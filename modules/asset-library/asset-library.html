@@ -1,0 +1,1870 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>素材库</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Rajdhani:wght@500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="../../styles/app-shell.css" />
+        <link rel="stylesheet" href="../../styles/ui-kit.css" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+        <style>
+            :root {
+                --tech-cyan: #00f0ff;
+                --tech-violet: #8b5cf6;
+                --font-display: 'Orbitron', 'Segoe UI', sans-serif;
+                --font-ui: 'Rajdhani', 'Segoe UI', sans-serif;
+                --mx: 50vw;
+                --my: 50vh;
+            }
+            html,
+            body {
+                height: 100%;
+                overflow: hidden;
+            }
+            /* 与主控制台 / 项目管理统一的科技感皮肤 */
+            body {
+                background: #0a0e18;
+                color: #e8ecf4;
+                min-height: 100vh;
+                margin: 0;
+                font-family: var(--font-ui);
+                font-weight: 500;
+                font-size: 17px;
+            }
+
+            .pointer-glow {
+                position: fixed;
+                left: var(--mx);
+                top: var(--my);
+                width: 560px;
+                height: 560px;
+                margin-left: -280px;
+                margin-top: -280px;
+                border-radius: 50%;
+                background: radial-gradient(
+                    circle,
+                    rgba(0, 240, 255, 0.22) 0%,
+                    rgba(167, 139, 250, 0.12) 40%,
+                    transparent 70%
+                );
+                pointer-events: none;
+                z-index: 1;
+                mix-blend-mode: screen;
+                transition: opacity 0.35s ease;
+            }
+            .pointer-glow--lag {
+                width: 720px;
+                height: 720px;
+                margin-left: -360px;
+                margin-top: -360px;
+                background: radial-gradient(
+                    circle,
+                    rgba(236, 72, 153, 0.12) 0%,
+                    rgba(0, 240, 255, 0.09) 46%,
+                    transparent 72%
+                );
+                filter: blur(14px);
+                opacity: 0.85;
+                transition:
+                    left 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                    top 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                    opacity 0.3s ease;
+            }
+            body:not(.pointer-glow-active) .pointer-glow,
+            body:not(.pointer-glow-active) .pointer-glow--lag {
+                opacity: 0;
+            }
+
+            body::before {
+                content: '';
+                position: fixed;
+                inset: -20%;
+                background:
+                    radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.24) 0%, rgba(0, 240, 255, 0) 38%),
+                    radial-gradient(circle at 80% 30%, rgba(124, 58, 237, 0.28) 0%, rgba(124, 58, 237, 0) 40%),
+                    radial-gradient(circle at 50% 85%, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0) 37%);
+                filter: blur(28px);
+                transform: translate3d(0, 0, 0);
+                animation: aiFlowBg 7.2s ease-in-out infinite alternate;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            @keyframes aiFlowBg {
+                0% {
+                    transform: translate3d(-3%, -2%, 0) scale(1.01);
+                }
+                50% {
+                    transform: translate3d(3%, 2%, 0) scale(1.08);
+                }
+                100% {
+                    transform: translate3d(-2%, 3%, 0) scale(1.04);
+                }
+            }
+            .dashboard-container {
+                display: flex;
+                min-height: 100vh;
+                width: 100%;
+                position: relative;
+                z-index: 2;
+            }
+            .sidebar {
+                width: 240px;
+                background: linear-gradient(180deg, #0f1629 0%, #0a0e18 100%);
+                padding: 0;
+                box-shadow:
+                    4px 0 32px rgba(0, 0, 0, 0.45),
+                    inset -1px 0 0 rgba(0, 240, 255, 0.12);
+                position: fixed;
+                height: 100vh;
+                top: 0;
+                left: 0;
+                z-index: 100;
+            }
+            .sidebar::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 1px;
+                background: linear-gradient(
+                    180deg,
+                    transparent 0%,
+                    rgba(0, 240, 255, 0.35) 30%,
+                    rgba(167, 139, 250, 0.4) 55%,
+                    rgba(0, 240, 255, 0.25) 80%,
+                    transparent 100%
+                );
+                opacity: 0.85;
+                pointer-events: none;
+                animation: sidebarEdgeFlow 2.4s ease-in-out infinite;
+            }
+            @keyframes sidebarEdgeFlow {
+                0%,
+                100% {
+                    opacity: 0.55;
+                    filter: blur(0);
+                }
+                50% {
+                    opacity: 1;
+                    filter: blur(1px);
+                }
+            }
+            .sidebar-logo {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                margin-bottom: 0;
+                gap: 10px;
+            }
+            .sidebar-logo .logo-img {
+                height: 40px;
+                width: auto;
+                object-fit: contain;
+            }
+            .sidebar-logo h1 {
+                font-family: var(--font-display);
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                color: #f0f4fc;
+                margin: 0;
+            }
+            .nav-menu {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+            .nav-item {
+                margin-bottom: 0;
+            }
+            .nav-link {
+                display: flex;
+                align-items: center;
+                padding: 15px 20px;
+                color: #b0b0c0;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                border-left: 3px solid transparent;
+            }
+            .nav-link:hover,
+            .nav-link.active {
+                background: rgba(0, 240, 255, 0.1);
+                color: #00f0ff;
+                border-left-color: #00f0ff;
+            }
+            .nav-link i {
+                margin-right: 10px;
+                width: 20px;
+                text-align: center;
+            }
+
+            .main-content {
+                flex: 1;
+                padding: 20px;
+                margin-left: 240px;
+                overflow-y: auto;
+                overflow-x: hidden;
+                height: 100vh;
+                min-height: 100vh;
+                box-sizing: border-box;
+                position: relative;
+                background:
+                    linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+                background-size: 48px 48px;
+                background-color: rgba(10, 14, 24, 0.55);
+            }
+            .main-content::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                z-index: 0;
+                background: repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.07) 2px,
+                    rgba(0, 0, 0, 0.07) 4px
+                );
+                opacity: 0.3;
+                mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 75%);
+            }
+            .main-content > * {
+                position: relative;
+                z-index: 1;
+            }
+            .top-bar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 24px;
+                padding: 14px 18px;
+                border-radius: 10px;
+                border: 1px solid rgba(0, 240, 255, 0.15);
+                background: rgba(15, 22, 41, 0.65);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                box-shadow: 0 0 28px rgba(0, 240, 255, 0.06);
+                position: relative;
+                overflow: hidden;
+            }
+            .top-bar::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 10px;
+                background: linear-gradient(
+                    105deg,
+                    transparent 0%,
+                    rgba(0, 240, 255, 0.12) 45%,
+                    rgba(167, 139, 250, 0.14) 55%,
+                    transparent 100%
+                );
+                background-size: 200% 100%;
+                pointer-events: none;
+                animation: topBarShine 1.9s ease-in-out infinite;
+                z-index: 0;
+            }
+            .top-bar > * {
+                position: relative;
+                z-index: 1;
+            }
+            .top-bar::after,
+            .asset-wrap::after,
+            .asset-card::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                background: radial-gradient(
+                    300px circle at var(--card-x, 50%) var(--card-y, 50%),
+                    rgba(0, 240, 255, 0.22),
+                    rgba(139, 92, 246, 0.1) 42%,
+                    transparent 72%
+                );
+                opacity: 0;
+                transition: opacity 0.16s ease;
+                pointer-events: none;
+                z-index: 0;
+            }
+            .top-bar:hover::after,
+            .asset-wrap:hover::after,
+            .asset-card:hover::after {
+                opacity: 1;
+            }
+            .asset-wrap > *,
+            .asset-card > * {
+                position: relative;
+                z-index: 1;
+            }
+            @keyframes topBarShine {
+                0%,
+                100% {
+                    background-position: 0% 50%;
+                    opacity: 0.58;
+                }
+                50% {
+                    background-position: 100% 50%;
+                    opacity: 1;
+                }
+            }
+            .search-bar {
+                position: relative;
+                width: 300px;
+            }
+            .search-bar input {
+                width: 100%;
+                padding: 10px 15px 10px 35px;
+                background: rgba(5, 8, 16, 0.65);
+                border: 1px solid rgba(0, 240, 255, 0.18);
+                border-radius: 6px;
+                color: #f0f4fc;
+                font-size: 15px;
+                font-family: var(--font-ui);
+            }
+            .search-bar i {
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #b0b0c0;
+                font-size: 14px;
+            }
+
+            /* asset 页面元素风格调整 - 深色卡片 */
+            .asset-wrap {
+                width: 100%;
+                max-width: none;
+                margin: 0;
+                box-sizing: border-box;
+                padding: 22px 24px 28px;
+                border-radius: 10px;
+                border: 1px solid rgba(0, 240, 255, 0.18);
+                background: rgba(15, 22, 41, 0.55);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
+                box-shadow:
+                    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+                    0 24px 48px rgba(0, 0, 0, 0.35),
+                    0 0 60px rgba(0, 240, 255, 0.05);
+                position: relative;
+                overflow: hidden;
+                --card-x: 50%;
+                --card-y: 50%;
+            }
+            .asset-wrap::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, var(--tech-cyan), var(--tech-violet), transparent);
+                opacity: 0.85;
+                pointer-events: none;
+            }
+            .form-header h2 {
+                font-family: var(--font-display);
+                font-size: 1.05rem;
+                font-weight: 700;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--tech-cyan);
+                text-shadow: 0 0 24px rgba(0, 240, 255, 0.35);
+                margin: 0 0 8px 0;
+            }
+            .form-header p {
+                color: #9aa8c4;
+                font-size: 15px;
+                line-height: 1.5;
+                margin: 0;
+            }
+            .top-row {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+                margin-bottom: 16px;
+            }
+            .search-input.input-group {
+                flex: 1;
+                padding-left: 40px;
+            }
+            .asset-wrap select.input-group,
+            .asset-wrap .input-group {
+                background: rgba(5, 8, 16, 0.65) !important;
+                border: 1px solid rgba(0, 240, 255, 0.18) !important;
+                border-radius: 6px !important;
+                color: #f0f4fc !important;
+                font-family: var(--font-ui) !important;
+            }
+            /* 自定义下拉：与 AI 生成页完全同款 */
+            select.input-group.tech-select-native {
+                position: absolute !important;
+                width: 1px !important;
+                height: 1px !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: 0 !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+            .tech-select {
+                position: relative;
+                width: 100%;
+                z-index: 20;
+                display: inline-block;
+                vertical-align: middle;
+            }
+            .tech-select.is-open {
+                z-index: 1400;
+            }
+            .tech-select-trigger {
+                width: 100%;
+                min-height: 48px;
+                padding: 12px 40px 12px 14px;
+                border-radius: 6px;
+                border: 1px solid rgba(var(--tab-accent-rgb, 0, 240, 255), 0.72);
+                background:
+                    linear-gradient(
+                            to right,
+                            rgba(var(--tab-accent-rgb, 0, 240, 255), 0.3),
+                            rgba(var(--tab-accent-rgb, 0, 240, 255), 0.08)
+                        )
+                        calc(100% - 38px) 50% / 1px 62% no-repeat,
+                    #0b1220;
+                color: #e8f8ff;
+                font-family: var(--font-ui);
+                font-size: 16px;
+                text-align: left;
+                cursor: pointer;
+                transition:
+                    border-color 0.2s ease,
+                    box-shadow 0.2s ease;
+                box-shadow:
+                    inset 0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.1),
+                    0 0 0 1px rgba(3, 8, 18, 0.75);
+                position: relative;
+                mix-blend-mode: normal;
+                isolation: isolate;
+            }
+            .tech-select-trigger::before,
+            .tech-select-trigger::after {
+                content: '';
+                position: absolute;
+                right: 14px;
+                width: 6px;
+                height: 6px;
+                border-right: 2px solid rgba(var(--tab-accent-rgb, 0, 240, 255), 0.92);
+                border-bottom: 2px solid rgba(var(--tab-accent-rgb, 0, 240, 255), 0.92);
+                transform: rotate(45deg);
+                transition: transform 0.2s ease;
+                pointer-events: none;
+            }
+            .tech-select-trigger::before {
+                top: calc(50% - 6px);
+            }
+            .tech-select-trigger::after {
+                top: calc(50% - 1px);
+            }
+            .tech-select:hover .tech-select-trigger {
+                border-color: rgba(var(--tab-accent-rgb, 0, 240, 255), 0.82);
+                box-shadow:
+                    inset 0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.18),
+                    0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.16),
+                    0 0 20px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.14);
+            }
+            .tech-select.is-open .tech-select-trigger,
+            .tech-select-trigger:focus-visible {
+                outline: none;
+                border-color: rgba(var(--tab-accent-rgb, 0, 240, 255), 0.92);
+                box-shadow:
+                    inset 0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.24),
+                    0 0 0 2px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.22),
+                    0 0 24px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.2);
+            }
+            .tech-select.is-open .tech-select-trigger::before {
+                transform: rotate(225deg) translate(1px, 1px);
+            }
+            .tech-select.is-open .tech-select-trigger::after {
+                transform: rotate(225deg) translate(-1px, -1px);
+            }
+            .tech-select-value.is-placeholder {
+                color: #9cb3c9;
+            }
+            .tech-select-menu {
+                position: absolute;
+                top: calc(100% + 6px);
+                left: 0;
+                right: 0;
+                background: #0b1220;
+                border: 1px solid rgba(var(--tab-accent-rgb, 0, 240, 255), 0.42);
+                border-radius: 8px;
+                box-shadow:
+                    0 12px 28px rgba(0, 0, 0, 0.42),
+                    0 0 24px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.16);
+                max-height: 280px;
+                overflow-y: auto;
+                z-index: 1200;
+                padding: 6px;
+                display: none;
+                mix-blend-mode: normal;
+                isolation: isolate;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(var(--tab-accent-rgb, 0, 240, 255), 0.75) rgba(10, 18, 34, 0.95);
+            }
+            .tech-select-menu::-webkit-scrollbar {
+                width: 10px;
+            }
+            .tech-select-menu::-webkit-scrollbar-track {
+                background: rgba(10, 18, 34, 0.95);
+                border-left: 1px solid rgba(var(--tab-accent-rgb, 0, 240, 255), 0.18);
+                border-radius: 10px;
+            }
+            .tech-select-menu::-webkit-scrollbar-thumb {
+                background: linear-gradient(
+                    180deg,
+                    rgba(var(--tab-accent-rgb, 0, 240, 255), 0.88),
+                    rgba(139, 92, 246, 0.78)
+                );
+                border-radius: 10px;
+                border: 2px solid rgba(10, 18, 34, 0.95);
+                box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            }
+            .tech-select-menu::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(
+                    180deg,
+                    rgba(var(--tab-accent-rgb, 0, 240, 255), 0.98),
+                    rgba(139, 92, 246, 0.9)
+                );
+            }
+            .tech-select.is-open .tech-select-menu {
+                display: block;
+            }
+            .tech-select-menu.tech-select-menu--portal {
+                position: fixed;
+                left: 0;
+                top: 0;
+                right: auto;
+                z-index: 5000;
+                display: block;
+            }
+            .tech-select-option {
+                width: 100%;
+                border: 0;
+                border-radius: 6px;
+                padding: 10px 12px;
+                background: #0f1a2d;
+                color: #d9ecfb;
+                text-align: left;
+                font-family: var(--font-ui);
+                font-size: 15px;
+                cursor: pointer;
+                transition:
+                    background 0.15s ease,
+                    color 0.15s ease;
+            }
+            .tech-select-option:hover {
+                background: #16314a;
+                color: #f4feff;
+            }
+            .tech-select-option.is-selected {
+                background: #193a57;
+                color: #00f0ff;
+            }
+            .tech-select-option.is-placeholder {
+                color: #9cb3c9;
+            }
+            .tech-select-option:disabled {
+                opacity: 0.55;
+                cursor: not-allowed;
+            }
+            .filters {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+            .upload-area {
+                border: 2px dashed rgba(0, 240, 255, 0.22);
+                border-radius: 8px;
+                padding: 20px;
+                text-align: center;
+                background: rgba(5, 8, 16, 0.5);
+                color: #9aa8c4;
+                transition:
+                    border-color 0.2s,
+                    background 0.2s;
+            }
+            .upload-area.dragover {
+                background: rgba(0, 240, 255, 0.06);
+                border-color: #00f0ff;
+            }
+            .asset-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 14px;
+                margin-top: 16px;
+            }
+            .asset-card {
+                background: rgba(8, 12, 24, 0.85);
+                border-radius: 8px;
+                padding: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                border: 1px solid rgba(0, 240, 255, 0.12);
+                position: relative;
+                overflow: hidden;
+                transition:
+                    transform 0.25s ease,
+                    border-color 0.25s ease,
+                    box-shadow 0.25s ease;
+                --card-x: 50%;
+                --card-y: 50%;
+            }
+            .asset-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 2px;
+                height: 100%;
+                background: linear-gradient(180deg, var(--tech-cyan), var(--tech-violet));
+                opacity: 0.35;
+                pointer-events: none;
+            }
+            .asset-card:hover {
+                transform: translateY(-5px);
+                border-color: rgba(0, 240, 255, 0.35);
+                box-shadow:
+                    0 14px 32px rgba(0, 0, 0, 0.38),
+                    0 0 28px rgba(0, 240, 255, 0.16);
+            }
+            .thumb {
+                width: 100%;
+                height: 120px;
+                object-fit: cover;
+                border-radius: 4px;
+                background: #080c14;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                color: #9aa8c4;
+                border: 1px solid rgba(0, 240, 255, 0.08);
+            }
+            .meta {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+                font-size: 13px;
+            }
+            .meta .name {
+                font-weight: 600;
+                color: #fff;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .meta .cat {
+                font-size: 12px;
+                color: #b0b0c0;
+            }
+            .card-actions {
+                display: flex;
+                gap: 6px;
+            }
+            .btn-small {
+                padding: 6px 8px;
+                font-size: 13px;
+                border-radius: 8px;
+            }
+            .modal {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.6);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 2000;
+            }
+            .modal .box {
+                background: linear-gradient(165deg, #121a2e 0%, #0c1220 100%);
+                color: #e8ecf4;
+                padding: 18px;
+                border-radius: 8px;
+                border: 1px solid rgba(0, 240, 255, 0.2);
+                max-width: 90%;
+                max-height: 90%;
+                overflow: auto;
+                box-shadow:
+                    0 24px 64px rgba(0, 0, 0, 0.55),
+                    0 0 40px rgba(0, 240, 255, 0.08);
+            }
+            .no-assets {
+                text-align: center;
+                color: #9aa8c4;
+                padding: 40px;
+            }
+
+            /* 覆盖全局 styles.css 里登录页的 .btn（避免素材库出现棕色大按钮） */
+            .asset-wrap .btn {
+                width: auto;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 9px 18px;
+                border-radius: 6px;
+                font-family: var(--font-display);
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                transition:
+                    transform 0.2s ease,
+                    box-shadow 0.2s ease,
+                    border-color 0.2s ease;
+            }
+            .asset-wrap .btn-primary {
+                background: linear-gradient(135deg, #00f0ff 0%, #0099cc 100%);
+                color: #050810;
+                border: 1px solid rgba(0, 240, 255, 0.45);
+                box-shadow: 0 0 18px rgba(0, 240, 255, 0.28);
+            }
+            .asset-wrap .btn-primary:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 0 26px rgba(0, 240, 255, 0.4);
+            }
+            .asset-wrap .btn:not(.btn-primary) {
+                background: rgba(255, 255, 255, 0.05);
+                color: #e8ecf4;
+                border: 1px solid rgba(0, 240, 255, 0.18);
+            }
+            .asset-wrap .btn:not(.btn-primary):hover {
+                background: rgba(0, 240, 255, 0.1);
+                border-color: rgba(0, 240, 255, 0.35);
+                color: #00f0ff;
+            }
+            .asset-wrap .btn-small {
+                padding: 6px 12px;
+                font-size: 9px;
+            }
+
+            .user-menu {
+                display: flex;
+                align-items: center;
+            }
+            .notification-btn {
+                background: transparent;
+                border: none;
+                color: #b0b0c0;
+                font-size: 18px;
+                margin-right: 20px;
+                cursor: pointer;
+                position: relative;
+            }
+            .notification-badge {
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                width: 16px;
+                height: 16px;
+                background: #00f0ff;
+                color: #1a1a2e;
+                border-radius: 50%;
+                font-size: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+            }
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: #00f0ff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #1a1a2e;
+                font-weight: bold;
+                font-size: 14px;
+                cursor: pointer;
+            }
+
+            .mobile-menu-toggle {
+                display: none;
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background: #00f0ff;
+                color: #1a1a2e;
+                border: none;
+                font-size: 20px;
+                box-shadow: 0 4px 10px rgba(0, 240, 255, 0.4);
+                cursor: pointer;
+                z-index: 999;
+            }
+
+            /* 响应式设计调整 */
+            @media (max-width: 1200px) {
+                .asset-grid {
+                    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                }
+            }
+
+            @media (max-width: 992px) {
+                .sidebar {
+                    width: 60px;
+                    padding: 20px 0;
+                }
+
+                .main-content {
+                    margin-left: 60px;
+                }
+
+                .sidebar-logo h1,
+                .nav-link span {
+                    display: none;
+                }
+
+                .sidebar-logo {
+                    justify-content: center;
+                    padding: 0 0 20px;
+                    gap: 0;
+                }
+
+                .nav-link {
+                    justify-content: center;
+                    padding: 15px;
+                }
+
+                .nav-link i {
+                    margin-right: 0;
+                    font-size: 18px;
+                }
+
+                .search-bar {
+                    width: 200px;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .search-bar {
+                    width: 100%;
+                }
+
+                .top-bar {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 15px;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .sidebar {
+                    position: fixed;
+                    left: -240px;
+                    height: 100vh;
+                    z-index: 1000;
+                }
+
+                .sidebar.show {
+                    left: 0;
+                }
+
+                .main-content {
+                    margin-left: 0;
+                    padding: 15px;
+                }
+
+                .asset-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .mobile-menu-toggle {
+                    display: block;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                body::before,
+                .sidebar::after,
+                .top-bar::before {
+                    animation: none !important;
+                }
+                .pointer-glow,
+                .pointer-glow--lag {
+                    display: none !important;
+                }
+                .top-bar::after,
+                .asset-wrap::after,
+                .asset-card::after {
+                    display: none !important;
+                }
+            }
+        </style>
+        <link rel="stylesheet" href="../../styles/app-shell.css" />
+    </head>
+    <body class="app-shell" data-app-page="asset-library">
+        <div class="pointer-glow" aria-hidden="true"></div>
+        <div class="pointer-glow pointer-glow--lag" aria-hidden="true"></div>
+        <div class="dashboard-container">
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-logo">
+                    <img src="../../js/logo-main.png" alt="Artifex" class="logo-img" />
+                    <h1>Artifex</h1>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="home">
+                            <i class="fas fa-home"></i>
+                            <span>主页</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="project-management">
+                            <i class="fas fa-project-diagram"></i>
+                            <span>项目管理</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="ai-generate">
+                            <i class="fas fa-magic"></i>
+                            <span>AI 生成</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="asset-library">
+                            <i class="fas fa-images"></i>
+                            <span>素材库</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="style-presets">
+                            <i class="fas fa-swatchbook"></i>
+                            <span>风格预设</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="user-center">
+                            <i class="fas fa-user-circle"></i>
+                            <span>账户</span>
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+
+            <main class="main-content">
+                <div class="top-bar">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input id="search" type="text" placeholder="搜索项目、资产或文档..." />
+                    </div>
+                    <div class="user-menu">
+                        <button class="notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
+                        <div class="user-avatar user-avatar--placeholder" role="img" aria-label="用户头像">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="asset-wrap scroll-section">
+                    <div class="form-header">
+                        <h2>素材库</h2>
+                        <p>上传、分类、检索并管理你的素材。</p>
+                        <div
+                            id="currentProjectHint"
+                            style="margin-top: 8px; font-size: 13px; color: #7ddcff; display: none"
+                        >
+                            当前关联项目：<span data-project-name></span>
+                            <button
+                                type="button"
+                                data-back-to-project
+                                style="
+                                    margin-left: 8px;
+                                    padding: 2px 8px;
+                                    border-radius: 999px;
+                                    border: 1px solid rgba(0, 240, 255, 0.6);
+                                    background: transparent;
+                                    color: #00f0ff;
+                                    cursor: pointer;
+                                    font-size: 12px;
+                                "
+                            >
+                                返回项目详情
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="top-row">
+                        <div style="flex: 1"></div>
+                        <div class="filters">
+                            <select id="categoryFilter" class="input-group">
+                                <option value="all">全部分类</option>
+                            </select>
+                            <button id="btnAddCategory" class="btn btn-primary btn-small">新增分类</button>
+                            <button id="btnClearAll" class="btn btn-small">清空所有</button>
+                        </div>
+                    </div>
+
+                    <div class="upload-area" id="uploadArea">
+                        <p>把文件拖到这里或点击下面按钮上传（支持多选）</p>
+                        <div style="margin-top: 12px; display: flex; gap: 8px; justify-content: center">
+                            <input type="file" id="fileInput" multiple style="display: none" />
+                            <button id="btnChoose" class="btn btn-primary">选择文件</button>
+                            <select id="uploadCategory" class="input-group" style="width: 160px"></select>
+                            <input
+                                id="defaultName"
+                                class="input-group"
+                                placeholder="为上传文件设置默认显示名（可选）"
+                                style="width: 220px"
+                            />
+                        </div>
+                    </div>
+
+                    <div id="assetGrid" class="asset-grid"></div>
+                    <div id="noAssets" class="no-assets" style="display: none">暂无素材。试试上传一些文件。</div>
+                </div>
+            </main>
+        </div>
+
+        <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+
+        <div id="modalRoot" style="display: none"></div>
+
+        <script src="../../js/ui-kit.js"></script>
+        <script src="../../js/navigation.js"></script>
+        <script src="../../js/notification-component.js"></script>
+        <script src="../../js/avatar-manager.js"></script>
+        <script src="../../js/notification-manager.js"></script>
+        <script src="../../js/scroll-animations.js"></script>
+        <script src="../../js/user-storage-scope.js"></script>
+        <script src="../../js/page-effects.js"></script>
+        <script>
+            if (window.PageEffects) {
+                window.PageEffects.initPointerGlow();
+                window.PageEffects.initCardSpotlight('.top-bar, .asset-wrap, .asset-card');
+            }
+
+            function buildTechSelect(select) {
+                if (!select) return;
+                const oldWrap =
+                    select.nextElementSibling && select.nextElementSibling.classList.contains('tech-select')
+                        ? select.nextElementSibling
+                        : null;
+                if (oldWrap) {
+                    if (typeof oldWrap.__closeTechSelect === 'function') oldWrap.__closeTechSelect();
+                    oldWrap.remove();
+                }
+
+                select.classList.add('tech-select-native');
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'tech-select';
+                if (select.style.width) wrapper.style.width = select.style.width;
+
+                const trigger = document.createElement('button');
+                trigger.type = 'button';
+                trigger.className = 'tech-select-trigger';
+                trigger.setAttribute('aria-haspopup', 'listbox');
+                trigger.setAttribute('aria-expanded', 'false');
+
+                const value = document.createElement('span');
+                value.className = 'tech-select-value';
+                trigger.appendChild(value);
+
+                const menu = document.createElement('div');
+                menu.className = 'tech-select-menu';
+                menu.setAttribute('role', 'listbox');
+                wrapper.__portalMenu = menu;
+
+                Array.from(select.options).forEach((opt) => {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'tech-select-option';
+                    item.textContent = opt.textContent;
+                    item.dataset.value = opt.value;
+                    if (opt.disabled) item.disabled = true;
+                    if (opt.value === '' || opt.value === 'all') item.classList.add('is-placeholder');
+                    menu.appendChild(item);
+                });
+
+                select.insertAdjacentElement('afterend', wrapper);
+                wrapper.appendChild(trigger);
+                wrapper.appendChild(menu);
+
+                const syncUI = () => {
+                    const current = select.options[select.selectedIndex];
+                    const currentText = current ? current.textContent : '请选择';
+                    value.textContent = currentText;
+                    value.classList.toggle('is-placeholder', !select.value || select.value === 'all');
+                    menu.querySelectorAll('.tech-select-option').forEach((item) => {
+                        item.classList.toggle('is-selected', item.dataset.value === select.value);
+                    });
+                };
+
+                const positionPortalMenu = () => {
+                    if (!wrapper.classList.contains('is-open')) return;
+                    const rect = trigger.getBoundingClientRect();
+                    const viewportW = window.innerWidth;
+                    const viewportH = window.innerHeight;
+                    const safeLeft = Math.max(8, Math.min(rect.left, viewportW - rect.width - 8));
+                    const spaceBelow = viewportH - rect.bottom - 10;
+                    const spaceAbove = rect.top - 10;
+                    const openDown = spaceBelow >= 180 || spaceBelow >= spaceAbove;
+                    const maxHeight = Math.max(120, Math.min(280, openDown ? spaceBelow : spaceAbove));
+                    let top = openDown ? rect.bottom + 6 : rect.top - maxHeight - 6;
+                    top = Math.max(8, Math.min(top, viewportH - maxHeight - 8));
+                    menu.style.left = safeLeft + 'px';
+                    menu.style.top = top + 'px';
+                    menu.style.width = rect.width + 'px';
+                    menu.style.maxHeight = maxHeight + 'px';
+                };
+
+                const handleViewportChange = () => {
+                    if (wrapper.classList.contains('is-open')) {
+                        positionPortalMenu();
+                    }
+                };
+
+                const closeMenu = () => {
+                    wrapper.classList.remove('is-open');
+                    trigger.setAttribute('aria-expanded', 'false');
+                    window.removeEventListener('resize', handleViewportChange);
+                    document.removeEventListener('scroll', handleViewportChange, true);
+                    if (menu.parentElement !== wrapper) {
+                        wrapper.appendChild(menu);
+                    }
+                    menu.classList.remove('tech-select-menu--portal');
+                    menu.style.left = '';
+                    menu.style.top = '';
+                    menu.style.width = '';
+                    menu.style.maxHeight = '';
+                };
+                wrapper.__closeTechSelect = closeMenu;
+
+                trigger.addEventListener('click', () => {
+                    const willOpen = !wrapper.classList.contains('is-open');
+                    document.querySelectorAll('.tech-select.is-open').forEach((el) => {
+                        if (typeof el.__closeTechSelect === 'function') {
+                            el.__closeTechSelect();
+                        } else {
+                            el.classList.remove('is-open');
+                        }
+                    });
+                    if (!willOpen) {
+                        closeMenu();
+                        return;
+                    }
+                    wrapper.classList.add('is-open');
+                    trigger.setAttribute('aria-expanded', 'true');
+                    if (menu.parentElement !== document.body) {
+                        document.body.appendChild(menu);
+                    }
+                    menu.classList.add('tech-select-menu--portal');
+                    positionPortalMenu();
+                    window.addEventListener('resize', handleViewportChange);
+                    document.addEventListener('scroll', handleViewportChange, true);
+                });
+
+                menu.addEventListener('click', (e) => {
+                    const item = e.target.closest('.tech-select-option');
+                    if (!item || item.disabled) return;
+                    const nextValue = item.dataset.value || '';
+                    if (select.value !== nextValue) {
+                        select.value = nextValue;
+                        select.dispatchEvent(new Event('input', { bubbles: true }));
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    syncUI();
+                    closeMenu();
+                });
+
+                select.addEventListener('change', syncUI);
+                syncUI();
+            }
+
+            function initTechSelects() {
+                if (window.__techSelectGlobalBound !== true) {
+                    window.__techSelectGlobalBound = true;
+                    document.addEventListener('click', (e) => {
+                        document.querySelectorAll('.tech-select.is-open').forEach((wrap) => {
+                            const portalMenu = wrap.__portalMenu;
+                            const clickedInside =
+                                wrap.contains(e.target) || (portalMenu && portalMenu.contains(e.target));
+                            if (!clickedInside) {
+                                if (typeof wrap.__closeTechSelect === 'function') {
+                                    wrap.__closeTechSelect();
+                                } else {
+                                    wrap.classList.remove('is-open');
+                                }
+                            }
+                        });
+                    });
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape') {
+                            document.querySelectorAll('.tech-select.is-open').forEach((wrap) => {
+                                if (typeof wrap.__closeTechSelect === 'function') {
+                                    wrap.__closeTechSelect();
+                                } else {
+                                    wrap.classList.remove('is-open');
+                                }
+                            });
+                        }
+                    });
+                }
+
+                document
+                    .querySelectorAll('.asset-wrap select.input-group')
+                    .forEach((select) => buildTechSelect(select));
+            }
+
+            function uiToast(message, type = 'success') {
+                if (window.TechUI && typeof window.TechUI.toast === 'function') {
+                    window.TechUI.toast(message, type);
+                }
+            }
+
+            function uiConfirm(message, title) {
+                if (window.TechUI && typeof window.TechUI.confirm === 'function') {
+                    return window.TechUI.confirm(message, title || '请确认', '确定', '取消');
+                }
+                return Promise.resolve(confirm(message));
+            }
+
+            function uiPrompt(title, label, value) {
+                if (window.TechUI && typeof window.TechUI.prompt === 'function') {
+                    return window.TechUI.prompt(title, label, value || '', '确定', '取消');
+                }
+                return Promise.resolve(prompt(label, value || ''));
+            }
+
+            // 本地存储键（登录后 bootAssetLibrary 中设为按用户隔离）
+            let STORAGE_KEY = 'assetLibrary_v1';
+
+            // 默认分类
+            const DEFAULT_CATEGORIES = ['图片', '图标', '背景', '音频', '其他'];
+
+            // 页面元素
+            const searchEl = document.getElementById('search');
+            const categoryFilterEl = document.getElementById('categoryFilter');
+            const uploadCategoryEl = document.getElementById('uploadCategory');
+            const btnChoose = document.getElementById('btnChoose');
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.getElementById('uploadArea');
+            const assetGrid = document.getElementById('assetGrid');
+            const modalRoot = document.getElementById('modalRoot');
+            const noAssets = document.getElementById('noAssets');
+            const btnAddCategory = document.getElementById('btnAddCategory');
+            const btnClearAll = document.getElementById('btnClearAll');
+            const defaultName = document.getElementById('defaultName');
+            // 导航元素引用已移除，因为现在使用与dashboard.html一致的导航结构
+
+            // 运行初始化
+            let categories = [];
+            let assets = [];
+
+            function loadState() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        categories = parsed.categories || DEFAULT_CATEGORIES.slice();
+                        assets = parsed.assets || [];
+                    } else {
+                        categories = DEFAULT_CATEGORIES.slice();
+                        assets = [];
+                    }
+                } catch (e) {
+                    console.error('读取 localStorage 失败', e);
+                    categories = DEFAULT_CATEGORIES.slice();
+                    assets = [];
+                }
+
+                // 读取当前项目上下文，用于提示与返回
+                try {
+                    const ctxRaw = localStorage.getItem(GameUiUserScope.key('currentProjectContext'));
+                    const ctx = ctxRaw ? JSON.parse(ctxRaw) : null;
+                    const hint = document.getElementById('currentProjectHint');
+                    if (hint && ctx && ctx.id) {
+                        const nameSpan = hint.querySelector('[data-project-name]');
+                        if (nameSpan) {
+                            nameSpan.textContent = ctx.name || '未命名项目';
+                        }
+                        hint.style.display = 'block';
+                        const backBtn = hint.querySelector('[data-back-to-project]');
+                        if (backBtn) {
+                            backBtn.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                window.location.href =
+                                    '../project-management/project-detail.html?id=' + encodeURIComponent(ctx.id);
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.warn('读取 currentProjectContext 失败：', e);
+                }
+            }
+
+            function saveState() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify({ categories, assets }));
+                    return true;
+                } catch (e) {
+                    console.error('保存素材库失败（可能超出 localStorage 容量）', e);
+                    uiToast('保存失败：本地存储空间不足，请删除部分素材后重试', 'warn');
+                    return false;
+                }
+            }
+
+            function populateCategorySelectors() {
+                // filter selector
+                categoryFilterEl.innerHTML =
+                    '<option value="all">全部分类</option>' +
+                    categories.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+                uploadCategoryEl.innerHTML = categories
+                    .map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`)
+                    .join('');
+                initTechSelects();
+            }
+
+            function renderAssets() {
+                const q = (searchEl.value || '').trim().toLowerCase();
+                const cat = categoryFilterEl.value;
+                const filtered = assets.filter((a) => {
+                    if (cat !== 'all' && a.category !== cat) return false;
+                    if (!q) return true;
+                    return (a.name || '').toLowerCase().includes(q) || (a.fileName || '').toLowerCase().includes(q);
+                });
+                assetGrid.innerHTML = '';
+                if (filtered.length === 0) {
+                    noAssets.style.display = 'block';
+                    noAssets.textContent = '暂无素材。试试上传一些文件。';
+                } else {
+                    noAssets.style.display = 'none';
+                }
+                filtered.forEach((a) => {
+                    const card = document.createElement('div');
+                    card.className = 'asset-card';
+
+                    const thumb = document.createElement('div');
+                    thumb.className = 'thumb';
+                    if (a.type && a.type.startsWith('image/') && a.dataURL) {
+                        const img = document.createElement('img');
+                        img.src = a.dataURL;
+                        img.alt = a.name || a.fileName;
+                        img.className = 'thumb-img';
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+                        thumb.appendChild(img);
+                    } else {
+                        thumb.textContent = a.fileName || a.name || '文件';
+                    }
+
+                    const meta = document.createElement('div');
+                    meta.className = 'meta';
+                    const name = document.createElement('div');
+                    name.className = 'name';
+                    name.title = a.name || a.fileName;
+                    name.textContent = a.name || a.fileName;
+                    const cat = document.createElement('div');
+                    cat.className = 'cat';
+                    cat.textContent = a.category || '未分类';
+                    meta.appendChild(name);
+                    meta.appendChild(cat);
+
+                    const actions = document.createElement('div');
+                    actions.className = 'card-actions';
+                    const btnView = document.createElement('button');
+                    btnView.className = 'btn btn-small';
+                    btnView.textContent = '预览';
+                    btnView.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openPreview(a);
+                    });
+                    const btnDownload = document.createElement('button');
+                    btnDownload.className = 'btn btn-small';
+                    btnDownload.textContent = '下载';
+                    btnDownload.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        downloadAsset(a);
+                    });
+                    const btnDelete = document.createElement('button');
+                    btnDelete.className = 'btn btn-small';
+                    btnDelete.textContent = '删除';
+                    btnDelete.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const ok = await uiConfirm('确定删除此素材？', '删除素材');
+                        if (ok) {
+                            deleteAsset(a.id);
+                        }
+                    });
+
+                    // 收藏功能已移除
+                    actions.appendChild(btnView);
+                    actions.appendChild(btnDownload);
+                    actions.appendChild(btnDelete);
+
+                    card.appendChild(thumb);
+                    card.appendChild(meta);
+                    card.appendChild(actions);
+
+                    assetGrid.appendChild(card);
+                });
+            }
+
+            function openPreview(a) {
+                modalRoot.innerHTML = '';
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                const box = document.createElement('div');
+                box.className = 'box';
+                const title = document.createElement('div');
+                title.style.marginBottom = '8px';
+                title.innerHTML = `<strong>${escapeHtml(a.name || a.fileName)}</strong> <span style="color:#666">（${escapeHtml(a.category || '未分类')}, ${escapeHtml(a.fileName || '')}）</span>`;
+                box.appendChild(title);
+                if (a.type && a.type.startsWith('image/') && a.dataURL) {
+                    const img = document.createElement('img');
+                    img.src = a.dataURL;
+                    img.style.maxWidth = '100%';
+                    img.style.height = 'auto';
+                    box.appendChild(img);
+                } else if (a.type && a.type.startsWith('audio/') && a.dataURL) {
+                    const audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.src = a.dataURL;
+                    box.appendChild(audio);
+                } else if (a.dataURL) {
+                    const link = document.createElement('a');
+                    link.href = a.dataURL;
+                    link.textContent = '打开/下载文件';
+                    link.target = '_blank';
+                    box.appendChild(link);
+                } else {
+                    box.appendChild(document.createTextNode('此文件没有预览数据。'));
+                }
+                const close = document.createElement('div');
+                close.style.marginTop = '12px';
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-primary';
+                btn.textContent = '关闭';
+                btn.addEventListener('click', () => {
+                    modalRoot.style.display = 'none';
+                    modalRoot.innerHTML = '';
+                });
+                close.appendChild(btn);
+                box.appendChild(close);
+                modal.appendChild(box);
+                modalRoot.appendChild(modal);
+                modalRoot.style.display = 'block';
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modalRoot.style.display = 'none';
+                        modalRoot.innerHTML = '';
+                    }
+                });
+            }
+
+            function downloadAsset(a) {
+                if (!a.dataURL) {
+                    uiToast('无下载数据', 'warn');
+                    return;
+                }
+
+                try {
+                    // 获取文件名
+                    const fileName = a.fileName || a.name || 'download';
+
+                    // 方法1：直接使用window.open（适用于图片等）
+                    if (a.type && a.type.startsWith('image/')) {
+                        // 对于图片，直接在新窗口打开并提示用户右键保存
+                        const newWindow = window.open();
+                        newWindow.document.write(`
+            <html>
+              <head><title>${fileName}</title></head>
+              <body style="margin:0; padding:20px; text-align:center; background:#1a1a2e; color:#e0e0e0;">
+                <img src="${a.dataURL}" style="max-width:100%; max-height:80vh; border-radius:8px;" alt="${fileName}">
+                <p style="margin-top:20px;">右键点击图片选择"另存为"来保存文件</p>
+                <button onclick="window.close()" style="padding:10px 20px; background:#00f0ff; color:#1a1a2e; border:none; border-radius:5px; cursor:pointer;">关闭</button>
+              </body>
+            </html>
+          `);
+                        return;
+                    }
+
+                    // 方法2：使用fetch + blob下载（适用于所有文件类型）
+                    fetch(a.dataURL)
+                        .then((response) => response.blob())
+                        .then((blob) => {
+                            const url = window.URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = fileName;
+                            link.style.display = 'none';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+                        })
+                        .catch((error) => {
+                            console.error('下载失败:', error);
+                            uiToast('下载失败，请重试', 'warn');
+                        });
+                } catch (error) {
+                    console.error('下载失败:', error);
+                    uiToast('下载失败，请重试', 'warn');
+                }
+            }
+
+            function deleteAsset(id) {
+                assets = assets.filter((x) => x.id !== id);
+                saveState();
+                renderAssets();
+            }
+
+            // 收藏功能已移除，因为导航结构与dashboard.html一致
+
+            function readFileAsDataURL(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = (e) => reject(e);
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            function dataUrlToImage(dataURL) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('图片读取失败'));
+                    img.src = dataURL;
+                });
+            }
+
+            async function compressImageDataUrl(dataURL, options = {}) {
+                const opt = {
+                    maxWidth: options.maxWidth || 1600,
+                    maxHeight: options.maxHeight || 1600,
+                    mimeType: options.mimeType || 'image/webp',
+                    quality: options.quality == null ? 0.82 : options.quality,
+                };
+                const img = await dataUrlToImage(dataURL);
+                const ratio = Math.min(opt.maxWidth / img.naturalWidth, opt.maxHeight / img.naturalHeight, 1);
+                const w = Math.max(1, Math.round(img.naturalWidth * ratio));
+                const h = Math.max(1, Math.round(img.naturalHeight * ratio));
+                const canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                return canvas.toDataURL(opt.mimeType, opt.quality);
+            }
+
+            function createAssetItem(file, defaultNameVal, categoryVal, dataURL, typeOverride) {
+                return {
+                    id: 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+                    name: defaultNameVal || file.name,
+                    fileName: file.name,
+                    category: categoryVal || '其他',
+                    type: typeOverride || file.type || 'application/octet-stream',
+                    dataURL: dataURL,
+                    favorite: false,
+                    createdAt: Date.now(),
+                };
+            }
+
+            function persistAssetItem(item) {
+                assets.unshift(item);
+                const ok = saveState();
+                if (!ok) {
+                    assets = assets.filter((x) => x.id !== item.id);
+                    renderAssets();
+                    return false;
+                }
+                renderAssets();
+                return true;
+            }
+
+            async function addAssetFromFile(file, defaultNameVal, categoryVal) {
+                const MAX_NON_IMAGE_FILE_SIZE = 2.5 * 1024 * 1024;
+                const isImage = !!(file.type && file.type.startsWith('image/'));
+                if (!isImage && file.size > MAX_NON_IMAGE_FILE_SIZE) {
+                    throw new Error(`文件过大（${(file.size / 1024 / 1024).toFixed(1)}MB），非图片建议不超过 2.5MB`);
+                }
+
+                let dataURL = await readFileAsDataURL(file);
+                let outType = file.type;
+
+                // 大图先压缩一次，减少 localStorage 超限概率
+                if (isImage && file.size > 1.5 * 1024 * 1024) {
+                    try {
+                        dataURL = await compressImageDataUrl(dataURL, {
+                            maxWidth: 1600,
+                            maxHeight: 1600,
+                            mimeType: 'image/webp',
+                            quality: 0.82,
+                        });
+                        outType = 'image/webp';
+                    } catch (e) {
+                        console.warn('预压缩失败，回退原图：', e);
+                    }
+                }
+
+                let item = createAssetItem(file, defaultNameVal, categoryVal, dataURL, outType);
+                if (persistAssetItem(item)) {
+                    return item;
+                }
+
+                // 保存失败时再激进压缩重试（图片专用）
+                if (isImage) {
+                    const aggressive = await compressImageDataUrl(dataURL, {
+                        maxWidth: 1280,
+                        maxHeight: 1280,
+                        mimeType: 'image/webp',
+                        quality: 0.7,
+                    });
+                    item = createAssetItem(file, defaultNameVal, categoryVal, aggressive, 'image/webp');
+                    if (persistAssetItem(item)) {
+                        uiToast('图片已自动压缩后保存', 'warn');
+                        return item;
+                    }
+                }
+
+                throw new Error('本地存储空间不足，素材未保存（可先删除部分旧素材）');
+            }
+
+            // 处理上传
+            async function handleFiles(files) {
+                if (!files || files.length === 0) return;
+                const cat = uploadCategoryEl.value || categories[0] || '其他';
+                const defaultNameVal = defaultName.value && defaultName.value.trim();
+                let success = 0;
+                let failed = 0;
+                const failMessages = [];
+                for (const f of Array.from(files)) {
+                    try {
+                        await addAssetFromFile(f, defaultNameVal || f.name, cat);
+                        success++;
+                    } catch (e) {
+                        failed++;
+                        const msg = e && e.message ? e.message : '读取文件失败';
+                        failMessages.push(`${f.name}: ${msg}`);
+                        console.error('读取文件失败', f.name, e);
+                    }
+                }
+                defaultName.value = '';
+                if (fileInput) fileInput.value = '';
+                if (success > 0 && failed === 0) {
+                    uiToast(`上传成功：${success} 个素材`, 'success');
+                } else if (success > 0 && failed > 0) {
+                    uiToast(`部分成功：${success} 成功，${failed} 失败`, 'warn');
+                } else if (failed > 0) {
+                    uiToast(`上传失败：${failed} 个文件未保存`, 'warn');
+                }
+                if (failMessages.length) {
+                    console.warn('上传失败详情:\n' + failMessages.join('\n'));
+                }
+            }
+
+            // drag/drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', (e) => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+
+            btnChoose.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+            // 搜索与筛选
+            searchEl.addEventListener('input', () => renderAssets());
+            categoryFilterEl.addEventListener('change', () => renderAssets());
+
+            btnAddCategory.addEventListener('click', async () => {
+                const v = await uiPrompt('新增分类', '输入新分类名称：', '');
+                if (v && v.trim()) {
+                    categories.unshift(v.trim());
+                    populateCategorySelectors();
+                    saveState();
+                }
+            });
+
+            btnClearAll.addEventListener('click', async () => {
+                const ok = await uiConfirm(
+                    '确定要删除所有素材并清空吗？此操作不可撤销（仅清除本地浏览器存储）',
+                    '清空素材库'
+                );
+                if (ok) {
+                    assets = [];
+                    saveState();
+                    renderAssets();
+                }
+            });
+
+            // 工具：转义 HTML
+            function escapeHtml(s) {
+                return (s + '').replace(/[&<>"']/g, function (m) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+                });
+            }
+
+            // 提供一组初始示例素材（从工作区的 ./素材库图片 文件夹读取，作为初始资源）
+            function sampleAssets() {
+                // 请确保目录名与工作区中文件夹一致：./素材库图片
+                const files = [
+                    '叶片.png',
+                    '山水.png',
+                    '星空.png',
+                    '油画背景.png',
+                    '海洋纹.png',
+                    '海洋纹2.png',
+                    '灯笼.webp',
+                    '科技.webp',
+                    '花朵.webp',
+                    '花枝.webp',
+                    '漫画风.webp',
+                    '漫画风1.webp',
+                ];
+
+                const samples = files.map((fname, idx) => {
+                    const ext = (fname.split('.').pop() || '').toLowerCase();
+                    let mime = 'application/octet-stream';
+                    if (ext === 'png') mime = 'image/png';
+                    else if (ext === 'jpg' || ext === 'jpeg') mime = 'image/jpeg';
+                    else if (ext === 'gif') mime = 'image/gif';
+                    else if (ext === 'svg') mime = 'image/svg+xml';
+                    else if (ext === 'webp') mime = 'image/webp';
+
+                    return {
+                        id: 'sample_' + idx + '_' + Date.now(),
+                        name: fname.replace(/\.[^/.]+$/, ''),
+                        fileName: fname,
+                        category: '图片',
+                        type: mime,
+                        // 使用相对路径引用工作区内的图片文件（直接使用原始文件名以避免重复编码导致的问题）
+                        dataURL: './素材库图片/' + fname,
+                        favorite: false,
+                        createdAt: Date.now() - idx * 1000,
+                    };
+                });
+
+                return samples;
+            }
+
+            // 加载并初始化
+            function init() {
+                loadState();
+                // 如果当前没有素材，则写入示例素材以便用户能快速看到效果
+                if (!assets || assets.length === 0) {
+                    const samples = sampleAssets();
+                    // 将示例素材放在前面
+                    assets = samples.concat(assets || []);
+                    // 如果 categories 中尚未包含示例的分类，则合并
+                    const sampleCats = Array.from(new Set(samples.map((s) => s.category)));
+                    sampleCats.forEach((c) => {
+                        if (!categories.includes(c)) categories.push(c);
+                    });
+                    saveState();
+                }
+                populateCategorySelectors();
+                renderAssets();
+            }
+
+            function mergeLegacyLibraryData() {
+                // 兼容历史未分用户键：首次进入分用户键时自动合并一次，避免“显示成功但看不到”
+                try {
+                    const scopedKey = STORAGE_KEY;
+                    const legacyKey = 'assetLibrary_v1';
+                    if (scopedKey === legacyKey) return;
+
+                    const scopedRaw = localStorage.getItem(scopedKey);
+                    const legacyRaw = localStorage.getItem(legacyKey);
+                    if (!legacyRaw) return;
+
+                    const scopedState = scopedRaw ? JSON.parse(scopedRaw) : { categories: [], assets: [] };
+                    const legacyState = JSON.parse(legacyRaw);
+                    const scopedCategories = Array.isArray(scopedState.categories) ? scopedState.categories : [];
+                    const scopedAssets = Array.isArray(scopedState.assets) ? scopedState.assets : [];
+                    const legacyCategories = Array.isArray(legacyState.categories) ? legacyState.categories : [];
+                    const legacyAssets = Array.isArray(legacyState.assets) ? legacyState.assets : [];
+
+                    const seen = new Set(
+                        scopedAssets.map((a) => (a && (a.id || a.fileName + '|' + a.createdAt)) || '')
+                    );
+                    legacyAssets.forEach((a) => {
+                        const k = (a && (a.id || a.fileName + '|' + a.createdAt)) || '';
+                        if (k && !seen.has(k)) {
+                            scopedAssets.push(a);
+                            seen.add(k);
+                        }
+                    });
+                    legacyCategories.forEach((c) => {
+                        if (c && !scopedCategories.includes(c)) scopedCategories.push(c);
+                    });
+
+                    localStorage.setItem(
+                        scopedKey,
+                        JSON.stringify({ categories: scopedCategories, assets: scopedAssets })
+                    );
+                } catch (e) {
+                    console.warn('迁移旧素材库数据失败：', e);
+                }
+            }
+
+            async function bootAssetLibrary() {
+                try {
+                    await GameUiUserScope.ensure();
+                } catch (e) {
+                    console.warn('用户态校验失败，继续初始化素材库：', e);
+                }
+                if (typeof GameUiUserScope !== 'undefined' && typeof GameUiUserScope.key === 'function') {
+                    STORAGE_KEY = GameUiUserScope.key('assetLibrary_v1');
+                }
+                mergeLegacyLibraryData();
+                init();
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', bootAssetLibrary);
+            } else {
+                bootAssetLibrary();
+            }
+
+            // 额外：支持按回车上传当前选中文件名（不实际选文件）——保留轻量交互
+            searchEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    renderAssets();
+                }
+            });
+        </script>
+    </body>
+</html>

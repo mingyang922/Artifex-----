@@ -1,0 +1,216 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Artifex API",
+        "description": "二维游戏美术协作与 AI 资产生成平台 API",
+        "version": "1.0.0",
+        "contact": { "name": "Artifex Team" }
+    },
+    "servers": [
+        { "url": "http://127.0.0.1:3000", "description": "本地开发" }
+    ],
+    "tags": [
+        { "name": "auth", "description": "认证与用户管理" },
+        { "name": "config", "description": "运行时配置" },
+        { "name": "image", "description": "图片生成" },
+        { "name": "chat", "description": "AI 对话" },
+        { "name": "status", "description": "服务状态" }
+    ],
+    "paths": {
+        "/api/health": {
+            "get": {
+                "tags": ["status"],
+                "summary": "健康检查",
+                "responses": { "200": { "description": "服务正常" } }
+            }
+        },
+        "/api/csrf-token": {
+            "get": {
+                "tags": ["auth"],
+                "summary": "获取 CSRF 令牌",
+                "responses": { "200": { "description": "返回 csrfToken" } }
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "tags": ["auth"],
+                "summary": "注册",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["username", "email", "password"],
+                                "properties": {
+                                    "username": { "type": "string" },
+                                    "email": { "type": "string", "format": "email" },
+                                    "password": { "type": "string", "minLength": 6 }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "注册成功" },
+                    "400": { "description": "参数错误" },
+                    "409": { "description": "邮箱/用户名已存在" }
+                }
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": ["auth"],
+                "summary": "登录",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["email", "password"],
+                                "properties": {
+                                    "email": { "type": "string" },
+                                    "password": { "type": "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "登录成功" },
+                    "401": { "description": "邮箱或密码错误" }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": { "tags": ["auth"], "summary": "登出", "responses": { "200": { "description": "已登出" } } }
+        },
+        "/api/me": {
+            "get": { "tags": ["auth"], "summary": "获取当前用户信息", "responses": { "200": { "description": "用户信息" } } }
+        },
+        "/api/me/profile": {
+            "put": {
+                "tags": ["auth"],
+                "summary": "更新用户资料",
+                "requestBody": {
+                    "content": { "application/json": { "schema": { "type": "object", "properties": { "profile": { "type": "object" } } } } }
+                },
+                "responses": { "200": { "description": "更新成功" } }
+            }
+        },
+        "/api/me/api-settings": {
+            "get": { "tags": ["auth"], "summary": "获取 API 设置（脱敏）", "responses": { "200": { "description": "API 设置" } } },
+            "put": {
+                "tags": ["auth"],
+                "summary": "更新 API 设置",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "provider": { "type": "string", "enum": ["tencent", "alibaba", "jimeng", "sdwebui"] },
+                                    "credentials": { "type": "object" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": { "200": { "description": "设置成功" } }
+            }
+        },
+        "/api/me/api-settings/{provider}": {
+            "delete": {
+                "tags": ["auth"],
+                "summary": "删除 API 设置",
+                "parameters": [{ "name": "provider", "in": "path", "required": true, "schema": { "type": "string" } }],
+                "responses": { "200": { "description": "删除成功" } }
+            }
+        },
+        "/api/image-proxy": {
+            "post": {
+                "tags": ["image"],
+                "summary": "图片生成（文生图 / 图生图）",
+                "description": "支持 tencent / alibaba / jimeng / sdwebui / free / mock 等 provider",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["prompt"],
+                                "properties": {
+                                    "prompt": { "type": "string", "description": "生成提示词" },
+                                    "size": { "type": "string", "description": "尺寸，如 1024x1024" },
+                                    "provider": { "type": "string", "enum": ["tencent", "alibaba", "jimeng", "sdwebui", "free", "mock"], "default": "tencent" },
+                                    "mode": { "type": "string", "enum": ["text2img", "img2img"], "default": "text2img" },
+                                    "image": { "type": "string", "description": "图生图的 base64 / data URL" },
+                                    "strength": { "type": "number", "default": 0.7 },
+                                    "imageModel": { "type": "string" },
+                                    "styleReferenceImage": { "type": "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "生成成功，返回 image_url" },
+                    "400": { "description": "参数错误" },
+                    "502": { "description": "上游 API 失败" }
+                }
+            }
+        },
+        "/api/proxy-image": {
+            "get": {
+                "tags": ["image"],
+                "summary": "代理拉取远程图片",
+                "parameters": [{ "name": "url", "in": "query", "required": true, "schema": { "type": "string" } }],
+                "responses": { "200": { "description": "图片内容" } }
+            }
+        },
+        "/api/hunyuan-proxy": {
+            "post": {
+                "tags": ["chat"],
+                "summary": "腾讯混元对话代理",
+                "responses": { "200": { "description": "对话结果" } }
+            }
+        },
+        "/api/alibaba-proxy": {
+            "post": {
+                "tags": ["chat"],
+                "summary": "阿里通义千问对话代理",
+                "responses": { "200": { "description": "对话结果" } }
+            }
+        },
+        "/api/alibaba-vision-proxy": {
+            "post": {
+                "tags": ["chat"],
+                "summary": "阿里多模态视觉代理",
+                "responses": { "200": { "description": "分析结果" } }
+            }
+        },
+        "/api/config": {
+            "get": { "tags": ["config"], "summary": "获取运行时配置状态", "responses": { "200": { "description": "配置状态" } } }
+        },
+        "/api/tencent/status": {
+            "get": { "tags": ["status"], "summary": "腾讯云密钥自检", "responses": { "200": { "description": "状态信息" } } }
+        },
+        "/api/sd-webui/status": {
+            "get": { "tags": ["status"], "summary": "SD Web UI 连通性", "responses": { "200": { "description": "状态信息" } } }
+        },
+        "/api/jimeng/status": {
+            "get": { "tags": ["status"], "summary": "即梦连通性", "responses": { "200": { "description": "状态信息" } } }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "cookieAuth": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "connect.sid"
+            }
+        }
+    },
+    "security": [{ "cookieAuth": [] }]
+}

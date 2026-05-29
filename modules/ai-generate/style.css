@@ -1,0 +1,307 @@
+.ai-generate-module {
+    color: #e0e0e0;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.module-title {
+    color: #00f0ff;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #00f0ff;
+    font-weight: bold;
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+}
+
+.input-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+    outline: none;
+    border-color: #00f0ff;
+    box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.2);
+}
+
+.btn {
+    background: #00f0ff;
+    color: #1a1a2e;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 240, 255, 0.4);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 加载状态样式 */
+.loading-container {
+    display: none;
+    text-align: center;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid #00f0ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00f0ff, #0077ff);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* 预览区域 */
+.preview-area {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.result-container {
+    margin-top: 10px;
+    min-height: 150px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+/* 资产图库样式 */
+.assets-gallery {
+    margin-top: 40px;
+}
+
+.gallery-title {
+    color: #00f0ff;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+.assets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.asset-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.asset-card:hover {
+    transform: translateY(-5px);
+}
+
+.asset-preview {
+    height: 120px;
+    background: rgba(255, 255, 255, 0.02);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.asset-info {
+    padding: 15px;
+}
+
+.asset-name {
+    color: #fff;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.asset-action {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    margin: 0 3px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-size: 12px;
+}
+
+.asset-action:hover {
+    background: #00f0ff;
+    color: #1a1a2e;
+}
+
+/* 表单样式 */
+.generator-form {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #00f0ff;
+    box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.2);
+}
+
+.generate-btn {
+    background: linear-gradient(135deg, #00f0ff 0%, #0077ff 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 240, 255, 0.4);
+}
+
+.generate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 生成结果样式 */
+.generated-asset {
+    text-align: center;
+    padding: 20px;
+}
+
+.generated-asset pre {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    color: #00f0ff;
+    font-size: 12px;
+}
+
+.asset-actions {
+    margin-top: 20px;
+}
+
+.asset-action {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.asset-action:hover {
+    background: #00f0ff;
+    color: #1a1a2e;
+}
+
+/* 响应式设计补充 */
+@media (max-width: 768px) {
+    .assets-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .generator-form {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .assets-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .asset-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .asset-action {
+        margin: 0;
+    }
+}

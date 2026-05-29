@@ -1,0 +1,34 @@
+# 环境变量与密钥
+backend/.env
+config/.env
+*.pem
+*.key
+
+# 本地 REST 配置
+config/ark-rest-api.local.json
+
+# 运行时数据
+backend/data/*.sqlite
+backend/data/*.sqlite-shm
+backend/data/*.sqlite-wal
+backend/data/users.json
+
+# 日志
+logs/
+
+# 部署包
+artifex-deploy.tgz
+
+# 依赖
+node_modules/
+
+# 编辑器与工具
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db

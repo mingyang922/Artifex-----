@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>风格预设</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Rajdhani:wght@500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="../../styles/ui-kit.css" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+        <style>
+            :root {
+                --tech-cyan: #00f0ff;
+                --tech-violet: #8b5cf6;
+                --font-display: 'Orbitron', 'Segoe UI', sans-serif;
+                --font-ui: 'Rajdhani', 'Segoe UI', sans-serif;
+                --mx: 50vw;
+                --my: 50vh;
+            }
+            html,
+            body {
+                height: 100%;
+                overflow: hidden;
+            }
+            body {
+                margin: 0;
+                background: #0a0e18;
+                color: #e8ecf4;
+                font-family: var(--font-ui);
+                font-weight: 500;
+                font-size: 17px;
+            }
+
+            .top-bar::after,
+            .asset-wrap::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                background: radial-gradient(
+                    300px circle at var(--card-x, 50%) var(--card-y, 50%),
+                    rgba(0, 240, 255, 0.22),
+                    rgba(139, 92, 246, 0.1) 42%,
+                    transparent 72%
+                );
+                opacity: 0;
+                transition: opacity 0.16s ease;
+                pointer-events: none;
+                z-index: 0;
+            }
+            .top-bar:hover::after,
+            .asset-wrap:hover::after {
+                opacity: 1;
+            }
+            .asset-wrap > * {
+                position: relative;
+                z-index: 1;
+            }
+
+            .asset-wrap {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 22px 24px 28px;
+                border-radius: 10px;
+                border: 1px solid rgba(0, 240, 255, 0.18);
+                background: rgba(15, 22, 41, 0.55);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
+                box-shadow:
+                    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+                    0 24px 48px rgba(0, 0, 0, 0.35),
+                    0 0 60px rgba(0, 240, 255, 0.05);
+                position: relative;
+                overflow: hidden;
+                --card-x: 50%;
+                --card-y: 50%;
+            }
+            .asset-wrap::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, var(--tech-cyan), var(--tech-violet), transparent);
+                opacity: 0.85;
+                pointer-events: none;
+            }
+            .form-header h2 {
+                font-family: var(--font-display);
+                font-size: 1.05rem;
+                font-weight: 700;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--tech-cyan);
+                text-shadow: 0 0 24px rgba(0, 240, 255, 0.35);
+                margin: 0 0 8px 0;
+            }
+            .form-header p {
+                color: #9aa8c4;
+                font-size: 15px;
+                line-height: 1.5;
+                margin: 0;
+            }
+
+            .style-preset-lib-row {
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 8px;
+                padding: 12px;
+                margin-bottom: 10px;
+                background: rgba(10, 14, 24, 0.5);
+            }
+            .style-preset-lib-row-header {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+                margin-bottom: 8px;
+            }
+            .style-preset-lib-name {
+                font-weight: 600;
+                color: #e8ecf4;
+            }
+            .style-preset-lib-meta {
+                font-size: 12px;
+                color: #9aa8c4;
+            }
+            .style-preset-lib-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .style-preset-lib-snippet {
+                width: 100%;
+                min-height: 56px;
+                margin: 8px 0;
+                padding: 8px;
+                border-radius: 6px;
+                border: 1px solid rgba(0, 240, 255, 0.12);
+                background: rgba(5, 8, 16, 0.6);
+                color: #e8ecf4;
+                font-family: inherit;
+                font-size: 14px;
+                resize: vertical;
+                box-sizing: border-box;
+            }
+            .style-preset-lib-thumb {
+                max-height: 64px;
+                border-radius: 6px;
+                margin-bottom: 6px;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+            }
+            .style-preset-empty {
+                color: #9aa8c4;
+                font-size: 14px;
+                margin: 0;
+            }
+
+            .asset-wrap .btn {
+                width: auto;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 9px 18px;
+                border-radius: 6px;
+                font-family: var(--font-display);
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                transition:
+                    transform 0.2s ease,
+                    box-shadow 0.2s ease,
+                    border-color 0.2s ease;
+            }
+            .asset-wrap .btn-primary {
+                background: linear-gradient(135deg, #00f0ff 0%, #0099cc 100%);
+                color: #050810;
+                border: 1px solid rgba(0, 240, 255, 0.45);
+                box-shadow: 0 0 18px rgba(0, 240, 255, 0.28);
+            }
+            .asset-wrap .btn-primary:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 0 26px rgba(0, 240, 255, 0.4);
+            }
+            .asset-wrap .btn:not(.btn-primary) {
+                background: rgba(255, 255, 255, 0.05);
+                color: #e8ecf4;
+                border: 1px solid rgba(0, 240, 255, 0.18);
+            }
+            .asset-wrap .btn:not(.btn-primary):hover {
+                background: rgba(0, 240, 255, 0.1);
+                border-color: rgba(0, 240, 255, 0.35);
+            }
+            .asset-wrap .btn-small {
+                padding: 6px 8px;
+                font-size: 13px;
+                border-radius: 8px;
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .top-bar::after,
+                .asset-wrap::after {
+                    display: none !important;
+                }
+            }
+        </style>
+        <link rel="stylesheet" href="../../styles/app-shell.css" />
+    </head>
+    <body class="app-shell" data-app-page="style-presets">
+        <div class="pointer-glow" aria-hidden="true"></div>
+        <div class="pointer-glow pointer-glow--lag" aria-hidden="true"></div>
+        <div class="dashboard-container">
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-logo">
+                    <img src="../../js/logo-main.png" alt="Artifex" class="logo-img" />
+                    <h1>Artifex</h1>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="home"><i class="fas fa-home"></i><span>主页</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="project-management"
+                            ><i class="fas fa-project-diagram"></i><span>项目管理</span></a
+                        >
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="ai-generate"
+                            ><i class="fas fa-magic"></i><span>AI 生成</span></a
+                        >
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="asset-library"
+                            ><i class="fas fa-images"></i><span>素材库</span></a
+                        >
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-module="style-presets"
+                            ><i class="fas fa-swatchbook"></i><span>风格预设</span></a
+                        >
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="user-center"
+                            ><i class="fas fa-user-circle"></i><span>账户</span></a
+                        >
+                    </li>
+                </ul>
+            </aside>
+
+            <main class="main-content">
+                <div class="top-bar">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索项目、资产或文档..." />
+                    </div>
+                    <div class="user-menu">
+                        <button type="button" class="notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
+                        <div class="user-avatar user-avatar--placeholder" role="img" aria-label="用户头像">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="asset-wrap scroll-section">
+                    <div class="form-header">
+                        <h2>风格预设库</h2>
+                        <p>可编辑风格片段、复制为新预设或删除,在AI生成时可直接选择使用。</p>
+                    </div>
+                    <div id="stylePresetLibraryList"></div>
+                </div>
+            </main>
+        </div>
+
+        <button type="button" class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+
+        <script src="../../js/ui-kit.js"></script>
+        <script src="../../js/navigation.js"></script>
+        <script src="../../js/notification-component.js"></script>
+        <script src="../../js/avatar-manager.js"></script>
+        <script src="../../js/notification-manager.js"></script>
+        <script src="../../js/scroll-animations.js"></script>
+        <script src="../../js/user-storage-scope.js"></script>
+        <script src="../../js/page-effects.js"></script>
+        <script>
+            if (window.PageEffects) {
+                window.PageEffects.initPointerGlow();
+            }
+
+            (function initCardSpotlight() {
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                const selector = '.top-bar, .asset-wrap';
+                const bind = (el) => {
+                    if (
+                        !el ||
+                        el.dataset.cardGlowBound === '1' ||
+                        !el.style ||
+                        typeof el.style.setProperty !== 'function'
+                    )
+                        return;
+                    el.dataset.cardGlowBound = '1';
+                    el.addEventListener('mousemove', (e) => {
+                        const rect = el.getBoundingClientRect();
+                        const x = ((e.clientX - rect.left) / rect.width) * 100;
+                        const y = ((e.clientY - rect.top) / rect.height) * 100;
+                        el.style.setProperty('--card-x', x + '%');
+                        el.style.setProperty('--card-y', y + '%');
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        el.style.setProperty('--card-x', '50%');
+                        el.style.setProperty('--card-y', '50%');
+                    });
+                };
+                const scan = () => document.querySelectorAll(selector).forEach(bind);
+                scan();
+                const observer = new MutationObserver(scan);
+                observer.observe(document.body, { childList: true, subtree: true });
+            })();
+
+            function uiToast(message, type) {
+                if (window.TechUI && typeof window.TechUI.toast === 'function') {
+                    window.TechUI.toast(message, type || 'success');
+                }
+            }
+            function uiConfirm(message, title) {
+                if (window.TechUI && typeof window.TechUI.confirm === 'function') {
+                    return window.TechUI.confirm(message, title || '请确认', '确定', '取消');
+                }
+                return Promise.resolve(confirm(message));
+            }
+            function uiPrompt(title, label, value) {
+                if (window.TechUI && typeof window.TechUI.prompt === 'function') {
+                    return window.TechUI.prompt(title, label, value || '', '确定', '取消');
+                }
+                return Promise.resolve(prompt(label, value || ''));
+            }
+
+            const STYLE_PRESETS_STORE = 'style_presets_v1';
+            function stylePresetsStorageKey() {
+                if (typeof GameUiUserScope !== 'undefined' && typeof GameUiUserScope.key === 'function') {
+                    return GameUiUserScope.key(STYLE_PRESETS_STORE);
+                }
+                return STYLE_PRESETS_STORE;
+            }
+            function readStylePresetsList() {
+                try {
+                    const raw = localStorage.getItem(stylePresetsStorageKey());
+                    const arr = raw ? JSON.parse(raw) : [];
+                    return Array.isArray(arr) ? arr : [];
+                } catch (_) {
+                    return [];
+                }
+            }
+            function writeStylePresetsList(list) {
+                try {
+                    localStorage.setItem(stylePresetsStorageKey(), JSON.stringify(list));
+                } catch (e) {
+                    console.error(e);
+                    uiToast('风格预设保存失败（存储空间可能不足）', 'warn');
+                    return false;
+                }
+                try {
+                    window.dispatchEvent(new CustomEvent('stylePresetsChanged', { bubbles: true }));
+                } catch (_) {}
+                renderStylePresetLibrary();
+                return true;
+            }
+            function renderStylePresetLibrary() {
+                const root = document.getElementById('stylePresetLibraryList');
+                if (!root) return;
+                const list = readStylePresetsList();
+                root.innerHTML = '';
+                if (!list.length) {
+                    const p = document.createElement('p');
+                    p.className = 'style-preset-empty';
+                    p.textContent = '暂无风格预设。可在 AI 图片生成或工作台中创建。';
+                    root.appendChild(p);
+                    return;
+                }
+                list.forEach((preset) => {
+                    const row = document.createElement('div');
+                    row.className = 'style-preset-lib-row';
+                    const head = document.createElement('div');
+                    head.className = 'style-preset-lib-row-header';
+                    const title = document.createElement('div');
+                    title.className = 'style-preset-lib-name';
+                    title.textContent = preset.name || '未命名';
+                    const meta = document.createElement('div');
+                    meta.className = 'style-preset-lib-meta';
+                    meta.textContent = (preset.createdAt || '').slice(0, 10);
+                    head.appendChild(title);
+                    head.appendChild(meta);
+                    if (preset.referenceThumb) {
+                        const im = document.createElement('img');
+                        im.src = preset.referenceThumb;
+                        im.className = 'style-preset-lib-thumb';
+                        im.alt = '预设参考图';
+                        row.appendChild(im);
+                    }
+                    const ta = document.createElement('textarea');
+                    ta.className = 'style-preset-lib-snippet';
+                    ta.value = preset.styleText || '';
+                    ta.rows = 3;
+                    const actions = document.createElement('div');
+                    actions.className = 'style-preset-lib-actions';
+                    const btnSave = document.createElement('button');
+                    btnSave.className = 'btn btn-small btn-primary';
+                    btnSave.type = 'button';
+                    btnSave.textContent = '保存片段';
+                    btnSave.addEventListener('click', () => {
+                        const next = readStylePresetsList().map((x) =>
+                            String(x.id) === String(preset.id)
+                                ? Object.assign({}, x, { styleText: ta.value.trim() })
+                                : x
+                        );
+                        if (writeStylePresetsList(next)) {
+                            uiToast('风格片段已更新', 'success');
+                        }
+                    });
+                    const btnCopy = document.createElement('button');
+                    btnCopy.className = 'btn btn-small';
+                    btnCopy.type = 'button';
+                    btnCopy.textContent = '复制为新预设';
+                    btnCopy.addEventListener('click', async () => {
+                        const nm = await uiPrompt('复制为预设', '新预设名称：', (preset.name || '预设') + ' 副本');
+                        if (!nm || !String(nm).trim()) return;
+                        const nu = readStylePresetsList();
+                        nu.push({
+                            id: Date.now().toString(),
+                            name: String(nm).trim(),
+                            styleText: ta.value.trim() || preset.styleText || '',
+                            referenceThumb: preset.referenceThumb || null,
+                            createdAt: new Date().toISOString(),
+                        });
+                        if (writeStylePresetsList(nu)) {
+                            uiToast('已复制为新预设', 'success');
+                        }
+                    });
+                    const btnDel = document.createElement('button');
+                    btnDel.className = 'btn btn-small';
+                    btnDel.type = 'button';
+                    btnDel.textContent = '删除';
+                    btnDel.addEventListener('click', async () => {
+                        const ok = await uiConfirm('确定删除该风格预设？此操作不可撤销。', '删除风格预设');
+                        if (!ok) return;
+                        const next = readStylePresetsList().filter((x) => String(x.id) !== String(preset.id));
+                        writeStylePresetsList(next);
+                        uiToast('已删除', 'success');
+                    });
+                    actions.appendChild(btnSave);
+                    actions.appendChild(btnCopy);
+                    actions.appendChild(btnDel);
+                    row.appendChild(head);
+                    row.appendChild(ta);
+                    row.appendChild(actions);
+                    root.appendChild(row);
+                });
+            }
+
+            async function boot() {
+                try {
+                    await GameUiUserScope.ensure();
+                } catch (e) {
+                    console.warn('用户态校验失败：', e);
+                }
+                if (!window.__stylePresetPageListeners) {
+                    window.__stylePresetPageListeners = true;
+                    window.addEventListener('storage', (e) => {
+                        if (e.key === stylePresetsStorageKey()) {
+                            renderStylePresetLibrary();
+                        }
+                    });
+                    window.addEventListener('stylePresetsChanged', () => renderStylePresetLibrary());
+                }
+                renderStylePresetLibrary();
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', boot);
+            } else {
+                boot();
+            }
+        </script>
+    </body>
+</html>

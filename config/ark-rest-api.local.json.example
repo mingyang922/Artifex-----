@@ -1,0 +1,17 @@
+{
+  "_readme": "复制为 ark-rest-api.local.json 并填写 apiKey。model 填接入点 ep-m-...；meta 仅备注不参与请求。",
+  "endpoint": "https://ark.cn-beijing.volces.com/api/v3/images/generations",
+  "apiKey": "sk-你的密钥",
+  "model": "ep-m-你的接入点ID",
+  "meta": {
+    "baseModelId": "doubao-seedream-4-0-250828",
+    "endpointId": "ep-m-xxxxxxxx"
+  },
+  "defaults": {
+    "sequential_image_generation": "disabled",
+    "response_format": "url",
+    "size": "2K",
+    "stream": false,
+    "watermark": true
+  }
+}

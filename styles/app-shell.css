@@ -1,0 +1,517 @@
+/**
+ * 应用外壳：侧边栏 + 顶栏 + 主内容区布局（与主控制台视觉一致）
+ * 各功能页在 head 末尾引入本文件，以覆盖页面内旧版侧栏样式。
+ */
+:root {
+    --font-display: "Orbitron", "Segoe UI", sans-serif;
+    --font-ui: "Rajdhani", "Segoe UI", sans-serif;
+    --shell-bg: #0a0e18;
+    --shell-text: #e8ecf4;
+    --shell-muted: #b0b0c0;
+    --shell-accent: #00f0ff;
+    --shell-sidebar-w: 240px;
+    --mx: 50vw;
+    --my: 50vh;
+}
+
+html,
+body.app-shell {
+    height: 100%;
+}
+
+body.app-shell {
+    background: var(--shell-bg);
+    color: var(--shell-text);
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-ui);
+    font-weight: 500;
+    font-size: 17px;
+    overflow-x: hidden;
+}
+
+body.app-shell::before {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.24) 0%, rgba(0, 240, 255, 0) 38%),
+        radial-gradient(circle at 80% 30%, rgba(124, 58, 237, 0.28) 0%, rgba(124, 58, 237, 0) 40%),
+        radial-gradient(circle at 50% 85%, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0) 37%);
+    filter: blur(28px);
+    transform: translate3d(0, 0, 0);
+    animation: appShellFlowBg 7.2s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes appShellFlowBg {
+    0% { transform: translate3d(-3%, -2%, 0) scale(1.01); }
+    50% { transform: translate3d(3%, 2%, 0) scale(1.08); }
+    100% { transform: translate3d(-2%, 3%, 0) scale(1.04); }
+}
+
+body.app-shell .pointer-glow {
+    position: fixed;
+    left: var(--mx);
+    top: var(--my);
+    width: 560px;
+    height: 560px;
+    margin-left: -280px;
+    margin-top: -280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.22) 0%, rgba(167, 139, 250, 0.12) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 2;
+    mix-blend-mode: screen;
+    transition: opacity 0.35s ease;
+}
+
+body.app-shell .pointer-glow--lag {
+    width: 720px;
+    height: 720px;
+    margin-left: -360px;
+    margin-top: -360px;
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.12) 0%, rgba(0, 240, 255, 0.09) 46%, transparent 72%);
+    filter: blur(14px);
+    opacity: 0.85;
+    transition: left 0.38s cubic-bezier(0.22, 1, 0.36, 1), top 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+
+body.app-shell:not(.pointer-glow-active) .pointer-glow,
+body.app-shell:not(.pointer-glow-active) .pointer-glow--lag {
+    opacity: 0;
+}
+
+body.app-shell .dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    position: relative;
+    z-index: 2;
+}
+
+body.app-shell .sidebar {
+    width: var(--shell-sidebar-w);
+    background: linear-gradient(180deg, #0f1629 0%, #0a0e18 100%);
+    padding: 20px 0;
+    transition: left 0.3s ease, width 0.3s ease, padding 0.3s ease;
+    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.45), inset -1px 0 0 rgba(0, 240, 255, 0.12);
+    z-index: 100;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+body.app-shell .sidebar::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 240, 255, 0.35) 30%, rgba(167, 139, 250, 0.4) 55%, rgba(0, 240, 255, 0.25) 80%, transparent 100%);
+    opacity: 0.85;
+    pointer-events: none;
+    animation: appShellSidebarEdge 2.4s ease-in-out infinite;
+}
+
+@keyframes appShellSidebarEdge {
+    0%, 100% { opacity: 0.55; filter: blur(0); }
+    50% { opacity: 1; filter: blur(1px); }
+}
+
+body.app-shell .sidebar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+body.app-shell .sidebar-logo .logo-img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+body.app-shell .sidebar-logo h1 {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #f0f4fc;
+    margin: 0;
+}
+
+body.app-shell .nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+body.app-shell .nav-item {
+    margin-bottom: 5px;
+}
+
+body.app-shell .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: var(--shell-muted);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+body.app-shell .nav-link:hover,
+body.app-shell .nav-link.active {
+    background: rgba(0, 240, 255, 0.1);
+    color: var(--shell-accent);
+    border-left-color: var(--shell-accent);
+}
+
+body.app-shell .nav-link i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+body.app-shell .main-content {
+    flex: 1;
+    padding: 20px;
+    margin-left: var(--shell-sidebar-w);
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100vh;
+    min-height: 100vh;
+    box-sizing: border-box;
+    position: relative;
+    background:
+        linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-color: rgba(10, 14, 24, 0.55);
+}
+
+body.app-shell .main-content::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.07) 2px, rgba(0, 0, 0, 0.07) 4px);
+    opacity: 0.3;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 75%);
+}
+
+body.app-shell .main-content > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* 顶栏必须在主内容其它区块之上，否则通知下拉会被下方 scroll-section 盖住 */
+body.app-shell .main-content > .top-bar {
+    z-index: 50;
+}
+
+body.app-shell .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    background: rgba(15, 22, 41, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 0 28px rgba(0, 240, 255, 0.06);
+    position: relative;
+    /* 不可 hidden：会裁切通知下拉；光晕在 ::before 上已单独分层 */
+    overflow: visible;
+}
+
+body.app-shell .top-bar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: linear-gradient(105deg, transparent 0%, rgba(0, 240, 255, 0.12) 45%, rgba(167, 139, 250, 0.14) 55%, transparent 100%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    animation: appShellTopBarShine 1.9s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes appShellTopBarShine {
+    0%, 100% { background-position: 0% 50%; opacity: 0.58; }
+    50% { background-position: 100% 50%; opacity: 1; }
+}
+
+body.app-shell .top-bar > * {
+    position: relative;
+    z-index: 1;
+}
+
+body.app-shell .top-bar .search-bar {
+    position: relative;
+    flex: 1;
+    max-width: 420px;
+    margin-right: 16px;
+}
+
+body.app-shell .top-bar .search-bar input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 15px 10px 35px;
+    background: rgba(5, 8, 16, 0.65);
+    border: 1px solid rgba(0, 240, 255, 0.18);
+    border-radius: 6px;
+    color: #f0f4fc;
+    font-size: 15px;
+    font-family: var(--font-ui);
+}
+
+body.app-shell .top-bar .search-bar i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--shell-muted);
+}
+
+body.app-shell .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+body.app-shell .notification-container {
+    position: relative;
+    z-index: 100;
+}
+
+body.app-shell .notification-dropdown {
+    z-index: 5000;
+}
+
+body.app-shell .notification-btn {
+    background: transparent;
+    border: none;
+    color: var(--shell-muted);
+    font-size: 18px;
+    cursor: pointer;
+    position: relative;
+}
+
+body.app-shell .notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    background: var(--shell-accent);
+    color: #1a1a2e;
+    border-radius: 50%;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+body.app-shell .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--shell-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a1a2e;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+body.app-shell .user-avatar.user-avatar--placeholder {
+    font-weight: normal;
+}
+
+body.app-shell .user-avatar.user-avatar--placeholder > .fas {
+    font-size: 19px;
+    line-height: 1;
+}
+
+/* 头像下拉（账户 / 登出），层级与通知下拉一致 */
+body.app-shell .user-avatar-menu {
+    position: relative;
+    z-index: 120;
+}
+
+body.app-shell .user-avatar-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 180px;
+    padding: 8px 0;
+    background: rgba(15, 22, 41, 0.98);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    z-index: 10000;
+}
+
+body.app-shell .user-avatar-dropdown.show {
+    display: block;
+}
+
+body.app-shell .user-avatar-dd-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: #e8ecf4;
+    font-size: 14px;
+    font-family: var(--font-ui);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s ease;
+}
+
+body.app-shell .user-avatar-dd-item i {
+    width: 18px;
+    color: var(--shell-accent);
+    text-align: center;
+}
+
+body.app-shell .user-avatar-dd-item:hover {
+    background: rgba(0, 240, 255, 0.1);
+}
+
+body.app-shell .user-avatar-dd-item--danger i {
+    color: #ff6b6b;
+}
+
+body.app-shell .user-avatar-dd-item--danger:hover {
+    background: rgba(255, 107, 107, 0.12);
+}
+
+body.app-shell .mobile-menu-toggle {
+    display: none;
+}
+
+@media (max-width: 992px) {
+    body.app-shell {
+        --shell-sidebar-w: 60px;
+    }
+    body.app-shell .sidebar {
+        padding: 16px 0;
+    }
+    body.app-shell .sidebar-logo h1,
+    body.app-shell .nav-link span {
+        display: none;
+    }
+    body.app-shell .sidebar-logo {
+        justify-content: center;
+        padding: 0 0 16px;
+    }
+    body.app-shell .sidebar-logo h1 {
+        display: none;
+    }
+    body.app-shell .nav-link {
+        justify-content: center;
+        padding: 14px 10px;
+    }
+    body.app-shell .nav-link i {
+        margin-right: 0;
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 576px) {
+    body.app-shell {
+        --shell-sidebar-w: 240px;
+    }
+    body.app-shell .sidebar {
+        left: calc(-1 * var(--shell-sidebar-w));
+        width: var(--shell-sidebar-w);
+        padding: 20px 0;
+    }
+    body.app-shell .sidebar.show {
+        left: 0;
+    }
+    body.app-shell .sidebar-logo h1,
+    body.app-shell .nav-link span {
+        display: inline;
+    }
+    body.app-shell .sidebar-logo {
+        justify-content: flex-start;
+        padding: 0 20px 20px;
+    }
+    body.app-shell .sidebar-logo i {
+        margin-right: 10px;
+    }
+    body.app-shell .nav-link {
+        justify-content: flex-start;
+        padding: 12px 20px;
+    }
+    body.app-shell .nav-link i {
+        margin-right: 10px;
+    }
+    body.app-shell .main-content {
+        margin-left: 0;
+        padding: 16px;
+    }
+    body.app-shell .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    body.app-shell .top-bar .search-bar {
+        max-width: none;
+        margin-right: 0;
+    }
+    body.app-shell .mobile-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--shell-accent);
+        color: #1a1a2e;
+        border: none;
+        font-size: 20px;
+        box-shadow: 0 4px 10px rgba(0, 240, 255, 0.4);
+        cursor: pointer;
+        z-index: 999;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.app-shell::before,
+    body.app-shell .sidebar::after,
+    body.app-shell .top-bar::before {
+        animation: none !important;
+    }
+    body.app-shell .pointer-glow,
+    body.app-shell .pointer-glow--lag {
+        display: none !important;
+    }
+}

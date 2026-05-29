@@ -1,0 +1,1104 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>项目管理 - Artifex</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Rajdhani:wght@500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="./style.css" />
+        <link rel="stylesheet" href="../../styles/ui-kit.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+        <style>
+            :root {
+                --mx: 50vw;
+                --my: 50vh;
+            }
+
+            html,
+            body {
+                height: 100%;
+                overflow: hidden;
+            }
+
+            /* 主界面核心样式 - 来自style.html */
+            body {
+                background: #0a0e18;
+                color: #e0e0e0;
+                min-height: 100vh;
+                margin: 0;
+                font-family: 'Rajdhani', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 17px;
+                font-weight: 500;
+            }
+
+            .pointer-glow {
+                position: fixed;
+                left: var(--mx);
+                top: var(--my);
+                width: 560px;
+                height: 560px;
+                margin-left: -280px;
+                margin-top: -280px;
+                border-radius: 50%;
+                background: radial-gradient(
+                    circle,
+                    rgba(0, 240, 255, 0.22) 0%,
+                    rgba(167, 139, 250, 0.12) 40%,
+                    transparent 70%
+                );
+                pointer-events: none;
+                z-index: 1;
+                mix-blend-mode: screen;
+                transition: opacity 0.35s ease;
+            }
+
+            .pointer-glow--lag {
+                width: 720px;
+                height: 720px;
+                margin-left: -360px;
+                margin-top: -360px;
+                background: radial-gradient(
+                    circle,
+                    rgba(236, 72, 153, 0.12) 0%,
+                    rgba(0, 240, 255, 0.09) 46%,
+                    transparent 72%
+                );
+                filter: blur(14px);
+                opacity: 0.85;
+                transition:
+                    left 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                    top 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                    opacity 0.3s ease;
+            }
+
+            body:not(.pointer-glow-active) .pointer-glow,
+            body:not(.pointer-glow-active) .pointer-glow--lag {
+                opacity: 0;
+            }
+
+            body::before {
+                content: '';
+                position: fixed;
+                inset: -20%;
+                background:
+                    radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.24) 0%, rgba(0, 240, 255, 0) 38%),
+                    radial-gradient(circle at 80% 30%, rgba(124, 58, 237, 0.28) 0%, rgba(124, 58, 237, 0) 40%),
+                    radial-gradient(circle at 50% 85%, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0) 37%);
+                filter: blur(28px);
+                transform: translate3d(0, 0, 0);
+                animation: aiFlowBg 7.2s ease-in-out infinite alternate;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            @keyframes aiFlowBg {
+                0% {
+                    transform: translate3d(-3%, -2%, 0) scale(1.01);
+                }
+                50% {
+                    transform: translate3d(3%, 2%, 0) scale(1.08);
+                }
+                100% {
+                    transform: translate3d(-2%, 3%, 0) scale(1.04);
+                }
+            }
+
+            .dashboard-container {
+                display: flex;
+                min-height: 100vh;
+                width: 100%;
+                max-width: 100%;
+                padding: 0;
+                margin: 0;
+                background: transparent;
+                position: relative;
+                z-index: 2;
+            }
+
+            /* 侧边导航 */
+            .sidebar {
+                width: 240px;
+                background: linear-gradient(180deg, #0f1629 0%, #0a0e18 100%);
+                padding: 0;
+                transition: all 0.3s ease;
+                box-shadow:
+                    4px 0 32px rgba(0, 0, 0, 0.45),
+                    inset -1px 0 0 rgba(0, 240, 255, 0.12);
+                z-index: 100;
+                height: 100vh;
+                position: fixed;
+                top: 0;
+                left: 0;
+            }
+
+            .sidebar::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 1px;
+                background: linear-gradient(
+                    180deg,
+                    transparent 0%,
+                    rgba(0, 240, 255, 0.35) 30%,
+                    rgba(167, 139, 250, 0.4) 55%,
+                    rgba(0, 240, 255, 0.25) 80%,
+                    transparent 100%
+                );
+                opacity: 0.85;
+                pointer-events: none;
+                animation: sidebarEdgeFlow 2.4s ease-in-out infinite;
+            }
+
+            @keyframes sidebarEdgeFlow {
+                0%,
+                100% {
+                    opacity: 0.55;
+                    filter: blur(0);
+                }
+                50% {
+                    opacity: 1;
+                    filter: blur(1px);
+                }
+            }
+
+            .sidebar-logo {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                margin-bottom: 0;
+                gap: 6px;
+            }
+
+            .sidebar-logo .logo-img {
+                height: 40px;
+                width: auto;
+                object-fit: contain;
+                margin-top: 6px;
+            }
+
+            .sidebar-logo h1 {
+                font-family: 'Orbitron', 'Segoe UI', sans-serif;
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                color: #f0f4fc;
+                margin: 0;
+            }
+
+            .nav-menu {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .nav-item {
+                margin-bottom: 0;
+            }
+
+            .nav-link {
+                display: flex;
+                align-items: center;
+                padding: 15px 20px;
+                color: #b0b0c0;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                border-left: 3px solid transparent;
+            }
+
+            .nav-link:hover,
+            .nav-link.active {
+                background: rgba(0, 240, 255, 0.1);
+                color: #00f0ff;
+                border-left-color: #00f0ff;
+            }
+
+            .nav-link i {
+                margin-right: 10px;
+                width: 20px;
+                text-align: center;
+            }
+
+            /* 主内容区 */
+            .main-content {
+                flex: 1;
+                padding: 20px;
+                margin-left: 240px;
+                overflow-y: auto;
+                overflow-x: hidden;
+                height: 100vh;
+                min-height: 100vh;
+                box-sizing: border-box;
+                position: relative;
+                background:
+                    linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+                background-size: 48px 48px;
+                background-color: rgba(10, 14, 24, 0.6);
+            }
+
+            .main-content::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background: repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.12) 2px,
+                    rgba(0, 0, 0, 0.12) 4px
+                );
+                opacity: 0.35;
+                z-index: 0;
+            }
+
+            .main-content > * {
+                position: relative;
+                z-index: 1;
+            }
+
+            /* 顶部工具栏 */
+            .top-bar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                padding: 14px 18px;
+                border-radius: 8px;
+                border: 1px solid rgba(0, 240, 255, 0.15);
+                background: rgba(15, 22, 41, 0.65);
+                backdrop-filter: blur(10px);
+                box-shadow: 0 0 24px rgba(0, 240, 255, 0.06);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .top-bar::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 8px;
+                background: linear-gradient(
+                    105deg,
+                    transparent 0%,
+                    rgba(0, 240, 255, 0.12) 45%,
+                    rgba(167, 139, 250, 0.14) 55%,
+                    transparent 100%
+                );
+                background-size: 200% 100%;
+                pointer-events: none;
+                animation: topBarShine 1.9s ease-in-out infinite;
+                z-index: 0;
+            }
+
+            .top-bar > * {
+                position: relative;
+                z-index: 1;
+            }
+
+            .top-bar::after,
+            .project-management-module::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                background: radial-gradient(
+                    300px circle at var(--card-x, 50%) var(--card-y, 50%),
+                    rgba(0, 240, 255, 0.22),
+                    rgba(139, 92, 246, 0.1) 42%,
+                    transparent 72%
+                );
+                opacity: 0;
+                transition: opacity 0.16s ease;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            .top-bar:hover::after,
+            .project-management-module:hover::after {
+                opacity: 1;
+            }
+
+            .project-management-module > * {
+                position: relative;
+                z-index: 1;
+            }
+
+            @keyframes topBarShine {
+                0%,
+                100% {
+                    background-position: 0% 50%;
+                    opacity: 0.58;
+                }
+                50% {
+                    background-position: 100% 50%;
+                    opacity: 1;
+                }
+            }
+
+            .search-bar {
+                position: relative;
+                width: 300px;
+            }
+
+            .search-bar input {
+                width: 100%;
+                padding: 10px 15px 10px 35px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                color: white;
+                font-size: 14px;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .search-bar i {
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #b0b0c0;
+                font-size: 14px;
+            }
+
+            .user-menu {
+                display: flex;
+                align-items: center;
+            }
+
+            .notification-btn {
+                background: transparent;
+                border: none;
+                color: #b0b0c0;
+                font-size: 18px;
+                margin-right: 20px;
+                cursor: pointer;
+                position: relative;
+            }
+
+            .notification-badge {
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                width: 16px;
+                height: 16px;
+                background: #00f0ff;
+                color: #1a1a2e;
+                border-radius: 50%;
+                font-size: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+            }
+
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: #00f0ff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #1a1a2e;
+                font-weight: bold;
+                font-size: 14px;
+                cursor: pointer;
+            }
+
+            /* 移动端菜单切换 */
+            .mobile-menu-toggle {
+                display: none;
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background: #00f0ff;
+                color: #1a1a2e;
+                border: none;
+                font-size: 20px;
+                box-shadow: 0 4px 10px rgba(0, 240, 255, 0.4);
+                cursor: pointer;
+                z-index: 999;
+            }
+
+            /* 项目管理模块样式重置 */
+            .project-management-module {
+                background: transparent;
+                padding: 16px 18px 24px;
+                margin: 0;
+                position: relative;
+                border-radius: 10px;
+                --card-x: 50%;
+                --card-y: 50%;
+            }
+
+            .module-header {
+                margin-bottom: 24px;
+                padding: 6px 4px 16px;
+            }
+
+            .module-title {
+                line-height: 1.25;
+                padding-left: 2px;
+            }
+
+            .project-list-section h3 {
+                margin: 0 0 18px;
+                padding-left: 2px;
+            }
+
+            /* 确保顶部栏位置正确 - 覆盖style.css的影响 */
+            .main-content {
+                padding-top: 0 !important;
+                margin-top: 0 !important;
+            }
+
+            .top-bar {
+                margin-top: 0 !important;
+                padding-top: 8px !important;
+            }
+
+            /* 确保项目卡片操作按钮样式正确显示 */
+            .project-card-actions {
+                display: flex !important;
+                gap: 8px;
+                margin-top: 15px;
+                justify-content: flex-end;
+                flex-wrap: wrap;
+            }
+
+            .icon-btn {
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                padding: 6px 10px;
+                background: rgba(0, 240, 255, 0.08);
+                border: 1px solid rgba(0, 240, 255, 0.22);
+                color: #c7e7ff;
+                border-radius: 15px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: 12px;
+            }
+
+            .icon-btn:hover {
+                background: rgba(0, 240, 255, 0.2);
+                border-color: rgba(0, 240, 255, 0.48);
+                color: #00f0ff;
+                transform: translateY(-2px);
+            }
+
+            .action-label {
+                margin-left: 4px;
+            }
+
+            @media (max-width: 992px) {
+                .sidebar {
+                    width: 60px;
+                    padding: 20px 0;
+                }
+
+                .main-content {
+                    margin-left: 60px;
+                }
+
+                .sidebar-logo h1,
+                .nav-link span {
+                    display: none;
+                }
+
+                .sidebar-logo {
+                    justify-content: center;
+                    padding: 0 0 20px;
+                    gap: 0;
+                }
+
+                .sidebar-logo h1 {
+                    display: none;
+                }
+
+                .nav-link {
+                    justify-content: center;
+                    padding: 15px;
+                }
+
+                .nav-link i {
+                    margin-right: 0;
+                    font-size: 18px;
+                }
+
+                .search-bar {
+                    width: 200px;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .search-bar {
+                    width: 100%;
+                }
+
+                .top-bar {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 15px;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .sidebar {
+                    position: fixed;
+                    left: -60px;
+                    height: 100vh;
+                    z-index: 1000;
+                }
+
+                .sidebar.show {
+                    left: 0;
+                }
+
+                .main-content {
+                    margin-left: 0;
+                    padding: 15px;
+                }
+
+                .mobile-menu-toggle {
+                    display: block;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                body::before,
+                .sidebar::after,
+                .top-bar::before {
+                    animation: none !important;
+                }
+                .pointer-glow,
+                .pointer-glow--lag {
+                    display: none !important;
+                }
+                .top-bar::after,
+                .project-management-module::after {
+                    display: none !important;
+                }
+            }
+        </style>
+        <link rel="stylesheet" href="../../styles/app-shell.css" />
+    </head>
+    <body class="app-shell" data-app-page="project-management">
+        <div class="pointer-glow" aria-hidden="true"></div>
+        <div class="pointer-glow pointer-glow--lag" aria-hidden="true"></div>
+        <div class="dashboard-container">
+            <!-- 侧边导航 -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-logo">
+                    <img src="../../js/logo-main.png" alt="Artifex" class="logo-img" />
+                    <h1>Artifex</h1>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="home">
+                            <i class="fas fa-home"></i>
+                            <span>主页</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="project-management">
+                            <i class="fas fa-project-diagram"></i>
+                            <span>项目管理</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="ai-generate">
+                            <i class="fas fa-magic"></i>
+                            <span>AI 生成</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="asset-library">
+                            <i class="fas fa-images"></i>
+                            <span>素材库</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="style-presets">
+                            <i class="fas fa-swatchbook"></i>
+                            <span>风格预设</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="user-center">
+                            <i class="fas fa-user-circle"></i>
+                            <span>账户</span>
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- 主内容区 -->
+            <main class="main-content">
+                <!-- 顶部工具栏 -->
+                <div class="top-bar">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索项目、资产或文档..." />
+                    </div>
+                    <div class="user-menu">
+                        <button class="notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
+                        <div class="user-avatar user-avatar--placeholder" role="img" aria-label="用户头像">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 原有的项目管理内容 -->
+                <div class="project-management-module scroll-section">
+                    <!-- 顶部操作区 -->
+                    <div class="module-header">
+                        <h2 class="module-title">项目管理</h2>
+                        <div class="header-actions">
+                            <button
+                                id="sketch-to-asset-btn"
+                                class="secondary-btn"
+                                onclick="window.__pmQuickAction && window.__pmQuickAction('openSketchModal')"
+                            >
+                                <i class="fas fa-pencil-alt"></i> 从线稿生成
+                            </button>
+                            <button
+                                id="desc-to-asset-btn"
+                                class="secondary-btn"
+                                onclick="window.__pmQuickAction && window.__pmQuickAction('openDescModal')"
+                            >
+                                <i class="fas fa-file-alt"></i> 从描述生成
+                            </button>
+                            <button
+                                id="create-project-btn"
+                                class="primary-btn"
+                                onclick="window.__pmQuickAction && window.__pmQuickAction('openCreateForm')"
+                            >
+                                + 新建项目
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 项目创建表单（默认隐藏，点击"新建项目"显示） -->
+                    <div id="create-project-form" class="project-form hidden">
+                        <h3>创建新项目</h3>
+                        <div class="form-group">
+                            <label>项目名称*</label>
+                            <input type="text" id="project-name" placeholder="输入项目名称" required />
+                        </div>
+                        <div class="form-group">
+                            <label>项目描述</label>
+                            <textarea id="project-desc" placeholder="简要描述项目用途"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>项目类型</label>
+                            <select id="project-type">
+                                <option value="ui">UI设计</option>
+                                <option value="game">游戏界面</option>
+                                <option value="character">角色设计</option>
+                                <option value="environment">场景设计</option>
+                                <option value="other">其他</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer">
+                                <input type="checkbox" id="open-ai-after-create" checked />
+                                <span>创建后直接进入 AI 生成</span>
+                            </label>
+                        </div>
+                        <div class="form-actions">
+                            <button id="cancel-create-btn" class="secondary-btn">取消</button>
+                            <button id="submit-project-btn" class="primary-btn">创建</button>
+                        </div>
+                    </div>
+
+                    <!-- 项目列表区 -->
+                    <div class="project-list-section">
+                        <h3>我的项目</h3>
+                        <div
+                            id="project-empty-state"
+                            class="empty-state"
+                            role="button"
+                            tabindex="0"
+                            aria-label="点击打开新建项目表单"
+                            onclick="window.__pmQuickAction && window.__pmQuickAction('openCreateForm')"
+                        >
+                            <i class="fas fa-folder-open"></i>
+                            <p>暂无项目，点击"新建项目"开始创建</p>
+                        </div>
+                        <div id="project-list" class="project-list"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- 项目编辑弹窗（默认隐藏） -->
+        <div id="edit-project-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>编辑项目</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit-project-id" />
+                    <!-- 存储当前编辑项目ID -->
+                    <div class="form-group">
+                        <label>项目名称*</label>
+                        <input type="text" id="edit-project-name" required />
+                    </div>
+                    <div class="form-group">
+                        <label>项目描述</label>
+                        <textarea id="edit-project-desc"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>项目类型</label>
+                        <select id="edit-project-type">
+                            <option value="ui">UI设计</option>
+                            <option value="game">游戏界面</option>
+                            <option value="character">角色设计</option>
+                            <option value="environment">场景设计</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="secondary-btn close-modal">取消</button>
+                    <button id="save-edit-btn" class="primary-btn">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 版本历史弹窗（默认隐藏） -->
+        <div id="version-history-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>版本历史</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="history-project-id" />
+                    <!-- 存储当前项目ID -->
+                    <div id="version-list" class="version-list">
+                        <!-- 版本记录会动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 项目分享弹窗（默认隐藏） -->
+        <div id="share-project-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>分享项目</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="share-project-id" />
+                    <!-- 存储当前项目ID -->
+                    <div class="form-group">
+                        <label>分享链接</label>
+                        <input type="text" id="share-link" readonly />
+                    </div>
+                    <p>复制链接分享给他人，对方可以查看和编辑此项目。</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="secondary-btn close-modal">关闭</button>
+                    <button id="copy-link-btn" class="primary-btn">复制链接</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 项目素材管理弹窗（默认隐藏） -->
+        <div id="project-assets-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>项目素材管理</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="assets-project-id" />
+                    <!-- 存储当前项目ID -->
+                    <div class="form-group">
+                        <label>添加素材</label>
+                        <div class="add-asset-container">
+                            <input type="text" id="asset-name" placeholder="素材名称" />
+                            <select id="asset-type">
+                                <option value="image">图片</option>
+                                <option value="icon">图标</option>
+                                <option value="button">按钮</option>
+                                <option value="component">组件</option>
+                                <option value="character">角色</option>
+                                <option value="environment">场景</option>
+                                <option value="prop">道具</option>
+                            </select>
+                            <input type="text" id="asset-url" placeholder="素材URL或内容（可选）" />
+                            <div style="display: flex; align-items: center; gap: 8px">
+                                <input type="file" id="asset-file" accept="image/*,.webp,.png,.jpg,.jpeg,.gif" />
+                                <span id="asset-file-name" style="font-size: 12px; color: #b0b0c0">未选择本地文件</span>
+                            </div>
+                            <button id="add-asset-btn" class="primary-btn">添加</button>
+                        </div>
+                    </div>
+                    <div id="assets-list" class="assets-list">
+                        <!-- 素材列表会动态生成 -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="secondary-btn close-modal">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 从线稿生成素材弹窗（新增） -->
+        <div id="sketch-to-asset-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>从线稿生成素材</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>线稿图片URL*</label>
+                        <input type="text" id="sketch-url" placeholder="输入线稿图片的URL" />
+                    </div>
+                    <div class="form-group">
+                        <label>目标风格</label>
+                        <select id="sketch-style">
+                            <option value="cartoon">卡通风格</option>
+                            <option value="anime">动漫风格</option>
+                            <option value="realistic">写实风格</option>
+                            <option value="pixel">像素风格</option>
+                            <option value="hand-drawn">手绘风格</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>输出类型</label>
+                        <select id="sketch-output-type">
+                            <option value="image">图片</option>
+                            <option value="character">角色</option>
+                            <option value="environment">场景</option>
+                            <option value="prop">道具</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="secondary-btn close-modal">取消</button>
+                    <button id="confirm-sketch-btn" class="primary-btn">开始生成</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 从描述生成素材弹窗（新增） -->
+        <div id="desc-to-asset-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>从描述生成素材</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>素材描述*</label>
+                        <textarea
+                            id="asset-description"
+                            placeholder="详细描述你想要的素材，例如：一个穿着太空服的卡通角色，蓝色背景，像素风格"
+                        ></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>目标风格</label>
+                        <select id="desc-style">
+                            <option value="cartoon">卡通风格</option>
+                            <option value="anime">动漫风格</option>
+                            <option value="realistic">写实风格</option>
+                            <option value="pixel">像素风格</option>
+                            <option value="hand-drawn">手绘风格</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>输出类型</label>
+                        <select id="desc-output-type">
+                            <option value="image">图片</option>
+                            <option value="character">角色</option>
+                            <option value="environment">场景</option>
+                            <option value="prop">道具</option>
+                            <option value="icon">图标</option>
+                            <option value="button">按钮</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="secondary-btn close-modal">取消</button>
+                    <button id="confirm-desc-btn" class="primary-btn">开始生成</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统一项目风格弹窗（新增） -->
+        <div id="unify-style-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>统一项目风格</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="unify-style-project-id" />
+                    <!-- 存储当前项目ID -->
+                    <div class="form-group">
+                        <label>目标风格*</label>
+                        <select id="target-style">
+                            <option value="cartoon">卡通风格</option>
+                            <option value="anime">动漫风格</option>
+                            <option value="realistic">写实风格</option>
+                            <option value="pixel">像素风格</option>
+                            <option value="hand-drawn">手绘风格</option>
+                        </select>
+                    </div>
+                    <p>此操作将对项目中的所有素材应用统一的风格。处理时间可能较长，请耐心等待。</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="secondary-btn close-modal">取消</button>
+                    <button id="confirm-unify-btn" class="primary-btn">开始统一</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 移动端菜单按钮 -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <script src="../../js/ui-kit.js"></script>
+        <script src="../../js/user-storage-scope.js"></script>
+        <script src="../../js/api-utils.js"></script>
+        <script src="./pm-shared.js"></script>
+        <script>
+            (function () {
+                function loadMain() {
+                    var s = document.createElement('script');
+                    s.src = './main.js';
+                    document.body.appendChild(s);
+                }
+                function boot() {
+                    GameUiUserScope.ensure().finally(function () {
+                        // ensure 主要负责鉴权与写入 userId；若未登录会跳转登录页。
+                        // 这里不依赖返回值，避免 main.js 因 undefined 返回值而无法加载。
+                        loadMain();
+                    });
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', boot);
+                } else {
+                    boot();
+                }
+            })();
+        </script>
+        <script src="../../js/navigation.js"></script>
+        <script src="../../js/notification-component.js"></script>
+        <script src="../../js/avatar-manager.js"></script>
+        <script src="../../js/notification-manager.js"></script>
+        <script src="../../js/scroll-animations.js"></script>
+        <script src="../../js/page-effects.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                if (window.PageEffects) {
+                    window.PageEffects.initPointerGlow();
+                    window.PageEffects.initCardSpotlight('.top-bar, .project-management-module, .project-card');
+                }
+
+                // 调试：检查项目卡片操作按钮
+                setTimeout(() => {
+                    const projectCards = document.querySelectorAll('.project-card');
+                    const actionButtons = document.querySelectorAll('.icon-btn');
+                }, 1000);
+            });
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                window.__pmQuickAction = function (action) {
+                    const openCreateForm = function () {
+                        const form = document.getElementById('create-project-form');
+                        if (form) {
+                            form.classList.remove('hidden');
+                            const nameInput = document.getElementById('project-name');
+                            if (nameInput) nameInput.focus();
+                        }
+                    };
+                    if (action === 'openCreateForm') {
+                        openCreateForm();
+                        return;
+                    }
+                    if (action === 'openSketchModal') {
+                        const m1 = document.getElementById('sketch-to-asset-modal');
+                        if (m1) m1.classList.remove('hidden');
+                        return;
+                    }
+                    if (action === 'openDescModal') {
+                        const m2 = document.getElementById('desc-to-asset-modal');
+                        if (m2) m2.classList.remove('hidden');
+                        return;
+                    }
+                };
+
+                const bindOnce = function (el, key, handler) {
+                    if (!el || el.dataset[key] === '1') return;
+                    el.dataset[key] = '1';
+                    el.addEventListener('click', handler);
+                };
+
+                const openCreateForm = function () {
+                    const form = document.getElementById('create-project-form');
+                    if (form) {
+                        form.classList.remove('hidden');
+                        const nameInput = document.getElementById('project-name');
+                        if (nameInput) nameInput.focus();
+                    }
+                };
+
+                const createBtn = document.getElementById('create-project-btn');
+                bindOnce(createBtn, 'fallbackCreateBound', openCreateForm);
+
+                const emptyState = document.getElementById('project-empty-state');
+                if (emptyState) {
+                    emptyState.style.cursor = 'pointer';
+                    bindOnce(emptyState, 'fallbackEmptyBound', openCreateForm);
+                    if (emptyState.dataset.fallbackEmptyKeyBound !== '1') {
+                        emptyState.dataset.fallbackEmptyKeyBound = '1';
+                        emptyState.addEventListener('keydown', function (e) {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                openCreateForm();
+                            }
+                        });
+                    }
+                }
+
+                const openModal = function (id) {
+                    const modal = document.getElementById(id);
+                    if (modal) modal.classList.remove('hidden');
+                };
+
+                bindOnce(document.getElementById('sketch-to-asset-btn'), 'fallbackSketchBound', function () {
+                    openModal('sketch-to-asset-modal');
+                });
+                bindOnce(document.getElementById('desc-to-asset-btn'), 'fallbackDescBound', function () {
+                    openModal('desc-to-asset-modal');
+                });
+            });
+        </script>
+    </body>
+</html>

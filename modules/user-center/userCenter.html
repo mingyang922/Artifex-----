@@ -1,0 +1,2761 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Artifex - 用户中心</title>
+        <link rel="stylesheet" href="../../styles/app-shell.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Rajdhani:wght@500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="../../styles/ui-kit.css" />
+        <style>
+            /* 主界面特有样式 - 修改背景色并设置横屏布局基础 */
+            body {
+                background: #1a1a2e; /* 移除黄色背景，使用深色主题 */
+                color: #e0e0e0;
+                min-height: 100vh;
+                margin: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .dashboard-container {
+                display: flex;
+                min-height: 100vh;
+                width: 100%;
+                max-width: 100%; /* 移除固定最大宽度，适应横屏 */
+                padding: 0;
+                margin: 0;
+                background: transparent; /* 移除白色背景 */
+                box-shadow: none; /* 移除容器阴影 */
+            }
+
+            /* 侧边导航 - 保持原有样式 */
+            .sidebar {
+                width: 240px;
+                background: #16213e;
+                padding: 0;
+                transition: all 0.3s ease;
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+                z-index: 100;
+                height: 100vh; /* 侧边栏高度充满屏幕 */
+                position: fixed; /* 固定侧边栏 */
+                top: 0;
+                left: 0;
+            }
+
+            .sidebar-logo {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                margin-bottom: 0;
+                gap: 10px;
+            }
+
+            .sidebar-logo .logo-img {
+                height: 40px;
+                width: auto;
+                object-fit: contain;
+            }
+
+            .sidebar-logo h1 {
+                font-size: 18px;
+                color: white;
+                margin: 0;
+                font-weight: 600;
+            }
+
+            .nav-menu {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .nav-item {
+                margin-bottom: 0;
+            }
+
+            .nav-link {
+                display: flex;
+                align-items: center;
+                padding: 15px 20px;
+                color: #b0b0c0;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                border-left: 3px solid transparent;
+            }
+
+            .nav-link:hover,
+            .nav-link.active {
+                background: rgba(0, 240, 255, 0.1);
+                color: #00f0ff;
+                border-left-color: #00f0ff;
+            }
+
+            .nav-link i {
+                margin-right: 10px;
+                width: 20px;
+                text-align: center;
+            }
+
+            /* 主内容区 - 调整边距和宽度 */
+            .main-content {
+                flex: 1;
+                padding: 20px;
+                margin-left: 240px; /* 为固定侧边栏留出空间 */
+                overflow-y: auto;
+                min-height: 100vh;
+            }
+
+            /* 顶部工具栏 */
+            .top-bar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .search-bar {
+                display: flex;
+                align-items: center;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                padding: 8px 12px;
+                flex: 1;
+                max-width: 400px;
+                margin-right: 20px;
+            }
+
+            .search-bar i {
+                color: #b0b0c0;
+                margin-right: 8px;
+            }
+
+            .search-bar input {
+                background: transparent;
+                border: none;
+                color: #e0e0e0;
+                outline: none;
+                flex: 1;
+                font-size: 14px;
+            }
+
+            .search-bar input::placeholder {
+                color: #b0b0c0;
+            }
+
+            .user-menu {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .notification-btn {
+                position: relative;
+                background: rgba(255, 255, 255, 0.1);
+                border: none;
+                border-radius: 8px;
+                padding: 8px 12px;
+                color: #b0b0c0;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .notification-btn:hover {
+                background: rgba(0, 240, 255, 0.1);
+                color: #00f0ff;
+            }
+
+            .notification-badge {
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                background: #ff4757;
+                color: white;
+                border-radius: 50%;
+                width: 18px;
+                height: 18px;
+                font-size: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* 通知下拉框样式 */
+            .notification-container {
+                position: relative;
+            }
+
+            .notification-dropdown {
+                position: absolute;
+                top: 100%;
+                right: 0;
+                width: 350px;
+                background: #16213e;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                display: none;
+                margin-top: 8px;
+            }
+
+            .notification-dropdown.show {
+                display: block;
+            }
+
+            .notification-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 20px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .notification-header h4 {
+                color: white;
+                margin: 0;
+                font-size: 16px;
+            }
+
+            .mark-all-read {
+                background: none;
+                border: none;
+                color: #00f0ff;
+                font-size: 12px;
+                cursor: pointer;
+                transition: color 0.3s ease;
+            }
+
+            .mark-all-read:hover {
+                color: #00d4ff;
+            }
+
+            .notification-list {
+                max-height: 300px;
+                overflow-y: auto;
+            }
+
+            .notification-item {
+                display: flex;
+                padding: 15px 20px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                transition: all 0.3s ease;
+                cursor: pointer;
+                position: relative;
+            }
+
+            .notification-item:hover {
+                background: rgba(255, 255, 255, 0.05);
+                transform: translateX(2px);
+            }
+
+            .notification-item:active {
+                transform: translateX(0);
+                background: rgba(0, 240, 255, 0.1);
+            }
+
+            .notification-item.unread {
+                background: rgba(0, 240, 255, 0.05);
+                border-left: 3px solid #00f0ff;
+            }
+
+            .notification-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: rgba(0, 240, 255, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 12px;
+                flex-shrink: 0;
+            }
+
+            .notification-icon i {
+                color: #00f0ff;
+                font-size: 16px;
+            }
+
+            .notification-content {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .notification-title {
+                color: white;
+                font-weight: 600;
+                font-size: 14px;
+                margin-bottom: 4px;
+            }
+
+            .notification-message {
+                color: #b0b0c0;
+                font-size: 13px;
+                line-height: 1.4;
+                margin-bottom: 4px;
+            }
+
+            .notification-time {
+                color: #888;
+                font-size: 11px;
+            }
+
+            .notification-footer {
+                padding: 15px 20px;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                text-align: center;
+            }
+
+            .view-all-notifications {
+                color: #00f0ff;
+                text-decoration: none;
+                font-size: 13px;
+                transition: color 0.3s ease;
+            }
+
+            .view-all-notifications:hover {
+                color: #00d4ff;
+            }
+
+            .section-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+            .section-title {
+                font-size: 18px;
+                color: white;
+                margin: 0;
+            }
+
+            .user-menu {
+                display: flex;
+                align-items: center;
+            }
+
+            .notification-btn {
+                background: transparent;
+                border: none;
+                color: #b0b0c0;
+                font-size: 18px;
+                margin-right: 20px;
+                cursor: pointer;
+                position: relative;
+            }
+
+            .notification-badge {
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                width: 16px;
+                height: 16px;
+                background: #00f0ff;
+                color: #1a1a2e;
+                border-radius: 50%;
+                font-size: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+            }
+
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: #00f0ff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #1a1a2e;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .user-avatar.user-avatar--placeholder {
+                font-weight: normal;
+            }
+
+            .user-avatar.user-avatar--placeholder > .fas {
+                font-size: 19px;
+                line-height: 1;
+            }
+
+            .current-avatar > .fas.fa-user {
+                font-weight: 400;
+            }
+
+            /* 用户中心样式 */
+            .user-center-tabs {
+                display: flex;
+                margin-bottom: 30px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                overflow-x: auto;
+            }
+
+            .user-center-tab {
+                padding: 12px 24px;
+                color: #b0b0c0;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border-bottom: 3px solid transparent;
+                white-space: nowrap;
+            }
+
+            .user-center-tab:hover,
+            .user-center-tab.active {
+                color: #00f0ff;
+                border-bottom-color: #00f0ff;
+            }
+
+            /* 信息卡片 */
+            .info-cards {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+
+            .info-card {
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 12px;
+                padding: 20px;
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .info-card:hover {
+                border-color: rgba(0, 240, 255, 0.3);
+            }
+
+            .info-card-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            .info-card-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                background: rgba(0, 240, 255, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 15px;
+            }
+
+            .info-card-icon i {
+                color: #00f0ff;
+                font-size: 18px;
+            }
+
+            .info-card-title {
+                font-size: 16px;
+                color: white;
+                margin: 0;
+            }
+
+            /* 表单样式 */
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-label {
+                display: block;
+                margin-bottom: 8px;
+                color: #b0b0c0;
+                font-size: 14px;
+            }
+
+            .form-input {
+                width: 100%;
+                padding: 10px 15px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                color: white;
+                font-size: 14px;
+                transition: all 0.3s ease;
+                box-sizing: border-box; /* 添加这一行，确保和其他表单元素计算方式一致 */
+            }
+
+            .form-select {
+                width: 100%;
+                padding: 10px 15px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                color: white;
+                font-size: 14px;
+                transition: all 0.3s ease;
+                box-sizing: border-box; /* 确保和input元素计算方式一致 */
+                cursor: pointer;
+                appearance: none;
+                -webkit-appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300f0ff' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 12px center;
+                padding-right: 35px;
+            }
+
+            .form-select option {
+                background: #1a1a2e;
+                color: #e8ecf4;
+                padding: 10px;
+            }
+
+            .form-select:focus {
+                outline: none;
+                border-color: #00f0ff;
+                background-color: rgba(0, 240, 255, 0.05);
+                box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.1);
+            }
+
+            .form-input:focus {
+                outline: none;
+                border-color: #00f0ff;
+                background: rgba(0, 240, 255, 0.05);
+                box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.1);
+            }
+
+            /* Tech Select 样式 */
+            .tech-select {
+                position: relative;
+                width: 100%;
+            }
+
+            .tech-select-trigger {
+                width: 100%;
+                padding: 10px 15px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                color: white;
+                font-size: 14px;
+                font-family: inherit;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                transition: all 0.3s ease;
+            }
+
+            .tech-select-trigger::after {
+                content: '';
+                width: 0;
+                height: 0;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 6px solid #00f0ff;
+                transition: transform 0.3s ease;
+            }
+
+            .tech-select.is-open .tech-select-trigger::after {
+                transform: rotate(180deg);
+            }
+
+            .tech-select-trigger:hover {
+                border-color: rgba(0, 240, 255, 0.3);
+                background: rgba(0, 240, 255, 0.05);
+            }
+
+            .tech-select.is-open .tech-select-trigger {
+                border-color: #00f0ff;
+                box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.1);
+            }
+
+            .tech-select-menu {
+                position: fixed;
+                background: #132342;
+                border: 1px solid rgba(0, 240, 255, 0.2);
+                border-radius: 8px;
+                padding: 6px;
+                z-index: 10000;
+                display: none;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+                max-height: 250px;
+                overflow-y: auto;
+            }
+
+            .tech-select.is-open .tech-select-menu {
+                display: block;
+            }
+
+            .tech-select-option {
+                width: 100%;
+                padding: 10px 14px;
+                background: transparent;
+                border: none;
+                border-radius: 6px;
+                color: #e8ecf4;
+                font-size: 14px;
+                font-family: inherit;
+                cursor: pointer;
+                text-align: left;
+                transition: all 0.2s ease;
+                display: block;
+            }
+
+            .tech-select-option:hover {
+                background: rgba(0, 240, 255, 0.1);
+                color: #00f0ff;
+            }
+
+            .tech-select-option.is-selected {
+                background: rgba(0, 240, 255, 0.15);
+                color: #00f0ff;
+            }
+
+            .form-group.tech-select-open {
+                z-index: 10001;
+            }
+
+            /* 用户ID输入框特殊样式 - 始终不可编辑 */
+            .form-input.user-id {
+                cursor: default;
+                background: rgba(255, 255, 255, 0.03);
+                border-color: rgba(255, 255, 255, 0.1);
+                color: #888;
+            }
+
+            .form-input.user-id:focus {
+                border-color: rgba(255, 255, 255, 0.1);
+                background: rgba(255, 255, 255, 0.03);
+                cursor: default;
+            }
+
+            /* 密码安全相关样式 */
+            .password-toggle {
+                transition: color 0.3s ease;
+            }
+
+            .password-toggle:hover {
+                color: #00f0ff !important;
+            }
+
+            /* 密码输入框容器样式 */
+            .password-input-container {
+                position: relative;
+            }
+
+            .password-input-container .form-input {
+                padding-right: 40px; /* 为按钮留出空间 */
+            }
+
+            .password-input-container .password-toggle {
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: none;
+                border: none;
+                color: #b0b0c0;
+                cursor: pointer;
+                padding: 5px;
+                border-radius: 3px;
+                transition: all 0.3s ease;
+                z-index: 10;
+            }
+
+            .password-input-container .password-toggle:hover {
+                background: rgba(0, 240, 255, 0.1);
+                color: #00f0ff;
+            }
+
+            /* 验证码输入框样式 */
+            .verification-input-container {
+                position: relative;
+            }
+
+            .verification-input-container .form-input {
+                padding-right: 120px; /* 为重新发送按钮留出更多空间 */
+            }
+
+            .verification-input-container .resend-btn {
+                position: absolute;
+                right: 8px;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 10;
+            }
+
+            .requirement-item {
+                display: flex;
+                align-items: center;
+                margin-bottom: 3px;
+                transition: all 0.3s ease;
+            }
+
+            .requirement-item.valid {
+                color: #52c41a;
+            }
+
+            .requirement-item.valid i {
+                color: #52c41a !important;
+            }
+
+            .requirement-item.valid i:before {
+                content: '\f00c'; /* fa-check */
+            }
+
+            .error-message {
+                animation: shake 0.5s ease-in-out;
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-5px);
+                }
+                75% {
+                    transform: translateX(5px);
+                }
+            }
+
+            .security-notice {
+                animation: fadeIn 0.5s ease-in-out;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .btn:disabled:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+            /* 重新发送按钮样式 */
+            .resend-btn {
+                transition: all 0.3s ease;
+            }
+
+            .resend-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                background: rgba(100, 100, 100, 0.1) !important;
+                border-color: rgba(100, 100, 100, 0.3) !important;
+                color: #666 !important;
+            }
+
+            .resend-btn:disabled:hover {
+                background: rgba(100, 100, 100, 0.1) !important;
+                border-color: rgba(100, 100, 100, 0.3) !important;
+                color: #666 !important;
+            }
+
+            /* 验证码输入框样式 */
+            #verification-code {
+                font-family: 'Courier New', monospace;
+                font-weight: bold;
+                font-size: 16px;
+            }
+
+            /* 发送成功提示动画 */
+            .verification-sent-message {
+                animation: slideInFromTop 0.5s ease-out;
+            }
+
+            @keyframes slideInFromTop {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* 忘记密码链接样式 */
+            #forgot-password-link {
+                transition: all 0.3s ease;
+            }
+
+            #forgot-password-link:hover {
+                color: #00f0ff !important;
+                text-decoration: underline !important;
+            }
+
+            /* 忘记密码模态框样式 */
+            .forgot-password-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: none;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+
+            .forgot-password-content {
+                background: #1a1a2e;
+                border: 1px solid rgba(0, 240, 255, 0.3);
+                border-radius: 12px;
+                padding: 30px;
+                max-width: 400px;
+                width: 90%;
+                position: relative;
+                animation: modalSlideIn 0.3s ease-out;
+            }
+
+            @keyframes modalSlideIn {
+                from {
+                    opacity: 0;
+                    transform: scale(0.9) translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1) translateY(0);
+                }
+            }
+
+            .forgot-password-close {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: none;
+                border: none;
+                color: #888;
+                font-size: 20px;
+                cursor: pointer;
+                transition: color 0.3s ease;
+            }
+
+            .forgot-password-close:hover {
+                color: #00f0ff;
+            }
+
+            /* 通用提示样式 */
+            .toast-message {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 14px;
+            }
+
+            .toast-message--success {
+                background: #52c41a;
+                color: white;
+            }
+
+            .toast-message--error {
+                background: #ff4d4f;
+                color: white;
+            }
+
+            .toast-message--info {
+                background: #1890ff;
+                color: white;
+            }
+
+            .toast-message i {
+                font-size: 16px;
+            }
+
+            @keyframes slideIn {
+                from { opacity: 0; transform: translateX(100px); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+
+            /* 工具提示样式 */
+            .custom-tooltip {
+                position: fixed;
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                padding: 6px 10px;
+                border-radius: 4px;
+                font-size: 12px;
+                white-space: nowrap;
+                z-index: 10000;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            }
+
+            .custom-tooltip.visible {
+                opacity: 1;
+            }
+
+            /* 输入框验证状态样式 */
+            .input-success {
+                border-color: #52c41a !important;
+                background: rgba(82, 196, 26, 0.05) !important;
+            }
+
+            .input-success:focus {
+                border-color: #52c41a !important;
+                box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2) !important;
+            }
+
+            .input-error {
+                border-color: #ff7875 !important;
+                background: rgba(255, 120, 117, 0.05) !important;
+            }
+
+            .input-error:focus {
+                border-color: #ff7875 !important;
+                box-shadow: 0 0 0 2px rgba(255, 120, 117, 0.2) !important;
+            }
+
+            /* 错误消息样式增强 */
+            .error-message {
+                animation: shake 0.5s ease-in-out;
+                font-size: 12px;
+                line-height: 1.4;
+                color: #ff7875 !important;
+                background: rgba(255, 120, 117, 0.1);
+                border: 1px solid rgba(255, 120, 117, 0.3);
+                border-radius: 6px;
+                padding: 8px 12px;
+                margin-top: 6px;
+                display: flex;
+                align-items: center;
+                transition: all 0.3s ease;
+            }
+
+            .error-message::before {
+                content: '\f057'; /* fa-times-circle */
+                font-family: 'Font Awesome 5 Free';
+                font-weight: 900;
+                margin-right: 6px;
+                font-size: 14px;
+                color: #ff7875;
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-5px);
+                }
+                75% {
+                    transform: translateX(5px);
+                }
+            }
+
+            .form-textarea {
+                width: 100%;
+                padding: 10px 15px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                color: white;
+                font-size: 14px;
+                resize: vertical;
+                min-height: 100px;
+                transition: all 0.3s ease;
+                box-sizing: border-box; /* 添加这一行，确保和其他表单元素计算方式一致 */
+            }
+
+            .form-textarea:focus {
+                outline: none;
+                border-color: #00f0ff;
+                background: rgba(0, 240, 255, 0.05);
+            }
+
+            .form-select:focus {
+                outline: none;
+                border-color: #00f0ff;
+            }
+
+            /* 按钮样式 */
+            .btn {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .btn-primary {
+                background: #00f0ff;
+                color: #1a1a2e;
+            }
+
+            .btn-primary:hover {
+                background: #00d1dd;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0, 240, 255, 0.3);
+            }
+            .btn-secondary {
+                background: transparent;
+                color: #00f0ff;
+                border: 1px solid #00f0ff;
+            }
+
+            .btn-secondary:hover {
+                background: rgba(0, 240, 255, 0.1);
+            }
+
+            .btn-secondary:disabled {
+                opacity: 0.45;
+                cursor: not-allowed;
+            }
+
+            .btn-secondary:disabled:hover {
+                background: transparent;
+                transform: none;
+                box-shadow: none;
+            }
+
+            .avatar-upload-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+            .btn-danger {
+                background: rgba(255, 0, 0, 0.1);
+                color: #ff4d4d;
+                border: 1px solid rgba(255, 0, 0, 0.3);
+            }
+
+            .btn-danger:hover {
+                background: rgba(255, 0, 0, 0.2);
+            }
+
+            /* 头像上传样式 */
+            .avatar-upload {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-bottom: 30px;
+            }
+
+            .avatar-container {
+                position: relative;
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                overflow: hidden;
+                margin-bottom: 15px;
+                border: 3px solid rgba(0, 240, 255, 0.3);
+            }
+
+            .current-avatar {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                background: rgba(0, 240, 255, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #00f0ff;
+                font-size: 48px;
+                font-weight: bold;
+            }
+
+            .avatar-upload-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                cursor: pointer;
+            }
+
+            .avatar-container:hover .avatar-upload-overlay {
+                opacity: 1;
+            }
+
+            .avatar-upload-icon {
+                color: white;
+                font-size: 24px;
+            }
+
+            .avatar-upload-input {
+                display: none;
+            }
+
+            /* 权限设置样式 */
+            .permissions-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 20px;
+            }
+
+            .permission-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 15px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 8px;
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                /* 在现有CSS部分添加以下样式 */
+                .delete-current-avatar-btn {
+                    position: absolute;
+                    top: -10px;
+                    right: -10px;
+                    width: 26px;
+                    height: 26px;
+                    background-color: rgba(255, 0, 0, 0.9);
+                    color: white;
+                    border-radius: 50%;
+                    border: 2px solid white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    z-index: 1000;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+                    box-sizing: border-box;
+                }
+
+                .delete-current-avatar-btn:hover {
+                    background-color: rgba(255, 0, 0, 1);
+                    transform: scale(1.1);
+                }
+
+                /* 自定义工具提示样式 */
+                .custom-tooltip {
+                    position: absolute;
+                    background: rgba(0, 0, 0, 0.9);
+                    color: white;
+                    padding: 6px 10px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    font-weight: normal;
+                    white-space: nowrap;
+                    z-index: 10000;
+                    pointer-events: none;
+                    opacity: 0;
+                    transition: opacity 0.2s ease;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                }
+
+                .custom-tooltip.show {
+                    opacity: 1;
+                }
+
+                .custom-tooltip::after {
+                    content: '';
+                    position: absolute;
+                    top: 100%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    border: 4px solid transparent;
+                    border-top-color: rgba(0, 0, 0, 0.9);
+                }
+            }
+
+            .permission-info {
+                display: flex;
+                align-items: center;
+            }
+
+            .permission-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 6px;
+                background: rgba(0, 240, 255, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 12px;
+            }
+
+            .permission-icon i {
+                color: #00f0ff;
+                font-size: 14px;
+            }
+
+            .permission-details h4 {
+                color: white;
+                margin: 0 0 2px 0;
+                font-size: 14px;
+            }
+
+            .permission-details p {
+                color: #888;
+                margin: 0;
+                font-size: 12px;
+            }
+
+            /* 开关样式 */
+            .toggle-switch {
+                position: relative;
+                display: inline-block;
+                width: 48px;
+                height: 24px;
+            }
+
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            .toggle-slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(255, 255, 255, 0.2);
+                transition: 0.4s;
+                border-radius: 24px;
+            }
+
+            .toggle-slider:before {
+                position: absolute;
+                content: '';
+                height: 18px;
+                width: 18px;
+                left: 3px;
+                bottom: 3px;
+                background-color: white;
+                transition: 0.4s;
+                border-radius: 50%;
+            }
+
+            input:checked + .toggle-slider {
+                background-color: #00f0ff;
+            }
+
+            input:checked + .toggle-slider:before {
+                transform: translateX(24px);
+            }
+
+            /* 用户信息网格布局 */
+            .user-info-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+            }
+
+            /* 嵌套卡片样式 - 优化确保不会超出父容器 */
+            .nested-card {
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                padding: 15px !important;
+                width: 100%;
+                box-sizing: border-box; /* 确保内边距不会增加元素总宽度 */
+            }
+            /* 确保嵌套卡片内的元素不会超出卡片 */
+            .nested-card > * {
+                box-sizing: border-box;
+                max-width: 100%;
+            }
+
+            @media (max-width: 768px) {
+                .user-info-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            /* 响应式设计调整 - 优化多设备适配 */
+            @media (max-width: 1200px) {
+                .info-cards,
+                .permissions-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                }
+            }
+
+            @media (max-width: 992px) {
+                .sidebar {
+                    width: 60px;
+                    padding: 20px 0;
+                }
+
+                .main-content {
+                    margin-left: 60px; /* 适应收缩的侧边栏 */
+                }
+
+                .sidebar-logo h1,
+                .nav-link span {
+                    display: none;
+                }
+
+                .sidebar-logo {
+                    justify-content: center;
+                    padding: 0 0 20px;
+                    gap: 0;
+                }
+
+                .sidebar-logo h1 {
+                    display: none;
+                }
+
+                .nav-link {
+                    justify-content: center;
+                    padding: 15px;
+                }
+
+                .nav-link i {
+                    margin-right: 0;
+                    font-size: 18px;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .info-cards,
+                .permissions-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                }
+            }
+
+            @media (max-width: 576px) {
+                .sidebar {
+                    position: fixed;
+                    left: -240px; /* 默认隐藏侧边栏 */
+                    height: 100vh;
+                    z-index: 1000;
+                    width: 240px; /* 保持完整宽度 */
+                }
+
+                .sidebar.show {
+                    left: 0;
+                }
+
+                .main-content {
+                    margin-left: 0; /* 移动端无边距 */
+                    padding: 15px;
+                }
+
+                .info-cards,
+                .permissions-grid {
+                    grid-template-columns: 1fr; /* 移动端单列布局 */
+                }
+
+                .user-center-tabs {
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                    padding-bottom: 10px;
+                }
+
+                .user-center-tab {
+                    min-width: 120px; /* 确保标签页有足够宽度 */
+                    text-align: center;
+                }
+
+                .avatar-upload {
+                    text-align: center;
+                }
+
+                .avatar-container {
+                    margin: 0 auto 15px;
+                }
+
+                .mobile-menu-toggle {
+                    display: block;
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    background: #00f0ff;
+                    color: #1a1a2e;
+                    border: none;
+                    font-size: 20px;
+                    box-shadow: 0 4px 10px rgba(0, 240, 255, 0.4);
+                    cursor: pointer;
+                    z-index: 999;
+                }
+
+                /* 优化表单在移动端的显示 */
+                .form-input,
+                .form-textarea,
+                .form-select {
+                    font-size: 16px; /* 防止iOS缩放 */
+                }
+
+                /* 优化按钮在移动端的显示 */
+                .btn {
+                    padding: 12px 20px;
+                    font-size: 16px;
+                }
+
+                /* 优化头像历史记录在移动端的显示 */
+                #avatar-history-container {
+                    flex-wrap: wrap;
+                    justify-content: center;
+                }
+
+                .avatar-history-item {
+                    margin: 5px;
+                }
+
+                /* 优化权限设置网格在移动端的显示 */
+                .permissions-grid {
+                    gap: 15px;
+                }
+
+                .permission-item {
+                    padding: 12px;
+                }
+
+                /* 优化信息卡片在移动端的显示 */
+                .nested-card {
+                    padding: 12px !important;
+                }
+            }
+        </style>
+        <link rel="stylesheet" href="../../styles/app-shell.css" />
+    </head>
+    <body class="app-shell" data-app-page="user-center">
+        <div class="pointer-glow" aria-hidden="true"></div>
+        <div class="pointer-glow pointer-glow--lag" aria-hidden="true"></div>
+        <div class="dashboard-container">
+            <!-- 侧边导航栏 -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-logo">
+                    <img src="../../js/logo-main.png" alt="Artifex" class="logo-img" />
+                    <h1>Artifex</h1>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="home">
+                            <i class="fas fa-home"></i>
+                            <span>主页</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="project-management">
+                            <i class="fas fa-project-diagram"></i>
+                            <span>项目管理</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="ai-generate">
+                            <i class="fas fa-magic"></i>
+                            <span>AI 生成</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="asset-library">
+                            <i class="fas fa-images"></i>
+                            <span>素材库</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="style-presets">
+                            <i class="fas fa-swatchbook"></i>
+                            <span>风格预设</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="user-center">
+                            <i class="fas fa-user-circle"></i>
+                            <span>账户</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="admin-nav-item" style="display: none">
+                        <a href="../admin/admin.html" class="nav-link">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>管理面板</span>
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- 主内容区域 -->
+            <main class="main-content scroll-section">
+                <!-- 顶部工具栏 -->
+                <div class="top-bar">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索用户设置..." />
+                    </div>
+                    <div class="user-menu">
+                        <div class="notification-container">
+                            <button class="notification-btn" id="notificationBtn">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge">3</span>
+                            </button>
+                            <div class="notification-dropdown" id="notificationDropdown">
+                                <div class="notification-header">
+                                    <h4>消息通知</h4>
+                                    <button class="mark-all-read" id="markAllRead">全部已读</button>
+                                </div>
+                                <div class="notification-list" id="notificationList">
+                                    <div class="notification-item unread">
+                                        <div class="notification-icon">
+                                            <i class="fas fa-user-plus"></i>
+                                        </div>
+                                        <div class="notification-content">
+                                            <div class="notification-title">新用户注册</div>
+                                            <div class="notification-message">用户 "张三" 刚刚注册了账户</div>
+                                            <div class="notification-time">2分钟前</div>
+                                        </div>
+                                    </div>
+                                    <div class="notification-item unread">
+                                        <div class="notification-icon">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </div>
+                                        <div class="notification-content">
+                                            <div class="notification-title">安全提醒</div>
+                                            <div class="notification-message">检测到异常登录活动，请检查账户安全</div>
+                                            <div class="notification-time">1小时前</div>
+                                        </div>
+                                    </div>
+                                    <div class="notification-item">
+                                        <div class="notification-icon">
+                                            <i class="fas fa-cog"></i>
+                                        </div>
+                                        <div class="notification-content">
+                                            <div class="notification-title">系统更新</div>
+                                            <div class="notification-message">系统已更新到最新版本，新增多项功能</div>
+                                            <div class="notification-time">3小时前</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="notification-footer">
+                                    <a href="#" class="view-all-notifications" id="viewAllNotifications"
+                                        >查看所有通知</a
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="user-avatar user-avatar--placeholder"
+                            id="top-right-avatar"
+                            role="img"
+                            aria-label="用户头像"
+                        >
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户中心选项卡 -->
+                <div class="user-center-tabs">
+                    <div class="user-center-tab active" data-tab="personal-info">个人信息</div>
+                    <div class="user-center-tab" data-tab="api-settings">API设置</div>
+                    <div class="user-center-tab" data-tab="change-password">修改密码</div>
+                    <div class="user-center-tab" data-tab="permissions">权限设置</div>
+                    <div class="user-center-tab" data-tab="avatar-upload">头像上传</div>
+                </div>
+
+                <!-- 个人信息选项卡内容 -->
+                <div class="tab-content" id="personal-info">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <div class="info-card-icon">
+                                <i class="fas fa-user-cog"></i>
+                            </div>
+                            <h3 class="info-card-title">个人中心</h3>
+                        </div>
+
+                        <div class="user-info-grid">
+                            <!-- 基本信息小方块 -->
+                            <div class="info-card nested-card">
+                                <div class="info-card-header">
+                                    <div class="info-card-icon">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <h3 class="info-card-title">基本信息</h3>
+                                </div>
+                                <form id="personal-info-form">
+                                    <div class="form-group">
+                                        <label class="form-label" for="username">用户ID</label>
+                                        <input
+                                            type="text"
+                                            class="form-input user-id"
+                                            id="username"
+                                            value=""
+                                            readonly
+                                            disabled
+                                        />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="email">电子邮箱</label>
+                                        <input
+                                            type="email"
+                                            class="form-input"
+                                            id="email"
+                                            value="john.doe@example.com"
+                                            readonly
+                                        />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="nickname">昵称</label>
+                                        <input
+                                            type="text"
+                                            class="form-input"
+                                            id="nickname"
+                                            value="游戏设计师"
+                                            readonly
+                                        />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="gender">性别</label>
+                                        <select class="form-select" id="gender" disabled>
+                                            <option value="">请选择</option>
+                                            <option value="male">男</option>
+                                            <option value="female">女</option>
+                                            <option value="private">不愿透露</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="bio">个人简介</label>
+                                        <textarea class="form-textarea" id="bio" readonly>
+热爱游戏UI设计的开发者，拥有5年游戏界面设计经验。</textarea
+                                        >
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="country">国家/地区</label>
+                                        <select class="form-select" id="country" disabled>
+                                            <option value="">请选择国家/地区</option>
+                                            <option value="cn">中国 (CN/CHN)</option>
+                                            <option value="us">美国 (US/USA)</option>
+                                            <option value="jp">日本 (JP/JPN)</option>
+                                            <option value="kr">韩国 (KR/KOR)</option>
+                                            <option value="af">阿富汗 (AF/AFG)</option>
+                                            <option value="al">阿尔巴尼亚 (AL/ALB)</option>
+                                            <option value="dz">阿尔及利亚 (DZ/DZA)</option>
+                                            <option value="ad">安道尔 (AD/AND)</option>
+                                            <option value="ao">安哥拉 (AO/AGO)</option>
+                                            <option value="ag">安提瓜和巴布达 (AG/ATG)</option>
+                                            <option value="ar">阿根廷 (AR/ARG)</option>
+                                            <option value="am">亚美尼亚 (AM/ARM)</option>
+                                            <option value="au">澳大利亚 (AU/AUS)</option>
+                                            <option value="at">奥地利 (AT/AUT)</option>
+                                            <option value="az">阿塞拜疆 (AZ/AZE)</option>
+                                            <option value="bs">巴哈马 (BS/BHS)</option>
+                                            <option value="bh">巴林 (BH/BHR)</option>
+                                            <option value="bd">孟加拉国 (BD/BGD)</option>
+                                            <option value="bb">巴巴多斯 (BB/BRB)</option>
+                                            <option value="by">白俄罗斯 (BY/BLR)</option>
+                                            <option value="be">比利时 (BE/BEL)</option>
+                                            <option value="bz">伯利兹 (BZ/BLZ)</option>
+                                            <option value="bj">贝宁 (BJ/BEN)</option>
+                                            <option value="bt">不丹 (BT/BTN)</option>
+                                            <option value="bo">玻利维亚 (BO/BOL)</option>
+                                            <option value="ba">波斯尼亚和黑塞哥维那 (BA/BIH)</option>
+                                            <option value="bw">博茨瓦纳 (BW/BWA)</option>
+                                            <option value="br">巴西 (BR/BRA)</option>
+                                            <option value="bn">文莱 (BN/BRN)</option>
+                                            <option value="bg">保加利亚 (BG/BGR)</option>
+                                            <option value="bf">布基纳法索 (BF/BFA)</option>
+                                            <option value="bi">布隆迪 (BI/BDI)</option>
+                                            <option value="cv">佛得角 (CV/CPV)</option>
+                                            <option value="kh">柬埔寨 (KH/KHM)</option>
+                                            <option value="cm">喀麦隆 (CM/CMR)</option>
+                                            <option value="ca">加拿大 (CA/CAN)</option>
+                                            <option value="cf">中非共和国 (CF/CAF)</option>
+                                            <option value="td">乍得 (TD/TCD)</option>
+                                            <option value="cl">智利 (CL/CHL)</option>
+                                            <option value="co">哥伦比亚 (CO/COL)</option>
+                                            <option value="km">科摩罗 (KM/COM)</option>
+                                            <option value="cg">刚果（布） (CG/COG)</option>
+                                            <option value="cd">刚果（金） (CD/COD)</option>
+                                            <option value="cr">哥斯达黎加 (CR/CRI)</option>
+                                            <option value="ci">科特迪瓦 (CI/CIV)</option>
+                                            <option value="hr">克罗地亚 (HR/HRV)</option>
+                                            <option value="cu">古巴 (CU/CUB)</option>
+                                            <option value="cy">塞浦路斯 (CY/CYP)</option>
+                                            <option value="cz">捷克 (CZ/CZE)</option>
+                                            <option value="dk">丹麦 (DK/DNK)</option>
+                                            <option value="dj">吉布提 (DJ/DJI)</option>
+                                            <option value="dm">多米尼克 (DM/DMA)</option>
+                                            <option value="do">多米尼加共和国 (DO/DOM)</option>
+                                            <option value="ec">厄瓜多尔 (EC/ECU)</option>
+                                            <option value="eg">埃及 (EG/EGY)</option>
+                                            <option value="sv">萨尔瓦多 (SV/SLV)</option>
+                                            <option value="gq">赤道几内亚 (GQ/GNQ)</option>
+                                            <option value="er">厄立特里亚 (ER/ERI)</option>
+                                            <option value="ee">爱沙尼亚 (EE/EST)</option>
+                                            <option value="sz">斯威士兰 (SZ/SWZ)</option>
+                                            <option value="et">埃塞俄比亚 (ET/ETH)</option>
+                                            <option value="fj">斐济 (FJ/FJI)</option>
+                                            <option value="fi">芬兰 (FI/FIN)</option>
+                                            <option value="fr">法国 (FR/FRA)</option>
+                                            <option value="ga">加蓬 (GA/GAB)</option>
+                                            <option value="gm">冈比亚 (GM/GMB)</option>
+                                            <option value="ge">格鲁吉亚 (GE/GEO)</option>
+                                            <option value="de">德国 (DE/DEU)</option>
+                                            <option value="gh">加纳 (GH/GHA)</option>
+                                            <option value="gr">希腊 (GR/GRC)</option>
+                                            <option value="gd">格林纳达 (GD/GRD)</option>
+                                            <option value="gt">危地马拉 (GT/GTM)</option>
+                                            <option value="gn">几内亚 (GN/GIN)</option>
+                                            <option value="gw">几内亚比绍 (GW/GNB)</option>
+                                            <option value="gy">圭亚那 (GY/GUY)</option>
+                                            <option value="ht">海地 (HT/HTI)</option>
+                                            <option value="hn">洪都拉斯 (HN/HND)</option>
+                                            <option value="hu">匈牙利 (HU/HUN)</option>
+                                            <option value="is">冰岛 (IS/ISL)</option>
+                                            <option value="in">印度 (IN/IND)</option>
+                                            <option value="id">印度尼西亚 (ID/IDN)</option>
+                                            <option value="ir">伊朗 (IR/IRN)</option>
+                                            <option value="iq">伊拉克 (IQ/IRQ)</option>
+                                            <option value="ie">爱尔兰 (IE/IRL)</option>
+                                            <option value="il">以色列 (IL/ISR)</option>
+                                            <option value="it">意大利 (IT/ITA)</option>
+                                            <option value="jm">牙买加 (JM/JAM)</option>
+                                            <option value="jo">约旦 (JO/JOR)</option>
+                                            <option value="kz">哈萨克斯坦 (KZ/KAZ)</option>
+                                            <option value="ke">肯尼亚 (KE/KEN)</option>
+                                            <option value="ki">基里巴斯 (KI/KIR)</option>
+                                            <option value="kw">科威特 (KW/KWT)</option>
+                                            <option value="kg">吉尔吉斯斯坦 (KG/KGZ)</option>
+                                            <option value="la">老挝 (LA/LAO)</option>
+                                            <option value="lv">拉脱维亚 (LV/LVA)</option>
+                                            <option value="lb">黎巴嫩 (LB/LBN)</option>
+                                            <option value="ls">莱索托 (LS/LSO)</option>
+                                            <option value="lr">利比里亚 (LR/LBR)</option>
+                                            <option value="ly">利比亚 (LY/LBY)</option>
+                                            <option value="li">列支敦士登 (LI/LIE)</option>
+                                            <option value="lt">立陶宛 (LT/LTU)</option>
+                                            <option value="lu">卢森堡 (LU/LUX)</option>
+                                            <option value="mg">马达加斯加 (MG/MDG)</option>
+                                            <option value="mw">马拉维 (MW/MWI)</option>
+                                            <option value="my">马来西亚 (MY/MYS)</option>
+                                            <option value="mv">马尔代夫 (MV/MDV)</option>
+                                            <option value="ml">马里 (ML/MLI)</option>
+                                            <option value="mt">马耳他 (MT/MLT)</option>
+                                            <option value="mh">马绍尔群岛 (MH/MHL)</option>
+                                            <option value="mr">毛里塔尼亚 (MR/MRT)</option>
+                                            <option value="mu">毛里求斯 (MU/MUS)</option>
+                                            <option value="mx">墨西哥 (MX/MEX)</option>
+                                            <option value="fm">密克罗尼西亚 (FM/FSM)</option>
+                                            <option value="md">摩尔多瓦 (MD/MDA)</option>
+                                            <option value="mc">摩纳哥 (MC/MCO)</option>
+                                            <option value="mn">蒙古 (MN/MNG)</option>
+                                            <option value="me">黑山 (ME/MNE)</option>
+                                            <option value="ma">摩洛哥 (MA/MAR)</option>
+                                            <option value="mz">莫桑比克 (MZ/MOZ)</option>
+                                            <option value="mm">缅甸 (MM/MMR)</option>
+                                            <option value="na">纳米比亚 (NA/NAM)</option>
+                                            <option value="nr">瑙鲁 (NR/NRU)</option>
+                                            <option value="np">尼泊尔 (NP/NPL)</option>
+                                            <option value="nl">荷兰 (NL/NLD)</option>
+                                            <option value="nz">新西兰 (NZ/NZL)</option>
+                                            <option value="ni">尼加拉瓜 (NI/NIC)</option>
+                                            <option value="ne">尼日尔 (NE/NER)</option>
+                                            <option value="ng">尼日利亚 (NG/NGA)</option>
+                                            <option value="no">挪威 (NO/NOR)</option>
+                                            <option value="om">阿曼 (OM/OMN)</option>
+                                            <option value="pk">巴基斯坦 (PK/PAK)</option>
+                                            <option value="pw">帕劳 (PW/PLW)</option>
+                                            <option value="pa">巴拿马 (PA/PAN)</option>
+                                            <option value="pg">巴布亚新几内亚 (PG/PNG)</option>
+                                            <option value="py">巴拉圭 (PY/PRY)</option>
+                                            <option value="pe">秘鲁 (PE/PER)</option>
+                                            <option value="ph">菲律宾 (PH/PHL)</option>
+                                            <option value="pl">波兰 (PL/POL)</option>
+                                            <option value="pt">葡萄牙 (PT/PRT)</option>
+                                            <option value="qa">卡塔尔 (QA/QAT)</option>
+                                            <option value="ro">罗马尼亚 (RO/ROU)</option>
+                                            <option value="ru">俄罗斯 (RU/RUS)</option>
+                                            <option value="rw">卢旺达 (RW/RWA)</option>
+                                            <option value="kn">圣基茨和尼维斯 (KN/KNA)</option>
+                                            <option value="lc">圣卢西亚 (LC/LCA)</option>
+                                            <option value="vc">圣文森特和格林纳丁斯 (VC/VCT)</option>
+                                            <option value="ws">萨摩亚 (WS/WSM)</option>
+                                            <option value="sm">圣马力诺 (SM/SMR)</option>
+                                            <option value="st">圣多美和普林西比 (ST/STP)</option>
+                                            <option value="sa">沙特阿拉伯 (SA/SAU)</option>
+                                            <option value="sn">塞内加尔 (SN/SEN)</option>
+                                            <option value="rs">塞尔维亚 (RS/SRB)</option>
+                                            <option value="sc">塞舌尔 (SC/SYC)</option>
+                                            <option value="sl">塞拉利昂 (SL/SLE)</option>
+                                            <option value="sg">新加坡 (SG/SGP)</option>
+                                            <option value="sk">斯洛伐克 (SK/SVK)</option>
+                                            <option value="si">斯洛文尼亚 (SI/SVN)</option>
+                                            <option value="sb">所罗门群岛 (SB/SLB)</option>
+                                            <option value="so">索马里 (SO/SOM)</option>
+                                            <option value="za">南非 (ZA/ZAF)</option>
+                                            <option value="es">西班牙 (ES/ESP)</option>
+                                            <option value="lk">斯里兰卡 (LK/LKA)</option>
+                                            <option value="sd">苏丹 (SD/SDN)</option>
+                                            <option value="sr">苏里南 (SR/SUR)</option>
+                                            <option value="se">瑞典 (SE/SWE)</option>
+                                            <option value="ch">瑞士 (CH/CHE)</option>
+                                            <option value="sy">叙利亚 (SY/SYR)</option>
+                                            <option value="tw">台湾 (TW/TWN)</option>
+                                            <option value="tj">塔吉克斯坦 (TJ/TJK)</option>
+                                            <option value="tz">坦桑尼亚 (TZ/TZA)</option>
+                                            <option value="th">泰国 (TH/THA)</option>
+                                            <option value="tl">东帝汶 (TL/TLS)</option>
+                                            <option value="tg">多哥 (TG/TGO)</option>
+                                            <option value="to">汤加 (TO/TON)</option>
+                                            <option value="tt">特立尼达和多巴哥 (TT/TTO)</option>
+                                            <option value="tn">突尼斯 (TN/TUN)</option>
+                                            <option value="tr">土耳其 (TR/TUR)</option>
+                                            <option value="tm">土库曼斯坦 (TM/TKM)</option>
+                                            <option value="tv">图瓦卢 (TV/TUV)</option>
+                                            <option value="ug">乌干达 (UG/UGA)</option>
+                                            <option value="ua">乌克兰 (UA/UKR)</option>
+                                            <option value="ae">阿联酋 (AE/ARE)</option>
+                                            <option value="gb">英国 (GB/GBR)</option>
+                                            <option value="uy">乌拉圭 (UY/URY)</option>
+                                            <option value="uz">乌兹别克斯坦 (UZ/UZB)</option>
+                                            <option value="vu">瓦努阿图 (VU/VUT)</option>
+                                            <option value="va">梵蒂冈 (VA/VAT)</option>
+                                            <option value="ve">委内瑞拉 (VE/VEN)</option>
+                                            <option value="vn">越南 (VN/VNM)</option>
+                                            <option value="ye">也门 (YE/YEM)</option>
+                                            <option value="zm">赞比亚 (ZM/ZMB)</option>
+                                            <option value="zw">津巴布韦 (ZW/ZWE)</option>
+                                            <option value="other">其他</option>
+                                        </select>
+                                        <input
+                                            type="text"
+                                            class="form-input"
+                                            id="country-other"
+                                            placeholder="请输入您的国家/地区"
+                                            style="display: none; margin-top: 10px"
+                                        />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="language">偏好语言</label>
+                                        <select class="form-select" id="language" disabled>
+                                            <option value="zh" selected>简体中文</option>
+                                            <option value="en">English</option>
+                                            <option value="ja">日本語</option>
+                                            <option value="ko">한국어</option>
+                                        </select>
+                                    </div>
+                                    <div style="display: flex; gap: 10px; margin-top: 20px">
+                                        <button type="button" class="btn btn-primary" id="edit-info-btn">
+                                            修改信息
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            class="btn btn-primary"
+                                            id="save-changes-btn"
+                                            style="display: none"
+                                        >
+                                            保存更改
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="btn btn-secondary"
+                                            id="cancel-changes-btn"
+                                            style="display: none"
+                                        >
+                                            取消
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- 账户统计小方块 -->
+                            <div class="info-card nested-card">
+                                <div class="info-card-header">
+                                    <div class="info-card-icon">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <h3 class="info-card-title" data-translate="account-stats">账户统计</h3>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 15px">
+                                    <div style="display: flex; justify-content: space-between; align-items: center">
+                                        <span style="color: #b0b0c0">创建项目数</span>
+                                        <span style="color: white; font-weight: bold">28</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center">
+                                        <span style="color: #b0b0c0">已完成项目</span>
+                                        <span style="color: white; font-weight: bold">23</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center">
+                                        <span style="color: #b0b0c0">收藏模板数</span>
+                                        <span style="color: white; font-weight: bold">15</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center">
+                                        <span style="color: #b0b0c0">账户注册时间</span>
+                                        <span id="registration-time" style="color: white; font-weight: bold"
+                                            >加载中...</span
+                                        >
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center">
+                                        <span style="color: #b0b0c0">上次登录时间</span>
+                                        <span id="last-login-time" style="color: white; font-weight: bold"
+                                            >2023-06-20</span
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API 设置选项卡内容 -->
+                <div class="tab-content" id="api-settings" style="display: none">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <div class="info-card-icon">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <h3 class="info-card-title">用户自配 API</h3>
+                        </div>
+                        <div class="info-card nested-card">
+                            <p style="color: #b0b0c0; margin-bottom: 16px">
+                                请在此配置你的服务商密钥。普通用户不可使用 free/mock，仅管理员可见。
+                            </p>
+                            <form id="api-settings-form">
+                                <div class="form-group">
+                                    <label class="form-label" for="api-provider-select">服务商</label>
+                                    <select id="api-provider-select" class="form-select">
+                                        <option value="jimeng">即梦（火山方舟）</option>
+                                        <option value="alibaba">阿里云（通义）</option>
+                                        <option value="tencent">腾讯云（混元）</option>
+                                        <option value="sdwebui">SD WebUI</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="api-field-1" id="api-field-1-label">API Key</label>
+                                    <input
+                                        type="text"
+                                        class="form-input"
+                                        id="api-field-1"
+                                        placeholder="请输入主凭证"
+                                        autocomplete="off"
+                                    />
+                                </div>
+                                <div class="form-group" id="api-field-2-wrap" style="display: none">
+                                    <label class="form-label" for="api-field-2" id="api-field-2-label">辅助字段</label>
+                                    <input
+                                        type="text"
+                                        class="form-input"
+                                        id="api-field-2"
+                                        placeholder="请输入辅助凭证"
+                                        autocomplete="off"
+                                    />
+                                </div>
+                                <div class="form-group" id="api-field-3-wrap" style="display: none">
+                                    <label class="form-label" for="api-field-3" id="api-field-3-label">可选字段</label>
+                                    <input
+                                        type="text"
+                                        class="form-input"
+                                        id="api-field-3"
+                                        placeholder="请输入可选配置"
+                                        autocomplete="off"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <div id="api-settings-status" style="font-size: 13px; color: #b0b0c0">
+                                        尚未读取配置状态
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                                    <button type="button" class="btn btn-primary" id="save-api-settings-btn">
+                                        保存配置
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="clear-api-settings-btn">
+                                        清空当前服务商
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="refresh-api-settings-btn">
+                                        刷新状态
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 修改密码选项卡内容 -->
+                <div class="tab-content" id="change-password" style="display: none">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <div class="info-card-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <h3 class="info-card-title" data-translate="change-password">修改密码</h3>
+                        </div>
+                        <div class="info-card nested-card">
+                            <!-- 安全提示 -->
+                            <div
+                                class="security-notice"
+                                style="
+                                    background: rgba(255, 193, 7, 0.1);
+                                    border: 1px solid rgba(255, 193, 7, 0.3);
+                                    border-radius: 8px;
+                                    padding: 15px;
+                                    margin-bottom: 20px;
+                                "
+                            >
+                                <div style="display: flex; align-items: center; margin-bottom: 10px">
+                                    <i class="fas fa-shield-alt" style="color: #ffc107; margin-right: 8px"></i>
+                                    <span style="color: #ffc107; font-weight: bold">安全提示</span>
+                                </div>
+                                <ul style="margin: 0; padding-left: 20px; color: #b0b0c0; font-size: 13px">
+                                    <li>请确保在安全的网络环境下修改密码</li>
+                                    <li>建议使用强密码，包含大小写字母、数字和特殊字符</li>
+                                    <li>修改密码后，所有设备将需要重新登录</li>
+                                </ul>
+                            </div>
+
+                            <form id="change-password-form">
+                                <!-- 当前密码 -->
+                                <div class="form-group">
+                                    <label class="form-label" for="current-password" data-translate="current-password"
+                                        >当前密码</label
+                                    >
+                                    <div class="password-input-container">
+                                        <input
+                                            type="password"
+                                            class="form-input"
+                                            id="current-password"
+                                            placeholder="请输入当前密码"
+                                            autocomplete="current-password"
+                                        />
+                                        <button type="button" class="password-toggle" id="toggle-current-password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div id="current-password-error" class="error-message" style="display: none"></div>
+
+                                    <!-- 忘记密码选项 -->
+                                    <div style="margin-top: 8px; text-align: right">
+                                        <a
+                                            href="#"
+                                            id="forgot-password-link"
+                                            style="
+                                                color: #00f0ff;
+                                                text-decoration: none;
+                                                font-size: 12px;
+                                                transition: color 0.3s ease;
+                                            "
+                                        >
+                                            <i class="fas fa-question-circle" style="margin-right: 4px"></i>
+                                            <span data-translate="forgot-password">忘记密码？</span>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- 新密码 -->
+                                <div class="form-group">
+                                    <label class="form-label" for="new-password" data-translate="new-password"
+                                        >新密码</label
+                                    >
+                                    <div class="password-input-container">
+                                        <input
+                                            type="password"
+                                            class="form-input"
+                                            id="new-password"
+                                            placeholder="请输入新密码"
+                                            autocomplete="new-password"
+                                        />
+                                        <button type="button" class="password-toggle" id="toggle-new-password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- 密码强度指示器 -->
+                                    <div class="password-strength" style="margin-top: 10px">
+                                        <div style="display: flex; align-items: center; margin-bottom: 5px">
+                                            <span style="font-size: 12px; color: #b0b0c0; margin-right: 10px"
+                                                >密码强度：</span
+                                            >
+                                            <div
+                                                id="password-strength-bar"
+                                                style="
+                                                    flex: 1;
+                                                    height: 4px;
+                                                    background: rgba(255, 255, 255, 0.1);
+                                                    border-radius: 2px;
+                                                    overflow: hidden;
+                                                "
+                                            >
+                                                <div
+                                                    id="password-strength-fill"
+                                                    style="
+                                                        height: 100%;
+                                                        width: 0%;
+                                                        transition: all 0.3s ease;
+                                                        background: #ff7875;
+                                                    "
+                                                ></div>
+                                            </div>
+                                            <span
+                                                id="password-strength-text"
+                                                style="font-size: 12px; color: #ff7875; margin-left: 10px"
+                                                >弱</span
+                                            >
+                                        </div>
+
+                                        <!-- 密码要求检查 -->
+                                        <div id="password-requirements" style="font-size: 12px">
+                                            <div class="requirement-item" data-requirement="length">
+                                                <i class="fas fa-times" style="color: #ff7875; margin-right: 5px"></i>
+                                                <span>至少8个字符</span>
+                                            </div>
+                                            <div class="requirement-item" data-requirement="uppercase">
+                                                <i class="fas fa-times" style="color: #ff7875; margin-right: 5px"></i>
+                                                <span>包含大写字母</span>
+                                            </div>
+                                            <div class="requirement-item" data-requirement="lowercase">
+                                                <i class="fas fa-times" style="color: #ff7875; margin-right: 5px"></i>
+                                                <span>包含小写字母</span>
+                                            </div>
+                                            <div class="requirement-item" data-requirement="number">
+                                                <i class="fas fa-times" style="color: #ff7875; margin-right: 5px"></i>
+                                                <span>包含数字</span>
+                                            </div>
+                                            <div class="requirement-item" data-requirement="special">
+                                                <i class="fas fa-times" style="color: #ff7875; margin-right: 5px"></i>
+                                                <span>包含特殊字符</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="new-password-error" class="error-message" style="display: none"></div>
+                                </div>
+
+                                <!-- 确认新密码 -->
+                                <div class="form-group">
+                                    <label class="form-label" for="confirm-password" data-translate="confirm-password"
+                                        >确认新密码</label
+                                    >
+                                    <div class="password-input-container">
+                                        <input
+                                            type="password"
+                                            class="form-input"
+                                            id="confirm-password"
+                                            placeholder="请再次输入新密码"
+                                            autocomplete="new-password"
+                                        />
+                                        <button type="button" class="password-toggle" id="toggle-confirm-password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div id="confirm-password-error" class="error-message" style="display: none"></div>
+                                </div>
+
+                                <!-- 双重验证确认 -->
+                                <div class="form-group" id="two-factor-section" style="display: none">
+                                    <label class="form-label">双重验证确认</label>
+                                    <div
+                                        style="
+                                            background: rgba(0, 240, 255, 0.1);
+                                            border: 1px solid rgba(0, 240, 255, 0.3);
+                                            border-radius: 8px;
+                                            padding: 15px;
+                                        "
+                                    >
+                                        <!-- 发送成功提示 -->
+                                        <div
+                                            class="verification-sent-message"
+                                            style="
+                                                display: none;
+                                                background: rgba(82, 196, 26, 0.1);
+                                                border: 1px solid rgba(82, 196, 26, 0.3);
+                                                border-radius: 6px;
+                                                padding: 10px;
+                                                margin-bottom: 15px;
+                                            "
+                                        >
+                                            <div style="display: flex; align-items: center">
+                                                <i
+                                                    class="fas fa-check-circle"
+                                                    style="color: #52c41a; margin-right: 8px"
+                                                ></i>
+                                                <span style="color: #52c41a; font-weight: bold; font-size: 14px"
+                                                    >验证码已发送</span
+                                                >
+                                            </div>
+                                            <p style="color: #b0b0c0; font-size: 12px; margin: 5px 0 0 0">
+                                                请查收手机短信，验证码5分钟内有效
+                                            </p>
+                                        </div>
+
+                                        <div style="display: flex; align-items: center; margin-bottom: 10px">
+                                            <i class="fas fa-mobile-alt" style="color: #00f0ff; margin-right: 8px"></i>
+                                            <span style="color: #00f0ff; font-weight: bold">手机验证</span>
+                                        </div>
+                                        <p style="color: #b0b0c0; font-size: 13px; margin: 0 0 15px 0">
+                                            为了您的账户安全，请输入手机验证码
+                                        </p>
+
+                                        <div class="verification-input-container">
+                                            <input
+                                                type="text"
+                                                class="form-input"
+                                                id="verification-code"
+                                                placeholder="请输入6位验证码"
+                                                maxlength="6"
+                                                style="text-align: center; letter-spacing: 2px"
+                                            />
+                                            <button
+                                                type="button"
+                                                id="resend-verification"
+                                                class="resend-btn"
+                                                style="
+                                                    background: rgba(0, 240, 255, 0.1);
+                                                    border: 1px solid rgba(0, 240, 255, 0.3);
+                                                    color: #00f0ff;
+                                                    padding: 6px 12px;
+                                                    border-radius: 4px;
+                                                    font-size: 12px;
+                                                    cursor: pointer;
+                                                    transition: all 0.3s ease;
+                                                "
+                                            >
+                                                重新发送验证码
+                                            </button>
+                                        </div>
+
+                                        <div id="verification-error" class="error-message" style="display: none"></div>
+
+                                        <!-- 验证码输入提示 -->
+                                        <div
+                                            style="
+                                                margin-top: 10px;
+                                                padding: 8px;
+                                                background: rgba(255, 255, 255, 0.05);
+                                                border-radius: 4px;
+                                                border-left: 3px solid #00f0ff;
+                                            "
+                                        >
+                                            <p style="color: #b0b0c0; font-size: 11px; margin: 0; line-height: 1.4">
+                                                <i
+                                                    class="fas fa-info-circle"
+                                                    style="color: #00f0ff; margin-right: 5px"
+                                                ></i>
+                                                验证码已发送到您的手机，请及时查收。如未收到，请检查短信拦截或稍后重试。
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 操作按钮 -->
+                                <div style="display: flex; gap: 10px; margin-top: 20px">
+                                    <button
+                                        type="submit"
+                                        class="btn btn-primary"
+                                        id="submit-password-change"
+                                        disabled
+                                        data-translate="confirm-change"
+                                    >
+                                        确认修改
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn btn-secondary"
+                                        id="cancel-password-change"
+                                        data-translate="cancel"
+                                    >
+                                        取消
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 权限设置选项卡内容 -->
+                <div class="tab-content" id="permissions" style="display: none">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <div class="info-card-icon">
+                                <i class="fas fa-user-cog"></i>
+                            </div>
+                            <h3 class="info-card-title">隐私与安全设置</h3>
+                        </div>
+                        <div class="info-card nested-card">
+                            <div class="permissions-grid">
+                                <div class="permission-item">
+                                    <div class="permission-info">
+                                        <div class="permission-icon">
+                                            <i class="fas fa-user-friends"></i>
+                                        </div>
+                                        <div class="permission-details">
+                                            <h4>个人资料可见性</h4>
+                                            <p>允许其他用户查看我的个人资料</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked />
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="permission-item">
+                                    <div class="permission-info">
+                                        <div class="permission-icon">
+                                            <i class="fas fa-download"></i>
+                                        </div>
+                                        <div class="permission-details">
+                                            <h4>允许下载我的作品</h4>
+                                            <p>允许其他用户下载我上传的UI作品</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked />
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="permission-item">
+                                    <div class="permission-info">
+                                        <div class="permission-icon">
+                                            <i class="fas fa-comments"></i>
+                                        </div>
+                                        <div class="permission-details">
+                                            <h4>接收消息</h4>
+                                            <p>允许其他用户给我发送私信</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked />
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="permission-item">
+                                    <div class="permission-info">
+                                        <div class="permission-icon">
+                                            <i class="fas fa-bell"></i>
+                                        </div>
+                                        <div class="permission-details">
+                                            <h4>邮件通知</h4>
+                                            <p>接收重要更新和活动邮件通知</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked />
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <script>
+                                    // 生成用户ID的函数
+                                    function generateUserId() {
+                                        // 生成2个随机字母（从26个字母中选择）
+                                        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                                        let randomLetters = '';
+                                        for (let i = 0; i < 2; i++) {
+                                            randomLetters += letters.charAt(Math.floor(Math.random() * letters.length));
+                                        }
+
+                                        // 生成8位数字编号（从00000000开始）
+                                        const userIdCounter = getUserIdCounter();
+                                        const numberPart = String(userIdCounter).padStart(8, '0');
+
+                                        // 组合用户ID
+                                        return randomLetters + numberPart;
+                                    }
+
+                                    // 获取用户ID计数器
+                                    function getUserIdCounter() {
+                                        const counter = localStorage.getItem('userIdCounter');
+                                        if (counter) {
+                                            const newCounter = parseInt(counter) + 1;
+                                            localStorage.setItem('userIdCounter', newCounter);
+                                            return newCounter;
+                                        } else {
+                                            // 初始化计数器
+                                            localStorage.setItem('userIdCounter', '1');
+                                            return 1;
+                                        }
+                                    }
+
+                                    // 检查用户ID是否唯一
+                                    function isUserIdUnique(userId) {
+                                        const usedIds = JSON.parse(localStorage.getItem('usedUserIds') || '[]');
+                                        return !usedIds.includes(userId);
+                                    }
+
+                                    // 保存已使用的用户ID
+                                    function saveUsedUserId(userId) {
+                                        const usedIds = JSON.parse(localStorage.getItem('usedUserIds') || '[]');
+                                        usedIds.push(userId);
+                                        localStorage.setItem('usedUserIds', JSON.stringify(usedIds));
+                                    }
+
+                                    // 生成唯一用户ID
+                                    function generateUniqueUserId() {
+                                        let userId;
+                                        let isUnique = false;
+                                        let attempts = 0;
+                                        const maxAttempts = 100; // 防止无限循环
+
+                                        while (!isUnique && attempts < maxAttempts) {
+                                            userId = generateUserId();
+                                            isUnique = isUserIdUnique(userId);
+                                            attempts++;
+                                        }
+
+                                        if (isUnique) {
+                                            saveUsedUserId(userId);
+                                            return userId;
+                                        } else {
+                                            throw new Error('无法生成唯一的用户ID');
+                                        }
+                                    }
+
+                                    // 初始化用户ID
+                                    function initUserId() {
+                                        const usernameInput = document.getElementById('username');
+                                        if (usernameInput) {
+                                            // 检查是否已经有用户ID
+                                            const savedConfig = localStorage.getItem('userConfig');
+                                            if (savedConfig) {
+                                                const config = JSON.parse(savedConfig);
+                                                if (config.userId) {
+                                                    usernameInput.value = config.userId;
+                                                    return;
+                                                }
+                                            }
+
+                                            // 生成新的用户ID
+                                            try {
+                                                const userId = generateUniqueUserId();
+                                                usernameInput.value = userId;
+
+                                                // 保存用户ID到配置中
+                                                saveUserConfig();
+                                            } catch (error) {
+                                                console.error('生成用户ID时出错:', error);
+                                                usernameInput.value = 'ID-00000000';
+                                            }
+                                        }
+                                    }
+
+                                    // 修改saveUserConfig函数以包含用户ID
+                                    function saveUserConfig() {
+                                        const usernameInput = document.getElementById('username');
+                                        const config = {
+                                            // 用户ID
+                                            userId: usernameInput ? usernameInput.value : '',
+                                            // 个人信息
+                                            personalInfo: {
+                                                email: document.getElementById('email').value,
+                                                phone: document.getElementById('phone').value,
+                                                nickname: document.getElementById('nickname').value,
+                                                bio: document.getElementById('bio').value,
+                                                country: document.getElementById('country').value,
+                                                language: document.getElementById('language').value,
+                                            },
+                                            // 权限设置
+                                            permissions: Array.from(
+                                                document.querySelectorAll('.permissions-grid input[type="checkbox"]')
+                                            ).map((checkbox, index) => checkbox.checked),
+                                            // 当前头像
+                                            currentAvatar: currentAvatar.querySelector('img')
+                                                ? currentAvatar.querySelector('img').src
+                                                : null,
+                                            // 头像历史记录
+                                            avatarHistory: getAvatarHistoryFromStorage(),
+                                        };
+
+                                        localStorage.setItem('userConfig', JSON.stringify(config));
+                                    }
+
+                                    // 修改loadUserConfig函数以加载用户ID
+                                    function loadUserConfig() {
+                                        const savedConfig = localStorage.getItem('userConfig');
+                                        if (!savedConfig) return;
+
+                                        const config = JSON.parse(savedConfig);
+
+                                        // 加载用户ID
+                                        const usernameInput = document.getElementById('username');
+                                        if (usernameInput && config.userId) {
+                                            usernameInput.value = config.userId;
+                                        }
+
+                                        // 加载个人信息
+                                        if (config.personalInfo) {
+                                            const { email, phone, nickname, bio, country, language } =
+                                                config.personalInfo;
+                                            document.getElementById('email').value = email;
+                                            document.getElementById('phone').value = phone;
+                                            document.getElementById('nickname').value = nickname;
+                                            document.getElementById('bio').value = bio;
+                                            document.getElementById('country').value = country;
+                                            document.getElementById('language').value = language;
+                                        }
+
+                                        // 加载权限设置
+                                        if (config.permissions && config.permissions.length > 0) {
+                                            const checkboxes = document.querySelectorAll(
+                                                '.permissions-grid input[type="checkbox"]'
+                                            );
+                                            checkboxes.forEach((checkbox, index) => {
+                                                if (index < config.permissions.length) {
+                                                    checkbox.checked = config.permissions[index];
+                                                }
+                                            });
+                                        }
+
+                                        // 加载当前头像
+                                        if (config.currentAvatar) {
+                                            setCurrentAvatar(config.currentAvatar);
+                                        }
+
+                                        // 加载并渲染头像历史记录
+                                        const avatarHistory = config.avatarHistory || [];
+                                        renderAvatarHistory(avatarHistory);
+                                    }
+
+                                    // 页面加载时加载保存的配置
+                                    window.addEventListener('DOMContentLoaded', () => {
+                                        initUserId(); // 初始化用户ID
+                                        loadUserConfig();
+                                        loadTabSelection();
+
+                                        // 初始化编辑信息功能
+                                        initEditInfoFunctionality();
+                                    });
+                                </script>
+                                <div class="permission-item">
+                                    <div class="permission-info">
+                                        <div class="permission-icon">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <div class="permission-details">
+                                            <h4>双重验证</h4>
+                                            <p>启用账户双重验证保护</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" />
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="permission-item">
+                                    <div class="permission-info">
+                                        <div class="permission-icon">
+                                            <i class="fas fa-history"></i>
+                                        </div>
+                                        <div class="permission-details">
+                                            <h4>浏览历史记录</h4>
+                                            <p>保存我的浏览和搜索历史记录</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked />
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div style="margin-top: 30px">
+                                <button type="button" class="btn btn-primary" id="save-permissions">保存设置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 头像上传选项卡内容 -->
+                <div class="tab-content" id="avatar-upload" style="display: none">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <div class="info-card-icon">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            <h3 class="info-card-title" data-translate="avatar-upload">头像上传</h3>
+                        </div>
+                        <div class="info-card nested-card">
+                            <div class="avatar-upload">
+                                <div class="avatar-container">
+                                    <div class="current-avatar" id="current-avatar">
+                                        <i class="fas fa-user" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="avatar-upload-overlay">
+                                        <i class="fas fa-camera avatar-upload-icon"></i>
+                                    </div>
+                                    <input type="file" class="avatar-upload-input" id="avatar-input" accept="image/*" />
+                                    <button
+                                        class="delete-current-avatar-btn"
+                                        id="deleteCurrentAvatarBtn"
+                                        style="display: none"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                                <p style="color: #888; font-size: 14px; margin-bottom: 12px">
+                                    支持JPG、PNG、GIF格式，建议尺寸200x200像素
+                                </p>
+                                <div class="avatar-upload-actions">
+                                    <button type="button" class="btn btn-primary" id="upload-avatar-btn">
+                                        上传新头像
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn btn-secondary"
+                                        id="resetDefaultAvatarBtn"
+                                        disabled
+                                        title="当前已是默认头像"
+                                    >
+                                        恢复默认头像
+                                    </button>
+                                </div>
+                            </div>
+                            <div style="margin-top: 30px">
+                                <h4 style="color: white; margin-bottom: 15px">头像历史</h4>
+                                <div
+                                    id="avatar-history-container"
+                                    style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px"
+                                >
+                                    <!-- 头像历史将通过JavaScript动态生成 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- 移动端菜单按钮 -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <script src="../../js/user-storage-scope.js"></script>
+        <script src="../../js/ui-kit.js"></script>
+        <script src="../../js/navigation.js"></script>
+        <script src="../../js/notification-component.js"></script>
+        <script src="../../js/avatar-manager.js"></script>
+        <script src="../../js/notification-manager.js"></script>
+        <script src="../../js/scroll-animations.js"></script>
+        <script src="../../js/page-effects.js"></script>
+        <script src="../../js/api-utils.js"></script>
+        <script src="user-center-page.js" defer></script>
+        <script>
+            // 初始化 API 设置下拉框为 tech-select 样式
+            function initApiTechSelect() {
+                const select = document.getElementById('api-provider-select');
+                if (!select || select.dataset.techSelectReady === '1') return;
+                select.dataset.techSelectReady = '1';
+                select.style.display = 'none';
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'tech-select';
+
+                const trigger = document.createElement('button');
+                trigger.type = 'button';
+                trigger.className = 'tech-select-trigger';
+                trigger.setAttribute('aria-haspopup', 'listbox');
+
+                const value = document.createElement('span');
+                value.className = 'tech-select-value';
+                trigger.appendChild(value);
+
+                const menu = document.createElement('div');
+                menu.className = 'tech-select-menu';
+                menu.setAttribute('role', 'listbox');
+
+                Array.from(select.options).forEach((opt) => {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'tech-select-option';
+                    item.setAttribute('role', 'option');
+                    item.textContent = opt.textContent;
+                    item.dataset.value = opt.value;
+                    menu.appendChild(item);
+                });
+
+                select.insertAdjacentElement('afterend', wrapper);
+                wrapper.appendChild(trigger);
+                wrapper.appendChild(menu);
+
+                const syncUI = () => {
+                    const current = select.options[select.selectedIndex];
+                    value.textContent = current ? current.textContent : '请选择';
+                    menu.querySelectorAll('.tech-select-option').forEach((item) => {
+                        const on = item.dataset.value === select.value;
+                        item.classList.toggle('is-selected', on);
+                        item.setAttribute('aria-selected', on ? 'true' : 'false');
+                    });
+                };
+
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isOpen = wrapper.classList.contains('is-open');
+                    document.querySelectorAll('.tech-select.is-open').forEach((w) => {
+                        w.classList.remove('is-open');
+                        const g = w.closest('.form-group');
+                        if (g) g.classList.remove('tech-select-open');
+                    });
+                    if (!isOpen) {
+                        wrapper.classList.add('is-open');
+                        const group = wrapper.closest('.form-group');
+                        if (group) group.classList.add('tech-select-open');
+                        // 定位菜单
+                        const rect = trigger.getBoundingClientRect();
+                        menu.style.minWidth = rect.width + 'px';
+                        menu.style.left = rect.left + 'px';
+                        menu.style.top = (rect.bottom + 4) + 'px';
+                    }
+                });
+
+                menu.addEventListener('click', (e) => {
+                    const item = e.target.closest('.tech-select-option');
+                    if (!item) return;
+                    select.value = item.dataset.value;
+                    select.dispatchEvent(new Event('change'));
+                    wrapper.classList.remove('is-open');
+                    const group = wrapper.closest('.form-group');
+                    if (group) group.classList.remove('tech-select-open');
+                    syncUI();
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!wrapper.contains(e.target)) {
+                        wrapper.classList.remove('is-open');
+                        const group = wrapper.closest('.form-group');
+                        if (group) group.classList.remove('tech-select-open');
+                    }
+                });
+
+                select.addEventListener('change', syncUI);
+                syncUI();
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(initApiTechSelect, 300);
+            });
+        </script>
+    </body>
+</html>

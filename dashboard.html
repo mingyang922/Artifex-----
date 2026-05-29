@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Artifex - 主控制台</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Rajdhani:wght@500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <!-- 预连接CDN，提高外部资源加载速度 -->
+        <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+        <!-- 预加载关键CSS -->
+        <link rel="preload" href="styles.css" as="style" />
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="styles/ui-kit.css" />
+        <!-- 异步加载非关键CSS -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            media="print"
+            onload="this.media = 'all'"
+        />
+        <!-- 内联关键CSS，避免首次加载白屏 -->
+        <style>
+            :root {
+                --tech-cyan: #00f0ff;
+                --tech-violet: #8b5cf6;
+                --font-display: "Orbitron", "Segoe UI", sans-serif;
+                --font-ui: "Rajdhani", "Segoe UI", sans-serif;
+                --mx: 50vw;
+                --my: 50vh;
+            }
+
+            html,
+            body {
+                height: 100%;
+                overflow: hidden;
+            }
+
+            /* 主界面核心样式 */
+            body {
+                background: #0a0e18;
+                color: #e8ecf4;
+                min-height: 100vh;
+                margin: 0;
+                font-family: var(--font-ui);
+                font-weight: 500;
+                font-size: 17px;
+            }
+
+            .pointer-glow {
+                position: fixed;
+                left: var(--mx);
+                top: var(--my);
+                width: 560px;
+                height: 560px;
+                margin-left: -280px;
+                margin-top: -280px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(0, 240, 255, 0.22) 0%, rgba(167, 139, 250, 0.12) 40%, transparent 70%);
+                pointer-events: none;
+                z-index: 1;
+                mix-blend-mode: screen;
+                transition: opacity 0.35s ease;
+            }
+
+            .pointer-glow--lag {
+                width: 720px;
+                height: 720px;
+                margin-left: -360px;
+                margin-top: -360px;
+                background: radial-gradient(circle, rgba(236, 72, 153, 0.12) 0%, rgba(0, 240, 255, 0.09) 46%, transparent 72%);
+                filter: blur(14px);
+                opacity: 0.85;
+                transition: left 0.38s cubic-bezier(0.22, 1, 0.36, 1), top 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+            }
+
+            body:not(.pointer-glow-active) .pointer-glow,
+            body:not(.pointer-glow-active) .pointer-glow--lag {
+                opacity: 0;
+            }
+
+            body::before {
+                content: "";
+                position: fixed;
+                inset: -20%;
+                background:
+                    radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.24) 0%, rgba(0, 240, 255, 0) 38%),
+                    radial-gradient(circle at 80% 30%, rgba(124, 58, 237, 0.28) 0%, rgba(124, 58, 237, 0) 40%),
+                    radial-gradient(circle at 50% 85%, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0) 37%);
+                filter: blur(28px);
+                transform: translate3d(0, 0, 0);
+                animation: aiFlowBg 7.2s ease-in-out infinite alternate;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            @keyframes aiFlowBg {
+                0% { transform: translate3d(-3%, -2%, 0) scale(1.01); }
+                50% { transform: translate3d(3%, 2%, 0) scale(1.08); }
+                100% { transform: translate3d(-2%, 3%, 0) scale(1.04); }
+            }
+
+            .dashboard-container {
+                display: flex;
+                min-height: 100vh;
+                width: 100%;
+                max-width: 100%;
+                padding: 0;
+                margin: 0;
+                background: transparent;
+                position: relative;
+                z-index: 2;
+            }
+
+            /* 侧边导航 */
+            .sidebar {
+                width: 240px;
+                background: linear-gradient(180deg, #0f1629 0%, #0a0e18 100%);
+                padding: 20px 0;
+                transition: all 0.3s ease;
+                box-shadow: 4px 0 32px rgba(0, 0, 0, 0.45), inset -1px 0 0 rgba(0, 240, 255, 0.12);
+                z-index: 100;
+                height: 100vh;
+                position: fixed;
+                top: 0;
+                left: 0;
+            }
+
+            .sidebar::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 1px;
+                background: linear-gradient(180deg, transparent 0%, rgba(0, 240, 255, 0.35) 30%, rgba(167, 139, 250, 0.4) 55%, rgba(0, 240, 255, 0.25) 80%, transparent 100%);
+                opacity: 0.85;
+                pointer-events: none;
+                animation: sidebarEdgeFlow 2.4s ease-in-out infinite;
+            }
+
+            @keyframes sidebarEdgeFlow {
+                0%, 100% { opacity: 0.55; filter: blur(0); }
+                50% { opacity: 1; filter: blur(1px); }
+            }
+
+            .sidebar-logo {
+                display: flex;
+                align-items: center;
+                padding: 0 20px 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+                margin-bottom: 20px;
+                gap: 10px;
+            }
+
+            .sidebar-logo .logo-img {
+                height: 40px;
+                width: auto;
+                object-fit: contain;
+            }
+
+            .sidebar-logo h1 {
+                font-family: var(--font-display);
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                color: #f0f4fc;
+                margin: 0;
+            }
+
+            .nav-menu {
+                list-style: none;
+                padding: 0;
+            }
+
+            .nav-item {
+                margin-bottom: 5px;
+            }
+
+            .nav-link {
+                display: flex;
+                align-items: center;
+                padding: 12px 20px;
+                color: #b0b0c0;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                border-left: 3px solid transparent;
+            }
+
+            .nav-link:hover, .nav-link.active {
+                background: rgba(0, 240, 255, 0.1);
+                color: #00f0ff;
+                border-left-color: #00f0ff;
+            }
+
+            .nav-link i {
+                margin-right: 10px;
+                width: 20px;
+                text-align: center;
+            }
+
+            /* 主内容区 */
+            .main-content {
+                flex: 1;
+                padding: 20px;
+                margin-left: 240px;
+                overflow-y: auto;
+                overflow-x: hidden;
+                height: 100vh;
+                min-height: 100vh;
+                box-sizing: border-box;
+                position: relative;
+                background:
+                    linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+                background-size: 48px 48px;
+                background-color: rgba(10, 14, 24, 0.55);
+            }
+
+            .main-content::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                z-index: 0;
+                background: repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.07) 2px,
+                    rgba(0, 0, 0, 0.07) 4px
+                );
+                opacity: 0.3;
+                mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 75%);
+            }
+
+            .main-content > * {
+                position: relative;
+                z-index: 1;
+            }
+
+            /* 加载状态 */
+            .loading {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 300px;
+                color: #00f0ff;
+            }
+
+            /* 错误状态 */
+            .error {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 300px;
+                color: #ff4757;
+            }
+
+            /* 顶部工具栏 */
+            .top-bar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                padding: 14px 18px;
+                border-radius: 10px;
+                border: 1px solid rgba(0, 240, 255, 0.15);
+                background: rgba(15, 22, 41, 0.65);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                box-shadow: 0 0 28px rgba(0, 240, 255, 0.06);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .top-bar::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: 10px;
+                background: linear-gradient(105deg, transparent 0%, rgba(0, 240, 255, 0.12) 45%, rgba(167, 139, 250, 0.14) 55%, transparent 100%);
+                background-size: 200% 100%;
+                pointer-events: none;
+                animation: topBarShine 1.9s ease-in-out infinite;
+                z-index: 0;
+            }
+
+            .top-bar > * {
+                position: relative;
+                z-index: 1;
+            }
+
+            @keyframes topBarShine {
+                0%, 100% { background-position: 0% 50%; opacity: 0.58; }
+                50% { background-position: 100% 50%; opacity: 1; }
+            }
+
+            .search-bar {
+                position: relative;
+                width: 300px;
+            }
+
+            .search-bar input {
+                width: 100%;
+                padding: 10px 15px 10px 35px;
+                background: rgba(5, 8, 16, 0.65);
+                border: 1px solid rgba(0, 240, 255, 0.18);
+                border-radius: 6px;
+                color: #f0f4fc;
+                font-size: 15px;
+                font-family: var(--font-ui);
+            }
+
+            .search-bar i {
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #b0b0c0;
+            }
+
+            .user-menu {
+                display: flex;
+                align-items: center;
+            }
+
+            .notification-btn {
+                background: transparent;
+                border: none;
+                color: #b0b0c0;
+                font-size: 18px;
+                margin-right: 20px;
+                cursor: pointer;
+                position: relative;
+            }
+
+            .notification-badge {
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                width: 16px;
+                height: 16px;
+                background: #00f0ff;
+                color: #1a1a2e;
+                border-radius: 50%;
+                font-size: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+            }
+
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: #00f0ff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #1a1a2e;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            /* 快捷工具区 - 优化网格布局 */
+            .quick-tools {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+
+            .tool-card {
+                background: rgba(8, 12, 24, 0.72);
+                border-radius: 10px;
+                padding: 22px 20px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border: 1px solid rgba(0, 240, 255, 0.12);
+                position: relative;
+                overflow: hidden;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            }
+
+            .tool-card::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 3px;
+                height: 100%;
+                background: linear-gradient(180deg, var(--tech-cyan), var(--tech-violet));
+                opacity: 0.4;
+                transition: opacity 0.3s ease;
+            }
+
+            .tool-card:hover {
+                background: rgba(0, 240, 255, 0.08);
+                transform: translateY(-6px);
+                border-color: rgba(0, 240, 255, 0.35);
+                box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), 0 0 32px rgba(0, 240, 255, 0.18);
+            }
+
+            .tool-card:hover::before {
+                opacity: 1;
+            }
+
+            .tool-card::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                background: radial-gradient(280px circle at var(--card-x, 50%) var(--card-y, 50%), rgba(0, 240, 255, 0.24), rgba(139, 92, 246, 0.1) 40%, transparent 70%);
+                opacity: 0;
+                transition: opacity 0.16s ease;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            .tool-card:hover::after {
+                opacity: 1;
+            }
+
+            .tool-card > * {
+                position: relative;
+                z-index: 1;
+            }
+
+            .tool-card i {
+                font-size: 26px;
+                color: #00f0ff;
+                margin-bottom: 10px;
+                filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.35));
+            }
+
+            .tool-card h3 {
+                font-family: var(--font-display);
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: #f5f8ff;
+                margin: 0 0 6px;
+            }
+
+            .tool-card p {
+                font-size: 13px;
+                color: #9aa8c4;
+                margin: 0;
+                line-height: 1.45;
+            }
+
+            /* 项目区域 - 优化网格布局 */
+            .section-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+            .section-title {
+                font-family: var(--font-display);
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: #f0f4fc;
+                margin: 0;
+                text-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+            }
+
+            .view-all {
+                color: #00f0ff;
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: 0.04em;
+            }
+
+            .projects-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 25px;
+            }
+
+            .project-card {
+                background: rgba(8, 12, 24, 0.75);
+                border-radius: 10px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+                border: 1px solid rgba(0, 240, 255, 0.12);
+                position: relative;
+            }
+
+            .project-card::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 3px;
+                height: 100%;
+                background: linear-gradient(180deg, var(--tech-cyan), var(--tech-violet));
+                opacity: 0.35;
+                z-index: 2;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+
+            .project-card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42), 0 0 34px rgba(0, 240, 255, 0.16);
+                border-color: rgba(0, 240, 255, 0.35);
+            }
+
+            .project-card:hover::before {
+                opacity: 0.95;
+            }
+
+            .project-card::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                background: radial-gradient(300px circle at var(--card-x, 50%) var(--card-y, 50%), rgba(0, 240, 255, 0.22), rgba(139, 92, 246, 0.1) 40%, transparent 70%);
+                opacity: 0;
+                transition: opacity 0.16s ease;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            .project-card:hover::after {
+                opacity: 1;
+            }
+
+            .project-card > * {
+                position: relative;
+                z-index: 1;
+            }
+
+            .project-thumbnail {
+                height: 140px;
+                background: linear-gradient(135deg, #121a2e 0%, #0a0e18 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+            }
+
+            .project-thumbnail img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .project-status {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                padding: 3px 8px;
+                border-radius: 12px;
+                font-size: 10px;
+                font-weight: bold;
+                background: rgba(0, 240, 255, 0.2);
+                color: #00f0ff;
+            }
+
+            .project-info {
+                padding: 15px;
+            }
+
+            .project-title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: #f5f8ff;
+                margin: 0 0 5px;
+            }
+
+            .project-desc {
+                font-size: 12px;
+                color: #b0b0c0;
+                margin: 0 0 15px;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            .project-meta {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 12px;
+                color: #888;
+            }
+
+            .project-date {
+                display: flex;
+                align-items: center;
+            }
+
+            .project-date i {
+                margin-right: 5px;
+                font-size: 10px;
+            }
+
+            .project-actions {
+                display: flex;
+                gap: 10px;
+            }
+
+            .project-action {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.05);
+                border: none;
+                color: #b0b0c0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .project-action:hover {
+                background: rgba(0, 240, 255, 0.2);
+                color: #00f0ff;
+            }
+
+            /* 响应式设计调整 */
+            @media (max-width: 1200px) {
+                .projects-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                }
+            }
+
+            @media (max-width: 992px) {
+                .sidebar {
+                    width: 60px;
+                    padding: 20px 0;
+                }
+
+                .main-content {
+                    margin-left: 60px;
+                }
+
+                .sidebar-logo h1, .nav-link span {
+                    display: none;
+                }
+
+                .sidebar-logo {
+                    justify-content: center;
+                    padding: 0 0 20px;
+                    gap: 0;
+                }
+
+                .sidebar-logo h1 {
+                    display: none;
+                }
+
+                .nav-link {
+                    justify-content: center;
+                    padding: 15px;
+                }
+
+                .nav-link i {
+                    margin-right: 0;
+                    font-size: 18px;
+                }
+
+                .search-bar {
+                    width: 200px;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .quick-tools {
+                    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                }
+
+                .search-bar {
+                    width: 100%;
+                }
+
+                .top-bar {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 15px;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .sidebar {
+                    position: fixed;
+                    left: -60px;
+                    height: 100vh;
+                    z-index: 1000;
+                }
+
+                .sidebar.show {
+                    left: 0;
+                }
+
+                .main-content {
+                    margin-left: 0;
+                    padding: 15px;
+                }
+
+                .quick-tools, .projects-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .mobile-menu-toggle {
+                    display: block;
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    background: #00f0ff;
+                    color: #1a1a2e;
+                    border: none;
+                    font-size: 20px;
+                    box-shadow: 0 4px 10px rgba(0, 240, 255, 0.4);
+                    cursor: pointer;
+                    z-index: 999;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                body::before,
+                .sidebar::after,
+                .top-bar::before {
+                    animation: none !important;
+                }
+                .pointer-glow,
+                .pointer-glow--lag {
+                    display: none !important;
+                }
+                .tool-card::after,
+                .project-card::after {
+                    display: none !important;
+                }
+            }
+        </style>
+        <link rel="stylesheet" href="styles/app-shell.css" />
+        <!-- 异步加载字体 -->
+        <link
+            rel="preload"
+            href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap"
+            as="style"
+            onload="this.rel = 'stylesheet'"
+        />
+    </head>
+    <body class="app-shell" data-app-page="home">
+        <div class="pointer-glow" aria-hidden="true"></div>
+        <div class="pointer-glow pointer-glow--lag" aria-hidden="true"></div>
+        <div class="dashboard-container">
+            <!-- 侧边导航 -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-logo">
+                    <img src="js/logo-main.png" alt="Artifex" class="logo-img" id="logoImg" />
+                    <h1>Artifex</h1>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="home">
+                            <i class="fas fa-home"></i>
+                            <span>主页</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="project-management">
+                            <i class="fas fa-project-diagram"></i>
+                            <span>项目管理</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="ai-generate">
+                            <i class="fas fa-magic"></i>
+                            <span>AI 生成</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="asset-library">
+                            <i class="fas fa-images"></i>
+                            <span>素材库</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="style-presets">
+                            <i class="fas fa-swatchbook"></i>
+                            <span>风格预设</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-module="user-center">
+                            <i class="fas fa-user-circle"></i>
+                            <span>账户</span>
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- 主内容区 -->
+            <main class="main-content">
+                <!-- 顶部工具栏 -->
+                <div class="top-bar">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索项目、资产或文档..." />
+                    </div>
+                    <div class="user-menu">
+                        <button class="notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
+                        <div class="user-avatar user-avatar--placeholder" role="img" aria-label="用户头像">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 快捷工具 -->
+                <section class="quick-tools-section scroll-section">
+                    <div class="quick-tools">
+                        <div class="tool-card" data-target="project-management">
+                            <i class="fas fa-plus-circle"></i>
+                            <h3>新建项目</h3>
+                            <p>创建全新的UI设计项目</p>
+                        </div>
+                        <div class="tool-card" data-target="ai-generate">
+                            <i class="fas fa-magic"></i>
+                            <h3>AI生成</h3>
+                            <p>使用AI自动生成UI资产</p>
+                        </div>
+                        <div class="tool-card" data-target="asset-library">
+                            <i class="fas fa-images"></i>
+                            <h3>素材库</h3>
+                            <p>访问游戏UI素材资源</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 最近项目（从本地项目数据动态加载） -->
+                <section class="recent-projects scroll-section">
+                    <div class="section-header">
+                        <h2 class="section-title">最近项目</h2>
+                        <a href="#" class="view-all" data-target="project-management">查看全部</a>
+                    </div>
+                    <div class="projects-grid" id="recent-projects-grid">
+                        <!-- 将由脚本根据 localStorage.gameui-projects 动态渲染最近项目 -->
+                    </div>
+                </section>
+
+                <section
+                    class="scroll-section"
+                    hidden
+                    style="
+                        margin-top: 8px;
+                        padding: 18px 22px;
+                        border-radius: 12px;
+                        border: 1px solid rgba(0, 240, 255, 0.18);
+                        background: rgba(15, 22, 41, 0.55);
+                        max-width: 920px;
+                    "
+                >
+                    <div class="section-header" style="margin-bottom: 10px">
+                        <h2 class="section-title"><i class="fas fa-database"></i> 本地数据备份</h2>
+                    </div>
+                    <p
+                        id="artifex-storage-usage"
+                        style="color: #b0b8d0; font-size: 14px; margin: 0 0 14px; line-height: 1.5"
+                    >
+                        正在计算本地存储用量…
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+                        <button
+                            type="button"
+                            id="artifex-export-local-btn"
+                            class="project-action"
+                            title="导出为 JSON 文件"
+                        >
+                            导出 JSON 备份
+                        </button>
+                        <button
+                            type="button"
+                            id="artifex-import-local-btn"
+                            class="project-action"
+                            title="从之前导出的 JSON 恢复"
+                        >
+                            从文件导入
+                        </button>
+                        <input
+                            type="file"
+                            id="artifex-import-local-file"
+                            accept="application/json,.json"
+                            style="display: none"
+                            aria-hidden="true"
+                        />
+                    </div>
+                    <p style="color: #8090a8; font-size: 12px; margin: 12px 0 0">
+                        覆盖项目列表、素材库、风格预设与 AI 生成缩略索引等当前登录用户下的键。导入后请刷新页面。
+                    </p>
+                </section>
+
+                <!-- 模块内容容器 -->
+                <div id="module-container"></div>
+            </main>
+        </div>
+
+        <!-- 移动端菜单按钮 -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- 简化的JavaScript代码 -->
+        <script src="js/ui-kit.js"></script>
+        <script src="js/user-storage-scope.js"></script>
+        <script src="js/data-portability.js"></script>
+        <script src="js/navigation.js"></script>
+        <script src="js/notification-component.js"></script>
+        <script src="js/avatar-manager.js"></script>
+        <script src="js/notification-manager.js"></script>
+        <script src="js/scroll-animations.js"></script>
+        <script src="js/page-effects.js"></script>
+        <script>
+            function formatDate(dateString) {
+                if (!dateString) return '';
+                var d = new Date(dateString);
+                if (isNaN(d.getTime())) return '';
+                var y = d.getFullYear();
+                var m = String(d.getMonth() + 1).padStart(2, '0');
+                var day = String(d.getDate()).padStart(2, '0');
+                return y + '-' + m + '-' + day;
+            }
+
+            function getProjectTypeName(type) {
+                var map = {
+                    ui: 'UI设计',
+                    game: '游戏界面',
+                    other: '其他',
+                };
+                return map[type] || type || '';
+            }
+
+            function renderRecentProjects() {
+                var grid = document.getElementById('recent-projects-grid');
+                if (!grid) return;
+
+                var raw = null;
+                try {
+                    raw = window.localStorage.getItem(GameUiUserScope.key('gameui-projects'));
+                } catch (e) {
+                    console.warn('读取项目数据失败:', e);
+                }
+
+                var projects = [];
+                if (raw) {
+                    try {
+                        projects = JSON.parse(raw) || [];
+                    } catch (e) {
+                        console.warn('解析项目数据失败:', e);
+                        projects = [];
+                    }
+                }
+
+                grid.innerHTML = '';
+
+                if (!projects.length) {
+                    grid.innerHTML =
+                        '<p style="color:#666;text-align:center;">暂无项目数据，请在“项目管理”中创建项目。</p>';
+                    return;
+                }
+
+                // 按创建时间倒序，取最近 3 个
+                projects.sort(function (a, b) {
+                    return new Date(b.createTime || 0) - new Date(a.createTime || 0);
+                });
+                var recent = projects.slice(0, 3);
+
+                recent.forEach(function (project) {
+                    var statusText = '进行中';
+                    if (project.status === 'done') statusText = '已完成';
+                    if (project.status === 'paused') statusText = '已暂停';
+
+                    var card = document.createElement('div');
+                    card.className = 'project-card';
+
+                    card.innerHTML =
+                        '<div class="project-thumbnail">' +
+                        '<span class="project-status">' +
+                        statusText +
+                        '</span>' +
+                        '</div>' +
+                        '<div class="project-info">' +
+                        '<h3 class="project-title">' +
+                        (project.name || '未命名项目') +
+                        '</h3>' +
+                        '<p class="project-desc">' +
+                        (project.desc || '无描述') +
+                        '</p>' +
+                        '<div class="project-meta">' +
+                        '<div class="project-date">' +
+                        '<i class="fas fa-clock"></i>' +
+                        '<span>' +
+                        formatDate(project.createTime) +
+                        '</span>' +
+                        '</div>' +
+                        '<div class="project-actions">' +
+                        '<button class="project-action" title="打开项目"><i class="fas fa-arrow-right"></i></button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+
+                    // 点击整卡或按钮进入项目详情
+                    var openDetail = function () {
+                        if (!project.id) return;
+                        window.location.href =
+                            'modules/project-management/project-detail.html?id=' + encodeURIComponent(project.id);
+                    };
+
+                    card.addEventListener('click', function (e) {
+                        openDetail();
+                    });
+                    grid.appendChild(card);
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', async function () {
+                try {
+                    await GameUiUserScope.ensure();
+                } catch (e) {
+                    console.warn('用户态校验失败，继续渲染主页：', e);
+                }
+
+                if (window.PageEffects) {
+                    window.PageEffects.initPointerGlow();
+                    window.PageEffects.initCardSpotlight('.tool-card, .project-card');
+                }
+
+                // 渲染最近项目（本地联调或 userId 为空时也应可见）
+                renderRecentProjects();
+            });
+        </script>
+    </body>
+</html>

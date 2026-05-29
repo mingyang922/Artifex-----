@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Artifex - 登录注册</title>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+        <style>
+            /* 与userCenter保持一致的主题色彩 */
+            body {
+                background: #1a1a2e;
+                color: #e0e0e0;
+                min-height: 100vh;
+                margin: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .container {
+                width: 100%;
+                max-width: 400px;
+                padding: 20px;
+            }
+
+            .form-container {
+                background: #16213e;
+                border-radius: 12px;
+                padding: 40px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .platform-logo {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-bottom: 30px;
+            }
+
+            .platform-logo img {
+                display: block;
+                width: 120px;
+                height: auto;
+                margin: 0;
+                /* 仅抵消 PNG 底部透明区(~44px)，留约 4px 与标题间距，不压住图案 */
+                margin-bottom: -40px;
+            }
+
+            .platform-logo h1 {
+                color: white;
+                font-size: 24px;
+                margin: 0;
+                line-height: 1.1;
+            }
+
+            .form-header {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+
+            .form-header h2 {
+                color: white;
+                font-size: 20px;
+                margin: 0 0 8px 0;
+            }
+
+            .form-header p {
+                color: #b0b0c0;
+                font-size: 14px;
+                margin: 0;
+            }
+
+            .input-group {
+                position: relative;
+                margin-bottom: 20px;
+            }
+
+            .input-group i {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #b0b0c0;
+                z-index: 2;
+            }
+
+            .input-group input {
+                width: 100%;
+                padding: 12px 15px 12px 45px;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 8px;
+                color: #e0e0e0;
+                font-size: 14px;
+                transition: all 0.3s ease;
+                box-sizing: border-box;
+            }
+
+            .input-group input:focus {
+                outline: none;
+                border-color: #00f0ff;
+                background: rgba(255, 255, 255, 0.15);
+            }
+
+            .input-group input::placeholder {
+                color: #b0b0c0;
+            }
+
+            /* 密码输入框容器样式 */
+            .password-input-container {
+                position: relative;
+                display: inline-block;
+                width: 100%;
+            }
+
+            .password-input-container input {
+                padding-right: 45px; /* 为按钮留出足够空间 */
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .password-toggle {
+                position: absolute;
+                right: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: none;
+                border: none;
+                color: #b0b0c0;
+                cursor: pointer;
+                padding: 4px;
+                border-radius: 4px;
+                transition: all 0.3s ease;
+                z-index: 10;
+                outline: none;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .password-toggle:hover {
+                background: rgba(0, 240, 255, 0.1);
+                color: #00f0ff;
+            }
+
+            .password-toggle:focus {
+                outline: none;
+                background: rgba(0, 240, 255, 0.1);
+                color: #00f0ff;
+            }
+
+            .password-toggle i {
+                font-size: 14px;
+                line-height: 1;
+            }
+
+            .form-options {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+            }
+
+            .remember-me {
+                display: flex;
+                align-items: center;
+                color: #b0b0c0;
+                font-size: 14px;
+                cursor: pointer;
+            }
+
+            .remember-me input {
+                margin-right: 8px;
+            }
+
+            .forgot-password {
+                color: #00f0ff;
+                text-decoration: none;
+                font-size: 14px;
+                transition: color 0.3s ease;
+            }
+
+            .forgot-password:hover {
+                color: #00d4ff;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 12px;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #00f0ff, #0099cc);
+                color: white;
+            }
+
+            .btn-primary:hover {
+                background: linear-gradient(135deg, #00d4ff, #0088bb);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 240, 255, 0.3);
+            }
+
+            .btn.loading {
+                pointer-events: none;
+            }
+
+            .btn.loading::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 20px;
+                height: 20px;
+                border: 2px solid transparent;
+                border-top: 2px solid white;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: translate(-50%, -50%) rotate(0deg);
+                }
+                100% {
+                    transform: translate(-50%, -50%) rotate(360deg);
+                }
+            }
+
+            .form-footer {
+                text-align: center;
+                margin-top: 20px;
+            }
+
+            .form-footer p {
+                color: #b0b0c0;
+                font-size: 14px;
+                margin: 0;
+            }
+
+            .form-footer a {
+                color: #00f0ff;
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+
+            .form-footer a:hover {
+                color: #00d4ff;
+            }
+
+            .password-strength {
+                margin-bottom: 20px;
+            }
+
+            .strength-bar {
+                width: 100%;
+                height: 4px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 2px;
+                overflow: hidden;
+                margin-bottom: 8px;
+            }
+
+            .strength-fill {
+                height: 100%;
+                transition: all 0.3s ease;
+                border-radius: 2px;
+            }
+
+            .strength-fill.weak {
+                width: 25%;
+                background: #ff4757;
+            }
+
+            .strength-fill.medium {
+                width: 50%;
+                background: #ffa502;
+            }
+
+            .strength-fill.strong {
+                width: 100%;
+                background: #2ed573;
+            }
+
+            .strength-text {
+                color: #b0b0c0;
+                font-size: 12px;
+            }
+
+            .terms-agreement {
+                display: flex;
+                align-items: flex-start;
+                color: #b0b0c0;
+                font-size: 14px;
+                cursor: pointer;
+                margin-bottom: 20px;
+            }
+
+            .terms-agreement input {
+                margin-right: 8px;
+                margin-top: 2px;
+            }
+
+            .terms-link {
+                color: #00f0ff;
+                text-decoration: none;
+            }
+
+            .terms-link:hover {
+                color: #00d4ff;
+            }
+
+            .message {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 1000;
+                transform: translateX(400px);
+                transition: transform 0.3s ease;
+            }
+
+            .message.show {
+                transform: translateX(0);
+            }
+
+            .message.success {
+                background: #2ed573;
+            }
+
+            .message.error {
+                background: #ff4757;
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            /* 响应式设计 */
+            @media (max-width: 480px) {
+                .container {
+                    padding: 10px;
+                }
+
+                .form-container {
+                    padding: 30px 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="form-container">
+                <!-- 游戏平台Logo -->
+                <div class="platform-logo">
+                    <img src="js/logo-main.png" alt="" />
+                    <h1>Artifex</h1>
+                </div>
+
+                <!-- 登录表单 -->
+                <div class="form-wrapper login-form" id="loginForm">
+                    <div class="form-header">
+                        <h2>欢迎回来，开发者</h2>
+                        <p>登录您的账户继续创建游戏UI资产</p>
+                    </div>
+                    <form id="login">
+                        <div class="input-group">
+                            <i class="fas fa-user-circle"></i>
+                            <input type="email" id="loginEmail" placeholder="邮箱地址" required />
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <div class="password-input-container">
+                                <input type="password" id="loginPassword" placeholder="密码" required />
+                                <button type="button" class="password-toggle" id="toggle-login-password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-options">
+                            <label class="remember-me">
+                                <input type="checkbox" id="rememberMe" />
+                                <span class="checkmark"></span>
+                                记住我
+                            </label>
+                            <a href="#" class="forgot-password">忘记密码？</a>
+                        </div>
+                        <button type="submit" class="btn btn-primary">登录账户</button>
+                        <div class="form-footer">
+                            <p>还没有账户？ <a href="#" data-switch-form="registerForm">立即注册</a></p>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 注册表单 -->
+                <div class="form-wrapper register-form hidden" id="registerForm">
+                    <div class="form-header">
+                        <h2>创建账户</h2>
+                        <p>注册成为 Artifex 开发者</p>
+                    </div>
+                    <form id="register">
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="registerUsername" placeholder="用户名" required />
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="registerEmail" placeholder="邮箱地址" required />
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <div class="password-input-container">
+                                <input type="password" id="registerPassword" placeholder="设置密码" required />
+                                <button type="button" class="password-toggle" id="toggle-register-password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 密码强度指示器 -->
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="registerStrengthFill"></div>
+                            </div>
+                            <div class="strength-text" id="registerStrengthText">密码强度: 未设置</div>
+                        </div>
+
+                        <div class="form-options">
+                            <label class="terms-agreement">
+                                <input type="checkbox" id="agreeTerms" required />
+                                <span class="checkmark"></span>
+                                我同意<a href="#" class="terms-link">服务条款</a>和<a href="#" class="terms-link"
+                                    >隐私政策</a
+                                >
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">创建账户</button>
+                        <div class="form-footer">
+                            <p>已有账户？ <a href="#" data-switch-form="loginForm">立即登录</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 消息提示 -->
+        <div class="message" id="message"></div>
+
+        <script src="js/api-utils.js"></script>
+        <script src="js/login-page.js"></script>
+    </body>
+</html>
