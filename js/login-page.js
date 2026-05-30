@@ -1,7 +1,8 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
+'use strict';
 
 /**
  * 登录页逻辑
@@ -9,7 +10,6 @@
  * 注意：getCsrfToken 已移至 js/api-utils.js
  */
 
-// 设置密码显示/隐藏切换
 function setupPasswordToggles() {
     const toggles = document.querySelectorAll('.password-toggle');
     toggles.forEach((toggle) => {
@@ -29,7 +29,6 @@ function setupPasswordToggles() {
     });
 }
 
-// 切换表单
 function switchForm(formId) {
     document.querySelectorAll('.form-wrapper').forEach((form) => {
         form.classList.add('hidden');
@@ -38,7 +37,6 @@ function switchForm(formId) {
     window.scrollTo(0, 0);
 }
 
-// 显示消息提示
 function showMessage(text, type) {
     const message = document.getElementById('message');
     message.textContent = text;
@@ -50,7 +48,6 @@ function showMessage(text, type) {
     }, 3000);
 }
 
-// 密码强度检测
 function setupPasswordStrength() {
     const registerPassword = document.getElementById('registerPassword');
     if (!registerPassword) return;
@@ -91,7 +88,6 @@ function setupPasswordStrength() {
     });
 }
 
-// 绑定表单切换链接
 function setupFormSwitchLinks() {
     document.querySelectorAll('[data-switch-form]').forEach((link) => {
         link.addEventListener('click', (e) => {
@@ -102,7 +98,6 @@ function setupFormSwitchLinks() {
     });
 }
 
-// 登录表单提交
 function setupLoginForm() {
     const loginForm = document.getElementById('login');
     if (!loginForm) return;
@@ -146,7 +141,6 @@ function setupLoginForm() {
     });
 }
 
-// 注册表单提交
 function setupRegisterForm() {
     const registerForm = document.getElementById('register');
     if (!registerForm) return;
@@ -206,7 +200,6 @@ function setupRegisterForm() {
     });
 }
 
-// 忘记密码处理
 function setupForgotPassword() {
     const forgotLink = document.querySelector('.forgot-password');
     if (!forgotLink) return;
@@ -217,7 +210,6 @@ function setupForgotPassword() {
     });
 }
 
-// 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function () {
     setupPasswordToggles();
     setupPasswordStrength();

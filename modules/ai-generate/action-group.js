@@ -1,7 +1,8 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
+'use strict';
 window.lastThreeViewImageUrl = null;
 window.lastThreeViewFrontDataUrl = null;
 window.lastActionSketchDataUrl = null;
@@ -176,7 +177,7 @@ function parsePromptActions(text) {
 
     document.addEventListener('paste', handleActionSketchPaste);
 
-    document.getElementById('actionThreeViewBtn').addEventListener('click', async function () {
+    document.getElementById('actionThreeViewBtn')?.addEventListener('click', async function () {
         if (!window.lastActionSketchDataUrl) {
             themedWarn('请先上传草图 / 线稿图片。');
             return;
@@ -261,7 +262,7 @@ function parsePromptActions(text) {
     });
 })();
 
-document.getElementById('actionGroupGenerateBtn').addEventListener('click', async function () {
+document.getElementById('actionGroupGenerateBtn')?.addEventListener('click', async function () {
     const promptEl = document.getElementById('actionCharacterPrompt');
     const framesPer = parseInt(document.getElementById('actionFramesPer').value, 10);
     const provider = 'jimeng';
@@ -579,10 +580,10 @@ async function downloadThreeViewZip() {
     URL.revokeObjectURL(a.href);
 }
 
-document.getElementById('exportSpritesheetPng').addEventListener('click', exportSpritesheetPng);
-document.getElementById('exportCreditsJson').addEventListener('click', exportCreditsJson);
-document.getElementById('exportZipByAnimation').addEventListener('click', exportZipByAnimation);
-document.getElementById('exportZipByFrame').addEventListener('click', exportZipByFrame);
-document.getElementById('downloadThreeViewPng').addEventListener('click', downloadThreeViewPng);
-document.getElementById('downloadThreeViewZip').addEventListener('click', downloadThreeViewZip);
+document.getElementById('exportSpritesheetPng')?.addEventListener('click', exportSpritesheetPng);
+document.getElementById('exportCreditsJson')?.addEventListener('click', exportCreditsJson);
+document.getElementById('exportZipByAnimation')?.addEventListener('click', exportZipByAnimation);
+document.getElementById('exportZipByFrame')?.addEventListener('click', exportZipByFrame);
+document.getElementById('downloadThreeViewPng')?.addEventListener('click', downloadThreeViewPng);
+document.getElementById('downloadThreeViewZip')?.addEventListener('click', downloadThreeViewZip);
 

@@ -5,31 +5,105 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Artifex - 登录注册</title>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet" />
         <style>
-            /* 与userCenter保持一致的主题色彩 */
+            /* ═══ 赛博朋克登录页 ═══ */
+            :root {
+                --login-cyan: #00f0ff;
+                --login-violet: #8b5cf6;
+                --login-bg: #0a0e18;
+                --login-panel: rgba(15, 22, 41, 0.75);
+                --login-text: #e8ecf4;
+                --login-muted: #b0b0c0;
+            }
+
             body {
-                background: #1a1a2e;
-                color: #e0e0e0;
+                background: var(--login-bg);
+                color: var(--login-text);
                 min-height: 100vh;
                 margin: 0;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+                font-weight: 500;
+                font-size: 15px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                overflow: hidden;
+            }
+
+            /* ── 动态渐变背景 ── */
+            body::before {
+                content: '';
+                position: fixed;
+                inset: -20%;
+                background:
+                    radial-gradient(ellipse 60% 50% at 20% 30%, rgba(0, 240, 255, 0.12), transparent),
+                    radial-gradient(ellipse 50% 60% at 80% 20%, rgba(139, 92, 246, 0.1), transparent),
+                    radial-gradient(ellipse 55% 45% at 50% 80%, rgba(56, 189, 248, 0.08), transparent);
+                filter: blur(28px);
+                animation: loginFlowBg 8s ease-in-out infinite alternate;
+                z-index: 0;
+            }
+
+            @keyframes loginFlowBg {
+                0% { transform: translate(0, 0) scale(1); }
+                33% { transform: translate(2%, -1%) scale(1.03); }
+                66% { transform: translate(-1%, 2%) scale(0.98); }
+                100% { transform: translate(1%, -2%) scale(1.02); }
+            }
+
+            /* ── 网格叠加 ── */
+            body::after {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background-image:
+                    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+                background-size: 48px 48px;
+                z-index: 0;
+                pointer-events: none;
             }
 
             .container {
                 width: 100%;
-                max-width: 400px;
+                max-width: 420px;
                 padding: 20px;
+                position: relative;
+                z-index: 1;
             }
 
+            /* ── 玻璃拟态表单卡片 ── */
             .form-container {
-                background: #16213e;
-                border-radius: 12px;
+                background: var(--login-panel);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-radius: 16px;
                 padding: 40px;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow:
+                    0 8px 32px rgba(0, 0, 0, 0.4),
+                    0 0 40px rgba(0, 240, 255, 0.06),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(0, 240, 255, 0.15);
+                position: relative;
+                overflow: hidden;
+            }
+
+            /* 卡片顶部光带 */
+            .form-container::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 200%;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, var(--login-cyan), var(--login-violet), transparent);
+                animation: cardShine 3s ease-in-out infinite;
+            }
+
+            @keyframes cardShine {
+                0% { left: -100%; }
+                100% { left: 100%; }
             }
 
             .platform-logo {
@@ -44,15 +118,21 @@
                 width: 120px;
                 height: auto;
                 margin: 0;
-                /* 仅抵消 PNG 底部透明区(~44px)，留约 4px 与标题间距，不压住图案 */
                 margin-bottom: -40px;
+                filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.3));
             }
 
             .platform-logo h1 {
                 color: white;
-                font-size: 24px;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 26px;
+                font-weight: 700;
                 margin: 0;
                 line-height: 1.1;
+                letter-spacing: 4px;
+                text-shadow:
+                    0 0 10px rgba(0, 240, 255, 0.5),
+                    0 0 30px rgba(0, 240, 255, 0.2);
             }
 
             .form-header {
@@ -62,12 +142,14 @@
 
             .form-header h2 {
                 color: white;
+                font-family: 'Rajdhani', sans-serif;
                 font-size: 20px;
+                font-weight: 600;
                 margin: 0 0 8px 0;
             }
 
             .form-header p {
-                color: #b0b0c0;
+                color: var(--login-muted);
                 font-size: 14px;
                 margin: 0;
             }
@@ -82,30 +164,38 @@
                 left: 15px;
                 top: 50%;
                 transform: translateY(-50%);
-                color: #b0b0c0;
+                color: var(--login-muted);
                 z-index: 2;
+                transition: color 0.3s ease;
             }
 
             .input-group input {
                 width: 100%;
                 padding: 12px 15px 12px 45px;
-                background: rgba(255, 255, 255, 0.1);
-                border: 1px solid rgba(255, 255, 255, 0.2);
+                background: rgba(255, 255, 255, 0.06);
+                border: 1px solid rgba(255, 255, 255, 0.12);
                 border-radius: 8px;
-                color: #e0e0e0;
-                font-size: 14px;
+                color: var(--login-text);
+                font-family: 'Rajdhani', sans-serif;
+                font-size: 15px;
                 transition: all 0.3s ease;
                 box-sizing: border-box;
             }
 
             .input-group input:focus {
                 outline: none;
-                border-color: #00f0ff;
-                background: rgba(255, 255, 255, 0.15);
+                border-color: var(--login-cyan);
+                background: rgba(0, 240, 255, 0.06);
+                box-shadow: 0 0 12px 2px rgba(0, 240, 255, 0.1);
+            }
+
+            .input-group input:focus + i,
+            .input-group input:focus ~ i {
+                color: var(--login-cyan);
             }
 
             .input-group input::placeholder {
-                color: #b0b0c0;
+                color: var(--login-muted);
             }
 
             /* 密码输入框容器样式 */
@@ -144,13 +234,14 @@
 
             .password-toggle:hover {
                 background: rgba(0, 240, 255, 0.1);
-                color: #00f0ff;
+                color: var(--login-cyan);
             }
 
             .password-toggle:focus {
                 outline: none;
                 background: rgba(0, 240, 255, 0.1);
-                color: #00f0ff;
+                color: var(--login-cyan);
+                box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.4);
             }
 
             .password-toggle i {
@@ -168,17 +259,18 @@
             .remember-me {
                 display: flex;
                 align-items: center;
-                color: #b0b0c0;
+                color: var(--login-muted);
                 font-size: 14px;
                 cursor: pointer;
             }
 
             .remember-me input {
                 margin-right: 8px;
+                accent-color: var(--login-cyan);
             }
 
             .forgot-password {
-                color: #00f0ff;
+                color: var(--login-cyan);
                 text-decoration: none;
                 font-size: 14px;
                 transition: color 0.3s ease;
@@ -186,6 +278,7 @@
 
             .forgot-password:hover {
                 color: #00d4ff;
+                text-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
             }
 
             .btn {
@@ -193,8 +286,11 @@
                 padding: 12px;
                 border: none;
                 border-radius: 8px;
-                font-size: 16px;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 15px;
                 font-weight: 600;
+                letter-spacing: 2px;
+                text-transform: uppercase;
                 cursor: pointer;
                 transition: all 0.3s ease;
                 position: relative;
@@ -203,13 +299,36 @@
 
             .btn-primary {
                 background: linear-gradient(135deg, #00f0ff, #0099cc);
-                color: white;
+                color: #0a0e18;
             }
 
             .btn-primary:hover {
                 background: linear-gradient(135deg, #00d4ff, #0088bb);
                 transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(0, 240, 255, 0.3);
+                box-shadow:
+                    0 4px 16px rgba(0, 240, 255, 0.35),
+                    0 0 30px rgba(0, 240, 255, 0.15);
+            }
+
+            /* 按钮闪光扫过 */
+            .btn-primary::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 60%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+                transition: none;
+            }
+
+            .btn-primary:hover::before {
+                animation: btnShimmer 0.6s ease;
+            }
+
+            @keyframes btnShimmer {
+                0% { left: -100%; }
+                100% { left: 150%; }
             }
 
             .btn.loading {
@@ -245,19 +364,20 @@
             }
 
             .form-footer p {
-                color: #b0b0c0;
+                color: var(--login-muted);
                 font-size: 14px;
                 margin: 0;
             }
 
             .form-footer a {
-                color: #00f0ff;
+                color: var(--login-cyan);
                 text-decoration: none;
-                transition: color 0.3s ease;
+                transition: all 0.3s ease;
             }
 
             .form-footer a:hover {
                 color: #00d4ff;
+                text-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
             }
 
             .password-strength {
@@ -295,14 +415,14 @@
             }
 
             .strength-text {
-                color: #b0b0c0;
+                color: var(--login-muted);
                 font-size: 12px;
             }
 
             .terms-agreement {
                 display: flex;
                 align-items: flex-start;
-                color: #b0b0c0;
+                color: var(--login-muted);
                 font-size: 14px;
                 cursor: pointer;
                 margin-bottom: 20px;
@@ -311,10 +431,11 @@
             .terms-agreement input {
                 margin-right: 8px;
                 margin-top: 2px;
+                accent-color: var(--login-cyan);
             }
 
             .terms-link {
-                color: #00f0ff;
+                color: var(--login-cyan);
                 text-decoration: none;
             }
 
@@ -340,18 +461,28 @@
             }
 
             .message.success {
-                background: #2ed573;
+                background: linear-gradient(135deg, #2ed573, #1abc9c);
+                box-shadow: 0 4px 16px rgba(46, 213, 115, 0.3);
             }
 
             .message.error {
-                background: #ff4757;
+                background: linear-gradient(135deg, #ff4757, #ff6b81);
+                box-shadow: 0 4px 16px rgba(255, 71, 87, 0.3);
             }
 
             .hidden {
                 display: none;
             }
 
-            /* 响应式设计 */
+            /* ── 减少动画支持 ── */
+            @media (prefers-reduced-motion: reduce) {
+                body::before { animation: none !important; }
+                .form-container::before { animation: none !important; }
+                .btn-primary::before { display: none !important; }
+                .particle-network-canvas { display: none !important; }
+            }
+
+            /* ── 响应式设计 ── */
             @media (max-width: 480px) {
                 .container {
                     padding: 10px;
@@ -368,7 +499,7 @@
             <div class="form-container">
                 <!-- 游戏平台Logo -->
                 <div class="platform-logo">
-                    <img src="js/logo-main.png" alt="" />
+                    <img src="js/logo-main.png" alt="Artifex" />
                     <h1>Artifex</h1>
                 </div>
 
@@ -381,12 +512,12 @@
                     <form id="login">
                         <div class="input-group">
                             <i class="fas fa-user-circle"></i>
-                            <input type="email" id="loginEmail" placeholder="邮箱地址" required />
+                            <input type="email" id="loginEmail" placeholder="邮箱地址" required aria-label="邮箱地址" />
                         </div>
                         <div class="input-group">
                             <i class="fas fa-lock"></i>
                             <div class="password-input-container">
-                                <input type="password" id="loginPassword" placeholder="密码" required />
+                                <input type="password" id="loginPassword" placeholder="密码" required aria-label="密码" />
                                 <button type="button" class="password-toggle" id="toggle-login-password">
                                     <i class="fas fa-eye"></i>
                                 </button>
@@ -416,16 +547,16 @@
                     <form id="register">
                         <div class="input-group">
                             <i class="fas fa-user"></i>
-                            <input type="text" id="registerUsername" placeholder="用户名" required />
+                            <input type="text" id="registerUsername" placeholder="用户名" required aria-label="用户名" />
                         </div>
                         <div class="input-group">
                             <i class="fas fa-envelope"></i>
-                            <input type="email" id="registerEmail" placeholder="邮箱地址" required />
+                            <input type="email" id="registerEmail" placeholder="邮箱地址" required aria-label="邮箱地址" />
                         </div>
                         <div class="input-group">
                             <i class="fas fa-lock"></i>
                             <div class="password-input-container">
-                                <input type="password" id="registerPassword" placeholder="设置密码" required />
+                                <input type="password" id="registerPassword" placeholder="设置密码" required aria-label="设置密码" />
                                 <button type="button" class="password-toggle" id="toggle-register-password">
                                     <i class="fas fa-eye"></i>
                                 </button>
@@ -461,6 +592,10 @@
         <!-- 消息提示 -->
         <div class="message" id="message"></div>
 
+        <script src="js/particle-network.js"></script>
+        <script>
+            ParticleNetwork.init({ container: document.body, particleCount: 60 });
+        </script>
         <script src="js/api-utils.js"></script>
         <script src="js/login-page.js"></script>
     </body>

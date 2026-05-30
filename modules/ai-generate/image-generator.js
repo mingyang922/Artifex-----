@@ -1,9 +1,22 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
+'use strict';
 // ImageGenerator类 - 负责AI图片生成功能
 class ImageGenerator {
+    // 转义 HTML 特殊字符，防止 XSS
+    static escapeHtml(str) {
+        if (typeof str !== 'string') return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // 转义 JS 字符串中的特殊字符（用于 onclick 等内联事件处理器）
+    static escapeJsStr(str) {
+        if (typeof str !== 'string') return '';
+        return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/</g, '\\x3c').replace(/>/g, '\\x3e');
+    }
+
     constructor() {
         this.apiConfig = {
             endpoint: API_BASE + '/api/image-proxy',
@@ -66,7 +79,7 @@ class ImageGenerator {
                 reader.onload = () => {
                     this.sketchBase64 = reader.result; // data:image/png;base64,xxx
                     if (preview) {
-                        preview.innerHTML = '<img src="' + this.sketchBase64 + '" alt="线稿预览">';
+                        preview.innerHTML = ''; const _img = document.createElement('img'); _img.src = this.sketchBase64; _img.alt = '线稿预览'; preview.appendChild(_img);
                     }
                     this.persistGeneratorUiState();
                 };
@@ -90,7 +103,7 @@ class ImageGenerator {
                 this.sketchBase64 = reader.result;
                 const preview = document.getElementById('sketchPreview');
                 if (preview) {
-                    preview.innerHTML = '<img src="' + this.sketchBase64 + '" alt="线稿预览">';
+                    preview.innerHTML = ''; const _img = document.createElement('img'); _img.src = this.sketchBase64; _img.alt = '线稿预览'; preview.appendChild(_img);
                 }
                 const img2imgRadio = document.querySelector('input[name="imageMode"][value="img2img"]');
                 if (img2imgRadio && !img2imgRadio.checked) {
@@ -438,8 +451,9 @@ class ImageGenerator {
         if (extractBtn && extractBtn.disabled) {
             return;
         }
+        const styleVlModelSelect = document.getElementById('styleVlModelSelect');
         const vlModel =
-            (document.getElementById('styleVlModelSelect') && document.getElementById('styleVlModelSelect').value) ||
+            (styleVlModelSelect && styleVlModelSelect.value) ||
             'qwen-vl-plus';
         if (!this._styleRefRawDataUrl) {
             themedWarn('请先选择参考图');
@@ -825,67 +839,81 @@ class ImageGenerator {
 
     displayResult(result) {
         const container = document.getElementById('result-body');
-        if (container) {
-            container.innerHTML = `
+        if (!container) return;
+
+        const esc = ImageGenerator.escapeHtml;
+        const escJs = ImageGenerator.escapeJsStr;
+        const safeUrl = esc(result.imageUrl || '');
+        const safeId = escJs(result.id || '');
+        const safeType = esc(result.type || '');
+        const safeStyle = esc(result.style || '');
+        const safeColor = esc(result.colorScheme || '');
+        const safeSize = esc(result.imageSize || '');
+        const safeTime = esc(result.timestamp || '');
+        const safePresetId = esc(result.presetId || '');
+        const snippet = (result.stylePresetSnippet || '').slice(0, 200);
+        const safeSnippet = esc(snippet);
+        const snippetSuffix = (result.stylePresetSnippet || '').length > 200 ? '…' : '';
+
+        container.innerHTML = `
                         <div style="text-align: center; padding: 20px;">
                             <h3 style="color: #00f0ff; margin-bottom: 20px;">🎉 图片生成成功！</h3>
-                            
+
                             <div style="margin: 20px 0;">
-                                <img src="${result.imageUrl}" 
-                                     alt="生成的图片" 
+                                <img src="${safeUrl}"
+                                     alt="生成的图片"
                                      style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 2px solid #00f0ff;"
                                      onerror="console.error('图片加载失败:', this.src); this.style.display='none'; document.getElementById('error-msg').style.display='block';">
-                                
+
                                 <div id="error-msg" style="display: none; color: #ff6b6b; padding: 20px;">
                                     <p>❌ 图片无法显示</p>
                                     <p>请点击下方按钮在新窗口打开</p>
                                 </div>
                             </div>
-                            
+
                             <div style="background: rgba(0,240,255,0.1); padding: 15px; border-radius: 8px; margin: 15px 0; text-align: left;">
                                 <p><strong>📋 图片信息：</strong></p>
-                                <p>类型：${result.type}</p>
-                                <p>风格：${result.style}</p>
-                                <p>配色：${result.colorScheme}</p>
-                                <p>尺寸：${result.imageSize}</p>
-                                <p>时间：${result.timestamp}</p>
-                                ${result.presetId ? `<p>风格预设 ID：${result.presetId}</p>` : ''}
-                                ${result.stylePresetSnippet ? `<p style="word-break:break-all;">风格片段快照：${result.stylePresetSnippet.slice(0, 200)}${result.stylePresetSnippet.length > 200 ? '…' : ''}</p>` : ''}
+                                <p>类型：${safeType}</p>
+                                <p>风格：${safeStyle}</p>
+                                <p>配色：${safeColor}</p>
+                                <p>尺寸：${safeSize}</p>
+                                <p>时间：${safeTime}</p>
+                                ${result.presetId ? `<p>风格预设 ID：${safePresetId}</p>` : ''}
+                                ${result.stylePresetSnippet ? `<p style="word-break:break-all;">风格片段快照：${safeSnippet}${snippetSuffix}</p>` : ''}
                             </div>
-                            
+
                             <div style="margin-top: 20px;">
-                                <button onclick="window.open('${result.imageUrl}', '_blank')" 
+                                <button onclick="window.open('${safeUrl}', '_blank')"
                                         style="background: #00f0ff; color: #1a1a2e; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
                                     🔗 在新窗口打开
                                 </button>
-                                <button onclick="imageGenerator.downloadImage('${result.id}')" 
+                                <button onclick="imageGenerator.downloadImage('${safeId}')"
                                         style="background: #667eea; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
                                     💾 下载图片
                                 </button>
-                                <button onclick="imageGenerator.copyPrompt('${result.id}')" 
+                                <button onclick="imageGenerator.copyPrompt('${safeId}')"
                                         style="background: #4ade80; color: #1a1a2e; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
                                     📋 复制提示词
                                 </button>
-                                <button onclick="imageGenerator.saveToAssetLibrary('${result.id}')" 
+                                <button onclick="imageGenerator.saveToAssetLibrary('${safeId}')"
                                         style="background: #f59e0b; color: #1a1a2e; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
                                     🗂️ 存到素材库
                                 </button>
-                                <button onclick="imageGenerator.saveToCurrentProject('${result.id}')" 
+                                <button onclick="imageGenerator.saveToCurrentProject('${safeId}')"
                                         style="background: #a78bfa; color: #1a1a2e; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
                                     📌 加入当前项目
                                 </button>
                             </div>
-                            
+
                             <details style="margin-top: 20px; text-align: left;">
                                 <summary style="cursor: pointer; color: #888;" aria-label="展开或收起本条生成结果的调试信息">🔍 调试信息</summary>
                                 <div style="background: #2d2d4d; padding: 10px; border-radius: 4px; margin-top: 10px; font-family: monospace; font-size: 12px; word-break: break-all;">
                                     <p><strong>图片URL:</strong></p>
-                                    <p>${result.imageUrl}</p>
+                                    <p>${safeUrl}</p>
                                 </div>
                             </details>
                         </div>
                     `;
-        }
     }
 
     saveImage(image) {
@@ -919,17 +947,17 @@ class ImageGenerator {
                 (image) => `
                     <div class="asset-card">
                         <div class="asset-preview">
-                            <img src="${image.imageUrl}" alt="${image.name}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px;" onerror="imageGenerator.handleBrokenGeneratedImage('${image.id}')">
+                            <img src="${ImageGenerator.escapeHtml(image.imageUrl)}" alt="${ImageGenerator.escapeHtml(image.name)}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px;" onerror="imageGenerator.handleBrokenGeneratedImage('${ImageGenerator.escapeJsStr(image.id)}')">
                         </div>
                         <div class="asset-info">
-                            <div class="asset-name">${image.name}</div>
-                            <div style="font-size: 12px; color: #888;">${image.timestamp}</div>
+                            <div class="asset-name">${ImageGenerator.escapeHtml(image.name)}</div>
+                            <div style="font-size: 12px; color: #888;">${ImageGenerator.escapeHtml(image.timestamp)}</div>
                             <div style="margin-top: 10px;">
-                                <button class="asset-action" onclick="imageGenerator.downloadImage('${image.id}')" style="font-size: 12px; padding: 4px 8px;">下载</button>
-                                <button class="asset-action" onclick="imageGenerator.previewImage('${image.id}')" style="font-size: 12px; padding: 4px 8px;">预览</button>
-                                <button class="asset-action" onclick="imageGenerator.saveToAssetLibrary('${image.id}')" style="font-size: 12px; padding: 4px 8px;">存到素材库</button>
-                                <button class="asset-action" onclick="imageGenerator.saveToCurrentProject('${image.id}')" style="font-size: 12px; padding: 4px 8px;">加入项目</button>
-                                <button class="asset-action" onclick="imageGenerator.deleteImage('${image.id}')" style="font-size: 12px; padding: 4px 8px;">删除</button>
+                                <button class="asset-action" onclick="imageGenerator.downloadImage('${ImageGenerator.escapeJsStr(image.id)}')" style="font-size: 12px; padding: 4px 8px;">下载</button>
+                                <button class="asset-action" onclick="imageGenerator.previewImage('${ImageGenerator.escapeJsStr(image.id)}')" style="font-size: 12px; padding: 4px 8px;">预览</button>
+                                <button class="asset-action" onclick="imageGenerator.saveToAssetLibrary('${ImageGenerator.escapeJsStr(image.id)}')" style="font-size: 12px; padding: 4px 8px;">存到素材库</button>
+                                <button class="asset-action" onclick="imageGenerator.saveToCurrentProject('${ImageGenerator.escapeJsStr(image.id)}')" style="font-size: 12px; padding: 4px 8px;">加入项目</button>
+                                <button class="asset-action" onclick="imageGenerator.deleteImage('${ImageGenerator.escapeJsStr(image.id)}')" style="font-size: 12px; padding: 4px 8px;">删除</button>
                             </div>
                         </div>
                     </div>
@@ -1054,7 +1082,7 @@ class ImageGenerator {
             this.sketchBase64 = state.sketchBase64;
             const preview = document.getElementById('sketchPreview');
             if (preview) {
-                preview.innerHTML = '<img src="' + this.sketchBase64 + '" alt="线稿预览">';
+                preview.innerHTML = ''; const _img = document.createElement('img'); _img.src = this.sketchBase64; _img.alt = '线稿预览'; preview.appendChild(_img);
             }
         }
     }
@@ -1073,28 +1101,50 @@ class ImageGenerator {
         };
     }
 
-    saveToAssetLibrary(imageId) {
+    async saveToAssetLibrary(imageId) {
         const image = this.generatedImages.find((i) => i.id === imageId);
         if (!image) {
             themedWarn('未找到要保存的图片');
             return;
         }
-        let state = { categories: [], assets: [] };
         try {
-            const raw = localStorage.getItem(aiStorageKey('assetLibrary_v1'));
-            state = raw ? JSON.parse(raw) : state;
+            const fileName = `${(image.name || 'ai-image').replace(/[\\/:*?"<>|]/g, '_')}.png`;
+            const body = {
+                name: image.name || 'AI图片',
+                type: 'image/png',
+                content: image.imageUrl || '',
+                desc: fileName,
+                source: 'ai-generate',
+                tags: JSON.stringify({ category: 'AI生成', fileName: fileName }),
+            };
+            const resp = await fetchWithCsrf('/api/asset-library', {
+                method: 'POST',
+                body: JSON.stringify(body),
+            });
+            if (!resp.ok) {
+                const err = await resp.json().catch(() => ({}));
+                throw new Error(err.error || '保存失败');
+            }
+            themedSuccess('图片已保存到素材库');
         } catch (e) {
-            console.warn('读取素材库失败：', e);
+            console.error('保存到素材库失败', e);
+            // Fallback to localStorage
+            try {
+                let state = { categories: [], assets: [] };
+                const raw = localStorage.getItem(aiStorageKey('assetLibrary_v1'));
+                state = raw ? JSON.parse(raw) : state;
+                state.categories = Array.isArray(state.categories) ? state.categories : [];
+                state.assets = Array.isArray(state.assets) ? state.assets : [];
+                if (!state.categories.includes('AI生成')) {
+                    state.categories.unshift('AI生成');
+                }
+                state.assets.unshift(this.buildAssetLibraryItemFromImage(image));
+                localStorage.setItem(aiStorageKey('assetLibrary_v1'), JSON.stringify(state));
+                themedSuccess('图片已保存到素材库（本地备份）');
+            } catch (fallbackErr) {
+                themedWarn('保存失败：' + (e.message || '请重试'));
+            }
         }
-
-        state.categories = Array.isArray(state.categories) ? state.categories : [];
-        state.assets = Array.isArray(state.assets) ? state.assets : [];
-        if (!state.categories.includes('AI生成')) {
-            state.categories.unshift('AI生成');
-        }
-        state.assets.unshift(this.buildAssetLibraryItemFromImage(image));
-        localStorage.setItem(aiStorageKey('assetLibrary_v1'), JSON.stringify(state));
-        themedSuccess('图片已保存到素材库');
     }
 
     saveToCurrentProject(imageOrId, options = {}) {
@@ -1177,10 +1227,10 @@ class ImageGenerator {
             const newWindow = window.open('', '_blank');
             newWindow.document.write(`
                         <html>
-                        <head><title>${image.name}</title></head>
+                        <head><title>${ImageGenerator.escapeHtml(image.name)}</title></head>
                         <body style="margin: 0; padding: 20px; background: #1a1a2e; color: white; text-align: center;">
-                            <h2>${image.name}</h2>
-                            <img src="${image.imageUrl}" alt="${image.name}" style="max-width: 90%; max-height: 80vh; border-radius: 8px;">
+                            <h2>${ImageGenerator.escapeHtml(image.name)}</h2>
+                            <img src="${ImageGenerator.escapeHtml(image.imageUrl)}" alt="${ImageGenerator.escapeHtml(image.name)}" style="max-width: 90%; max-height: 80vh; border-radius: 8px;">
                             <div style="margin-top: 20px;">
                                 <button onclick="window.close()" style="padding: 10px 20px; background: #00f0ff; color: #1a1a2e; border: none; border-radius: 4px; cursor: pointer;">关闭</button>
                             </div>
@@ -1222,7 +1272,7 @@ class ImageGenerator {
             container.innerHTML = `
                         <div style="text-align: center; color: #ff4d4f; padding: 40px;">
                             <h3>❌ 图片生成失败</h3>
-                            <p><strong>错误信息:</strong> ${error.message || '未知错误'}</p>
+                            <p><strong>错误信息:</strong> ${ImageGenerator.escapeHtml(error.message || '未知错误')}</p>
                             <div style="background: rgba(255,77,79,0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
                                 <p><strong>可能的解决方案:</strong></p>
                                 <ul style="text-align: left; display: inline-block;">

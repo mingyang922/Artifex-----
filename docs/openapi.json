@@ -14,7 +14,11 @@
         { "name": "config", "description": "运行时配置" },
         { "name": "image", "description": "图片生成" },
         { "name": "chat", "description": "AI 对话" },
-        { "name": "status", "description": "服务状态" }
+        { "name": "status", "description": "服务状态" },
+        { "name": "projects", "description": "项目管理" },
+        { "name": "asset-library", "description": "素材库" },
+        { "name": "admin", "description": "管理员功能" },
+        { "name": "usage", "description": "用量统计" }
     ],
     "paths": {
         "/api/health": {
@@ -201,6 +205,229 @@
         },
         "/api/jimeng/status": {
             "get": { "tags": ["status"], "summary": "即梦连通性", "responses": { "200": { "description": "状态信息" } } }
+        },
+        "/api/projects": {
+            "get": {
+                "tags": ["projects"],
+                "summary": "获取用户所有项目",
+                "parameters": [
+                    { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1, "minimum": 1 }, "description": "页码" },
+                    { "name": "pageSize", "in": "query", "schema": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 }, "description": "每页条数" }
+                ],
+                "responses": { "200": { "description": "项目列表" } }
+            },
+            "post": {
+                "tags": ["projects"],
+                "summary": "创建项目",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["name"],
+                                "properties": {
+                                    "name": { "type": "string", "description": "项目名称" },
+                                    "description": { "type": "string", "description": "项目描述" },
+                                    "type": { "type": "string", "description": "项目类型" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "创建成功" },
+                    "400": { "description": "项目名称不能为空" }
+                }
+            }
+        },
+        "/api/projects/{id}": {
+            "put": {
+                "tags": ["projects"],
+                "summary": "更新项目",
+                "parameters": [
+                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": { "type": "string" },
+                                    "description": { "type": "string" },
+                                    "type": { "type": "string" },
+                                    "versionDesc": { "type": "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "更新成功" },
+                    "404": { "description": "项目不存在" }
+                }
+            },
+            "delete": {
+                "tags": ["projects"],
+                "summary": "删除项目",
+                "parameters": [
+                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+                ],
+                "responses": { "200": { "description": "删除成功" } }
+            }
+        },
+        "/api/projects/{id}/assets": {
+            "post": {
+                "tags": ["projects"],
+                "summary": "添加项目素材",
+                "description": "向项目添加素材。内容大小限制为 10MB。仅接受 PNG、JPG/JPEG、GIF、WebP、SVG 格式的图片。",
+                "parameters": [
+                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["name", "content"],
+                                "properties": {
+                                    "name": { "type": "string", "description": "素材名称" },
+                                    "type": { "type": "string", "description": "素材类型（如 image/png, image/jpeg）" },
+                                    "content": { "type": "string", "description": "素材内容（base64 或 data URL），最大 10MB" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "添加成功" },
+                    "400": { "description": "素材名称和内容不能为空" },
+                    "413": { "description": "素材内容过大，最大允许 10MB" }
+                }
+            }
+        },
+        "/api/assets/{id}": {
+            "delete": {
+                "tags": ["projects"],
+                "summary": "删除项目素材",
+                "parameters": [
+                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+                ],
+                "responses": { "200": { "description": "删除成功" } }
+            }
+        },
+        "/api/asset-library": {
+            "get": {
+                "tags": ["asset-library"],
+                "summary": "获取用户素材库",
+                "parameters": [
+                    { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1, "minimum": 1 }, "description": "页码" },
+                    { "name": "pageSize", "in": "query", "schema": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 }, "description": "每页条数" }
+                ],
+                "responses": { "200": { "description": "素材列表" } }
+            },
+            "post": {
+                "tags": ["asset-library"],
+                "summary": "添加素材到素材库",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["name", "content"],
+                                "properties": {
+                                    "name": { "type": "string", "description": "素材名称" },
+                                    "type": { "type": "string", "description": "素材类型" },
+                                    "content": { "type": "string", "description": "素材内容（base64 或 data URL），最大 10MB" },
+                                    "desc": { "type": "string", "description": "素材描述" },
+                                    "source": { "type": "string", "description": "素材来源" },
+                                    "tags": { "type": "string", "description": "标签（逗号分隔）" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "添加成功" },
+                    "400": { "description": "素材名称和内容不能为空" },
+                    "413": { "description": "素材内容过大，最大允许 10MB" }
+                }
+            }
+        },
+        "/api/asset-library/{id}": {
+            "put": {
+                "tags": ["asset-library"],
+                "summary": "更新素材库素材",
+                "parameters": [
+                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": { "type": "string" },
+                                    "desc": { "type": "string" },
+                                    "tags": { "type": "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "更新成功" },
+                    "404": { "description": "素材不存在" }
+                }
+            },
+            "delete": {
+                "tags": ["asset-library"],
+                "summary": "删除素材库素材",
+                "parameters": [
+                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+                ],
+                "responses": { "200": { "description": "删除成功" } }
+            }
+        },
+        "/api/me/usage": {
+            "get": {
+                "tags": ["usage"],
+                "summary": "获取当前用户用量统计",
+                "responses": { "200": { "description": "用量统计（stats + today）" } }
+            }
+        },
+        "/api/admin/usage": {
+            "get": {
+                "tags": ["admin"],
+                "summary": "管理员：全局用量统计",
+                "responses": {
+                    "200": { "description": "全局用量汇总与明细" },
+                    "403": { "description": "权限不足" }
+                }
+            }
+        },
+        "/api/admin/users": {
+            "get": {
+                "tags": ["admin"],
+                "summary": "管理员：用户列表",
+                "responses": {
+                    "200": { "description": "用户列表" },
+                    "403": { "description": "权限不足" }
+                }
+            }
+        },
+        "/api/health/detail": {
+            "get": {
+                "tags": ["admin"],
+                "summary": "详细健康检查（管理员）",
+                "responses": {
+                    "200": { "description": "详细配置状态" },
+                    "403": { "description": "权限不足" }
+                }
+            }
         }
     },
     "components": {

@@ -1,7 +1,7 @@
-Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
+﻿Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
 源代码文档
-生成时间: 2026-05-28
-总行数: 30103  总页数: 603
+生成时间: 2026-05-30
+总行数: 31123  总页数: 623
 ================================================================================
 
 【前30页】
@@ -428,7 +428,7 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                         </div>
                         <button type="submit" class="btn btn-primary">登录账户</button>
                         <div class="form-footer">
-                            <p>还没有账户？ <a href="#" onclick="switchForm('registerForm')">立即注册</a></p>
+                            <p>还没有账户？ <a href="#" data-switch-form="registerForm">立即注册</a></p>
                         </div>
                     </form>
                 </div>
@@ -479,7 +479,7 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                         </div>
                         <button type="submit" class="btn btn-primary">创建账户</button>
                         <div class="form-footer">
-                            <p>已有账户？ <a href="#" onclick="switchForm('loginForm')">立即登录</a></p>
+                            <p>已有账户？ <a href="#" data-switch-form="loginForm">立即登录</a></p>
                         </div>
                     </form>
                 </div>
@@ -489,203 +489,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
         <!-- 消息提示 -->
         <div class="message" id="message"></div>
 
-        <script>
-            // CSRF 令牌辅助函数
-            async function getCsrfToken() {
-                try {
-                    const r = await fetch('/api/csrf-token', { credentials: 'include' });
-                    const data = await r.json();
-                    return data.csrfToken || '';
-                } catch (e) {
-                    return '';
-                }
-            }
-
-            // 设置密码显示/隐藏切换
-            function setupPasswordToggles() {
-                const toggles = document.querySelectorAll('.password-toggle');
-                toggles.forEach((toggle) => {
-                    toggle.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const input = toggle.parentElement.querySelector('input');
-                        const icon = toggle.querySelector('i');
-
-                        if (input.type === 'password') {
-                            input.type = 'text';
-                            icon.className = 'fas fa-eye-slash';
-                        } else {
-                            input.type = 'password';
-                            icon.className = 'fas fa-eye';
-                        }
-                    });
-                });
-            }
-
-            // 切换表单
-            function switchForm(formId) {
-                document.querySelectorAll('.form-wrapper').forEach((form) => {
-                    form.classList.add('hidden');
-
---- 第 11 页 ---
-                });
-                document.getElementById(formId).classList.remove('hidden');
-
-                // 滚动到顶部
-                window.scrollTo(0, 0);
-            }
-
-            // 显示消息提示
-            function showMessage(text, type) {
-                const message = document.getElementById('message');
-                message.textContent = text;
-                message.className = 'message ' + type;
-                message.classList.add('show');
-
-                setTimeout(() => {
-                    message.classList.remove('show');
-                }, 3000);
-            }
-
-            // 页面加载完成后设置密码切换
-            document.addEventListener('DOMContentLoaded', function () {
-                setupPasswordToggles();
-            });
-
-            // 密码强度检测
-            document.getElementById('registerPassword').addEventListener('input', function (e) {
-                const password = e.target.value;
-                const strengthFill = document.getElementById('registerStrengthFill');
-                const strengthText = document.getElementById('registerStrengthText');
-
-                let strength = 0;
-                let strengthClass = '';
-                let strengthLabel = '';
-
-                if (password.length >= 8) strength++;
-                if (password.match(/[A-Z]/)) strength++;
-                if (password.match(/[0-9]/)) strength++;
-                if (password.match(/[^A-Za-z0-9]/)) strength++;
-
-                switch (strength) {
-                    case 0:
-                    case 1:
-                        strengthClass = 'weak';
-                        strengthLabel = '密码强度: 弱';
-                        break;
-                    case 2:
-                    case 3:
-                        strengthClass = 'medium';
-                        strengthLabel = '密码强度: 中';
-                        break;
-
---- 第 12 页 ---
-                    case 4:
-                        strengthClass = 'strong';
-                        strengthLabel = '密码强度: 强';
-                        break;
-                }
-
-                strengthFill.className = 'strength-fill ' + strengthClass;
-                strengthText.textContent = strengthLabel;
-            });
-
-            // 表单提交：对接后端 SQLite + 会话（比赛/演示）
-            document.getElementById('login').addEventListener('submit', async function (e) {
-                e.preventDefault();
-                const btn = this.querySelector('.btn');
-                btn.classList.add('loading');
-                try {
-                    const csrfToken = await getCsrfToken();
-                    const res = await fetch('/api/auth/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': csrfToken },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                            email: document.getElementById('loginEmail').value,
-                            password: document.getElementById('loginPassword').value,
-                        }),
-                    });
-                    const data = await res.json().catch(() => ({}));
-                    if (!res.ok) {
-                        showMessage(data.error || '登录失败', 'error');
-                        return;
-                    }
-                    if (data.user && data.user.id != null) {
-                        try {
-                            localStorage.setItem('gameui-session-user-id', String(data.user.id));
-                        } catch (e) {
-                            /* ignore */
-                        }
-                    }
-                    showMessage('登录成功！正在跳转到主控制台...', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 600);
-                } catch (err) {
-                    showMessage('无法连接服务器，请确认已运行 npm start', 'error');
-                } finally {
-                    btn.classList.remove('loading');
-                }
-            });
-
-            document.getElementById('register').addEventListener('submit', async function (e) {
-
---- 第 13 页 ---
-                e.preventDefault();
-                const btn = this.querySelector('.btn');
-                btn.classList.add('loading');
-                try {
-                    const csrfToken = await getCsrfToken();
-                    const res = await fetch('/api/auth/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': csrfToken },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                            username: document.getElementById('registerUsername').value,
-                            email: document.getElementById('registerEmail').value,
-                            password: document.getElementById('registerPassword').value,
-                        }),
-                    });
-                    const data = await res.json().catch(() => ({}));
-                    if (!res.ok) {
-                        showMessage(data.error || '注册失败', 'error');
-                        return;
-                    }
-                    if (data.user && data.user.id != null) {
-                        try {
-                            localStorage.setItem('gameui-session-user-id', String(data.user.id));
-                        } catch (e) {
-                            /* ignore */
-                        }
-                    }
-                    const registrationTime = new Date(
-                        data.user && data.user.created_at ? data.user.created_at : Date.now()
-                    );
-                    const registrationData = {
-                        registrationDate: registrationTime.toISOString(),
-                        registrationDateFormatted:
-                            registrationTime.getFullYear() +
-                            '/' +
-                            (registrationTime.getMonth() + 1) +
-                            '/' +
-                            registrationTime.getDate(),
-                        username: data.user && data.user.username,
-                        email: data.user && data.user.email,
-                    };
-                    localStorage.setItem('userRegistrationData', JSON.stringify(registrationData));
-                    showMessage('注册成功！已自动登录，正在进入控制台...', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 800);
-                } catch (err) {
-                    showMessage('无法连接服务器，请确认已运行 npm start', 'error');
-                } finally {
-                    btn.classList.remove('loading');
-
---- 第 14 页 ---
-                }
-            });
-        </script>
+        <script src="js/api-utils.js"></script>
+        <script src="js/login-page.js"></script>
     </body>
 </html>
 
@@ -720,6 +525,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
         <style>
             :root {
                 --tech-cyan: #00f0ff;
+
+--- 第 11 页 ---
                 --tech-violet: #8b5cf6;
                 --font-display: "Orbitron", "Segoe UI", sans-serif;
                 --font-ui: "Rajdhani", "Segoe UI", sans-serif;
@@ -733,8 +540,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 overflow: hidden;
             }
 
-
---- 第 15 页 ---
             /* 主界面核心样式 */
             body {
                 background: #0a0e18;
@@ -773,6 +578,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 transition: left 0.38s cubic-bezier(0.22, 1, 0.36, 1), top 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
             }
 
+--- 第 12 页 ---
+
             body:not(.pointer-glow-active) .pointer-glow,
             body:not(.pointer-glow-active) .pointer-glow--lag {
                 opacity: 0;
@@ -785,8 +592,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 background:
                     radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.24) 0%, rgba(0, 240, 255, 0) 38%),
                     radial-gradient(circle at 80% 30%, rgba(124, 58, 237, 0.28) 0%, rgba(124, 58, 237, 0) 40%),
-
---- 第 16 页 ---
                     radial-gradient(circle at 50% 85%, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0) 37%);
                 filter: blur(28px);
                 transform: translate3d(0, 0, 0);
@@ -824,6 +629,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 height: 100vh;
                 position: fixed;
                 top: 0;
+
+--- 第 13 页 ---
                 left: 0;
             }
 
@@ -837,8 +644,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 background: linear-gradient(180deg, transparent 0%, rgba(0, 240, 255, 0.35) 30%, rgba(167, 139, 250, 0.4) 55%, rgba(0, 240, 255, 0.25) 80%, transparent 100%);
                 opacity: 0.85;
                 pointer-events: none;
-
---- 第 17 页 ---
                 animation: sidebarEdgeFlow 2.4s ease-in-out infinite;
             }
 
@@ -870,13 +675,14 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 color: #f0f4fc;
                 margin: 0;
             }
-            }
 
             .nav-menu {
                 list-style: none;
                 padding: 0;
             }
 
+
+--- 第 14 页 ---
             .nav-item {
                 margin-bottom: 5px;
             }
@@ -889,8 +695,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 text-decoration: none;
                 transition: all 0.3s ease;
                 border-left: 3px solid transparent;
-
---- 第 18 页 ---
             }
 
             .nav-link:hover, .nav-link.active {
@@ -929,6 +733,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 inset: 0;
                 pointer-events: none;
                 z-index: 0;
+
+--- 第 15 页 ---
                 background: repeating-linear-gradient(
                     0deg,
                     transparent,
@@ -941,8 +747,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
             }
 
             .main-content > * {
-
---- 第 19 页 ---
                 position: relative;
                 z-index: 1;
             }
@@ -982,6 +786,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 overflow: hidden;
             }
 
+--- 第 16 页 ---
+
             .top-bar::before {
                 content: "";
                 position: absolute;
@@ -993,8 +799,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 animation: topBarShine 1.9s ease-in-out infinite;
                 z-index: 0;
             }
-
---- 第 20 页 ---
 
             .top-bar > * {
                 position: relative;
@@ -1033,6 +837,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
             .user-menu {
                 display: flex;
                 align-items: center;
+
+--- 第 17 页 ---
             }
 
             .notification-btn {
@@ -1045,8 +851,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 position: relative;
             }
 
-
---- 第 21 页 ---
             .notification-badge {
                 position: absolute;
                 top: -5px;
@@ -1085,6 +889,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
             }
 
             .tool-card {
+
+--- 第 18 页 ---
                 background: rgba(8, 12, 24, 0.72);
                 border-radius: 10px;
                 padding: 22px 20px;
@@ -1097,8 +903,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
             }
 
-
---- 第 22 页 ---
             .tool-card::before {
                 content: "";
                 position: absolute;
@@ -1138,6 +942,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 opacity: 1;
             }
 
+--- 第 19 页 ---
+
             .tool-card > * {
                 position: relative;
                 z-index: 1;
@@ -1149,8 +955,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 margin-bottom: 10px;
                 filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.35));
             }
-
---- 第 23 页 ---
 
             .tool-card h3 {
                 font-family: var(--font-display);
@@ -1189,6 +993,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
             }
 
             .view-all {
+
+--- 第 20 页 ---
                 color: #00f0ff;
                 text-decoration: none;
                 font-size: 13px;
@@ -1201,8 +1007,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
                 gap: 25px;
             }
-
---- 第 24 页 ---
 
             .project-card {
                 background: rgba(8, 12, 24, 0.75);
@@ -1241,6 +1045,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 content: "";
                 position: absolute;
                 inset: 0;
+
+--- 第 21 页 ---
                 border-radius: inherit;
                 background: radial-gradient(300px circle at var(--card-x, 50%) var(--card-y, 50%), rgba(0, 240, 255, 0.22), rgba(139, 92, 246, 0.1) 40%, transparent 70%);
                 opacity: 0;
@@ -1253,8 +1059,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 opacity: 1;
             }
 
-
---- 第 25 页 ---
             .project-card > * {
                 position: relative;
                 z-index: 1;
@@ -1293,6 +1097,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
 
             .project-title {
                 font-size: 1.05rem;
+
+--- 第 22 页 ---
                 font-weight: 700;
                 color: #f5f8ff;
                 margin: 0 0 5px;
@@ -1305,8 +1111,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
                 -webkit-box-orient: vertical;
-
---- 第 26 页 ---
                 overflow: hidden;
             }
 
@@ -1345,6 +1149,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 justify-content: center;
                 cursor: pointer;
                 transition: all 0.3s ease;
+
+--- 第 23 页 ---
             }
 
             .project-action:hover {
@@ -1357,8 +1163,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 .projects-grid {
                     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
                 }
-
---- 第 27 页 ---
             }
 
             @media (max-width: 992px) {
@@ -1397,6 +1201,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
 
                 .search-bar {
                     width: 200px;
+
+--- 第 24 页 ---
                 }
             }
 
@@ -1409,8 +1215,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                     width: 100%;
                 }
 
-
---- 第 28 页 ---
                 .top-bar {
                     flex-direction: column;
                     align-items: flex-start;
@@ -1449,6 +1253,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                     border-radius: 50%;
                     background: #00f0ff;
                     color: #1a1a2e;
+
+--- 第 25 页 ---
                     border: none;
                     font-size: 20px;
                     box-shadow: 0 4px 10px rgba(0, 240, 255, 0.4);
@@ -1461,8 +1267,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                 body::before,
                 .sidebar::after,
                 .top-bar::before {
-
---- 第 29 页 ---
                     animation: none !important;
                 }
                 .pointer-glow,
@@ -1501,6 +1305,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                             <span>主页</span>
                         </a>
                     </li>
+
+--- 第 26 页 ---
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="project-management">
                             <i class="fas fa-project-diagram"></i>
@@ -1513,8 +1319,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                             <span>AI 生成</span>
                         </a>
                     </li>
-
---- 第 30 页 ---
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="asset-library">
                             <i class="fas fa-images"></i>
@@ -1553,6 +1357,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                             <i class="fas fa-user" aria-hidden="true"></i>
                         </div>
                     </div>
+
+--- 第 27 页 ---
                 </div>
 
                 <!-- 快捷工具 -->
@@ -1565,91 +1371,207 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                         </div>
                         <div class="tool-card" data-target="ai-generate">
                             <i class="fas fa-magic"></i>
+                            <h3>AI生成</h3>
+                            <p>使用AI自动生成UI资产</p>
+                        </div>
+                        <div class="tool-card" data-target="asset-library">
+                            <i class="fas fa-images"></i>
+                            <h3>素材库</h3>
+                            <p>访问游戏UI素材资源</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 最近项目（从本地项目数据动态加载） -->
+                <section class="recent-projects scroll-section">
+                    <div class="section-header">
+                        <h2 class="section-title">最近项目</h2>
+                        <a href="#" class="view-all" data-target="project-management">查看全部</a>
+                    </div>
+                    <div class="projects-grid" id="recent-projects-grid">
+                        <!-- 将由脚本根据 localStorage.gameui-projects 动态渲染最近项目 -->
+                    </div>
+                </section>
+
+                <section
+                    class="scroll-section"
+                    hidden
+                    style="
+                        margin-top: 8px;
+                        padding: 18px 22px;
+                        border-radius: 12px;
+                        border: 1px solid rgba(0, 240, 255, 0.18);
+                        background: rgba(15, 22, 41, 0.55);
+                        max-width: 920px;
+                    "
+                >
+                    <div class="section-header" style="margin-bottom: 10px">
+                        <h2 class="section-title"><i class="fas fa-database"></i> 本地数据备份</h2>
+                    </div>
+                    <p
+
+--- 第 28 页 ---
+                        id="artifex-storage-usage"
+                        style="color: #b0b8d0; font-size: 14px; margin: 0 0 14px; line-height: 1.5"
+                    >
+                        正在计算本地存储用量…
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+                        <button
+                            type="button"
+                            id="artifex-export-local-btn"
+                            class="project-action"
+                            title="导出为 JSON 文件"
+                        >
+                            导出 JSON 备份
+                        </button>
+                        <button
+                            type="button"
+                            id="artifex-import-local-btn"
+                            class="project-action"
+                            title="从之前导出的 JSON 恢复"
+                        >
+                            从文件导入
+                        </button>
+                        <input
+                            type="file"
+                            id="artifex-import-local-file"
+                            accept="application/json,.json"
+                            style="display: none"
+                            aria-hidden="true"
+                        />
+                    </div>
+                    <p style="color: #8090a8; font-size: 12px; margin: 12px 0 0">
+                        覆盖项目列表、素材库、风格预设与 AI 生成缩略索引等当前登录用户下的键。导入后请刷新页面。
+                    </p>
+                </section>
+
+                <!-- 模块内容容器 -->
+                <div id="module-container"></div>
+            </main>
+        </div>
+
+        <!-- 移动端菜单按钮 -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- 简化的JavaScript代码 -->
+        <script src="js/ui-kit.js"></script>
+        <script src="js/user-storage-scope.js"></script>
+        <script src="js/data-portability.js"></script>
+        <script src="js/navigation.js"></script>
+
+--- 第 29 页 ---
+        <script src="js/notification-component.js"></script>
+        <script src="js/avatar-manager.js"></script>
+        <script src="js/notification-manager.js"></script>
+        <script src="js/scroll-animations.js"></script>
+        <script src="js/page-effects.js"></script>
+        <script>
+            function formatDate(dateString) {
+                if (!dateString) return '';
+                var d = new Date(dateString);
+                if (isNaN(d.getTime())) return '';
+                var y = d.getFullYear();
+                var m = String(d.getMonth() + 1).padStart(2, '0');
+                var day = String(d.getDate()).padStart(2, '0');
+                return y + '-' + m + '-' + day;
+            }
+
+            function getProjectTypeName(type) {
+                var map = {
+                    ui: 'UI设计',
+                    game: '游戏界面',
+                    other: '其他',
+                };
+                return map[type] || type || '';
+            }
+
+            function renderRecentProjects() {
+                var grid = document.getElementById('recent-projects-grid');
+                if (!grid) return;
+
+                var raw = null;
+                try {
+                    raw = window.localStorage.getItem(GameUiUserScope.key('gameui-projects'));
+                } catch (e) {
+                    console.warn('读取项目数据失败:', e);
+                }
+
+                var projects = [];
+                if (raw) {
+                    try {
+                        projects = JSON.parse(raw) || [];
+                    } catch (e) {
+                        console.warn('解析项目数据失败:', e);
+                        projects = [];
+                    }
+                }
+
+                grid.innerHTML = '';
+
+                if (!projects.length) {
+                    grid.innerHTML =
+
+--- 第 30 页 ---
+                        '<p style="color:#666;text-align:center;">暂无项目数据，请在“项目管理”中创建项目。</p>';
+                    return;
+                }
+
+                // 按创建时间倒序，取最近 3 个
+                projects.sort(function (a, b) {
+                    return new Date(b.createTime || 0) - new Date(a.createTime || 0);
+                });
+                var recent = projects.slice(0, 3);
+
+                recent.forEach(function (project) {
+                    var statusText = '进行中';
+                    if (project.status === 'done') statusText = '已完成';
+                    if (project.status === 'paused') statusText = '已暂停';
+
+                    var card = document.createElement('div');
+                    card.className = 'project-card';
+
+                    card.innerHTML =
+                        '<div class="project-thumbnail">' +
+                        '<span class="project-status">' +
+                        statusText +
+                        '</span>' +
+                        '</div>' +
+                        '<div class="project-info">' +
+                        '<h3 class="project-title">' +
+                        (project.name || '未命名项目') +
+                        '</h3>' +
+                        '<p class="project-desc">' +
+                        (project.desc || '无描述') +
+                        '</p>' +
+                        '<div class="project-meta">' +
+                        '<div class="project-date">' +
+                        '<i class="fas fa-clock"></i>' +
+                        '<span>' +
+                        formatDate(project.createTime) +
+                        '</span>' +
+                        '</div>' +
+                        '<div class="project-actions">' +
+                        '<button class="project-action" title="打开项目"><i class="fas fa-arrow-right"></i></button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+
+                    // 点击整卡或按钮进入项目详情
+                    var openDetail = function () {
+                        if (!project.id) return;
+                        window.location.href =
+                            'modules/project-management/project-detail.html?id=' + encodeURIComponent(project.id);
+                    };
 
 
 ... （中间省略） ...
 
 【后30页】
 
---- 第 574 页 ---
-                                        <option value="sdwebui">SD WebUI</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="api-field-1" id="api-field-1-label">API Key</label>
-                                    <input
-                                        type="text"
-                                        class="form-input"
-                                        id="api-field-1"
-                                        placeholder="请输入主凭证"
-                                        autocomplete="off"
-                                    />
-                                </div>
-                                <div class="form-group" id="api-field-2-wrap" style="display: none">
-                                    <label class="form-label" for="api-field-2" id="api-field-2-label">辅助字段</label>
-                                    <input
-                                        type="text"
-                                        class="form-input"
-                                        id="api-field-2"
-                                        placeholder="请输入辅助凭证"
-                                        autocomplete="off"
-                                    />
-                                </div>
-                                <div class="form-group" id="api-field-3-wrap" style="display: none">
-                                    <label class="form-label" for="api-field-3" id="api-field-3-label">可选字段</label>
-                                    <input
-                                        type="text"
-                                        class="form-input"
-                                        id="api-field-3"
-                                        placeholder="请输入可选配置"
-                                        autocomplete="off"
-                                    />
-                                </div>
-                                <div class="form-group">
-                                    <div id="api-settings-status" style="font-size: 13px; color: #b0b0c0">
-                                        尚未读取配置状态
-                                    </div>
-                                </div>
-                                <div style="display: flex; gap: 10px; flex-wrap: wrap">
-                                    <button type="button" class="btn btn-primary" id="save-api-settings-btn">
-                                        保存配置
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" id="clear-api-settings-btn">
-                                        清空当前服务商
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" id="refresh-api-settings-btn">
-                                        刷新状态
-                                    </button>
-                                </div>
-                            </form>
-
---- 第 575 页 ---
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 修改密码选项卡内容 -->
-                <div class="tab-content" id="change-password" style="display: none">
-                    <div class="info-card">
-                        <div class="info-card-header">
-                            <div class="info-card-icon">
-                                <i class="fas fa-lock"></i>
-                            </div>
-                            <h3 class="info-card-title" data-translate="change-password">修改密码</h3>
-                        </div>
-                        <div class="info-card nested-card">
-                            <!-- 安全提示 -->
-                            <div
-                                class="security-notice"
-                                style="
-                                    background: rgba(255, 193, 7, 0.1);
-                                    border: 1px solid rgba(255, 193, 7, 0.3);
-                                    border-radius: 8px;
-                                    padding: 15px;
-                                    margin-bottom: 20px;
-                                "
-                            >
-                                <div style="display: flex; align-items: center; margin-bottom: 10px">
+--- 第 594 页 ---
                                     <i class="fas fa-shield-alt" style="color: #ffc107; margin-right: 8px"></i>
                                     <span style="color: #ffc107; font-weight: bold">安全提示</span>
                                 </div>
@@ -1674,8 +1596,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                             placeholder="请输入当前密码"
                                             autocomplete="current-password"
                                         />
-
---- 第 576 页 ---
                                         <button type="button" class="password-toggle" id="toggle-current-password">
                                             <i class="fas fa-eye"></i>
                                         </button>
@@ -1702,6 +1622,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
 
                                 <!-- 新密码 -->
                                 <div class="form-group">
+
+--- 第 595 页 ---
                                     <label class="form-label" for="new-password" data-translate="new-password"
                                         >新密码</label
                                     >
@@ -1726,8 +1648,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                             >
                                             <div
                                                 id="password-strength-bar"
-
---- 第 577 页 ---
                                                 style="
                                                     flex: 1;
                                                     height: 4px;
@@ -1754,6 +1674,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                         </div>
 
                                         <!-- 密码要求检查 -->
+
+--- 第 596 页 ---
                                         <div id="password-requirements" style="font-size: 12px">
                                             <div class="requirement-item" data-requirement="length">
                                                 <i class="fas fa-times" style="color: #ff7875; margin-right: 5px"></i>
@@ -1778,8 +1700,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                         </div>
                                     </div>
                                     <div id="new-password-error" class="error-message" style="display: none"></div>
-
---- 第 578 页 ---
                                 </div>
 
                                 <!-- 确认新密码 -->
@@ -1806,6 +1726,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                 <div class="form-group" id="two-factor-section" style="display: none">
                                     <label class="form-label">双重验证确认</label>
                                     <div
+
+--- 第 597 页 ---
                                         style="
                                             background: rgba(0, 240, 255, 0.1);
                                             border: 1px solid rgba(0, 240, 255, 0.3);
@@ -1830,8 +1752,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                                     class="fas fa-check-circle"
                                                     style="color: #52c41a; margin-right: 8px"
                                                 ></i>
-
---- 第 579 页 ---
                                                 <span style="color: #52c41a; font-weight: bold; font-size: 14px"
                                                     >验证码已发送</span
                                                 >
@@ -1858,6 +1778,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                                 maxlength="6"
                                                 style="text-align: center; letter-spacing: 2px"
                                             />
+
+--- 第 598 页 ---
                                             <button
                                                 type="button"
                                                 id="resend-verification"
@@ -1882,8 +1804,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                         <!-- 验证码输入提示 -->
                                         <div
                                             style="
-
---- 第 580 页 ---
                                                 margin-top: 10px;
                                                 padding: 8px;
                                                 background: rgba(255, 255, 255, 0.05);
@@ -1910,6 +1830,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                         id="submit-password-change"
                                         disabled
                                         data-translate="confirm-change"
+
+--- 第 599 页 ---
                                     >
                                         确认修改
                                     </button>
@@ -1934,8 +1856,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                             <div class="info-card-icon">
                                 <i class="fas fa-user-cog"></i>
                             </div>
-
---- 第 581 页 ---
                             <h3 class="info-card-title">隐私与安全设置</h3>
                         </div>
                         <div class="info-card nested-card">
@@ -1962,6 +1882,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                         </div>
                                         <div class="permission-details">
                                             <h4>允许下载我的作品</h4>
+
+--- 第 600 页 ---
                                             <p>允许其他用户下载我上传的UI作品</p>
                                         </div>
                                     </div>
@@ -1986,8 +1908,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                     </label>
                                 </div>
                                 <div class="permission-item">
-
---- 第 582 页 ---
                                     <div class="permission-info">
                                         <div class="permission-icon">
                                             <i class="fas fa-bell"></i>
@@ -2014,6 +1934,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                         }
 
                                         // 生成8位数字编号（从00000000开始）
+
+--- 第 601 页 ---
                                         const userIdCounter = getUserIdCounter();
                                         const numberPart = String(userIdCounter).padStart(8, '0');
 
@@ -2038,8 +1960,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                     // 检查用户ID是否唯一
                                     function isUserIdUnique(userId) {
                                         const usedIds = JSON.parse(localStorage.getItem('usedUserIds') || '[]');
-
---- 第 583 页 ---
                                         return !usedIds.includes(userId);
                                     }
 
@@ -2066,6 +1986,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                         if (isUnique) {
                                             saveUsedUserId(userId);
                                             return userId;
+
+--- 第 602 页 ---
                                         } else {
                                             throw new Error('无法生成唯一的用户ID');
                                         }
@@ -2090,8 +2012,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                                 const userId = generateUniqueUserId();
                                                 usernameInput.value = userId;
 
-
---- 第 584 页 ---
                                                 // 保存用户ID到配置中
                                                 saveUserConfig();
                                             } catch (error) {
@@ -2118,6 +2038,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                             },
                                             // 权限设置
                                             permissions: Array.from(
+
+--- 第 603 页 ---
                                                 document.querySelectorAll('.permissions-grid input[type="checkbox"]')
                                             ).map((checkbox, index) => checkbox.checked),
                                             // 当前头像
@@ -2142,8 +2064,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                         const usernameInput = document.getElementById('username');
                                         if (usernameInput && config.userId) {
                                             usernameInput.value = config.userId;
-
---- 第 585 页 ---
                                         }
 
                                         // 加载个人信息
@@ -2170,6 +2090,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                             });
                                         }
 
+
+--- 第 604 页 ---
                                         // 加载当前头像
                                         if (config.currentAvatar) {
                                             setCurrentAvatar(config.currentAvatar);
@@ -2194,8 +2116,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                     <div class="permission-info">
                                         <div class="permission-icon">
                                             <i class="fas fa-lock"></i>
-
---- 第 586 页 ---
                                         </div>
                                         <div class="permission-details">
                                             <h4>双重验证</h4>
@@ -2222,6 +2142,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                         <span class="toggle-slider"></span>
                                     </label>
                                 </div>
+
+--- 第 605 页 ---
                             </div>
                             <div style="margin-top: 30px">
                                 <button type="button" class="btn btn-primary" id="save-permissions">保存设置</button>
@@ -2246,8 +2168,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                         <i class="fas fa-user" aria-hidden="true"></i>
                                     </div>
                                     <div class="avatar-upload-overlay">
-
---- 第 587 页 ---
                                         <i class="fas fa-camera avatar-upload-icon"></i>
                                     </div>
                                     <input type="file" class="avatar-upload-input" id="avatar-input" accept="image/*" />
@@ -2274,6 +2194,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
                                         title="当前已是默认头像"
                                     >
                                         恢复默认头像
+
+--- 第 606 页 ---
                                     </button>
                                 </div>
                             </div>
@@ -2298,8 +2220,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
         </button>
 
         <script src="../../js/user-storage-scope.js"></script>
-
---- 第 588 页 ---
         <script src="../../js/ui-kit.js"></script>
         <script src="../../js/navigation.js"></script>
         <script src="../../js/notification-component.js"></script>
@@ -2307,15 +2227,293 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0
         <script src="../../js/notification-manager.js"></script>
         <script src="../../js/scroll-animations.js"></script>
         <script src="../../js/page-effects.js"></script>
+        <script src="../../js/api-utils.js"></script>
         <script src="user-center-page.js" defer></script>
+        <script>
+            // 初始化 API 设置下拉框为 tech-select 样式
+            function initApiTechSelect() {
+                const select = document.getElementById('api-provider-select');
+                if (!select || select.dataset.techSelectReady === '1') return;
+                select.dataset.techSelectReady = '1';
+                select.style.display = 'none';
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'tech-select';
+
+                const trigger = document.createElement('button');
+                trigger.type = 'button';
+                trigger.className = 'tech-select-trigger';
+                trigger.setAttribute('aria-haspopup', 'listbox');
+
+                const value = document.createElement('span');
+
+--- 第 607 页 ---
+                value.className = 'tech-select-value';
+                trigger.appendChild(value);
+
+                const menu = document.createElement('div');
+                menu.className = 'tech-select-menu';
+                menu.setAttribute('role', 'listbox');
+
+                Array.from(select.options).forEach((opt) => {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'tech-select-option';
+                    item.setAttribute('role', 'option');
+                    item.textContent = opt.textContent;
+                    item.dataset.value = opt.value;
+                    menu.appendChild(item);
+                });
+
+                select.insertAdjacentElement('afterend', wrapper);
+                wrapper.appendChild(trigger);
+                wrapper.appendChild(menu);
+
+                const syncUI = () => {
+                    const current = select.options[select.selectedIndex];
+                    value.textContent = current ? current.textContent : '请选择';
+                    menu.querySelectorAll('.tech-select-option').forEach((item) => {
+                        const on = item.dataset.value === select.value;
+                        item.classList.toggle('is-selected', on);
+                        item.setAttribute('aria-selected', on ? 'true' : 'false');
+                    });
+                };
+
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isOpen = wrapper.classList.contains('is-open');
+                    document.querySelectorAll('.tech-select.is-open').forEach((w) => {
+                        w.classList.remove('is-open');
+                        const g = w.closest('.form-group');
+                        if (g) g.classList.remove('tech-select-open');
+                    });
+                    if (!isOpen) {
+                        wrapper.classList.add('is-open');
+                        const group = wrapper.closest('.form-group');
+                        if (group) group.classList.add('tech-select-open');
+                        // 定位菜单
+                        const rect = trigger.getBoundingClientRect();
+                        menu.style.minWidth = rect.width + 'px';
+                        menu.style.left = rect.left + 'px';
+                        menu.style.top = (rect.bottom + 4) + 'px';
+                    }
+                });
+
+--- 第 608 页 ---
+
+                menu.addEventListener('click', (e) => {
+                    const item = e.target.closest('.tech-select-option');
+                    if (!item) return;
+                    select.value = item.dataset.value;
+                    select.dispatchEvent(new Event('change'));
+                    wrapper.classList.remove('is-open');
+                    const group = wrapper.closest('.form-group');
+                    if (group) group.classList.remove('tech-select-open');
+                    syncUI();
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!wrapper.contains(e.target)) {
+                        wrapper.classList.remove('is-open');
+                        const group = wrapper.closest('.form-group');
+                        if (group) group.classList.remove('tech-select-open');
+                    }
+                });
+
+                select.addEventListener('change', syncUI);
+                syncUI();
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(initApiTechSelect, 300);
+            });
+        </script>
     </body>
 </html>
+
+
+// ===== 文件: js/particle-network.js =====
+/**
+ * Artifex - 二维游戏美术协作与 AI 资产生成平台
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
+ * 版本: 1.0.0 */
+/**
+ * ParticleNetwork — Canvas 粒子连线背景
+ * 用法：window.ParticleNetwork.init({ container: document.body })
+ */
+(function () {
+    'use strict';
+
+    const DEFAULTS = {
+        particleCount: 80,
+        particleColor: 'rgba(0, 240, 255, 0.35)',
+        lineColor: 'rgba(0, 240, 255, 0.12)',
+        lineDistance: 140,
+        particleSize: 1.8,
+        speed: 0.3,
+        mouseRadius: 160,
+        mouseBoost: 2.5,
+    };
+
+    function init(userOpts) {
+        const opts = Object.assign({}, DEFAULTS, userOpts);
+        const container = opts.container || document.body;
+
+        // 尊重用户"减少动画"偏好
+        const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        if (motionQuery.matches) return { destroy: function () {} };
+
+        const canvas = document.createElement('canvas');
+        canvas.className = 'particle-network-canvas';
+        canvas.style.cssText =
+            'position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;';
+        container.insertBefore(canvas, container.firstChild);
+
+        const ctx = canvas.getContext('2d');
+        let width, height, particles, animId;
+        let mouse = { x: -9999, y: -9999 };
+
+        // ── 粒子类 ──
+        function Particle() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.vx = (Math.random() - 0.5) * opts.speed;
+            this.vy = (Math.random() - 0.5) * opts.speed;
+            this.r = opts.particleSize * (0.6 + Math.random() * 0.8);
+        }
+
+        Particle.prototype.step = function () {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.x < 0 || this.x > width) this.vx *= -1;
+            if (this.y < 0 || this.y > height) this.vy *= -1;
+
+            // 鼠标吸引力
+            var dx = mouse.x - this.x;
+            var dy = mouse.y - this.y;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < opts.mouseRadius && dist > 0) {
+                var force = (1 - dist / opts.mouseRadius) * opts.mouseBoost * 0.02;
+                this.vx += (dx / dist) * force;
+                this.vy += (dy / dist) * force;
+            }
+            // 速度衰减
+            this.vx *= 0.99;
+            this.vy *= 0.99;
+        };
+
+        Particle.prototype.draw = function () {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            ctx.fillStyle = opts.particleColor;
+            ctx.fill();
+        };
+
+        // ── 初始化粒子 ──
+        function createParticles() {
+            var count = Math.min(opts.particleCount, Math.floor((width * height) / 12000));
+            particles = [];
+            for (var i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        // ── 绘制连线 ──
+        function drawLines() {
+            for (var i = 0; i < particles.length; i++) {
+                for (var j = i + 1; j < particles.length; j++) {
+                    var dx = particles[i].x - particles[j].x;
+                    var dy = particles[i].y - particles[j].y;
+                    var dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < opts.lineDistance) {
+                        var alpha = 1 - dist / opts.lineDistance;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = opts.lineColor.replace(/[\d.]+\)$/, (alpha * 0.6).toFixed(2) + ')');
+                        ctx.lineWidth = 0.6;
+                        ctx.stroke();
+                    }
+                }
+            }
+            // 鼠标与附近粒子连线
+            for (var k = 0; k < particles.length; k++) {
+                var mdx = mouse.x - particles[k].x;
+                var mdy = mouse.y - particles[k].y;
+                var mdist = Math.sqrt(mdx * mdx + mdy * mdy);
+                if (mdist < opts.mouseRadius) {
+                    var malpha = 1 - mdist / opts.mouseRadius;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[k].x, particles[k].y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.strokeStyle = 'rgba(0, 240, 255, ' + (malpha * 0.25).toFixed(2) + ')';
+                    ctx.lineWidth = 0.8;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // ── 主循环 ──
+        function frame() {
+            ctx.clearRect(0, 0, width, height);
+            for (var i = 0; i < particles.length; i++) {
+                particles[i].step();
+                particles[i].draw();
+            }
+            drawLines();
+            animId = requestAnimationFrame(frame);
+        }
+
+        // ── 尺寸适配 ──
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            if (!particles || particles.length === 0) createParticles();
+        }
+
+        // ── 鼠标监听 ──
+        function onMouseMove(e) {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        }
+        function onMouseLeave() {
+            mouse.x = -9999;
+            mouse.y = -9999;
+        }
+
+        resize();
+        createParticles();
+        window.addEventListener('resize', resize);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseleave', onMouseLeave);
+        frame();
+
+        // 动态减少动画时停止
+        function onMotionChange(e) {
+            if (e.matches) destroy();
+        }
+        motionQuery.addEventListener('change', onMotionChange);
+
+        function destroy() {
+            cancelAnimationFrame(animId);
+            window.removeEventListener('resize', resize);
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseleave', onMouseLeave);
+            motionQuery.removeEventListener('change', onMotionChange);
+            if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+        }
+
+        return { destroy: destroy };
+    }
+
+    window.ParticleNetwork = { init: init };
+})();
 
 
 // ===== 文件: config/api-config.js =====
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 [开发者1], [开发者2], [开发者3]
+ * Copyright (c) 2026 Artifex Team
  * 版本: 1.0.0 */
 // AI API配置
 const API_CONFIG = {
@@ -2330,6 +2528,8 @@ const API_CONFIG = {
     },
     // 阿里云通义千问API配置
     alibaba: {
+
+--- 第 609 页 ---
         // 从环境变量或配置文件中读取API密钥
         apiKey: process.env.DASHSCOPE_API_KEY || process.env.ALIBABA_API_KEY || 'YOUR_ALIBABA_API_KEY',
         endpoint: 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation',
@@ -2350,8 +2550,6 @@ const API_CONFIG = {
     proxy: {
         endpoint: process.env.PROXY_ENDPOINT || '/api',
         port: parseInt(process.env.PORT, 10) || 3000
-
---- 第 589 页 ---
     },
 
     // 前端配置
@@ -2382,6 +2580,8 @@ if (typeof module !== 'undefined' && module.exports) {
     --shell-muted: #b0b0c0;
     --shell-accent: #00f0ff;
     --shell-sidebar-w: 240px;
+
+--- 第 610 页 ---
     --mx: 50vw;
     --my: 50vh;
 }
@@ -2402,8 +2602,6 @@ body.app-shell {
     overflow-x: hidden;
 }
 
-
---- 第 590 页 ---
 body.app-shell::before {
     content: "";
     position: fixed;
@@ -2434,6 +2632,8 @@ body.app-shell .pointer-glow {
     margin-left: -280px;
     margin-top: -280px;
     border-radius: 50%;
+
+--- 第 611 页 ---
     background: radial-gradient(circle, rgba(0, 240, 255, 0.22) 0%, rgba(167, 139, 250, 0.12) 40%, transparent 70%);
     pointer-events: none;
     z-index: 2;
@@ -2454,8 +2654,6 @@ body.app-shell .pointer-glow--lag {
 
 body.app-shell:not(.pointer-glow-active) .pointer-glow,
 body.app-shell:not(.pointer-glow-active) .pointer-glow--lag {
-
---- 第 591 页 ---
     opacity: 0;
 }
 
@@ -2486,6 +2684,8 @@ body.app-shell .sidebar {
 
 body.app-shell .sidebar::after {
     content: "";
+
+--- 第 612 页 ---
     position: absolute;
     top: 0;
     right: 0;
@@ -2506,8 +2706,6 @@ body.app-shell .sidebar-logo {
     display: flex;
     align-items: center;
     justify-content: center;
-
---- 第 592 页 ---
     padding: 0 20px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     margin-bottom: 20px;
@@ -2539,6 +2737,8 @@ body.app-shell .nav-item {
     margin-bottom: 5px;
 }
 
+--- 第 613 页 ---
+
 body.app-shell .nav-link {
     display: flex;
     align-items: center;
@@ -2558,8 +2758,6 @@ body.app-shell .nav-link.active {
 
 body.app-shell .nav-link i {
     margin-right: 10px;
-
---- 第 593 页 ---
     width: 20px;
     text-align: center;
 }
@@ -2590,6 +2788,8 @@ body.app-shell .main-content::after {
     background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.07) 2px, rgba(0, 0, 0, 0.07) 4px);
     opacity: 0.3;
     mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 75%);
+
+--- 第 614 页 ---
 }
 
 body.app-shell .main-content > * {
@@ -2610,8 +2810,6 @@ body.app-shell .top-bar {
     padding: 14px 18px;
     border-radius: 10px;
     border: 1px solid rgba(0, 240, 255, 0.15);
-
---- 第 594 页 ---
     background: rgba(15, 22, 41, 0.65);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -2643,6 +2841,8 @@ body.app-shell .top-bar > * {
     z-index: 1;
 }
 
+--- 第 615 页 ---
+
 body.app-shell .top-bar .search-bar {
     position: relative;
     flex: 1;
@@ -2662,8 +2862,6 @@ body.app-shell .top-bar .search-bar input {
     font-family: var(--font-ui);
 }
 
-
---- 第 595 页 ---
 body.app-shell .top-bar .search-bar i {
     position: absolute;
     left: 10px;
@@ -2694,6 +2892,8 @@ body.app-shell .notification-btn {
     font-size: 18px;
     cursor: pointer;
     position: relative;
+
+--- 第 616 页 ---
 }
 
 body.app-shell .notification-badge {
@@ -2714,8 +2914,6 @@ body.app-shell .notification-badge {
 }
 
 body.app-shell .user-avatar {
-
---- 第 596 页 ---
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -2746,6 +2944,8 @@ body.app-shell .user-avatar-menu {
 body.app-shell .user-avatar-dropdown {
     display: none;
     position: absolute;
+
+--- 第 617 页 ---
     top: calc(100% + 8px);
     right: 0;
     min-width: 180px;
@@ -2766,8 +2966,6 @@ body.app-shell .user-avatar-dd-item {
     align-items: center;
     gap: 10px;
     width: 100%;
-
---- 第 597 页 ---
     padding: 10px 16px;
     border: none;
     background: transparent;
@@ -2798,6 +2996,8 @@ body.app-shell .user-avatar-dd-item--danger:hover {
 }
 
 body.app-shell .mobile-menu-toggle {
+
+--- 第 618 页 ---
     display: none;
 }
 
@@ -2818,8 +3018,6 @@ body.app-shell .mobile-menu-toggle {
     }
     body.app-shell .sidebar-logo h1 {
         display: none;
-
---- 第 598 页 ---
     }
     body.app-shell .nav-link {
         justify-content: center;
@@ -2850,6 +3048,8 @@ body.app-shell .mobile-menu-toggle {
     body.app-shell .sidebar-logo {
         justify-content: flex-start;
         padding: 0 20px 20px;
+
+--- 第 619 页 ---
     }
     body.app-shell .sidebar-logo i {
         margin-right: 10px;
@@ -2870,8 +3070,6 @@ body.app-shell .mobile-menu-toggle {
         align-items: stretch;
         gap: 12px;
     }
-
---- 第 599 页 ---
     body.app-shell .top-bar .search-bar {
         max-width: none;
         margin-right: 0;
@@ -2902,6 +3100,8 @@ body.app-shell .mobile-menu-toggle {
     body.app-shell .top-bar::before {
         animation: none !important;
     }
+
+--- 第 620 页 ---
     body.app-shell .pointer-glow,
     body.app-shell .pointer-glow--lag {
         display: none !important;
@@ -2922,8 +3122,6 @@ body.app-shell .mobile-menu-toggle {
 
 .tech-ui-overlay {
     position: fixed;
-
---- 第 600 页 ---
     inset: 0;
     z-index: 10000;
     background: rgba(2, 8, 20, 0.72);
@@ -2954,6 +3152,8 @@ body.app-shell .mobile-menu-toggle {
     color: var(--ui-accent);
 }
 
+
+--- 第 621 页 ---
 .tech-ui-body {
     padding: 14px 16px;
     line-height: 1.6;
@@ -2974,8 +3174,6 @@ body.app-shell .mobile-menu-toggle {
     margin-top: 4px;
 }
 
-
---- 第 601 页 ---
 .tech-ui-field-label {
     color: var(--ui-text-muted);
     font-size: 13px;
@@ -3006,6 +3204,8 @@ body.app-shell .mobile-menu-toggle {
     border: 1px solid rgba(0, 240, 255, 0.2);
     background: rgba(255, 255, 255, 0.04);
     color: var(--ui-text);
+
+--- 第 622 页 ---
     padding: 8px 14px;
     cursor: pointer;
     font-family: "Rajdhani", "Segoe UI", sans-serif;
@@ -3026,8 +3226,6 @@ body.app-shell .mobile-menu-toggle {
 
 .tech-ui-toast-wrap {
     position: fixed;
-
---- 第 602 页 ---
     right: 18px;
     bottom: 18px;
     z-index: 10001;
@@ -3058,6 +3256,8 @@ body.app-shell .mobile-menu-toggle {
 }
 
 .tech-ui-input:focus-visible {
+
+--- 第 623 页 ---
     outline: 2px solid var(--ui-accent);
     outline-offset: 2px;
 }
@@ -3078,8 +3278,6 @@ body.app-shell .mobile-menu-toggle {
         animation: none !important;
         transition: none !important;
     }
-
---- 第 603 页 ---
 }
 
 

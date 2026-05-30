@@ -1,7 +1,8 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
+'use strict';
 class AssetEditor {
     constructor() {
         this.canvas = document.getElementById('aeCanvas');
@@ -46,14 +47,35 @@ class AssetEditor {
     }
 
     /* ── 素材库加载 ── */
-    loadAssetLibrary() {
+    async loadAssetLibrary() {
         const list = document.getElementById('aeAssetList');
         if (!list) return;
         let assets = [];
         try {
-            const lib = JSON.parse(localStorage.getItem(aiStorageKey('assetLibrary_v1')) || '{}');
-            assets = Array.isArray(lib.assets) ? lib.assets : [];
+            const resp = await fetch('/api/asset-library', { credentials: 'include' });
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.ok && Array.isArray(data.items)) {
+                    assets = data.items.map((item) => {
+                        let category = '其他';
+                        let fileName = item.desc || '';
+                        try {
+                            const tagsObj = JSON.parse(item.tags || '{}');
+                            if (tagsObj.category) category = tagsObj.category;
+                            if (tagsObj.fileName) fileName = tagsObj.fileName;
+                        } catch (_) {}
+                        return { id: item.id, name: item.name || '', dataURL: item.content || '', type: item.type || 'image', category, fileName };
+                    });
+                }
+            }
         } catch (_) {}
+        // Fallback to localStorage if server returned nothing
+        if (assets.length === 0) {
+            try {
+                const lib = JSON.parse(localStorage.getItem(aiStorageKey('assetLibrary_v1')) || '{}');
+                assets = Array.isArray(lib.assets) ? lib.assets : [];
+            } catch (_) {}
+        }
         const imgs = JSON.parse(localStorage.getItem('generatedImages') || '[]');
         imgs.forEach((img) => {
             if (img.imageUrl && !assets.find((a) => a.dataURL === img.imageUrl)) {
@@ -750,31 +772,54 @@ class AssetEditor {
         a.click();
     }
 
-    saveToLib() {
+    async saveToLib() {
         if (!this.imageLoaded) {
             themedWarn('请先加载一张图片');
             return;
         }
-        let state = { categories: [], assets: [] };
         try {
-            state = JSON.parse(localStorage.getItem(aiStorageKey('assetLibrary_v1')) || '{}');
-        } catch (_) {}
-        state.categories = Array.isArray(state.categories) ? state.categories : [];
-        state.assets = Array.isArray(state.assets) ? state.assets : [];
-        if (!state.categories.includes('AI生成')) state.categories.unshift('AI生成');
-        state.assets.unshift({
-            id: 'ae_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-            name: '微调资产_' + new Date().toLocaleString('zh-CN'),
-            fileName: 'edited_' + Date.now() + '.png',
-            category: 'AI生成',
-            type: 'image/png',
-            dataURL: this.canvas.toDataURL('image/png'),
-            favorite: false,
-            createdAt: Date.now(),
-            source: 'asset-editor',
-        });
-        localStorage.setItem(aiStorageKey('assetLibrary_v1'), JSON.stringify(state));
-        themedSuccess('已保存到素材库');
+            const dataURL = this.canvas.toDataURL('image/png');
+            const fileName = 'edited_' + Date.now() + '.png';
+            const body = {
+                name: '微调资产_' + new Date().toLocaleString('zh-CN'),
+                type: 'image/png',
+                content: dataURL,
+                desc: fileName,
+                source: 'asset-editor',
+                tags: JSON.stringify({ category: 'AI生成', fileName: fileName }),
+            };
+            const resp = await fetchWithCsrf('/api/asset-library', {
+                method: 'POST',
+                body: JSON.stringify(body),
+            });
+            if (!resp.ok) {
+                const err = await resp.json().catch(() => ({}));
+                throw new Error(err.error || '保存失败');
+            }
+            themedSuccess('已保存到素材库');
+        } catch (e) {
+            console.warn('保存到服务器素材库失败，回退到 localStorage：', e);
+            let state = { categories: [], assets: [] };
+            try {
+                state = JSON.parse(localStorage.getItem(aiStorageKey('assetLibrary_v1')) || '{}');
+            } catch (_) {}
+            state.categories = Array.isArray(state.categories) ? state.categories : [];
+            state.assets = Array.isArray(state.assets) ? state.assets : [];
+            if (!state.categories.includes('AI生成')) state.categories.unshift('AI生成');
+            state.assets.unshift({
+                id: 'ae_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                name: '微调资产_' + new Date().toLocaleString('zh-CN'),
+                fileName: 'edited_' + Date.now() + '.png',
+                category: 'AI生成',
+                type: 'image/png',
+                dataURL: this.canvas.toDataURL('image/png'),
+                favorite: false,
+                createdAt: Date.now(),
+                source: 'asset-editor',
+            });
+            localStorage.setItem(aiStorageKey('assetLibrary_v1'), JSON.stringify(state));
+            themedSuccess('已保存到素材库（本地备份）');
+        }
         this.loadAssetLibrary();
     }
 

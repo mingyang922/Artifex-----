@@ -1,7 +1,8 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
+'use strict';
 const PMSharedLib = window.PMShared || {};
 const pmStorageKey = PMSharedLib.pmStorageKey || ((base) => base);
 
@@ -242,6 +243,7 @@ async function loadProjects() {
         console.error('加载项目数据失败:', error);
         projects = [];
         projectsCache = [];
+        uiToast('加载项目列表失败，请刷新重试', 'error');
     }
 }
 
@@ -269,10 +271,11 @@ async function saveProjectToServer(project) {
         }
     } catch (error) {
         console.error('保存项目失败:', error);
+        uiToast('保存项目失败', 'error');
     }
 }
 
-// 保存项目到localStorage（兼容旧代码，实际使用 API）
+// 批量保存项目到服务端
 let saveProjectsToStorage = debounce(function () {
     // 批量保存时，逐个同步到服务端
     projects.forEach(p => saveProjectToServer(p));
@@ -741,7 +744,7 @@ async function saveEditProject() {
     projects[projectIndex].desc = descInput.value.trim();
     projects[projectIndex].type = typeInput.value;
 
-    saveProjectsToStorage(); // 防抖保存到localStorage
+    saveProjectsToStorage();
     renderProjectList();
     document.getElementById('edit-project-modal').classList.add('hidden');
     uiToast('项目更新成功！版本已升级至 v' + projects[projectIndex].version, 'success');
@@ -756,12 +759,13 @@ async function deleteProject(projectId) {
             credentials: 'include',
             headers: { 'X-XSRF-Token': csrfToken },
         });
+        projects = projects.filter((p) => p.id !== projectId);
+        projectsCache = projects;
+        renderProjectList();
     } catch (error) {
         console.error('删除项目失败:', error);
+        uiToast('删除项目失败，请重试', 'error');
     }
-    projects = projects.filter((p) => p.id !== projectId);
-    projectsCache = projects;
-    renderProjectList();
 }
 
 // 打开版本历史弹窗
@@ -789,7 +793,7 @@ function openVersionHistoryModal(projectId) {
                     <span class="version-index">${index + 1}</span>
                     <span class="version-time">${formatDate(version.time)}</span>
                 </div>
-                <div class="version-desc">${version.desc}</div>
+                <div class="version-desc">${PMShared.escapeHtml(version.desc || '')}</div>
             `;
             fragment.appendChild(versionItem);
         });
@@ -956,53 +960,52 @@ function getLocalStorageUsageBytes() {
     return total;
 }
 
-function syncProjectAssetToLibrary(project, asset) {
+async function syncProjectAssetToLibrary(project, asset) {
     try {
-        const key = pmStorageKey('assetLibrary_v1');
-        const raw = localStorage.getItem(key);
-        const state = raw ? JSON.parse(raw) : { categories: [], assets: [] };
-        const categories = Array.isArray(state.categories) ? state.categories : [];
-        const assets = Array.isArray(state.assets) ? state.assets : [];
-
         const category = getLibraryCategoryByAssetType(asset.type);
-        if (!categories.includes(category)) {
-            categories.unshift(category);
-        }
-
-        const existingIndex = assets.findIndex(
-            (item) => item && item.sourceProjectId === project.id && item.sourceProjectAssetId === asset.id
-        );
-        const wasDeduped = existingIndex !== -1;
-        if (wasDeduped) {
-            assets.splice(existingIndex, 1);
-        }
-
         const content = asset.content || '';
         let mime = 'image/png';
         if (typeof content === 'string' && content.startsWith('data:')) {
             const m = content.match(/^data:([^;]+);/);
             if (m && m[1]) mime = m[1];
         }
-
         const fileExt = mime.includes('jpeg') ? 'jpg' : mime.split('/')[1] || 'png';
         const safeName = (asset.name || 'asset').replace(/[\\/:*?"<>|]/g, '_');
-        assets.unshift({
-            id: `project_${project.id}_${asset.id}`,
-            name: asset.name || '未命名素材',
-            fileName: `${safeName}.${fileExt}`,
-            category: category,
-            type: mime,
-            dataURL: content,
-            favorite: false,
-            createdAt: Date.now(),
-            source: 'project-management',
-            sourceProjectId: project.id,
-            sourceProjectAssetId: asset.id,
-        });
+        const sourceId = `project_${project.id}_${asset.id}`;
 
-        localStorage.setItem(key, JSON.stringify({ categories, assets }));
-        const nearLimit = getLocalStorageUsageBytes() > 4.2 * 1024 * 1024;
-        return { ok: true, deduped: wasDeduped, nearLimit: nearLimit };
+        // Check for existing asset with same source to deduplicate
+        let wasDeduped = false;
+        try {
+            const listResp = await fetch('/api/asset-library', { credentials: 'include' });
+            if (listResp.ok) {
+                const listData = await listResp.json();
+                if (listData.ok && Array.isArray(listData.items)) {
+                    const existing = listData.items.find((item) => item.source === sourceId);
+                    if (existing) {
+                        await fetchWithCsrf('/api/asset-library/' + encodeURIComponent(existing.id), { method: 'DELETE' });
+                        wasDeduped = true;
+                    }
+                }
+            }
+        } catch (_) {}
+
+        const body = {
+            name: asset.name || '未命名素材',
+            type: mime,
+            content: content,
+            desc: `${safeName}.${fileExt}`,
+            source: sourceId,
+            tags: JSON.stringify({ category: category, fileName: `${safeName}.${fileExt}` }),
+        };
+        const resp = await fetchWithCsrf('/api/asset-library', {
+            method: 'POST',
+            body: JSON.stringify(body),
+        });
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.error || '同步失败');
+        }
+        return { ok: true, deduped: wasDeduped, nearLimit: false };
     } catch (e) {
         console.warn('同步素材到素材库失败：', e);
         return { ok: false, deduped: false, nearLimit: false };
@@ -1073,10 +1076,10 @@ async function addProjectAsset() {
         time: new Date().toISOString(),
         desc: '添加素材：' + assetName,
     });
-    const syncResult = syncProjectAssetToLibrary(project, newAsset);
+    const syncResult = await syncProjectAssetToLibrary(project, newAsset);
 
-    saveProjectsToStorage(); // 防抖保存到localStorage
-    openAssetsModal(projectId); // 重新打开弹窗以显示更新后的素材列表
+    saveProjectsToStorage();
+    openAssetsModal(projectId);
 
     // 重置表单
     document.getElementById('asset-name').value = '';
@@ -1137,7 +1140,7 @@ function bindAssetEvents() {
                     time: new Date().toISOString(),
                     desc: '删除素材：' + deletedAssetName,
                 });
-                saveProjectsToStorage(); // 防抖保存到localStorage
+                saveProjectsToStorage();
                 openAssetsModal(projectId);
             }
         });
@@ -1175,16 +1178,11 @@ function getAssetTypeName(type) {
     return type || '未分类';
 }
 
-// 为了在模块重新加载时能正确显示数据，添加一个专门的初始化函数
-function initModule() {
-    // 重新从localStorage加载数据，确保数据是最新的
-    loadProjects();
+async function initModule() {
+    await loadProjects();
     renderProjectList();
     bindEventListeners();
 }
 
 // 提供给dashboard调用的接口
 window.initModule = initModule;
-
-// 移除DOMContentLoaded事件监听器，直接执行初始化函数
-initModule();

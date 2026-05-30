@@ -1,10 +1,8 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
-/**
- * AvatarManager类 - 统一管理所有页面的头像显示和更新
- */
+'use strict';
 class AvatarManager {
     constructor() {
         this.avatarKey = 'userAvatar';
@@ -13,9 +11,6 @@ class AvatarManager {
         this.init();
     }
 
-    /**
-     * 初始化头像管理器
-     */
     init() {
         // 延迟初始化，确保DOM完全加载
         setTimeout(() => {
@@ -25,16 +20,10 @@ class AvatarManager {
         }, 200);
     }
 
-    /**
-     * 查找所有头像元素
-     */
     findAvatarElements() {
         this.avatarElements = document.querySelectorAll('.user-avatar');
     }
 
-    /**
-     * 从本地存储加载头像
-     */
     loadAvatarFromStorage() {
         const savedAvatar = localStorage.getItem(this.avatarKey);
         if (savedAvatar) {
@@ -42,9 +31,6 @@ class AvatarManager {
         }
     }
 
-    /**
-     * 设置头像同步监听
-     */
     setupAvatarSync() {
         // 监听存储变化，实现跨页面同步
         window.addEventListener('storage', (e) => {
@@ -53,7 +39,6 @@ class AvatarManager {
             }
         });
 
-        // 监听自定义头像更新事件
         window.addEventListener('avatarUpdated', (e) => {
             this.updateAllAvatars(e.detail.avatar);
         });
@@ -77,10 +62,8 @@ class AvatarManager {
     updateSingleAvatar(element, avatar) {
         if (!element) return;
 
-        // 清空现有内容
         element.innerHTML = '';
 
-        // 检查是否为图片URL
         if (this.isImageUrl(avatar)) {
             const img = document.createElement('img');
             img.src = avatar;
@@ -91,7 +74,6 @@ class AvatarManager {
             img.style.objectFit = 'cover';
             element.appendChild(img);
         } else {
-            // 显示文字头像
             element.textContent = avatar || this.defaultAvatar;
         }
     }
@@ -104,10 +86,8 @@ class AvatarManager {
     isImageUrl(url) {
         if (!url || typeof url !== 'string') return false;
 
-        // 检查是否为base64图片
         if (url.startsWith('data:image/')) return true;
 
-        // 检查是否为有效的图片URL
         const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i;
         return imageExtensions.test(url) || url.startsWith('http');
     }
@@ -117,13 +97,8 @@ class AvatarManager {
      * @param {string} avatar - 新头像内容
      */
     setAvatar(avatar) {
-        // 保存到本地存储
         localStorage.setItem(this.avatarKey, avatar);
-
-        // 更新所有头像
         this.updateAllAvatars(avatar);
-
-        // 触发自定义事件
         window.dispatchEvent(
             new CustomEvent('avatarUpdated', {
                 detail: { avatar: avatar },
@@ -139,43 +114,22 @@ class AvatarManager {
         return localStorage.getItem(this.avatarKey) || this.defaultAvatar;
     }
 
-    /**
-     * 重置为默认头像
-     */
     resetToDefault() {
         this.setAvatar(this.defaultAvatar);
     }
 
-    /**
-     * 刷新头像显示（重新查找元素并更新）
-     */
     refresh() {
         this.findAvatarElements();
         this.loadAvatarFromStorage();
     }
 }
 
-// 创建全局头像管理器实例
 window.avatarManager = new AvatarManager();
 
-// 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', () => {
-    if (!window.avatarManager) {
-        window.avatarManager = new AvatarManager();
-    } else {
-        // 如果已经存在，重新初始化
-        window.avatarManager.refresh();
-    }
+    window.avatarManager.refresh();
 });
 
-// 页面完全加载后再次初始化
-window.addEventListener('load', () => {
-    if (window.avatarManager) {
-        window.avatarManager.refresh();
-    }
-});
-
-// 导出供其他模块使用
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = AvatarManager;
 }

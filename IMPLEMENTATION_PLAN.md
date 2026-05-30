@@ -35,7 +35,7 @@
 ## 二、现有代码结构速览
 
 ```
-GameManagement-platform/
+Artifex/
 ├── backend/proxy.js          # 混元对话代理、多厂商文生图代理
 ├── config/api-config.js      # API 配置
 ├── dashboard.html            # 主控制台

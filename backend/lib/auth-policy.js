@@ -1,6 +1,6 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
 function createAuthPolicy(usersDb) {
     function requireAuth(req, res, next) {
@@ -17,12 +17,15 @@ function createAuthPolicy(usersDb) {
 
     function isAdminUser(row) {
         if (!row) return false;
+        // 优先使用 users 表 role 列
+        if (row.role === 'admin') return true;
+        // 兼容旧数据：从 profile_json 读取
         try {
             const profile = JSON.parse(row.profile_json || '{}');
             if (profile.role === 'admin') return true;
             if (Array.isArray(profile.roles) && profile.roles.includes('admin')) return true;
         } catch (_) {
-            return false;
+            /* ignore */
         }
         return false;
     }

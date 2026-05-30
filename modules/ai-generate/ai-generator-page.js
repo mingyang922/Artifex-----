@@ -1,8 +1,9 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
 (function ensureLocalServerEntry() {
+    'use strict';
     try {
         const targetOrigin = 'http://127.0.0.1:3000';
         const isTarget = window.location.origin === targetOrigin;
@@ -56,21 +57,16 @@ const extractOriginalUrlFromProxy = aiPageUtils ? aiPageUtils.extractOriginalUrl
 const fetchImageAsBlob = aiPageUtils ? aiPageUtils.fetchImageAsBlob : () => Promise.reject(new Error('utils missing'));
 const loadImage = aiPageUtils ? aiPageUtils.loadImage : () => Promise.reject(new Error('utils missing'));
 
-const imagePreviewOverlay = document.getElementById('imagePreviewOverlay');
-const imagePreviewModalImg = document.getElementById('imagePreviewModalImg');
-const previewZoomInBtn = document.getElementById('previewZoomInBtn');
-const previewZoomOutBtn = document.getElementById('previewZoomOutBtn');
-const previewZoomResetBtn = document.getElementById('previewZoomResetBtn');
-const previewCloseBtn = document.getElementById('previewCloseBtn');
+let imagePreviewOverlay, imagePreviewModalImg, previewZoomInBtn, previewZoomOutBtn, previewZoomResetBtn, previewCloseBtn;
 let imagePreviewScale = 1;
 
 function updatePreviewScale(nextScale) {
     imagePreviewScale = Math.min(4, Math.max(0.4, nextScale));
-    imagePreviewModalImg.style.setProperty('--preview-scale', String(imagePreviewScale));
+    if (imagePreviewModalImg) imagePreviewModalImg.style.setProperty('--preview-scale', String(imagePreviewScale));
 }
 
 function openImagePreview(src) {
-    if (!src) return;
+    if (!src || !imagePreviewOverlay || !imagePreviewModalImg) return;
     imagePreviewModalImg.src = src;
     imagePreviewOverlay.classList.add('is-open');
     imagePreviewOverlay.setAttribute('aria-hidden', 'false');
@@ -78,6 +74,7 @@ function openImagePreview(src) {
 }
 
 function closeImagePreview() {
+    if (!imagePreviewOverlay || !imagePreviewModalImg) return;
     imagePreviewOverlay.classList.remove('is-open');
     imagePreviewOverlay.setAttribute('aria-hidden', 'true');
     setTimeout(() => {
@@ -87,43 +84,62 @@ function closeImagePreview() {
     }, 220);
 }
 
-document.addEventListener('click', (event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLElement)) return;
-    const img = target.closest(
-        '#actionThreeViewResult img, #actionGroupPreview img, #result-body img, #generatedAssets img'
-    );
-    if (img && img instanceof HTMLImageElement && img.src) {
-        img.classList.add('previewable-image');
-        openImagePreview(img.src);
-    }
-});
+function initImagePreview() {
+    imagePreviewOverlay = document.getElementById('imagePreviewOverlay');
+    imagePreviewModalImg = document.getElementById('imagePreviewModalImg');
+    previewZoomInBtn = document.getElementById('previewZoomInBtn');
+    previewZoomOutBtn = document.getElementById('previewZoomOutBtn');
+    previewZoomResetBtn = document.getElementById('previewZoomResetBtn');
+    previewCloseBtn = document.getElementById('previewCloseBtn');
 
-imagePreviewOverlay.addEventListener('click', (event) => {
-    if (event.target === imagePreviewOverlay) {
-        closeImagePreview();
+    document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const img = target.closest(
+            '#actionThreeViewResult img, #actionGroupPreview img, #result-body img, #generatedAssets img'
+        );
+        if (img && img instanceof HTMLImageElement && img.src) {
+            img.classList.add('previewable-image');
+            openImagePreview(img.src);
+        }
+    });
+
+    if (imagePreviewOverlay) {
+        imagePreviewOverlay.addEventListener('click', (event) => {
+            if (event.target === imagePreviewOverlay) {
+                closeImagePreview();
+            }
+        });
     }
-});
-previewCloseBtn.addEventListener('click', closeImagePreview);
-previewZoomInBtn.addEventListener('click', () => updatePreviewScale(imagePreviewScale + 0.2));
-previewZoomOutBtn.addEventListener('click', () => updatePreviewScale(imagePreviewScale - 0.2));
-previewZoomResetBtn.addEventListener('click', () => updatePreviewScale(1));
-imagePreviewModalImg.addEventListener(
-    'wheel',
-    (event) => {
-        event.preventDefault();
-        const delta = event.deltaY > 0 ? -0.12 : 0.12;
-        updatePreviewScale(imagePreviewScale + delta);
-    },
-    { passive: false }
-);
-document.addEventListener('keydown', (event) => {
-    if (!imagePreviewOverlay.classList.contains('is-open')) return;
-    if (event.key === 'Escape') closeImagePreview();
-    if (event.key === '+' || event.key === '=') updatePreviewScale(imagePreviewScale + 0.15);
-    if (event.key === '-') updatePreviewScale(imagePreviewScale - 0.15);
-    if (event.key === '0') updatePreviewScale(1);
-});
+    if (previewCloseBtn) previewCloseBtn.addEventListener('click', closeImagePreview);
+    if (previewZoomInBtn) previewZoomInBtn.addEventListener('click', () => updatePreviewScale(imagePreviewScale + 0.2));
+    if (previewZoomOutBtn) previewZoomOutBtn.addEventListener('click', () => updatePreviewScale(imagePreviewScale - 0.2));
+    if (previewZoomResetBtn) previewZoomResetBtn.addEventListener('click', () => updatePreviewScale(1));
+    if (imagePreviewModalImg) {
+        imagePreviewModalImg.addEventListener(
+            'wheel',
+            (event) => {
+                event.preventDefault();
+                const delta = event.deltaY > 0 ? -0.12 : 0.12;
+                updatePreviewScale(imagePreviewScale + delta);
+            },
+            { passive: false }
+        );
+    }
+    document.addEventListener('keydown', (event) => {
+        if (!imagePreviewOverlay || !imagePreviewOverlay.classList.contains('is-open')) return;
+        if (event.key === 'Escape') closeImagePreview();
+        if (event.key === '+' || event.key === '=') updatePreviewScale(imagePreviewScale + 0.15);
+        if (event.key === '-') updatePreviewScale(imagePreviewScale - 0.15);
+        if (event.key === '0') updatePreviewScale(1);
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initImagePreview);
+} else {
+    initImagePreview();
+}
 
 
 function aiStorageKey(base) {
@@ -214,16 +230,37 @@ function themedWarn(message) {
 }
 
 /* ── 保存到素材库的公共辅助 ── */
-function saveAssetToLibrary(entry) {
-    let state = { categories: [], assets: [] };
+async function saveAssetToLibrary(entry) {
     try {
-        state = JSON.parse(localStorage.getItem(aiStorageKey('assetLibrary_v1')) || '{}');
-    } catch (_) {}
-    state.categories = Array.isArray(state.categories) ? state.categories : [];
-    state.assets = Array.isArray(state.assets) ? state.assets : [];
-    if (!state.categories.includes('角色动作组')) state.categories.unshift('角色动作组');
-    state.assets.unshift(entry);
-    localStorage.setItem(aiStorageKey('assetLibrary_v1'), JSON.stringify(state));
+        const body = {
+            name: entry.name || '',
+            type: entry.type || 'image/png',
+            content: entry.dataURL || '',
+            desc: entry.fileName || '',
+            source: entry.source || 'action-group',
+            tags: JSON.stringify({ category: entry.category || '角色动作组', fileName: entry.fileName || '' }),
+        };
+        const resp = await fetchWithCsrf('/api/asset-library', {
+            method: 'POST',
+            body: JSON.stringify(body),
+        });
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.error || '保存失败');
+        }
+    } catch (e) {
+        console.warn('保存到服务器素材库失败，回退到 localStorage：', e);
+        // Fallback to localStorage
+        let state = { categories: [], assets: [] };
+        try {
+            state = JSON.parse(localStorage.getItem(aiStorageKey('assetLibrary_v1')) || '{}');
+        } catch (_) {}
+        state.categories = Array.isArray(state.categories) ? state.categories : [];
+        state.assets = Array.isArray(state.assets) ? state.assets : [];
+        if (!state.categories.includes('角色动作组')) state.categories.unshift('角色动作组');
+        state.assets.unshift(entry);
+        localStorage.setItem(aiStorageKey('assetLibrary_v1'), JSON.stringify(state));
+    }
 }
 
 function imgUrlToDataURL(imageUrl) {

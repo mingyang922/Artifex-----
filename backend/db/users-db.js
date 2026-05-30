@@ -1,6 +1,6 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
 const fs = require('fs');
 const path = require('path');
@@ -15,7 +15,6 @@ let db;
 
 /**
  * 把 WAL 里的已提交页合并进主库文件，便于用 DB Browser 等外部工具立刻看到最新行。
- * 使用 checkpoint()（RESTART 语义）比单独 PRAGMA 在多进程/多连接时更可靠。
  */
 function checkpointWal() {
     try {
@@ -153,9 +152,32 @@ function init() {
             created_at TEXT NOT NULL,
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
         );
+        CREATE TABLE IF NOT EXISTS asset_library (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            name TEXT NOT NULL DEFAULT '',
+            type TEXT NOT NULL DEFAULT 'image',
+            content TEXT NOT NULL DEFAULT '',
+            desc TEXT DEFAULT '',
+            source TEXT DEFAULT '',
+            tags TEXT DEFAULT '[]',
+            created_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_asset_library_user ON asset_library(user_id);
         CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id);
         CREATE INDEX IF NOT EXISTS idx_project_assets_project ON project_assets(project_id);
     `);
+
+    // Migration: add role column to users if missing
+    const userCols = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
+    if (!userCols.includes('role')) {
+        db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'");
+        console.log('[users-db] 已添加 role 列到 users 表');
+    }
+    // Ensure user ID 1 is admin
+    db.prepare("UPDATE users SET role = 'admin' WHERE id = 1 AND role != 'admin'").run();
+
     migrateFromJsonIfEmpty();
 }
 
@@ -195,6 +217,15 @@ function updateProfile(userId, profileObj) {
 function updatePassword(userId, passwordHash) {
     db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, Number(userId));
     checkpointWal();
+}
+
+function getUserRole(userId) {
+    const row = db.prepare('SELECT role FROM users WHERE id = ?').get(Number(userId));
+    return row ? row.role : 'user';
+}
+
+function isAdminRole(userId) {
+    return getUserRole(userId) === 'admin';
 }
 
 function normalizeProvider(provider) {
@@ -275,7 +306,7 @@ function getUserApiCredentialStatus(userId) {
 // ─── 管理员功能 ───
 
 function getAllUsers() {
-    const rows = db.prepare('SELECT id, username, email, profile_json, created_at FROM users ORDER BY created_at DESC').all();
+    const rows = db.prepare('SELECT id, username, email, role, profile_json, created_at FROM users ORDER BY created_at DESC').all();
     return rows.map((row) => {
         let profile = {};
         try { profile = JSON.parse(row.profile_json || '{}'); } catch (_) {}
@@ -283,7 +314,7 @@ function getAllUsers() {
             id: row.id,
             username: row.username,
             email: row.email,
-            role: profile.role || 'user',
+            role: row.role || profile.role || 'user',
             created_at: row.created_at,
         };
     });
@@ -313,13 +344,24 @@ function getProject(projectId) {
     return project;
 }
 
-function getUserProjects(userId) {
-    const projects = db.prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC').all(Number(userId));
+function getUserProjects(userId, limit, offset) {
+    let projects;
+    if (limit !== undefined && offset !== undefined) {
+        projects = db.prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?')
+            .all(Number(userId), Number(limit), Number(offset));
+    } else {
+        projects = db.prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC').all(Number(userId));
+    }
     return projects.map((p) => {
         p.assets = db.prepare('SELECT * FROM project_assets WHERE project_id = ?').all(p.id);
         p.versionHistory = db.prepare('SELECT * FROM version_history WHERE project_id = ? ORDER BY created_at DESC').all(p.id);
         return p;
     });
+}
+
+function getProjectCount(userId) {
+    const row = db.prepare('SELECT COUNT(*) AS count FROM projects WHERE user_id = ?').get(Number(userId));
+    return row ? row.count : 0;
 }
 
 function updateProject(projectId, userId, updates) {
@@ -362,6 +404,67 @@ function addProjectAsset(projectId, userId, name, type, content) {
 
 function deleteProjectAsset(assetId, userId) {
     db.prepare('DELETE FROM project_assets WHERE id = ? AND user_id = ?').run(Number(assetId), Number(userId));
+    checkpointWal();
+}
+
+// ─── 素材库 ───
+
+function getAssetLibrary(userId, limit, offset) {
+    if (limit !== undefined && offset !== undefined) {
+        return db.prepare('SELECT * FROM asset_library WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?')
+            .all(Number(userId), Number(limit), Number(offset));
+    }
+    return db.prepare('SELECT * FROM asset_library WHERE user_id = ? ORDER BY created_at DESC').all(Number(userId));
+}
+
+function getAssetLibraryCount(userId) {
+    const row = db.prepare('SELECT COUNT(*) AS count FROM asset_library WHERE user_id = ?').get(Number(userId));
+    return row ? row.count : 0;
+}
+
+function addAssetLibraryItem(userId, item) {
+    const now = new Date().toISOString();
+    const tags = item.tags ? (typeof item.tags === 'string' ? item.tags : JSON.stringify(item.tags)) : '[]';
+    const info = db.prepare(
+        'INSERT INTO asset_library (user_id, name, type, content, desc, source, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    ).run(
+        Number(userId),
+        item.name || '',
+        item.type || 'image',
+        item.content || '',
+        item.desc || '',
+        item.source || '',
+        tags,
+        now
+    );
+    checkpointWal();
+    return { id: Number(info.lastInsertRowid), user_id: userId, ...item, tags, created_at: now };
+}
+
+function updateAssetLibraryItem(userId, itemId, updates) {
+    const existing = db.prepare('SELECT * FROM asset_library WHERE id = ? AND user_id = ?').get(Number(itemId), Number(userId));
+    if (!existing) return null;
+    const tags = updates.tags !== undefined
+        ? (typeof updates.tags === 'string' ? updates.tags : JSON.stringify(updates.tags))
+        : existing.tags;
+    db.prepare(
+        'UPDATE asset_library SET name = ?, type = ?, content = ?, desc = ?, source = ?, tags = ? WHERE id = ? AND user_id = ?'
+    ).run(
+        updates.name !== undefined ? updates.name : existing.name,
+        updates.type !== undefined ? updates.type : existing.type,
+        updates.content !== undefined ? updates.content : existing.content,
+        updates.desc !== undefined ? updates.desc : existing.desc,
+        updates.source !== undefined ? updates.source : existing.source,
+        tags,
+        Number(itemId),
+        Number(userId)
+    );
+    checkpointWal();
+    return db.prepare('SELECT * FROM asset_library WHERE id = ?').get(Number(itemId));
+}
+
+function deleteAssetLibraryItem(userId, itemId) {
+    db.prepare('DELETE FROM asset_library WHERE id = ? AND user_id = ?').run(Number(itemId), Number(userId));
     checkpointWal();
 }
 
@@ -473,6 +576,8 @@ module.exports = {
     createUser,
     updateProfile,
     updatePassword,
+    getUserRole,
+    isAdminRole,
     getUserApiCredentials,
     getAllUserApiCredentials,
     upsertUserApiCredentials,
@@ -490,8 +595,14 @@ module.exports = {
     createProject,
     getProject,
     getUserProjects,
+    getProjectCount,
     updateProject,
     deleteProject,
     addProjectAsset,
     deleteProjectAsset,
+    getAssetLibrary,
+    getAssetLibraryCount,
+    addAssetLibraryItem,
+    updateAssetLibraryItem,
+    deleteAssetLibraryItem,
 };

@@ -1,6 +1,6 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
 /**
  * 即梦 / Seedream API 提供商（从 proxy.js 提取）

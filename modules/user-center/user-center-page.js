@@ -1,7 +1,8 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
+'use strict';
 const DEFAULT_AVATAR_ICON_HTML = '<i class="fas fa-user" aria-hidden="true"></i>';
 if (window.PageEffects && typeof window.PageEffects.initPointerGlow === 'function') {
     window.PageEffects.initPointerGlow();
@@ -820,7 +821,7 @@ class PasswordSecurityManager {
         const text = document.getElementById('password-strength-text');
 
         const percentages = [0, 20, 40, 60, 80, 100];
-        const colors = ['#ff7875', '#ff7875', '#faad14', '#faad14', '#52c41a', '#52c41a'];
+        const colors = ['#ff7875', '#ff7875', '#ffb404', '#ffb404', '#52c41a', '#52c41a'];
         const texts = ['弱', '弱', '中', '中', '强', '强'];
 
         const percentage = percentages[score] || 0;
@@ -915,13 +916,13 @@ class PasswordSecurityManager {
             const warning = document.createElement('div');
             warning.id = 'password-strength-warning';
             warning.style.cssText = `
-                        background: rgba(255, 193, 7, 0.1);
-                        border: 1px solid rgba(255, 193, 7, 0.3);
+                        background: rgba(255, 180, 4, 0.08);
+                        border: 1px solid rgba(255, 180, 4, 0.25);
                         border-radius: 6px;
                         padding: 10px;
                         margin-top: 10px;
                         font-size: 12px;
-                        color: #faad14;
+                        color: #ffb404;
                     `;
             warning.innerHTML =
                 '<i class="fas fa-exclamation-triangle" style="margin-right: 5px;"></i>建议使用更强的密码以提高安全性';
@@ -942,7 +943,7 @@ class PasswordSecurityManager {
     // 显示弱密码警告
     showWeakPasswordWarning() {
         const submitBtn = document.getElementById('submit-password-change');
-        submitBtn.style.background = '#faad14';
+        submitBtn.style.background = '#ffb404';
         submitBtn.title = '密码强度较弱，建议使用更强的密码';
     }
 
@@ -1064,7 +1065,7 @@ class PasswordSecurityManager {
         }
     }
 
-    // 显示忘记密码模态框
+    // 显示忘记密码模态框（演示功能，实际密码重置需管理员处理）
     showForgotPasswordModal() {
         // 创建模态框HTML
         const modalHTML = `
@@ -1158,7 +1159,7 @@ class PasswordSecurityManager {
         this.setupRealTimeValidation();
     }
 
-    // 处理密码重置请求
+    // 处理密码重置请求（演示功能：仅做前端校验，实际密码重置需管理员处理）
     handlePasswordResetRequest() {
         const email = document.getElementById('reset-email').value.trim();
         const phone = document.getElementById('reset-phone').value.trim();
@@ -1198,9 +1199,7 @@ class PasswordSecurityManager {
             return;
         }
 
-        // 模拟发送重置请求
-
-        // 显示成功消息
+        // 密码重置功能暂未开放，提示用户联系管理员
         this.showResetSuccessMessage();
 
         // 关闭模态框
@@ -1381,16 +1380,17 @@ class PasswordSecurityManager {
         }
     }
 
-    // 显示重置成功消息
+    // 显示重置提示消息（密码重置功能暂未开放，提示联系管理员）
     showResetSuccessMessage() {
+        const msg = '密码重置功能暂未开放，请联系管理员';
         if (window.TechUI) {
-            window.TechUI.toast('重置请求已发送，请查收邮箱和短信', 'success');
+            window.TechUI.toast(msg, 'info');
             return;
         }
         // 备用方案
         const successDiv = document.createElement('div');
-        successDiv.className = 'toast-message toast-message--success';
-        successDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>重置请求已发送，请查收邮箱和短信</span>';
+        successDiv.className = 'toast-message toast-message--info';
+        successDiv.innerHTML = `<i class="fas fa-info-circle"></i><span>${msg}</span>`;
         document.body.appendChild(successDiv);
         setTimeout(() => successDiv.remove(), 5000);
     }
@@ -1515,14 +1515,17 @@ function initNotificationSystem() {
         }
     });
 
-    // 查看所有通知
+    // 查看所有通知 —— 消息中心已集成在本页面，直接滚动到消息中心区域
     const viewAllNotifications = document.getElementById('viewAllNotifications');
     viewAllNotifications.addEventListener('click', (e) => {
         e.preventDefault();
         // 关闭通知下拉框
         notificationDropdown.classList.remove('show');
-        // 跳转到独立的消息中心页面
-        window.open('messageCenter.html', '_blank', 'width=900,height=700,scrollbars=yes,resizable=yes');
+        // 滚动到页面内嵌的消息中心面板
+        const messageCenter = document.querySelector('.message-center-panel') || document.querySelector('.message-center');
+        if (messageCenter) {
+            messageCenter.scrollIntoView({ behavior: 'smooth' });
+        }
     });
 
     // 更新通知徽章
@@ -1568,6 +1571,7 @@ function showMessageCenter() {
                                 <div class="message-tab" data-message-tab="system">系统通知</div>
                             </div>
                             <div class="message-center-list">
+                                <!-- 以下为占位/演示数据，实际使用时应从后端 API 获取真实通知 -->
                                 <div class="message-item unread">
                                     <div class="message-icon">
                                         <i class="fas fa-user-plus"></i>

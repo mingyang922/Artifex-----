@@ -1,14 +1,19 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
+'use strict';
 const PMSharedLib = window.PMShared || {};
 const pmStorageKey = PMSharedLib.pmStorageKey || ((base) => base);
 
-// 全局变量定义
+function escapeHtml(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 let currentProject = null;
 let projects = [];
-let projectsCache = null; // 内存缓存
+let projectsCache = null;
 
 // DOM 加载后先尝试校验登录，再执行页面初始化。
 // 说明：本地联调或 /api/me 不可用时，userId 可能为空，若直接 return 会导致整页“按钮无响应”。
@@ -21,11 +26,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await init();
 });
 
-// 初始化函数
 async function init() {
-    loadProjects();
+    await loadProjects();
 
-    // 获取URL中的项目ID参数
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get('id');
 
@@ -39,7 +42,6 @@ async function init() {
         return;
     }
 
-    // 查找当前项目
     currentProject = projects.find((project) => project.id === projectId);
 
     if (!currentProject) {
@@ -67,13 +69,8 @@ async function init() {
         console.warn('写入 currentProjectContext 失败：', e);
     }
 
-    // 渲染项目信息
     renderProjectInfo();
-
-    // 渲染素材列表
     renderAssetList();
-
-    // 绑定事件监听
     bindEventListeners();
 
     // 兜底：确保详情页所有下拉都替换为主题自定义样式
@@ -112,18 +109,42 @@ function bindCardGlowEffects() {
     observer.observe(document.body, { childList: true, subtree: true });
 }
 
-// 加载项目数据（使用内存缓存优化）
-function loadProjects() {
-    // 如果内存中有缓存，直接使用缓存数据
+async function loadProjects() {
     if (projectsCache) {
         projects = projectsCache;
         return;
     }
 
-    // 从localStorage加载数据
     try {
-        projects = JSON.parse(localStorage.getItem(pmStorageKey('gameui-projects'))) || [];
-        projectsCache = projects; // 存入内存缓存
+        const res = await fetch('/api/projects', { credentials: 'include' });
+        if (res.status === 401) {
+            window.location.href = '../../login.html';
+            return;
+        }
+        const data = await res.json();
+        if (data.ok) {
+            projects = (data.projects || []).map(p => ({
+                id: p.id.toString(),
+                name: p.name,
+                desc: p.description,
+                type: p.type,
+                createTime: p.created_at,
+                version: p.version,
+                versionHistory: (p.versionHistory || []).map(v => ({
+                    time: v.created_at,
+                    desc: v.description,
+                })),
+                assets: (p.assets || []).map(a => ({
+                    id: a.id.toString(),
+                    name: a.name,
+                    type: a.type,
+                    content: a.content,
+                    desc: a.desc,
+                    createTime: a.createTime,
+                })),
+            }));
+            projectsCache = projects;
+        }
     } catch (error) {
         console.error('加载项目数据失败:', error);
         projects = [];
@@ -131,19 +152,33 @@ function loadProjects() {
     }
 }
 
-// 防抖函数 - 用于优化频繁的保存操作
 function debounce(func, wait) {
     return PMSharedLib.debounce ? PMSharedLib.debounce(func, wait) : func;
 }
 
-// 保存项目到localStorage（使用防抖优化）
-let saveProjectsToStorage = debounce(function () {
+async function saveProjectToServer(project) {
     try {
-        localStorage.setItem(pmStorageKey('gameui-projects'), JSON.stringify(projects));
-        projectsCache = projects; // 更新内存缓存
+        const csrfToken = await getCsrfToken();
+        if (project.id && !project.id.startsWith('new_')) {
+            await fetch(`/api/projects/${project.id}`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': csrfToken },
+                body: JSON.stringify({
+                    name: project.name,
+                    description: project.desc,
+                    type: project.type,
+                }),
+            });
+        }
     } catch (error) {
-        console.error('保存项目数据失败:', error);
+        console.error('保存项目失败:', error);
     }
+}
+
+let saveProjectsToStorage = debounce(function () {
+    projects.forEach(p => saveProjectToServer(p));
+    projectsCache = projects;
 }, 300);
 
 function showTechPrompt(options) {
@@ -292,20 +327,19 @@ function showTechAssetEditorDialog(asset) {
     });
 }
 
-// 立即保存项目到localStorage（用于上传等关键写入，避免防抖导致刷新丢数据）
-function persistProjectsNow() {
+// 上传等关键写入要求立即落盘，不能走防抖
+async function persistProjectsNow() {
     try {
-        localStorage.setItem(pmStorageKey('gameui-projects'), JSON.stringify(projects));
+        await saveProjectToServer(currentProject);
         projectsCache = projects;
         return true;
     } catch (error) {
         console.error('立即保存项目数据失败:', error);
-        uiToast('素材已添加到当前页面，但保存到本地失败。请减少素材大小后重试。', 'warn');
+        uiToast('素材保存失败，请稍后重试。', 'warn');
         return false;
     }
 }
 
-// 渲染项目信息
 function renderProjectInfo() {
     document.getElementById('project-name').textContent = currentProject.name;
     document.getElementById('project-description').textContent = currentProject.desc || '无描述';
@@ -315,16 +349,13 @@ function renderProjectInfo() {
         ? currentProject.assets.length
         : 0;
 
-    // 设置项目类型徽章
     const projectTypeBadge = document.getElementById('project-type-badge');
     projectTypeBadge.textContent = getProjectTypeName(currentProject.type);
 
-    // 隐藏编辑项目ID
     document.getElementById('edit-project-id').value = currentProject.id;
     document.getElementById('unify-style-project-id').value = currentProject.id;
 }
 
-// 渲染素材列表
 function renderAssetList() {
     const assetGrid = document.getElementById('asset-grid');
     const emptyAssets = document.getElementById('empty-assets');
@@ -337,7 +368,6 @@ function renderAssetList() {
 
     emptyAssets.classList.add('hidden');
 
-    // 使用文档片段优化DOM操作性能
     const fragment = document.createDocumentFragment();
 
     currentProject.assets.forEach((asset, index) => {
@@ -345,13 +375,16 @@ function renderAssetList() {
         assetCard.className = 'asset-card';
         assetCard.dataset.index = index;
 
+        const safeContent = escapeHtml(asset.content || 'https://via.placeholder.com/280x200?text=No+Preview');
+        const safeName = escapeHtml(asset.name || '');
+        const safeDesc = escapeHtml(asset.desc || '无描述');
         assetCard.innerHTML = `
             <div class="asset-preview">
-                <img src="${asset.content || 'https://via.placeholder.com/280x200?text=No+Preview'}" alt="${asset.name}">
+                <img src="${safeContent}" alt="${safeName}">
             </div>
             <div class="asset-info">
-                <h4>${asset.name}</h4>
-                <p>${asset.desc || '无描述'}</p>
+                <h4>${safeName}</h4>
+                <p>${safeDesc}</p>
                 <div class="asset-meta">
                     <span>${getAssetTypeName(asset.type)}</span>
                     <span>${formatDate(asset.createTime)}</span>
@@ -374,13 +407,10 @@ function renderAssetList() {
     assetGrid.innerHTML = '';
     assetGrid.appendChild(fragment);
 
-    // 绑定素材操作事件
     bindAssetEvents();
 }
 
-// 绑定素材操作事件
 function bindAssetEvents() {
-    // 编辑素材
     document.querySelectorAll('.edit-asset').forEach((btn) => {
         btn.addEventListener('click', async (e) => {
             const card = e.target.closest('.asset-card');
@@ -392,7 +422,6 @@ function bindAssetEvents() {
         });
     });
 
-    // 删除素材
     document.querySelectorAll('.delete-asset').forEach((btn) => {
         btn.addEventListener('click', async (e) => {
             const index = parseInt(e.target.closest('.asset-card').dataset.index);
@@ -414,7 +443,7 @@ function bindAssetEvents() {
                 time: new Date().toISOString(),
                 desc: '删除素材：' + deletedAssetName,
             });
-            saveProjectsToStorage(); // 防抖保存
+            saveProjectsToStorage();
             renderAssetList();
             renderProjectInfo();
         });
@@ -444,7 +473,7 @@ async function editAssetAtIndex(index) {
         desc: `编辑素材：${beforeName} -> ${nextName}`,
     });
 
-    const saved = persistProjectsNow();
+    const saved = await persistProjectsNow();
     if (!saved) return;
 
     renderAssetList();
@@ -456,17 +485,13 @@ async function editAssetAtIndex(index) {
     });
 }
 
-// 绑定页面事件监听
 function bindEventListeners() {
-    // 返回按钮优化
     document.getElementById('back-to-projects').addEventListener('click', navigateBack);
 
-    // 上传标签切换
     document.querySelectorAll('.upload-tab').forEach((tab) => {
         tab.addEventListener('click', (e) => {
             const tabId = e.target.dataset.tab;
 
-            // 更新激活状态
             document.querySelectorAll('.upload-tab').forEach((t) => t.classList.remove('active'));
             document.querySelectorAll('.upload-content').forEach((c) => c.classList.remove('active'));
 
@@ -480,7 +505,6 @@ function bindEventListeners() {
         });
     });
 
-    // AI生成方式切换
     document.querySelectorAll('input[name="ai-method"]').forEach((radio) => {
         radio.addEventListener('change', (e) => {
             const method = e.target.value;
@@ -490,19 +514,15 @@ function bindEventListeners() {
         });
     });
 
-    // 文件选择
     document.getElementById('local-file-input').addEventListener('change', (e) => {
         const fileName = e.target.files[0]?.name || '未选择文件';
         document.getElementById('selected-file-name').textContent = fileName;
     });
 
-    // 上传素材
     document.getElementById('upload-asset-btn').addEventListener('click', uploadLocalAsset);
 
-    // AI生成素材
     document.getElementById('generate-asset-btn').addEventListener('click', generateAsset);
 
-    // 从素材库添加
     document.querySelectorAll('.add-from-library-btn').forEach((btn) => {
         btn.addEventListener('click', (e) => {
             const libId = e.target.dataset.id;
@@ -510,7 +530,6 @@ function bindEventListeners() {
         });
     });
 
-    // 编辑项目
     document.getElementById('edit-project-btn').addEventListener('click', () => {
         document.getElementById('edit-project-name').value = currentProject.name;
         document.getElementById('edit-project-desc').value = currentProject.desc || '';
@@ -521,43 +540,33 @@ function bindEventListeners() {
         document.getElementById('edit-project-modal').classList.remove('hidden');
     });
 
-    // 保存编辑
     document.getElementById('save-edit-btn').addEventListener('click', saveProjectEdit);
 
-    // 版本历史
     document.getElementById('version-history-btn').addEventListener('click', openVersionHistory);
 
-    // 分享项目
     document.getElementById('share-project-btn').addEventListener('click', openShareModal);
 
-    // 统一风格
     document.getElementById('unify-style-btn').addEventListener('click', () => {
         document.getElementById('unify-style-modal').classList.remove('hidden');
     });
 
-    // 确认统一风格
     document.getElementById('confirm-unify-btn').addEventListener('click', unifyProjectStyle);
 
-    // 关闭弹窗
     document.querySelectorAll('.close-modal').forEach((btn) => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.modal').forEach((modal) => modal.classList.add('hidden'));
         });
     });
 
-    // 复制链接
     document.getElementById('copy-link-btn').addEventListener('click', copyShareLink);
 }
 
-// 优化的返回导航函数
 function navigateBack() {
-    // 检查当前是否在dashboard中
     const isInDashboard = window.location.pathname.includes('dashboard.html');
     const backPath = isInDashboard ? '../dashboard.html' : 'index.html';
     window.location.href = backPath;
 }
 
-// 上传本地素材
 async function uploadLocalAsset() {
     const assetName = document.getElementById('local-asset-name').value.trim() || '未命名素材';
     const assetType = document.getElementById('local-asset-type').value;
@@ -573,7 +582,7 @@ async function uploadLocalAsset() {
         return;
     }
 
-    // 模拟文件上传（实际项目中应使用真实的文件上传API）
+    // 文件上传处理
     const file = fileInput.files[0];
 
     let finalDataUrl = '';
@@ -589,17 +598,15 @@ async function uploadLocalAsset() {
         return;
     }
 
-    // 初始化assets数组（如果不存在）
     if (!currentProject.assets) {
         currentProject.assets = [];
     }
 
-    // 创建新素材
     const newAsset = {
         id: Date.now().toString(),
         name: assetName,
         type: assetType,
-        content: finalDataUrl, // 使用压缩后的 DataURL
+        content: finalDataUrl,
         desc: assetDesc,
         createTime: new Date().toISOString(),
         isAIGenerated: false,
@@ -613,17 +620,16 @@ async function uploadLocalAsset() {
     });
 
     // 上传场景要求可立即落盘，避免用户刷新后素材丢失
-    const saved = persistProjectsNow();
+    const saved = await persistProjectsNow();
     if (!saved) {
         // 回滚，避免页面显示成功但实际未保存
         currentProject.assets.pop();
         return;
     }
-    const syncResult = syncProjectAssetToLibrary(currentProject, newAsset);
+    const syncResult = await syncProjectAssetToLibrary(currentProject, newAsset);
     renderAssetList();
     renderProjectInfo();
 
-    // 重置表单
     document.getElementById('local-asset-name').value = '';
     document.getElementById('local-file-input').value = '';
     document.getElementById('local-asset-desc').value = '';
@@ -741,60 +747,59 @@ function getLocalStorageUsageBytes() {
     return total;
 }
 
-function syncProjectAssetToLibrary(project, asset) {
+async function syncProjectAssetToLibrary(project, asset) {
     try {
-        const key = pmStorageKey('assetLibrary_v1');
-        const raw = localStorage.getItem(key);
-        const state = raw ? JSON.parse(raw) : { categories: [], assets: [] };
-        const categories = Array.isArray(state.categories) ? state.categories : [];
-        const assets = Array.isArray(state.assets) ? state.assets : [];
-
         const category = getLibraryCategoryByAssetType(asset.type);
-        if (!categories.includes(category)) {
-            categories.unshift(category);
-        }
-
-        const existingIndex = assets.findIndex(
-            (item) => item && item.sourceProjectId === project.id && item.sourceProjectAssetId === asset.id
-        );
-        const wasDeduped = existingIndex !== -1;
-        if (wasDeduped) {
-            assets.splice(existingIndex, 1);
-        }
-
         const content = asset.content || '';
         let mime = 'image/png';
         if (typeof content === 'string' && content.startsWith('data:')) {
             const m = content.match(/^data:([^;]+);/);
             if (m && m[1]) mime = m[1];
         }
-
         const fileExt = mime.includes('jpeg') ? 'jpg' : mime.split('/')[1] || 'png';
         const safeName = (asset.name || 'asset').replace(/[\\/:*?"<>|]/g, '_');
-        assets.unshift({
-            id: `project_${project.id}_${asset.id}`,
-            name: asset.name || '未命名素材',
-            fileName: `${safeName}.${fileExt}`,
-            category: category,
-            type: mime,
-            dataURL: content,
-            favorite: false,
-            createdAt: Date.now(),
-            source: 'project-management',
-            sourceProjectId: project.id,
-            sourceProjectAssetId: asset.id,
-        });
+        const sourceId = `project_${project.id}_${asset.id}`;
 
-        localStorage.setItem(key, JSON.stringify({ categories, assets }));
-        const nearLimit = getLocalStorageUsageBytes() > 4.2 * 1024 * 1024;
-        return { ok: true, deduped: wasDeduped, nearLimit: nearLimit };
+        // Check for existing asset with same source to deduplicate
+        let wasDeduped = false;
+        try {
+            const listResp = await fetch('/api/asset-library', { credentials: 'include' });
+            if (listResp.ok) {
+                const listData = await listResp.json();
+                if (listData.ok && Array.isArray(listData.items)) {
+                    const existing = listData.items.find((item) => item.source === sourceId);
+                    if (existing) {
+                        // Delete existing before re-adding
+                        await fetchWithCsrf('/api/asset-library/' + encodeURIComponent(existing.id), { method: 'DELETE' });
+                        wasDeduped = true;
+                    }
+                }
+            }
+        } catch (_) {}
+
+        const body = {
+            name: asset.name || '未命名素材',
+            type: mime,
+            content: content,
+            desc: `${safeName}.${fileExt}`,
+            source: sourceId,
+            tags: JSON.stringify({ category: category, fileName: `${safeName}.${fileExt}` }),
+        };
+        const resp = await fetchWithCsrf('/api/asset-library', {
+            method: 'POST',
+            body: JSON.stringify(body),
+        });
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.error || '同步失败');
+        }
+        return { ok: true, deduped: wasDeduped, nearLimit: false };
     } catch (e) {
         console.warn('同步素材到素材库失败：', e);
         return { ok: false, deduped: false, nearLimit: false };
     }
 }
 
-// AI生成素材
 function generateAsset() {
     const method = document.querySelector('input[name="ai-method"]:checked').value;
 
@@ -805,44 +810,37 @@ function generateAsset() {
     }
 }
 
-// 从线稿生成素材 - 跳转到 AI 生成页
 function generateFromSketch() {
     const sketchUrl = document.getElementById('sketch-url').value.trim();
     if (!sketchUrl) {
         uiToast('请输入线稿图片URL！', 'warn');
         return;
     }
-    // 跳转到 AI 生成页的图生图模式
     const aiPagePath = '../ai-generate/ai-generator-new.html';
-    window.location.href = `${aiPagePath}?mode=img2img&projectId=${encodeURIComponent(currentProjectId)}`;
+    window.location.href = `${aiPagePath}?mode=img2img&projectId=${encodeURIComponent(currentProject.id)}`;
 }
 
-// 从描述生成素材 - 跳转到 AI 生成页
 function generateFromDescription() {
     const description = document.getElementById('asset-description').value.trim();
     if (!description) {
         uiToast('请输入素材描述！', 'warn');
         return;
     }
-    // 跳转到 AI 生成页的文生图模式
     const aiPagePath = '../ai-generate/ai-generator-new.html';
-    window.location.href = `${aiPagePath}?prompt=${encodeURIComponent(description)}&projectId=${encodeURIComponent(currentProjectId)}`;
+    window.location.href = `${aiPagePath}?prompt=${encodeURIComponent(description)}&projectId=${encodeURIComponent(currentProject.id)}`;
 }
 
-// 从素材库添加素材 - 跳转到素材库
 function addFromLibrary() {
     const assetLibPath = '../asset-library/asset-library.html';
-    window.location.href = `${assetLibPath}?projectId=${encodeURIComponent(currentProjectId)}`;
+    window.location.href = `${assetLibPath}?projectId=${encodeURIComponent(currentProject.id)}`;
 }
 
-// 统一项目风格 - 跳转到 AI 生成页
 function unifyProjectStyle() {
     uiToast('请在 AI 生成页中使用风格预设功能', 'info');
     const aiPagePath = '../ai-generate/ai-generator-new.html';
-    window.location.href = `${aiPagePath}?projectId=${encodeURIComponent(currentProjectId)}`;
+    window.location.href = `${aiPagePath}?projectId=${encodeURIComponent(currentProject.id)}`;
 }
 
-// 保存项目编辑
 async function saveProjectEdit() {
     const projectName = document.getElementById('edit-project-name').value.trim();
 
@@ -864,26 +862,22 @@ async function saveProjectEdit() {
         desc: '编辑项目信息',
     });
 
-    saveProjectsToStorage(); // 防抖保存
+    saveProjectsToStorage();
     renderProjectInfo();
 
-    // 关闭弹窗
     document.getElementById('edit-project-modal').classList.add('hidden');
 
     uiToast('项目信息已更新！', 'success');
 }
 
-// 打开版本历史
 function openVersionHistory() {
     const versionList = document.getElementById('version-list');
 
     if (!currentProject.versionHistory || currentProject.versionHistory.length === 0) {
         versionList.innerHTML = '<p class="no-versions">暂无版本历史记录</p>';
     } else {
-        // 使用文档片段优化DOM操作
         const fragment = document.createDocumentFragment();
 
-        // 按时间倒序排列
         const sortedHistory = [...currentProject.versionHistory].sort((a, b) => new Date(b.time) - new Date(a.time));
 
         sortedHistory.forEach((version, index) => {
@@ -894,7 +888,7 @@ function openVersionHistory() {
                     <span class="version-index">${index + 1}</span>
                     <span class="version-time">${formatDate(version.time)}</span>
                 </div>
-                <div class="version-desc">${version.desc}</div>
+                <div class="version-desc">${escapeHtml(version.desc || '')}</div>
             `;
             fragment.appendChild(versionItem);
         });
@@ -906,16 +900,13 @@ function openVersionHistory() {
     document.getElementById('version-history-modal').classList.remove('hidden');
 }
 
-// 打开分享弹窗
 function openShareModal() {
-    // 生成分享链接
     const shareLink = `${window.location.origin}${window.location.pathname}?id=${currentProject.id}`;
     document.getElementById('share-link').value = shareLink;
 
     document.getElementById('share-modal').classList.remove('hidden');
 }
 
-// 复制分享链接
 function copyShareLink() {
     const shareLinkInput = document.getElementById('share-link');
     shareLinkInput.select();
@@ -924,19 +915,16 @@ function copyShareLink() {
     uiToast('链接已复制到剪贴板！', 'success');
 }
 
-// 辅助函数：获取素材类型名称
 function getAssetTypeName(type) {
     if (PMSharedLib.getAssetTypeName) return PMSharedLib.getAssetTypeName(type);
     return type || '未分类';
 }
 
-// 辅助函数：获取项目类型名称
 function getProjectTypeName(type) {
     if (PMSharedLib.getProjectTypeName) return PMSharedLib.getProjectTypeName(type);
     return type || '未分类';
 }
 
-// 辅助函数：格式化日期
 function formatDate(isoString) {
     if (PMSharedLib.formatDate) return PMSharedLib.formatDate(isoString);
     return isoString || '-';

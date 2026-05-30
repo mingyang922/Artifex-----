@@ -1,7 +1,8 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
+'use strict';
 /** 转义 HTML 特殊字符，防止 XSS */
 function escapeManagerHtml(str) {
     return String(str)
@@ -164,19 +165,19 @@ class NotificationManager {
         if (viewAllLink) {
             viewAllLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                // 跳转到消息中心
-                let messageCenterPath;
+                // 消息中心已集成在用户中心页面，跳转到用户中心
+                let userCenterPath;
                 const currentPath = window.location.pathname;
 
                 if (currentPath.includes('dashboard.html')) {
-                    messageCenterPath = 'modules/messageCenter.html';
+                    userCenterPath = 'modules/user-center/userCenter.html';
                 } else if (currentPath.includes('modules/')) {
-                    messageCenterPath = '../messageCenter.html';
+                    userCenterPath = 'user-center/userCenter.html';
                 } else {
-                    messageCenterPath = 'modules/messageCenter.html';
+                    userCenterPath = 'modules/user-center/userCenter.html';
                 }
 
-                window.location.href = messageCenterPath;
+                window.location.href = userCenterPath;
             });
         }
 
@@ -189,7 +190,7 @@ class NotificationManager {
     updateAllBadges() {
         const unreadCount = this.notifications.filter((n) => n.unread).length;
 
-        this.badgeElements.forEach((badge, index) => {
+        this.badgeElements.forEach((badge) => {
             if (unreadCount > 0) {
                 badge.textContent = unreadCount;
                 badge.style.display = 'flex';

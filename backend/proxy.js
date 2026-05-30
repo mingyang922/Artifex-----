@@ -1,6 +1,6 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
 'use strict';
 
@@ -64,7 +64,7 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+            scriptSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
             fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
             imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
@@ -350,10 +350,14 @@ app.get('/api/admin/users', requireAuth, (req, res) => {
 
 // ─── 项目管理 API ───
 
-// 获取用户所有项目
+// 获取用户所有项目（支持分页）
 app.get('/api/projects', requireAuth, (req, res) => {
-    const projects = usersDb.getUserProjects(req.currentUser.id);
-    res.json({ ok: true, projects });
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
+    const offset = (page - 1) * limit;
+    const total = usersDb.getProjectCount(req.currentUser.id);
+    const projects = usersDb.getUserProjects(req.currentUser.id, limit, offset);
+    res.json({ ok: true, projects, total, page, limit });
 });
 
 // 创建项目
@@ -390,6 +394,42 @@ app.post('/api/projects/:id/assets', requireAuth, csrfProtection, (req, res) => 
     if (!name || !content) {
         return res.status(400).json({ error: '素材名称和内容不能为空' });
     }
+    // 限制单个素材内容大小不超过 10MB
+    const MAX_ASSET_SIZE = 10 * 1024 * 1024;
+    if (typeof content === 'string' && content.length > MAX_ASSET_SIZE) {
+        return res.status(413).json({ error: '素材内容过大，最大允许 10MB' });
+    }
+
+    // 图片格式验证
+    if (typeof content === 'string' && content.startsWith('data:')) {
+        const ALLOWED_MIME = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'];
+        const mimeMatch = content.match(/^data:([^;]+);base64,/);
+        if (!mimeMatch) {
+            return res.status(400).json({ error: '无效的 data URL 格式' });
+        }
+        const claimedMime = mimeMatch[1].toLowerCase();
+        if (!ALLOWED_MIME.includes(claimedMime)) {
+            return res.status(400).json({ error: `不支持的图片格式: ${claimedMime}，允许: ${ALLOWED_MIME.join(', ')}` });
+        }
+        // SVG 无需 magic bytes 验证
+        if (claimedMime !== 'image/svg+xml') {
+            const base64Data = content.substring(mimeMatch[0].length);
+            const buf = Buffer.from(base64Data.substring(0, 12), 'base64');
+            if (buf.length < 4) {
+                return res.status(400).json({ error: '图片数据过短，无法验证格式' });
+            }
+            const validMagic =
+                (claimedMime === 'image/png'  && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47) ||
+                (claimedMime === 'image/jpeg' && buf[0] === 0xFF && buf[1] === 0xD8 && buf[2] === 0xFF) ||
+                (claimedMime === 'image/gif'  && buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46) ||
+                (claimedMime === 'image/webp' && buf[0] === 0x52 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x46 &&
+                    buf.length >= 12 && buf[8] === 0x57 && buf[9] === 0x45 && buf[10] === 0x42 && buf[11] === 0x50);
+            if (!validMagic) {
+                return res.status(400).json({ error: '图片文件头(magic bytes)与声明的格式不匹配' });
+            }
+        }
+    }
+
     const asset = usersDb.addProjectAsset(req.params.id, req.currentUser.id, name, type, content);
     res.json({ ok: true, asset });
 });
@@ -397,6 +437,48 @@ app.post('/api/projects/:id/assets', requireAuth, csrfProtection, (req, res) => 
 // 删除素材
 app.delete('/api/assets/:id', requireAuth, csrfProtection, (req, res) => {
     usersDb.deleteProjectAsset(req.params.id, req.currentUser.id);
+    res.json({ ok: true });
+});
+
+// ─── 素材库 API ───
+
+// 获取用户素材库（支持分页）
+app.get('/api/asset-library', requireAuth, (req, res) => {
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
+    const offset = (page - 1) * limit;
+    const total = usersDb.getAssetLibraryCount(req.currentUser.id);
+    const assets = usersDb.getAssetLibrary(req.currentUser.id, limit, offset);
+    res.json({ ok: true, assets, total, page, limit });
+});
+
+// 添加素材
+app.post('/api/asset-library', requireAuth, csrfProtection, (req, res) => {
+    const { name, type, content, desc, source, tags } = req.body || {};
+    if (!name || !content) {
+        return res.status(400).json({ error: '素材名称和内容不能为空' });
+    }
+    const MAX_ASSET_SIZE = 10 * 1024 * 1024;
+    if (typeof content === 'string' && content.length > MAX_ASSET_SIZE) {
+        return res.status(413).json({ error: '素材内容过大，最大允许 10MB' });
+    }
+    const item = usersDb.addAssetLibraryItem(req.currentUser.id, { name, type, content, desc, source, tags });
+    res.json({ ok: true, item });
+});
+
+// 更新素材
+app.put('/api/asset-library/:id', requireAuth, csrfProtection, (req, res) => {
+    const updates = req.body || {};
+    const item = usersDb.updateAssetLibraryItem(req.currentUser.id, req.params.id, updates);
+    if (!item) {
+        return res.status(404).json({ error: '素材不存在' });
+    }
+    res.json({ ok: true, item });
+});
+
+// 删除素材
+app.delete('/api/asset-library/:id', requireAuth, csrfProtection, (req, res) => {
+    usersDb.deleteAssetLibraryItem(req.currentUser.id, req.params.id);
     res.json({ ok: true });
 });
 

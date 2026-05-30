@@ -1,11 +1,8 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
-/**
- * 统一导航管理器
- * 处理所有页面的侧边栏跳转逻辑
- */
+'use strict';
 class NavigationManager {
     constructor() {
         // 模块路径映射（相对于站点根目录）
@@ -26,9 +23,6 @@ class NavigationManager {
         this.init();
     }
 
-    /**
-     * 计算当前页面到站点根目录的相对路径前缀
-     */
     computeRootPrefix() {
         const loc = window.location;
         // file:// 协议或根目录页面，无需前缀
@@ -45,13 +39,9 @@ class NavigationManager {
         return '';
     }
 
-    /**
-     * 获取目标模块的相对路径
-     */
     getTargetPath(module) {
         const targetFile = this.modulePaths[module];
         if (!targetFile) return null;
-        // 从根目录出发的绝对路径
         return this.rootPrefix + targetFile;
     }
 

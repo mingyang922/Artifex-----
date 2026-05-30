@@ -1,14 +1,8 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
 
-/**
- * API 工具函数
- * 提供 CSRF Token 获取和其他 API 辅助功能
- */
-
-// CSRF Token 缓存
 let _csrfToken = null;
 let _csrfTokenTime = 0;
 const CSRF_TOKEN_TTL = 50 * 60 * 1000; // 50 分钟
@@ -53,6 +47,25 @@ async function fetchWithCsrf(url, options = {}) {
     });
 }
 
-// 导出到全局
 window.getCsrfToken = getCsrfToken;
 window.fetchWithCsrf = fetchWithCsrf;
+
+// 全局错误监控
+window.addEventListener('error', function(event) {
+    console.error('[Artifex Error]', {
+        message: event.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+        stack: event.error ? event.error.stack : null,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+    });
+});
+
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('[Artifex Unhandled Promise]', {
+        reason: event.reason ? String(event.reason) : 'Unknown',
+        timestamp: new Date().toISOString(),
+    });
+});

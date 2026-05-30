@@ -1,7 +1,8 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
- * Copyright (c) 2026 Artifex Team
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.0.0 */
+'use strict';
 /**
  * 通知组件 - 可复用的通知下拉菜单
  */
@@ -78,7 +79,7 @@ class NotificationComponent {
     setupNotificationButtons() {
         const notificationBtns = document.querySelectorAll('.notification-btn');
 
-        notificationBtns.forEach((btn, index) => {
+        notificationBtns.forEach((btn) => {
             // 确保按钮有正确的容器结构
             if (!btn.parentElement.classList.contains('notification-container')) {
                 const container = document.createElement('div');
@@ -330,29 +331,23 @@ class NotificationComponent {
      * 跳转到消息中心
      */
     navigateToMessageCenter() {
-        let messageCenterPath;
-        let returnPath;
+        // 消息中心已集成在用户中心页面，跳转到用户中心
+        let userCenterPath;
 
         // 简化的路径计算
         const currentPath = window.location.pathname;
 
         if (currentPath.includes('dashboard.html')) {
-            messageCenterPath = 'modules/messageCenter.html';
-            returnPath = 'dashboard.html';
+            userCenterPath = 'modules/user-center/userCenter.html';
         } else if (currentPath.includes('modules/')) {
-            messageCenterPath = '../messageCenter.html';
-            returnPath = currentPath.split('/').pop(); // 获取当前文件名
+            userCenterPath = 'user-center/userCenter.html';
         } else {
-            messageCenterPath = 'modules/messageCenter.html';
-            returnPath = 'dashboard.html';
+            userCenterPath = 'modules/user-center/userCenter.html';
         }
-
-        // 添加来源页面参数
-        const fullPath = `${messageCenterPath}?from=${encodeURIComponent(returnPath)}`;
 
         // 显示跳转过渡效果
         this.showTransition(() => {
-            window.location.href = fullPath;
+            window.location.href = userCenterPath;
         });
     }
 
