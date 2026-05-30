@@ -198,11 +198,6 @@ body {
     color: white;
 }
 
-.form-group select option:hover {
-    background-color: rgba(0, 240, 255, 0.2);
-    color: #00f0ff;
-}
-
 /* 聚焦状态下的样式 */
 .form-group select:focus,
 .form-group input:focus,
@@ -714,7 +709,13 @@ select.pm-tech-select-native {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     margin-bottom: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 240, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.asset-item:hover {
+    background: rgba(0, 240, 255, 0.08);
+    border-color: rgba(0, 240, 255, 0.2);
 }
 
 .asset-info {
@@ -888,7 +889,7 @@ select.pm-tech-select-native {
 
 /* AI生成相关样式 */
 .ai-feature {
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 255, 0.1));
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(139, 92, 246, 0.1));
     border-left: 3px solid #00f0ff;
     padding: 15px;
     border-radius: 8px;
@@ -908,16 +909,17 @@ select.pm-tech-select-native {
 }
 
 .ai-feature-card {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 240, 255, 0.08);
     border-radius: 8px;
     padding: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 240, 255, 0.08);
     transition: all 0.3s ease;
 }
 
 .ai-feature-card:hover {
     transform: translateY(-3px);
     border-color: rgba(0, 240, 255, 0.3);
+    box-shadow: 0 0 28px rgba(0, 240, 255, 0.16);
 }
 
 .ai-feature-card i {

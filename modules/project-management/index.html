@@ -273,7 +273,7 @@
                 align-items: center;
                 margin-bottom: 30px;
                 padding: 14px 18px;
-                border-radius: 8px;
+                border-radius: 10px;
                 border: 1px solid rgba(0, 240, 255, 0.15);
                 background: rgba(15, 22, 41, 0.65);
                 -webkit-backdrop-filter: blur(10px);
@@ -287,7 +287,7 @@
                 content: '';
                 position: absolute;
                 inset: 0;
-                border-radius: 8px;
+                border-radius: 10px;
                 background: linear-gradient(
                     105deg,
                     transparent 0%,
@@ -356,10 +356,10 @@
                 padding: 10px 15px 10px 35px;
                 background: rgba(255, 255, 255, 0.05);
                 border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 8px;
+                border-radius: 6px;
                 color: white;
                 font-size: 14px;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-family: 'Rajdhani', 'Segoe UI', sans-serif;
             }
 
             .search-bar i {
@@ -577,6 +577,40 @@
                 .mobile-menu-toggle {
                     display: block;
                 }
+            }
+
+            input[type="checkbox"] {
+                appearance: none;
+                -webkit-appearance: none;
+                width: 18px;
+                height: 18px;
+                border: 2px solid rgba(0, 240, 255, 0.4);
+                border-radius: 4px;
+                background: transparent;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                position: relative;
+            }
+            input[type="checkbox"]:checked {
+                border-color: #00f0ff;
+                background: rgba(0, 240, 255, 0.15);
+            }
+            input[type="checkbox"]:checked::after {
+                content: '✓';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: #00f0ff;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            input[type="checkbox"]:focus-visible {
+                box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.4);
+            }
+            .notification-btn:hover {
+                background: rgba(0, 240, 255, 0.1);
+                color: #00f0ff;
             }
 
             @media (prefers-reduced-motion: reduce) {

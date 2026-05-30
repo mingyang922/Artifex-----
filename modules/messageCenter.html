@@ -5,9 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>消息中心 - Artifex</title>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="../styles/ui-kit.css" />
         <style>
-            /* 全局样式重置 */
             * {
                 margin: 0;
                 padding: 0;
@@ -15,9 +15,10 @@
             }
 
             body {
-                background: #1a1a2e;
-                color: #e0e0e0;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: #0a0e18;
+                color: #e8ecf4;
+                font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+                font-weight: 500;
                 min-height: 100vh;
                 display: flex;
                 align-items: center;
@@ -25,33 +26,37 @@
                 padding: 20px;
             }
 
-            /* 消息中心容器 */
             .message-center-container {
-                background: #16213e;
-                border-radius: 12px;
+                background: rgba(15, 22, 41, 0.85);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-radius: 16px;
                 width: 100%;
                 max-width: 800px;
                 max-height: 80vh;
                 overflow: hidden;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 240, 255, 0.06);
+                border: 1px solid rgba(0, 240, 255, 0.12);
+                animation: fadeIn 0.3s ease-out;
             }
 
-            /* 消息中心头部 */
             .message-center-header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 padding: 20px 30px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                background: rgba(0, 0, 0, 0.1);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                background: rgba(0, 0, 0, 0.15);
             }
 
             .message-center-header h2 {
                 color: white;
                 margin: 0;
-                font-size: 20px;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 16px;
                 font-weight: 600;
+                letter-spacing: 2px;
+                text-transform: uppercase;
             }
 
             .close-message-center {
@@ -61,7 +66,7 @@
                 font-size: 18px;
                 cursor: pointer;
                 padding: 8px;
-                border-radius: 4px;
+                border-radius: 6px;
                 transition: all 0.3s ease;
                 width: 36px;
                 height: 36px;
@@ -75,16 +80,14 @@
                 background: rgba(0, 240, 255, 0.1);
             }
 
-            /* 消息中心内容 */
             .message-center-content {
                 padding: 0;
             }
 
-            /* 选项卡 */
             .message-center-tabs {
                 display: flex;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                background: rgba(0, 0, 0, 0.05);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                background: rgba(0, 0, 0, 0.08);
             }
 
             .message-tab {
@@ -108,10 +111,11 @@
                 background: rgba(0, 240, 255, 0.05);
             }
 
-            /* 消息列表 */
             .message-center-list {
                 max-height: 400px;
                 overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(0, 240, 255, 0.3) rgba(10, 18, 34, 0.6);
             }
 
             .message-center-list::-webkit-scrollbar {
@@ -119,7 +123,7 @@
             }
 
             .message-center-list::-webkit-scrollbar-track {
-                background: rgba(255, 255, 255, 0.05);
+                background: rgba(10, 18, 34, 0.6);
             }
 
             .message-center-list::-webkit-scrollbar-thumb {
@@ -131,22 +135,21 @@
                 background: rgba(0, 240, 255, 0.5);
             }
 
-            /* 消息项 */
             .message-item {
                 display: flex;
                 padding: 20px 30px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.04);
                 transition: all 0.3s ease;
                 cursor: pointer;
                 position: relative;
             }
 
             .message-item:hover {
-                background: rgba(255, 255, 255, 0.05);
+                background: rgba(0, 240, 255, 0.04);
             }
 
             .message-item.unread {
-                background: rgba(0, 240, 255, 0.05);
+                background: rgba(0, 240, 255, 0.06);
                 border-left: 3px solid #00f0ff;
             }
 
@@ -162,12 +165,11 @@
                 border-radius: 50%;
             }
 
-            /* 消息图标 */
             .message-icon {
-                width: 50px;
-                height: 50px;
-                border-radius: 50%;
-                background: rgba(0, 240, 255, 0.1);
+                width: 44px;
+                height: 44px;
+                border-radius: 10px;
+                background: rgba(0, 240, 255, 0.08);
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -177,16 +179,14 @@
             }
 
             .message-item:hover .message-icon {
-                background: rgba(0, 240, 255, 0.2);
-                transform: scale(1.05);
+                background: rgba(0, 240, 255, 0.15);
             }
 
             .message-icon i {
                 color: #00f0ff;
-                font-size: 20px;
+                font-size: 18px;
             }
 
-            /* 消息内容 */
             .message-content {
                 flex: 1;
                 min-width: 0;
@@ -195,26 +195,25 @@
             .message-title {
                 color: white;
                 font-weight: 600;
-                font-size: 16px;
-                margin-bottom: 5px;
+                font-size: 15px;
+                margin-bottom: 4px;
             }
 
             .message-text {
                 color: #b0b0c0;
-                font-size: 14px;
+                font-size: 13px;
                 line-height: 1.4;
-                margin-bottom: 5px;
+                margin-bottom: 4px;
             }
 
             .message-time {
-                color: #888;
+                color: #666;
                 font-size: 12px;
             }
 
-            /* 消息操作 */
             .message-actions {
                 display: flex;
-                gap: 8px;
+                gap: 6px;
                 align-items: center;
                 opacity: 0;
                 transition: opacity 0.3s ease;
@@ -229,11 +228,11 @@
                 border: none;
                 color: #b0b0c0;
                 cursor: pointer;
-                padding: 8px;
-                border-radius: 4px;
+                padding: 6px;
+                border-radius: 6px;
                 transition: all 0.3s ease;
-                width: 32px;
-                height: 32px;
+                width: 30px;
+                height: 30px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -249,30 +248,37 @@
                 background: rgba(255, 71, 87, 0.1);
             }
 
-            /* 空状态 */
             .empty-state {
                 text-align: center;
                 padding: 60px 30px;
                 color: #b0b0c0;
+                border: 1px dashed rgba(0, 240, 255, 0.15);
+                border-radius: 12px;
+                margin: 20px;
+                background: rgba(0, 240, 255, 0.02);
             }
 
             .empty-state i {
-                font-size: 48px;
-                color: #666;
-                margin-bottom: 20px;
+                font-size: 40px;
+                color: rgba(0, 240, 255, 0.3);
+                margin-bottom: 16px;
             }
 
             .empty-state h3 {
                 color: #888;
-                margin-bottom: 10px;
+                margin-bottom: 8px;
             }
 
             .empty-state p {
                 color: #666;
-                font-size: 14px;
+                font-size: 13px;
             }
 
-            /* 响应式设计 */
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(12px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
             @media (max-width: 768px) {
                 .message-center-container {
                     max-width: 100%;
@@ -280,68 +286,14 @@
                     border-radius: 0;
                     max-height: 100vh;
                 }
-
-                .message-center-header {
-                    padding: 15px 20px;
-                }
-
-                .message-item {
-                    padding: 15px 20px;
-                }
-
-                .message-center-tabs {
-                    flex-wrap: wrap;
-                }
-
-                .message-tab {
-                    padding: 12px 15px;
-                    font-size: 13px;
-                }
-            }
-
-            /* 动画效果 */
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .message-center-container {
-                animation: fadeIn 0.3s ease-out;
-            }
-
-            /* 加载状态 */
-            .loading {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 40px;
-                color: #b0b0c0;
-            }
-
-            .loading i {
-                animation: spin 1s linear infinite;
-                margin-right: 10px;
-            }
-
-            @keyframes spin {
-                0% {
-                    transform: rotate(0deg);
-                }
-                100% {
-                    transform: rotate(360deg);
-                }
+                .message-center-header { padding: 15px 20px; }
+                .message-item { padding: 15px 20px; }
+                .message-tab { padding: 12px 15px; font-size: 13px; }
             }
         </style>
     </head>
     <body>
-        <div class="message-center-container scroll-section">
-            <!-- 消息中心头部 -->
+        <div class="message-center-container">
             <div class="message-center-header">
                 <h2>消息中心</h2>
                 <button class="close-message-center" id="closeMessageCenter">
@@ -349,90 +301,63 @@
                 </button>
             </div>
 
-            <!-- 消息中心内容 -->
             <div class="message-center-content">
-                <!-- 选项卡 -->
                 <div class="message-center-tabs">
                     <div class="message-tab active" data-message-tab="all">全部消息</div>
                     <div class="message-tab" data-message-tab="unread">未读消息</div>
                     <div class="message-tab" data-message-tab="system">系统通知</div>
                 </div>
 
-                <!-- 消息列表 -->
                 <div class="message-center-list" id="messageList">
                     <div class="message-item unread" data-category="user">
-                        <div class="message-icon">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
+                        <div class="message-icon"><i class="fas fa-user-plus"></i></div>
                         <div class="message-content">
                             <div class="message-title">新用户注册</div>
                             <div class="message-text">用户 "张三" 刚刚注册了账户，请及时审核用户信息</div>
                             <div class="message-time">2025/1/15 14:30</div>
                         </div>
                         <div class="message-actions">
-                            <button class="message-action-btn" title="标记为已读" data-action="mark-read">
-                                <i class="fas fa-check"></i>
-                            </button>
-                            <button class="message-action-btn delete" title="删除" data-action="delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <button class="message-action-btn" title="标记为已读" data-action="mark-read"><i class="fas fa-check"></i></button>
+                            <button class="message-action-btn delete" title="删除" data-action="delete"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
 
                     <div class="message-item unread" data-category="security">
-                        <div class="message-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
+                        <div class="message-icon"><i class="fas fa-shield-alt"></i></div>
                         <div class="message-content">
                             <div class="message-title">安全提醒</div>
                             <div class="message-text">检测到异常登录活动，请检查账户安全设置</div>
                             <div class="message-time">2025/1/15 13:45</div>
                         </div>
                         <div class="message-actions">
-                            <button class="message-action-btn" title="标记为已读" data-action="mark-read">
-                                <i class="fas fa-check"></i>
-                            </button>
-                            <button class="message-action-btn delete" title="删除" data-action="delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <button class="message-action-btn" title="标记为已读" data-action="mark-read"><i class="fas fa-check"></i></button>
+                            <button class="message-action-btn delete" title="删除" data-action="delete"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
 
                     <div class="message-item" data-category="system">
-                        <div class="message-icon">
-                            <i class="fas fa-cog"></i>
-                        </div>
+                        <div class="message-icon"><i class="fas fa-cog"></i></div>
                         <div class="message-content">
                             <div class="message-title">系统更新</div>
                             <div class="message-text">系统已更新到最新版本，新增多项功能</div>
                             <div class="message-time">2025/1/15 10:20</div>
                         </div>
                         <div class="message-actions">
-                            <button class="message-action-btn" title="标记为已读" data-action="mark-read">
-                                <i class="fas fa-check"></i>
-                            </button>
-                            <button class="message-action-btn delete" title="删除" data-action="delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <button class="message-action-btn" title="标记为已读" data-action="mark-read"><i class="fas fa-check"></i></button>
+                            <button class="message-action-btn delete" title="删除" data-action="delete"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
 
                     <div class="message-item" data-category="system">
-                        <div class="message-icon">
-                            <i class="fas fa-bell"></i>
-                        </div>
+                        <div class="message-icon"><i class="fas fa-bell"></i></div>
                         <div class="message-content">
                             <div class="message-title">功能更新</div>
                             <div class="message-text">新增消息中心功能，提升用户体验</div>
                             <div class="message-time">2025/1/15 09:15</div>
                         </div>
                         <div class="message-actions">
-                            <button class="message-action-btn" title="标记为已读" data-action="mark-read">
-                                <i class="fas fa-check"></i>
-                            </button>
-                            <button class="message-action-btn delete" title="删除" data-action="delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <button class="message-action-btn" title="标记为已读" data-action="mark-read"><i class="fas fa-check"></i></button>
+                            <button class="message-action-btn delete" title="删除" data-action="delete"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                 </div>
@@ -441,283 +366,6 @@
 
         <script src="../js/ui-kit.js"></script>
         <script src="../js/scroll-animations.js"></script>
-        <script>
-            // 消息中心功能
-            class MessageCenter {
-                constructor() {
-                    this.init();
-                }
-
-                init() {
-                    this.bindEvents();
-                    this.updateUnreadCount();
-                }
-
-                bindEvents() {
-                    // 关闭按钮
-                    document.getElementById('closeMessageCenter').addEventListener('click', () => {
-                        this.close();
-                    });
-
-                    // 选项卡切换
-                    document.querySelectorAll('.message-tab').forEach((tab) => {
-                        tab.addEventListener('click', () => {
-                            this.switchTab(tab.dataset.messageTab);
-                        });
-                    });
-
-                    // 消息操作
-                    document.querySelectorAll('.message-action-btn').forEach((btn) => {
-                        btn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            const action = btn.dataset.action;
-                            const messageItem = btn.closest('.message-item');
-
-                            if (action === 'mark-read') {
-                                this.markAsRead(messageItem);
-                            } else if (action === 'delete') {
-                                this.deleteMessage(messageItem);
-                            }
-                        });
-                    });
-
-                    // 消息项点击
-                    document.querySelectorAll('.message-item').forEach((item) => {
-                        item.addEventListener('click', (e) => {
-                            if (!e.target.closest('.message-actions')) {
-                                this.handleMessageClick(item);
-                            }
-                        });
-                    });
-                }
-
-                switchTab(tabType) {
-                    // 更新选项卡状态
-                    document.querySelectorAll('.message-tab').forEach((tab) => {
-                        tab.classList.remove('active');
-                    });
-                    document.querySelector(`[data-message-tab="${tabType}"]`).classList.add('active');
-
-                    // 过滤消息
-                    const messages = document.querySelectorAll('.message-item');
-                    messages.forEach((message) => {
-                        const category = message.dataset.category;
-                        const isUnread = message.classList.contains('unread');
-
-                        let shouldShow = true;
-
-                        if (tabType === 'unread' && !isUnread) {
-                            shouldShow = false;
-                        } else if (tabType === 'system' && category !== 'system') {
-                            shouldShow = false;
-                        }
-
-                        message.style.display = shouldShow ? 'flex' : 'none';
-                    });
-                }
-
-                markAsRead(messageItem) {
-                    messageItem.classList.remove('unread');
-                    this.updateUnreadCount();
-
-                    // 显示成功提示
-                    this.showToast('消息已标记为已读', 'success');
-                }
-
-                async deleteMessage(messageItem) {
-                    const ok = await window.TechUI.confirm('确定要删除这条消息吗？', '删除消息', '删除', '取消');
-                    if (!ok) return;
-                    messageItem.style.animation = 'fadeOut 0.3s ease-out';
-                    setTimeout(() => {
-                        messageItem.remove();
-                        this.updateUnreadCount();
-                        this.showToast('消息已删除', 'success');
-                    }, 300);
-                }
-
-                handleMessageClick(messageItem) {
-                    const title = messageItem.querySelector('.message-title').textContent;
-
-                    // 根据消息类型处理点击
-                    if (title === '新用户注册') {
-                        this.showToast('跳转到用户管理界面', 'info');
-                    } else if (title === '安全提醒') {
-                        this.showToast('跳转到安全设置', 'info');
-                    } else if (title === '系统更新' || title === '功能更新') {
-                        this.showToast('跳转到系统设置', 'info');
-                    }
-
-                    // 标记为已读
-                    this.markAsRead(messageItem);
-                }
-
-                updateUnreadCount() {
-                    const unreadCount = document.querySelectorAll('.message-item.unread').length;
-                }
-
-                showToast(message, type = 'info') {
-                    const toast = document.createElement('div');
-                    toast.className = `toast toast-${type}`;
-                    toast.textContent = message;
-                    toast.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: ${type === 'success' ? '#2ed573' : type === 'error' ? '#ff4757' : '#00f0ff'};
-                    color: white;
-                    padding: 12px 20px;
-                    border-radius: 6px;
-                    font-size: 14px;
-                    z-index: 10000;
-                    animation: slideIn 0.3s ease-out;
-                `;
-
-                    document.body.appendChild(toast);
-
-                    setTimeout(() => {
-                        toast.style.animation = 'slideOut 0.3s ease-out';
-                        setTimeout(() => {
-                            document.body.removeChild(toast);
-                        }, 300);
-                    }, 2000);
-                }
-
-                close() {
-                    // 检查是否有来源页面信息
-                    const referrer = document.referrer;
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const fromPage = urlParams.get('from');
-
-
-                    // 如果有from参数，优先使用
-                    if (fromPage) {
-                        this.navigateToPage(fromPage);
-                        return;
-                    }
-
-                    // 如果有referrer，使用referrer
-                    if (referrer && referrer !== window.location.href) {
-                        window.location.href = referrer;
-                        return;
-                    }
-
-                    // 如果是从其他页面打开的，返回上一页
-                    if (window.history.length > 1) {
-                        window.history.back();
-                    } else {
-                        // 默认跳转到dashboard
-                        window.location.href = '../dashboard.html';
-                    }
-                }
-
-                navigateToPage(pagePath) {
-
-                    // 精确的路径处理
-                    let finalPath = pagePath;
-
-                    // 根据文件名确定正确的相对路径
-                    if (pagePath === 'dashboard.html') {
-                        finalPath = '../dashboard.html';
-                    } else if (pagePath === 'ai-generator-new.html') {
-                        finalPath = './ai-generate/ai-generator-new.html';
-                    } else if (pagePath === 'asset-library.html') {
-                        finalPath = './asset-library/asset-library.html';
-                    } else if (pagePath === 'style-presets.html') {
-                        finalPath = './style-presets/style-presets.html';
-                    } else if (pagePath === 'index.html') {
-                        finalPath = './project-management/index.html';
-                    } else if (pagePath === 'userCenter.html') {
-                        finalPath = './user-center/userCenter.html';
-                    } else {
-                        // 默认情况，尝试直接使用
-                        finalPath = pagePath;
-                    }
-
-
-                    // 显示返回过渡效果
-                    this.showReturnTransition(() => {
-                        window.location.href = finalPath;
-                    });
-                }
-
-                showReturnTransition(callback) {
-                    // 创建返回过渡遮罩层
-                    const overlay = document.createElement('div');
-                    overlay.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-                    z-index: 9999;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                `;
-
-                    // 添加返回动画
-                    const returnIcon = document.createElement('div');
-                    returnIcon.style.cssText = `
-                    width: 40px;
-                    height: 40px;
-                    border: 3px solid rgba(0, 240, 255, 0.3);
-                    border-right: 3px solid #00f0ff;
-                    border-radius: 50%;
-                    animation: spin 1s linear infinite;
-                `;
-
-                    // 添加旋转动画样式
-                    const style = document.createElement('style');
-                    style.textContent = `
-                    @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                    }
-                `;
-                    document.head.appendChild(style);
-
-                    overlay.appendChild(returnIcon);
-                    document.body.appendChild(overlay);
-
-                    // 显示过渡效果
-                    requestAnimationFrame(() => {
-                        overlay.style.opacity = '1';
-                    });
-
-                    // 延迟执行跳转
-                    setTimeout(() => {
-                        callback();
-                    }, 500);
-                }
-            }
-
-            // 添加动画样式
-            const style = document.createElement('style');
-            style.textContent = `
-            @keyframes fadeOut {
-                from { opacity: 1; transform: translateX(0); }
-                to { opacity: 0; transform: translateX(100%); }
-            }
-            
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            
-            @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-        `;
-            document.head.appendChild(style);
-
-            // 初始化消息中心
-            document.addEventListener('DOMContentLoaded', () => {
-                new MessageCenter();
-            });
-        </script>
+        <script src="message-center.js"></script>
     </body>
 </html>

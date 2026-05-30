@@ -16,7 +16,7 @@ let projects = [];
 let projectsCache = null;
 
 // DOM 加载后先尝试校验登录，再执行页面初始化。
-// 说明：本地联调或 /api/me 不可用时，userId 可能为空，若直接 return 会导致整页“按钮无响应”。
+// 说明：本地联调或 /api/me 不可用时，userId 可能为空，若直接 return 会导致整页"按钮无响应"。
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         await GameUiUserScope.ensure();

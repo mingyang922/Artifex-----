@@ -873,7 +873,7 @@
             }
 
             function mergeLegacyLibraryData() {
-                // 兼容历史未分用户键：首次进入分用户键时自动合并一次，避免“显示成功但看不到”
+                // 兼容历史未分用户键：首次进入分用户键时自动合并一次，避免"显示成功但看不到"
                 try {
                     const scopedKey = STORAGE_KEY;
                     const legacyKey = 'assetLibrary_v1';

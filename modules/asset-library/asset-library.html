@@ -642,6 +642,10 @@
                 background: linear-gradient(180deg, var(--tech-cyan), var(--tech-violet));
                 opacity: 0.35;
                 pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+            .asset-card:hover::before {
+                opacity: 0.95;
             }
             .asset-card:hover {
                 transform: translateY(-5px);
@@ -713,9 +717,12 @@
                     0 0 40px rgba(0, 240, 255, 0.08);
             }
             .no-assets {
-                text-align: center;
                 color: #9aa8c4;
                 padding: 40px;
+                text-align: center;
+                border: 1px dashed rgba(0, 240, 255, 0.22);
+                border-radius: 12px;
+                background: rgba(0, 240, 255, 0.03);
             }
 
             /* 覆盖全局 styles.css 里登录页的 .btn（避免素材库出现棕色大按钮） */
@@ -992,7 +999,7 @@
                         <p>上传、分类、检索并管理你的素材。</p>
                         <div
                             id="currentProjectHint"
-                            style="margin-top: 8px; font-size: 13px; color: #7ddcff; display: none"
+                            style="margin-top: 8px; font-size: 13px; color: #00f0ff; display: none"
                         >
                             当前关联项目：<span data-project-name></span>
                             <button

@@ -168,7 +168,9 @@
 
             window.refreshTechSelects = initTechSelects;
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initTechSelects);
+                document.addEventListener('DOMContentLoaded', function () {
+                    initTechSelects();
+                });
             } else {
                 initTechSelects();
             }

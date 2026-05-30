@@ -857,7 +857,7 @@ class AssetEditor {
             const s = this.selection;
             cx.fillRect(Math.min(s.x, s.x + s.w), Math.min(s.y, s.y + s.h), Math.abs(s.w), Math.abs(s.h));
         } else {
-            // 未框选时兜底整图重绘，避免按钮“无响应”体验
+            // 未框选时兜底整图重绘，避免按钮"无响应"体验
             cx.fillRect(0, 0, c.width, c.height);
         }
         return c.toDataURL('image/png');
@@ -1108,7 +1108,7 @@ class AssetEditor {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 重绘中…';
         }
 
-        // 第 1 阶段（必成功）：本地稳定重绘，保证“点了就有效果”
+        // 第 1 阶段（必成功）：本地稳定重绘，保证"点了就有效果"
         const localResult = this.runLocalInpaintStable(prompt, strength);
         if (!localResult.ok) {
             if (btn) {

@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="../../styles/app-shell.css" />
         <link rel="stylesheet" href="../../styles/ui-kit.css" />
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet" />
         <style>
             :root {
                 --admin-bg: #0a0e18;
@@ -43,6 +44,10 @@
                 padding: 30px 20px;
                 position: relative;
                 z-index: 1;
+                background-image:
+                    linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+                background-size: 48px 48px;
             }
 
             .admin-header {
@@ -136,6 +141,12 @@
                 margin-bottom: 20px;
                 -webkit-backdrop-filter: blur(10px);
                 backdrop-filter: blur(10px);
+                transition: all 0.3s ease;
+            }
+
+            .card:hover {
+                border-color: rgba(0, 240, 255, 0.2);
+                box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
             }
 
             .card h2 {
@@ -174,7 +185,7 @@
             }
 
             tr:hover {
-                background: rgba(255, 255, 255, 0.02);
+                background: rgba(0, 240, 255, 0.04);
             }
 
             .badge {
@@ -221,7 +232,7 @@
             .stat-card:hover {
                 border-color: rgba(0, 240, 255, 0.2);
                 transform: translateY(-2px);
-                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 8px 24px rgba(0, 240, 255, 0.16);
             }
 
             .stat-card .label {
@@ -245,11 +256,213 @@
                 text-align: center;
                 padding: 40px;
                 color: var(--admin-muted);
-                font-style: italic;
+                border: 1px dashed rgba(0, 240, 255, 0.22);
+                border-radius: 12px;
+                background: rgba(0, 240, 255, 0.03);
+            }
+
+            .dashboard-container {
+                display: flex;
+                min-height: 100vh;
+                width: 100%;
+                position: relative;
+                z-index: 2;
+            }
+
+            .sidebar {
+                width: 240px;
+                background: linear-gradient(180deg, #0f1629 0%, #0a0e18 100%);
+                padding: 0;
+                box-shadow:
+                    4px 0 32px rgba(0, 0, 0, 0.45),
+                    inset -1px 0 0 rgba(0, 240, 255, 0.12);
+                position: fixed;
+                height: 100vh;
+                top: 0;
+                left: 0;
+                z-index: 100;
+            }
+
+            .sidebar::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 1px;
+                background: linear-gradient(
+                    180deg,
+                    transparent 0%,
+                    rgba(0, 240, 255, 0.35) 30%,
+                    rgba(167, 139, 250, 0.4) 55%,
+                    rgba(0, 240, 255, 0.25) 80%,
+                    transparent 100%
+                );
+                opacity: 0.85;
+                pointer-events: none;
+            }
+
+            .sidebar-logo {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                gap: 10px;
+            }
+
+            .sidebar-logo .logo-img {
+                height: 40px;
+                width: auto;
+                object-fit: contain;
+            }
+
+            .sidebar-logo h1 {
+                font-family: var(--font-display);
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                color: #f0f4fc;
+                margin: 0;
+            }
+
+            .nav-menu {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .nav-item {
+                margin-bottom: 0;
+            }
+
+            .nav-link {
+                display: flex;
+                align-items: center;
+                padding: 15px 20px;
+                color: #b0b0c0;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                border-left: 3px solid transparent;
+            }
+
+            .nav-link:hover,
+            .nav-link.active {
+                background: rgba(0, 240, 255, 0.1);
+                color: #00f0ff;
+                border-left-color: #00f0ff;
+            }
+
+            .nav-link i {
+                margin-right: 10px;
+                width: 20px;
+                text-align: center;
+            }
+
+            .main-content {
+                flex: 1;
+                padding: 20px;
+                margin-left: 240px;
+                overflow-y: auto;
+                overflow-x: hidden;
+                min-height: 100vh;
+                box-sizing: border-box;
+                position: relative;
+                background-color: rgba(10, 14, 24, 0.55);
+            }
+
+            .pointer-glow {
+                position: fixed;
+                left: 50vw;
+                top: 50vh;
+                width: 560px;
+                height: 560px;
+                margin-left: -280px;
+                margin-top: -280px;
+                border-radius: 50%;
+                background: radial-gradient(
+                    circle,
+                    rgba(0, 240, 255, 0.22) 0%,
+                    rgba(167, 139, 250, 0.12) 40%,
+                    transparent 70%
+                );
+                pointer-events: none;
+                z-index: 1;
+                mix-blend-mode: screen;
+                transition: opacity 0.35s ease;
+                opacity: 0;
+            }
+
+            .pointer-glow--lag {
+                width: 720px;
+                height: 720px;
+                margin-left: -360px;
+                margin-top: -360px;
+                background: radial-gradient(
+                    circle,
+                    rgba(236, 72, 153, 0.12) 0%,
+                    rgba(0, 240, 255, 0.09) 46%,
+                    transparent 72%
+                );
+                filter: blur(14px);
+                opacity: 0;
+                transition:
+                    left 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                    top 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                    opacity 0.3s ease;
             }
         </style>
     </head>
     <body>
+        <div class="pointer-glow"></div>
+        <div class="pointer-glow pointer-glow--lag"></div>
+        <div class="dashboard-container">
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-logo">
+                    <img src="../../js/logo-main.png" alt="Artifex" class="logo-img" />
+                    <h1>Artifex</h1>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="../../dashboard.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>主页</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="../project-management/index.html" class="nav-link">
+                            <i class="fas fa-project-diagram"></i>
+                            <span>项目管理</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="../ai-generate/ai-generator-new.html" class="nav-link">
+                            <i class="fas fa-magic"></i>
+                            <span>AI 生成</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="../asset-library/asset-library.html" class="nav-link">
+                            <i class="fas fa-images"></i>
+                            <span>素材库</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="../style-presets/style-presets.html" class="nav-link">
+                            <i class="fas fa-swatchbook"></i>
+                            <span>风格预设</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="../user-center/userCenter.html" class="nav-link">
+                            <i class="fas fa-user-circle"></i>
+                            <span>账户</span>
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+
+            <main class="main-content">
         <div class="admin-container">
             <div class="admin-header">
                 <h1><i class="fas fa-shield-alt"></i> 管理员面板</h1>
@@ -329,6 +542,7 @@
                     </table>
                 </div>
             </div>
+        </main>
         </div>
 
         <script src="../../js/ui-kit.js"></script>

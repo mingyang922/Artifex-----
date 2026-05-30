@@ -794,7 +794,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         observer.observe(document.body, { childList: true, subtree: true });
     })();
 
-    // 选项卡切换：三个独立“页面”视图 + 丝滑动画
+    // 选项卡切换：三个独立"页面"视图 + 丝滑动画
     const tabButtons = document.querySelectorAll('.tab-button');
     const generatorViews = document.querySelectorAll('.generator-view');
 

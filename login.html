@@ -6,6 +6,7 @@
         <title>Artifex - 登录注册</title>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="styles/app-shell.css" />
         <style>
             /* ═══ 赛博朋克登录页 ═══ */
             :root {
@@ -479,7 +480,6 @@
                 body::before { animation: none !important; }
                 .form-container::before { animation: none !important; }
                 .btn-primary::before { display: none !important; }
-                .particle-network-canvas { display: none !important; }
             }
 
             /* ── 响应式设计 ── */
@@ -592,10 +592,7 @@
         <!-- 消息提示 -->
         <div class="message" id="message"></div>
 
-        <script src="js/particle-network.js"></script>
-        <script>
-            ParticleNetwork.init({ container: document.body, particleCount: 60 });
-        </script>
+        <script src="js/login-init.js"></script>
         <script src="js/api-utils.js"></script>
         <script src="js/login-page.js"></script>
     </body>

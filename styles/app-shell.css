@@ -200,7 +200,18 @@ body.app-shell .main-content {
         linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
     background-size: 48px 48px;
-    background-color: rgba(10, 14, 24, 0.55);
+    background-color: rgba(10, 14, 24, 0.3);
+}
+
+body.app-shell .main-content::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.07) 2px, rgba(0, 0, 0, 0.07) 4px);
+    opacity: 0.3;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 75%);
 }
 
 /* ── 主内容区滚动条 ── */
@@ -218,16 +229,6 @@ body.app-shell .main-content::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 240, 255, 0.55);
 }
 
-body.app-shell .main-content::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.07) 2px, rgba(0, 0, 0, 0.07) 4px);
-    opacity: 0.3;
-    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 75%);
-}
 
 body.app-shell .main-content > * {
     position: relative;
@@ -521,17 +522,6 @@ body.app-shell .mobile-menu-toggle {
     }
 }
 
-/* ── 粒子网络 Canvas ── */
-body.app-shell .particle-network-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    pointer-events: none;
-}
-
 /* ── 通知徽章呼吸灯 ── */
 @keyframes badgePulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.5); }
@@ -548,8 +538,33 @@ body.app-shell .search-bar input:focus {
     border-color: var(--shell-accent);
 }
 
+/* ── 旋转渐变边框 ── */
+@keyframes rotate-border {
+    0% { --border-angle: 0deg; }
+    100% { --border-angle: 360deg; }
+}
+.rotating-border {
+    position: relative;
+    border: none !important;
+    overflow: visible;
+}
+.rotating-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: conic-gradient(from var(--border-angle, 0deg), #00f0ff, #8b5cf6, #00f0ff);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: rotate-border 4s linear infinite;
+    pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
     body.app-shell::before,
+    body.app-shell::after,
     body.app-shell .sidebar::after,
     body.app-shell .top-bar::before {
         animation: none !important;
@@ -561,7 +576,8 @@ body.app-shell .search-bar input:focus {
     body.app-shell .notification-badge {
         animation: none !important;
     }
-    body.app-shell .particle-network-canvas {
-        display: none !important;
+    .rotating-border::before {
+        animation: none !important;
     }
+    #boot-sequence { display: none !important; }
 }

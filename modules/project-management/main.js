@@ -238,6 +238,7 @@ async function loadProjects() {
                 })),
             }));
             projectsCache = projects;
+            syncProjectsToLocalStorage();
         }
     } catch (error) {
         console.error('加载项目数据失败:', error);
@@ -273,6 +274,13 @@ async function saveProjectToServer(project) {
         console.error('保存项目失败:', error);
         uiToast('保存项目失败', 'error');
     }
+}
+
+// 同步项目数据到 localStorage（供 Dashboard 等模块读取）
+function syncProjectsToLocalStorage() {
+    try {
+        localStorage.setItem(pmStorageKey('gameui-projects'), JSON.stringify(projects));
+    } catch (e) { /* ignore */ }
 }
 
 // 批量保存项目到服务端
@@ -392,7 +400,7 @@ function bindEventListeners() {
         createBtn.addEventListener('click', openCreateProjectForm);
     }
 
-    // 空状态区支持点击和键盘回车，行为与“新建项目”按钮一致
+    // 空状态区支持点击和键盘回车，行为与"新建项目"按钮一致
     const emptyStateEl = document.getElementById('project-empty-state');
     if (emptyStateEl) {
         emptyStateEl.style.cursor = 'pointer';
@@ -683,6 +691,7 @@ async function createProject() {
     }
 
     saveProjectsToStorage();
+    syncProjectsToLocalStorage();
     uiToast('项目创建成功！', 'success');
 }
 
@@ -745,6 +754,7 @@ async function saveEditProject() {
     projects[projectIndex].type = typeInput.value;
 
     saveProjectsToStorage();
+    syncProjectsToLocalStorage();
     renderProjectList();
     document.getElementById('edit-project-modal').classList.add('hidden');
     uiToast('项目更新成功！版本已升级至 v' + projects[projectIndex].version, 'success');
@@ -761,6 +771,7 @@ async function deleteProject(projectId) {
         });
         projects = projects.filter((p) => p.id !== projectId);
         projectsCache = projects;
+        syncProjectsToLocalStorage();
         renderProjectList();
     } catch (error) {
         console.error('删除项目失败:', error);

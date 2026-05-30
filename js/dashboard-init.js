@@ -21,23 +21,49 @@
                 var grid = document.getElementById('recent-projects-grid');
                 if (!grid) return;
 
-                var raw = null;
-                try {
-                    raw = window.localStorage.getItem(GameUiUserScope.key('gameui-projects'));
-                } catch (e) {
-                    console.warn('读取项目数据失败:', e);
-                }
+                grid.innerHTML = '<p style="color:#666;text-align:center;">加载中...</p>';
 
+                fetch('/api/projects?page=1&limit=3', { credentials: 'include' })
+                    .then(function (res) {
+                        if (!res.ok) throw new Error('API ' + res.status);
+                        return res.json();
+                    })
+                    .then(function (data) {
+                        var projects = [];
+                        if (data.ok && data.projects) {
+                            projects = data.projects.map(function (p) {
+                                return {
+                                    id: String(p.id),
+                                    name: p.name,
+                                    desc: p.description,
+                                    createTime: p.created_at,
+                                    status: p.status || 'active',
+                                };
+                            });
+                        }
+                        if (projects.length > 0) {
+                            renderProjectCards(grid, projects);
+                        } else {
+                            renderFromLocalStorage(grid);
+                        }
+                    })
+                    .catch(function (err) {
+                        console.warn('[Dashboard] API failed, trying localStorage:', err.message);
+                        renderFromLocalStorage(grid);
+                    });
+            }
+
+            function renderFromLocalStorage(grid) {
                 var projects = [];
-                if (raw) {
-                    try {
-                        projects = JSON.parse(raw) || [];
-                    } catch (e) {
-                        console.warn('解析项目数据失败:', e);
-                        projects = [];
-                    }
-                }
+                try {
+                    var raw = localStorage.getItem(GameUiUserScope.key('gameui-projects'));
+                    if (raw) projects = JSON.parse(raw) || [];
+                } catch (e) { /* ignore */ }
+                console.log('[Dashboard] localStorage projects:', projects.length);
+                renderProjectCards(grid, projects);
+            }
 
+            function renderProjectCards(grid, projects) {
                 grid.innerHTML = '';
 
                 if (!projects.length) {
@@ -46,10 +72,6 @@
                     return;
                 }
 
-                // 按创建时间倒序，取最近 3 个
-                projects.sort(function (a, b) {
-                    return new Date(b.createTime || 0) - new Date(a.createTime || 0);
-                });
                 var recent = projects.slice(0, 3);
 
                 recent.forEach(function (project) {
@@ -86,7 +108,6 @@
                         '</div>' +
                         '</div>';
 
-                    // 点击整卡或按钮进入项目详情
                     var openDetail = function () {
                         if (!project.id) return;
                         window.location.href =
@@ -101,8 +122,10 @@
             }
 
             document.addEventListener('DOMContentLoaded', async function () {
+                console.log('[Dashboard] init start');
                 try {
                     await GameUiUserScope.ensure();
+                    console.log('[Dashboard] logged in, userId:', GameUiUserScope.userId);
                 } catch (e) {
                     console.warn('用户态校验失败，继续渲染主页：', e);
                 }
@@ -112,11 +135,9 @@
                     window.PageEffects.initCardSpotlight('.tool-card, .project-card');
                 }
 
-                // 粒子网络背景
                 if (window.ParticleNetwork) {
-                    window.ParticleNetwork.init({ container: document.body, particleCount: 70 });
+                    ParticleNetwork.init({ container: document.body, particleCount: 70 });
                 }
 
-                // 渲染最近项目（本地联调或 userId 为空时也应可见）
                 renderRecentProjects();
             });

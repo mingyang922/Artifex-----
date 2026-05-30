@@ -131,6 +131,7 @@ function setupLoginForm() {
             }
             showMessage('登录成功！正在跳转到主控制台...', 'success');
             setTimeout(() => {
+                sessionStorage.removeItem('artifex-boot-seen');
                 window.location.href = 'dashboard.html';
             }, 600);
         } catch (err) {
@@ -190,6 +191,7 @@ function setupRegisterForm() {
             localStorage.setItem('userRegistrationData', JSON.stringify(registrationData));
             showMessage('注册成功！已自动登录，正在进入控制台...', 'success');
             setTimeout(() => {
+                sessionStorage.removeItem('artifex-boot-seen');
                 window.location.href = 'dashboard.html';
             }, 800);
         } catch (err) {
