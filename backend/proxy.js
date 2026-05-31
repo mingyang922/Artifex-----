@@ -1,12 +1,13 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.1 */
 'use strict';
 
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
@@ -26,6 +27,10 @@ const jimengProvider = require('./providers/jimeng');
 const sdWebUiProvider = require('./providers/sd-webui');
 const { createAuthRouter } = require('./routes/auth');
 const { createImageRouter } = require('./routes/image-proxy');
+const { createProjectRouter } = require('./routes/projects');
+const { createAssetLibraryRouter } = require('./routes/asset-library');
+const { createAdminRouter } = require('./routes/admin');
+const { createAiProviderRouter } = require('./routes/ai-providers');
 
 // ── 环境变量 ──────────────────────────────────────────────────────
 const envFiles = [path.join(__dirname, '.env'), path.join(__dirname, '../config/.env')];
@@ -159,7 +164,7 @@ app.use(session({
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
         sameSite: 'lax',
-        secure: isProd, // 生产环境强制 HTTPS
+        secure: isProd,
     },
 }));
 
@@ -262,7 +267,31 @@ if (!isProd) {
     jimengProvider.logJimengConfig();
 }
 
-// ── 业务路由 ─────────────────────────────────────────────────────
+// ── 业务路由（按模块拆分） ──────────────────────────────────────
+
+// AI 服务商路由（即梦/SD/混元/阿里云）
+app.use('/api', createAiProviderRouter({
+    requireAuth, runtimeConfig, API_CONFIG, getUserProviderConfig, isAdminUser,
+    tencentProvider, alibabaProvider, jimengProvider, sdWebUiProvider,
+}));
+
+// 图片生成路由
+app.use('/api', createImageRouter({
+    requireAuth, csrfProtection, isAdminUser, getUserProviderConfig,
+    logApiCall: usersDb.logApiCall,
+    checkQuota: usersDb.checkQuota,
+}));
+
+// 项目管理路由
+app.use('/api', createProjectRouter({ usersDb, requireAuth, csrfProtection }));
+
+// 素材库路由
+app.use('/api', createAssetLibraryRouter({ usersDb, requireAuth, csrfProtection }));
+
+// 管理员路由（用量统计/用户管理）
+app.use('/api', createAdminRouter({ usersDb, requireAuth, isAdminUser }));
+
+// ── 配置状态（保留在此，依赖 runtimeConfig） ───────────────────
 
 // 用户级 API 配置状态（兼容旧路径）
 app.get('/api/config', requireAuth, (req, res) => {
@@ -292,195 +321,7 @@ for (const action of ['update', 'validate', 'reset']) {
     });
 }
 
-// 腾讯混元
-const _tencentDeps = { runtimeConfig, API_CONFIG, getUserProviderConfig, isAdminUser };
-app.post('/api/hunyuan-proxy', requireAuth, (req, res) => tencentProvider.handleHunyuanProxy(req, res, _tencentDeps));
-
-// 图片生成路由
-app.use('/api', createImageRouter({
-    requireAuth, csrfProtection, isAdminUser, getUserProviderConfig,
-    logApiCall: usersDb.logApiCall,
-    checkQuota: usersDb.checkQuota,
-}));
-
-// SD Web UI / 即梦状态
-app.get('/api/sd-webui/status', requireAuth, (req, res) => sdWebUiProvider.handleSdWebUiStatus(req, res, { getUserProviderConfig }));
-app.get('/api/jimeng/status', requireAuth, (req, res) => jimengProvider.handleJimengStatus(req, res, { getUserProviderConfig }));
-app.get('/api/jimeng/live-test', requireAuth, (req, res) => jimengProvider.handleJimengLiveTest(req, res, { getUserProviderConfig }));
-app.post('/api/sd-webui/txt2img', requireAuth, (req, res) => sdWebUiProvider.handleSdWebUiTxt2Img(req, res, { getUserProviderConfig }));
-
-// 阿里云
-app.post('/api/alibaba-proxy', requireAuth, (req, res) =>
-    alibabaProvider.handleAlibabaProxy(req, res, { runtimeConfig, API_CONFIG, getUserProviderConfig })
-);
-app.post('/api/alibaba-vision-proxy', requireAuth, (req, res) =>
-    alibabaProvider.handleAlibabaVisionProxy(req, res, { runtimeConfig, API_CONFIG, getUserProviderConfig })
-);
-
-// 腾讯云状态
-app.get('/api/tencent/status', requireAuth, (req, res) => tencentProvider.handleTencentStatus(req, res, { getUserProviderConfig }));
-
-// ─── 用量统计 API ───
-
-// 用户自己的用量
-app.get('/api/me/usage', requireAuth, (req, res) => {
-    const stats = usersDb.getUserUsageStats(req.currentUser.id);
-    const today = usersDb.getUserUsageToday(req.currentUser.id);
-    res.json({ ok: true, stats, today });
-});
-
-// 管理员：全局用量
-app.get('/api/admin/usage', requireAuth, (req, res) => {
-    if (!isAdminUser(req.currentUser)) {
-        return res.status(403).json({ error: '权限不足' });
-    }
-    const summary = usersDb.getGlobalUsageSummary();
-    const details = usersDb.getGlobalUsageStats();
-    res.json({ ok: true, summary, details });
-});
-
-// 管理员：用户列表
-app.get('/api/admin/users', requireAuth, (req, res) => {
-    if (!isAdminUser(req.currentUser)) {
-        return res.status(403).json({ error: '权限不足' });
-    }
-    const users = usersDb.getAllUsers();
-    res.json({ ok: true, users });
-});
-
-// ─── 项目管理 API ───
-
-// 获取用户所有项目（支持分页）
-app.get('/api/projects', requireAuth, (req, res) => {
-    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
-    const offset = (page - 1) * limit;
-    const total = usersDb.getProjectCount(req.currentUser.id);
-    const projects = usersDb.getUserProjects(req.currentUser.id, limit, offset);
-    res.json({ ok: true, projects, total, page, limit });
-});
-
-// 创建项目
-app.post('/api/projects', requireAuth, csrfProtection, (req, res) => {
-    const { name, description, type } = req.body || {};
-    if (!name || !name.trim()) {
-        return res.status(400).json({ error: '项目名称不能为空' });
-    }
-    const project = usersDb.createProject(req.currentUser.id, name.trim(), description, type);
-    res.json({ ok: true, project });
-});
-
-// 更新项目
-app.put('/api/projects/:id', requireAuth, csrfProtection, (req, res) => {
-    const { name, description, type, versionDesc } = req.body || {};
-    const project = usersDb.updateProject(req.params.id, req.currentUser.id, { name, description, type, versionDesc });
-    if (!project) {
-        return res.status(404).json({ error: '项目不存在' });
-    }
-    res.json({ ok: true, project });
-});
-
-// 删除项目
-app.delete('/api/projects/:id', requireAuth, csrfProtection, (req, res) => {
-    usersDb.deleteProject(req.params.id, req.currentUser.id);
-    res.json({ ok: true });
-});
-
-// ─── 项目素材 API ───
-
-// 添加素材
-app.post('/api/projects/:id/assets', requireAuth, csrfProtection, (req, res) => {
-    const { name, type, content } = req.body || {};
-    if (!name || !content) {
-        return res.status(400).json({ error: '素材名称和内容不能为空' });
-    }
-    // 限制单个素材内容大小不超过 10MB
-    const MAX_ASSET_SIZE = 10 * 1024 * 1024;
-    if (typeof content === 'string' && content.length > MAX_ASSET_SIZE) {
-        return res.status(413).json({ error: '素材内容过大，最大允许 10MB' });
-    }
-
-    // 图片格式验证
-    if (typeof content === 'string' && content.startsWith('data:')) {
-        const ALLOWED_MIME = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'];
-        const mimeMatch = content.match(/^data:([^;]+);base64,/);
-        if (!mimeMatch) {
-            return res.status(400).json({ error: '无效的 data URL 格式' });
-        }
-        const claimedMime = mimeMatch[1].toLowerCase();
-        if (!ALLOWED_MIME.includes(claimedMime)) {
-            return res.status(400).json({ error: `不支持的图片格式: ${claimedMime}，允许: ${ALLOWED_MIME.join(', ')}` });
-        }
-        // SVG 无需 magic bytes 验证
-        if (claimedMime !== 'image/svg+xml') {
-            const base64Data = content.substring(mimeMatch[0].length);
-            const buf = Buffer.from(base64Data.substring(0, 12), 'base64');
-            if (buf.length < 4) {
-                return res.status(400).json({ error: '图片数据过短，无法验证格式' });
-            }
-            const validMagic =
-                (claimedMime === 'image/png'  && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47) ||
-                (claimedMime === 'image/jpeg' && buf[0] === 0xFF && buf[1] === 0xD8 && buf[2] === 0xFF) ||
-                (claimedMime === 'image/gif'  && buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46) ||
-                (claimedMime === 'image/webp' && buf[0] === 0x52 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x46 &&
-                    buf.length >= 12 && buf[8] === 0x57 && buf[9] === 0x45 && buf[10] === 0x42 && buf[11] === 0x50);
-            if (!validMagic) {
-                return res.status(400).json({ error: '图片文件头(magic bytes)与声明的格式不匹配' });
-            }
-        }
-    }
-
-    const asset = usersDb.addProjectAsset(req.params.id, req.currentUser.id, name, type, content);
-    res.json({ ok: true, asset });
-});
-
-// 删除素材
-app.delete('/api/assets/:id', requireAuth, csrfProtection, (req, res) => {
-    usersDb.deleteProjectAsset(req.params.id, req.currentUser.id);
-    res.json({ ok: true });
-});
-
-// ─── 素材库 API ───
-
-// 获取用户素材库（支持分页）
-app.get('/api/asset-library', requireAuth, (req, res) => {
-    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
-    const offset = (page - 1) * limit;
-    const total = usersDb.getAssetLibraryCount(req.currentUser.id);
-    const assets = usersDb.getAssetLibrary(req.currentUser.id, limit, offset);
-    res.json({ ok: true, assets, total, page, limit });
-});
-
-// 添加素材
-app.post('/api/asset-library', requireAuth, csrfProtection, (req, res) => {
-    const { name, type, content, desc, source, tags } = req.body || {};
-    if (!name || !content) {
-        return res.status(400).json({ error: '素材名称和内容不能为空' });
-    }
-    const MAX_ASSET_SIZE = 10 * 1024 * 1024;
-    if (typeof content === 'string' && content.length > MAX_ASSET_SIZE) {
-        return res.status(413).json({ error: '素材内容过大，最大允许 10MB' });
-    }
-    const item = usersDb.addAssetLibraryItem(req.currentUser.id, { name, type, content, desc, source, tags });
-    res.json({ ok: true, item });
-});
-
-// 更新素材
-app.put('/api/asset-library/:id', requireAuth, csrfProtection, (req, res) => {
-    const updates = req.body || {};
-    const item = usersDb.updateAssetLibraryItem(req.currentUser.id, req.params.id, updates);
-    if (!item) {
-        return res.status(404).json({ error: '素材不存在' });
-    }
-    res.json({ ok: true, item });
-});
-
-// 删除素材
-app.delete('/api/asset-library/:id', requireAuth, csrfProtection, (req, res) => {
-    usersDb.deleteAssetLibraryItem(req.currentUser.id, req.params.id);
-    res.json({ ok: true });
-});
+// ── 健康检查 ───────────────────────────────────────────────────
 
 // 基础健康检查（公开，不暴露配置细节）
 app.get('/api/health', (req, res) => {
@@ -524,7 +365,6 @@ app.get('/api/health/detail', requireAuth, (req, res) => {
 });
 
 // ── API 文档 ─────────────────────────────────────────────────────
-const fs = require('fs');
 const openapiPath = path.join(__dirname, '..', 'docs', 'openapi.json');
 if (fs.existsSync(openapiPath)) {
     app.get('/api/docs', (req, res) => {

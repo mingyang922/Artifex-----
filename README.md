@@ -39,6 +39,13 @@ backend/                     Node.js 服务端
   db/users-db.js             用户与 API 凭证存储
   lib/                       鉴权/配置等后端辅助模块
   proxy.js                   服务入口与路由
+  routes/                    路由模块
+    auth.js                  认证路由
+    image-proxy.js           图片生成路由
+    projects.js              项目管理路由
+    asset-library.js         素材库路由
+    admin.js                 管理员路由
+    ai-providers.js          AI 服务商路由
 modules/
   admin/                     管理员面板
   ai-generate/               AI 生成页面
