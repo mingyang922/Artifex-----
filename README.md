@@ -40,13 +40,16 @@ backend/                     Node.js 服务端
   lib/                       鉴权/配置等后端辅助模块
   proxy.js                   服务入口与路由
 modules/
+  admin/                     管理员面板
   ai-generate/               AI 生成页面
   project-management/        项目管理页面
   asset-library/             素材库页面
+  style-presets/              风格预设
   user-center/               用户中心
 js/                          前端共享脚本
 styles/                      共享样式
 docs/                        部署与接入文档
+.github/                     CI/CD 与 Issue 模板
 ```
 
 ## 常用脚本
@@ -55,6 +58,11 @@ docs/                        部署与接入文档
 - `npm run dev`：开发模式（自动重启）
 - `npm run lint`：ESLint 检查
 - `npm run format:check`：Prettier 检查
+- `npm test`：运行测试
+
+## CI/CD
+
+项目已配置 GitHub Actions，每次 push 到 `main` 分支会自动运行 lint 检查和测试。详见 `.github/workflows/ci.yml`。
 
 ## 后端接口摘要
 
@@ -84,6 +92,8 @@ docs/                        部署与接入文档
 ## 相关文档
 
 - `更新日志.md`
+- `CONTRIBUTING.md` — 贡献指南
+- `SECURITY.md` — 安全策略
 - `docs/DEPLOY_TENCENT_SINGLE_SERVER.md`
 - `docs/DOMAIN_artifex.com.cn.md`（当前域名部署命令）
 - `deploy/nginx-artifex-http-only.conf`（备案前关闭 HTTP→HTTPS 强制跳转）
