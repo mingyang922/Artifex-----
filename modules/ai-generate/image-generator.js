@@ -221,7 +221,7 @@ class ImageGenerator {
     refreshStylePresetSelect(keepSelectedId) {
         const sel = document.getElementById('stylePresetSelect');
         if (!sel) return;
-        const cur = keepSelectedId != null ? String(keepSelectedId) : String(sel.value || '');
+        const cur = keepSelectedId !== null ? String(keepSelectedId) : String(sel.value || '');
         const list = this.getStylePresetsList();
         teardownTechSelectForSelect(sel);
         teardownTechSelectForSelect(document.getElementById('styleVlModelSelect'));
@@ -765,7 +765,7 @@ class ImageGenerator {
         };
         if (mode === 'img2img') {
             requestData.image = formData.sketchImageBase64;
-            requestData.strength = formData.strength != null ? formData.strength : 0.7;
+            requestData.strength = formData.strength !== null ? formData.strength : 0.7;
         }
         if (provider === 'jimeng') {
             requestData.jimeng = {

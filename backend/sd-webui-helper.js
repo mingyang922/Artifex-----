@@ -25,7 +25,7 @@ function applySdWebuiLoraPrefix(prompt) {
     if (/<lora:\s*[^>]+>/i.test(prompt)) return prompt;
     const name = (process.env.SD_WEBUI_LORA || 'last').trim();
     if (!name) return prompt;
-    const w = String(process.env.SD_WEBUI_LORA_WEIGHT != null ? process.env.SD_WEBUI_LORA_WEIGHT : '1').trim() || '1';
+    const w = String(process.env.SD_WEBUI_LORA_WEIGHT !== null ? process.env.SD_WEBUI_LORA_WEIGHT : '1').trim() || '1';
     return `<lora:${name}:${w}>, ${prompt}`;
 }
 
@@ -51,11 +51,11 @@ function buildTxt2ImgPayload(prompt, sizeStr, extra = {}) {
     const rawPrompt = extra.rawPrompt === true || extra.skip_lora === true;
     const { rawPrompt: _rp, skip_lora: _sl, size: _sz, ...rest } = extra;
 
-    let finalPrompt = String(prompt != null ? prompt : '');
+    let finalPrompt = String(prompt !== null ? prompt : '');
     if (!rawPrompt) finalPrompt = applySdWebuiLoraPrefix(finalPrompt);
 
     const dims = parseSizeForSd(
-        sizeStr || (rest.width != null && rest.height != null ? `${rest.width}x${rest.height}` : '1024x1024')
+        sizeStr || (rest.width !== null && rest.height !== null ? `${rest.width}x${rest.height}` : '1024x1024')
     );
 
     const skipKeys = new Set([
@@ -74,16 +74,16 @@ function buildTxt2ImgPayload(prompt, sizeStr, extra = {}) {
 
     const base = {
         prompt: finalPrompt,
-        negative_prompt: rest.negative_prompt != null ? rest.negative_prompt : 'low quality, blurry, distorted',
-        width: rest.width != null ? Number(rest.width) : dims.width,
-        height: rest.height != null ? Number(rest.height) : dims.height,
-        steps: rest.steps != null ? Number(rest.steps) : 28,
-        cfg_scale: rest.cfg_scale != null ? Number(rest.cfg_scale) : 7,
-        sampler_name: rest.sampler_name != null ? rest.sampler_name : 'DPM++ 2M',
-        scheduler: rest.scheduler != null ? rest.scheduler : 'Karras',
-        seed: rest.seed != null ? rest.seed : -1,
-        n_iter: rest.n_iter != null ? Number(rest.n_iter) : 1,
-        batch_size: rest.batch_size != null ? Number(rest.batch_size) : 1,
+        negative_prompt: rest.negative_prompt !== null ? rest.negative_prompt : 'low quality, blurry, distorted',
+        width: rest.width !== null ? Number(rest.width) : dims.width,
+        height: rest.height !== null ? Number(rest.height) : dims.height,
+        steps: rest.steps !== null ? Number(rest.steps) : 28,
+        cfg_scale: rest.cfg_scale !== null ? Number(rest.cfg_scale) : 7,
+        sampler_name: rest.sampler_name !== null ? rest.sampler_name : 'DPM++ 2M',
+        scheduler: rest.scheduler !== null ? rest.scheduler : 'Karras',
+        seed: rest.seed !== null ? rest.seed : -1,
+        n_iter: rest.n_iter !== null ? Number(rest.n_iter) : 1,
+        batch_size: rest.batch_size !== null ? Number(rest.batch_size) : 1,
     };
 
     for (const [k, v] of Object.entries(rest)) {
@@ -102,11 +102,11 @@ function buildImg2ImgPayload(prompt, imageBase64, strength, sizeStr, extra = {})
     const rawPrompt = extra.rawPrompt === true || extra.skip_lora === true;
     const { rawPrompt: _rp, skip_lora: _sl, size: _sz, ...rest } = extra;
 
-    let finalPrompt = String(prompt != null ? prompt : '');
+    let finalPrompt = String(prompt !== null ? prompt : '');
     if (!rawPrompt) finalPrompt = applySdWebuiLoraPrefix(finalPrompt);
 
     const dims = parseSizeForSd(
-        sizeStr || (rest.width != null && rest.height != null ? `${rest.width}x${rest.height}` : '1024x1024')
+        sizeStr || (rest.width !== null && rest.height !== null ? `${rest.width}x${rest.height}` : '1024x1024')
     );
     const numStrength = typeof strength === 'number' ? strength : parseFloat(strength);
     const s = Number.isFinite(numStrength) ? numStrength : 0.7;
@@ -129,18 +129,18 @@ function buildImg2ImgPayload(prompt, imageBase64, strength, sizeStr, extra = {})
 
     const base = {
         prompt: finalPrompt,
-        negative_prompt: rest.negative_prompt != null ? rest.negative_prompt : 'low quality, blurry, distorted',
+        negative_prompt: rest.negative_prompt !== null ? rest.negative_prompt : 'low quality, blurry, distorted',
         init_images: [imageBase64],
-        width: rest.width != null ? Number(rest.width) : dims.width,
-        height: rest.height != null ? Number(rest.height) : dims.height,
-        steps: rest.steps != null ? Number(rest.steps) : 28,
-        cfg_scale: rest.cfg_scale != null ? Number(rest.cfg_scale) : 7,
+        width: rest.width !== null ? Number(rest.width) : dims.width,
+        height: rest.height !== null ? Number(rest.height) : dims.height,
+        steps: rest.steps !== null ? Number(rest.steps) : 28,
+        cfg_scale: rest.cfg_scale !== null ? Number(rest.cfg_scale) : 7,
         strength: Math.min(1, Math.max(0.01, s)),
-        sampler_name: rest.sampler_name != null ? rest.sampler_name : 'DPM++ 2M',
-        scheduler: rest.scheduler != null ? rest.scheduler : 'Karras',
-        seed: rest.seed != null ? rest.seed : -1,
-        n_iter: rest.n_iter != null ? Number(rest.n_iter) : 1,
-        batch_size: rest.batch_size != null ? Number(rest.batch_size) : 1,
+        sampler_name: rest.sampler_name !== null ? rest.sampler_name : 'DPM++ 2M',
+        scheduler: rest.scheduler !== null ? rest.scheduler : 'Karras',
+        seed: rest.seed !== null ? rest.seed : -1,
+        n_iter: rest.n_iter !== null ? Number(rest.n_iter) : 1,
+        batch_size: rest.batch_size !== null ? Number(rest.batch_size) : 1,
     };
 
     for (const [k, v] of Object.entries(rest)) {

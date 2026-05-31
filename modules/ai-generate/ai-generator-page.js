@@ -423,7 +423,7 @@ function compressDataUrlImage(dataUrl, maxSide, outMime, quality) {
             ctx.drawImage(img, 0, 0, w, h);
             const mime = outMime || 'image/webp';
             try {
-                resolve(c.toDataURL(mime, quality != null ? quality : 0.82));
+                resolve(c.toDataURL(mime, quality !== null ? quality : 0.82));
             } catch (e) {
                 resolve(c.toDataURL('image/jpeg', 0.85));
             }

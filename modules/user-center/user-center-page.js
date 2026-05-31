@@ -1855,7 +1855,7 @@ async function syncSessionAndProfile() {
                 language: pi.language || '',
             },
             permissions: Array.isArray(profile.permissions) ? profile.permissions : [],
-            currentAvatar: profile.currentAvatar != null ? profile.currentAvatar : null,
+            currentAvatar: profile.currentAvatar !== null ? profile.currentAvatar : null,
             avatarHistory: Array.isArray(profile.avatarHistory) ? profile.avatarHistory : [],
         };
         localStorage.setItem('userConfig', JSON.stringify(config));

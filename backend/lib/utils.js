@@ -99,7 +99,7 @@ function generateSignature(
 
 /** 规范化 .env 中的方舟 API Key（去 BOM、首尾空白、成对引号） */
 function normalizeJimengApiKey(raw) {
-    if (raw == null || raw === '') return '';
+    if (raw === null || raw === '') return '';
     let s = String(raw)
         .trim()
         .replace(/^\uFEFF/, '');

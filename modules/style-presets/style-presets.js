@@ -1,3 +1,4 @@
+            'use strict';
             if (window.PageEffects) {
                 window.PageEffects.initPointerGlow();
             }

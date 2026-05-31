@@ -1,3 +1,4 @@
+            'use strict';
             // Tab 切换
             document.querySelectorAll('.admin-tab').forEach(tab => {
                 tab.addEventListener('click', () => {

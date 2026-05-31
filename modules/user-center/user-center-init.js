@@ -1,3 +1,4 @@
+'use strict';
 // 生成用户ID的函数
 function generateUserId() {
     // 生成2个随机字母（从26个字母中选择）

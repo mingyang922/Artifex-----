@@ -122,7 +122,7 @@ function setupLoginForm() {
                 showMessage(data.error || '登录失败', 'error');
                 return;
             }
-            if (data.user && data.user.id != null) {
+            if (data.user && data.user.id !== null) {
                 try {
                     localStorage.setItem('gameui-session-user-id', String(data.user.id));
                 } catch (e) {
@@ -167,7 +167,7 @@ function setupRegisterForm() {
                 showMessage(data.error || '注册失败', 'error');
                 return;
             }
-            if (data.user && data.user.id != null) {
+            if (data.user && data.user.id !== null) {
                 try {
                     localStorage.setItem('gameui-session-user-id', String(data.user.id));
                 } catch (e) {

@@ -8,7 +8,7 @@ const { spawnSync } = require('child_process');
 
 function sqliteOk() {
     try {
-        // eslint-disable-next-line global-require
+         
         const Database = require('better-sqlite3');
         new Database(':memory:').close();
         return true;

@@ -24,10 +24,10 @@
         _ensurePromise: null,
 
         key: function (base) {
-            if (base == null || base === '') return base;
+            if (base === null || base === '') return base;
             try {
                 const id =
-                    this.userId != null ? String(this.userId) : global.localStorage.getItem('gameui-session-user-id');
+                    this.userId !== null ? String(this.userId) : global.localStorage.getItem('gameui-session-user-id');
                 return id ? base + ':u' + id : base;
             } catch (e) {
                 return base;
@@ -51,10 +51,10 @@
                         return;
                     }
                     const data = await r.json();
-                    const id = data && data.id != null ? data.id : null;
+                    const id = data && data.id !== null ? data.id : null;
                     self.userId = id;
                     try {
-                        if (id != null) {
+                        if (id !== null) {
                             global.localStorage.setItem('gameui-session-user-id', String(id));
                         }
                     } catch (e) {

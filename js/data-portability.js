@@ -34,7 +34,7 @@
             var k = scopedKey(base);
             try {
                 var v = global.localStorage.getItem(k);
-                if (v != null && v !== '') {
+                if (v !== null && v !== '') {
                     out.keys[k] = v;
                     out.meta[k] = { bytes: v.length };
                 }
@@ -62,7 +62,7 @@
     }
 
     function formatBytes(n) {
-        if (n == null || isNaN(n)) return '—';
+        if (n === null || isNaN(n)) return '—';
         if (n < 1024) return n + ' B';
         if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
         return (n / 1048576).toFixed(2) + ' MB';
@@ -120,9 +120,9 @@
             if (!usageEl) return;
             var b = estimateUsedBytes();
             var approxQuota = 5 * 1024 * 1024;
-            var pct = b != null ? Math.min(100, Math.round((b / approxQuota) * 100)) : null;
+            var pct = b !== null ? Math.min(100, Math.round((b / approxQuota) * 100)) : null;
             usageEl.textContent =
-                b != null
+                b !== null
                     ? '本地数据约 ' + formatBytes(b) + '（按 ~5MB 浏览器上限粗算约 ' + pct + '%，实际因浏览器而异）'
                     : '无法估算本地存储用量';
         }

@@ -1,3 +1,4 @@
+            'use strict';
             function initTechSelects() {
                 if (window.__techSelectGlobalBound !== true) {
                     window.__techSelectGlobalBound = true;

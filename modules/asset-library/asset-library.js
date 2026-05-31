@@ -1,3 +1,4 @@
+            'use strict';
             if (window.PageEffects) {
                 window.PageEffects.initPointerGlow();
                 window.PageEffects.initCardSpotlight('.top-bar, .asset-wrap, .asset-card');
@@ -512,7 +513,7 @@
                     maxWidth: options.maxWidth || 1600,
                     maxHeight: options.maxHeight || 1600,
                     mimeType: options.mimeType || 'image/webp',
-                    quality: options.quality == null ? 0.82 : options.quality,
+                    quality: options.quality === null ? 0.82 : options.quality,
                 };
                 const img = await dataUrlToImage(dataURL);
                 const ratio = Math.min(opt.maxWidth / img.naturalWidth, opt.maxHeight / img.naturalHeight, 1);

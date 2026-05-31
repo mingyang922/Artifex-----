@@ -7,7 +7,7 @@ function createUserApiSettingsHelpers(usersDb) {
         const p = String(provider || '')
             .trim()
             .toLowerCase();
-        if (!payload || typeof payload !== 'object') return null;
+        if (!payload || typeof payload != 'object') return null;
         if (p === 'jimeng') {
             const apiKey = String(payload.apiKey || '').trim();
             const endpoint = String(payload.endpoint || '').trim();
