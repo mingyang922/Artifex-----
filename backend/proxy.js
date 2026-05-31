@@ -74,6 +74,7 @@ app.use(helmet({
             fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
             imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
             connectSrc: ["'self'"],
+            upgradeInsecureRequests: null,
         },
     },
     crossOriginEmbedderPolicy: false,
@@ -164,7 +165,7 @@ app.use(session({
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
         sameSite: 'lax',
-        secure: isProd,
+        secure: false,
     },
 }));
 
