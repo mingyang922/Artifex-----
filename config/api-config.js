@@ -1,9 +1,12 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 // AI API配置
+const ARTIFEX_VERSION = '1.3.3';
+
 const API_CONFIG = {
+    version: ARTIFEX_VERSION,
     // 腾讯混元API配置
     hunyuan: {
         // 从环境变量或配置文件中读取API密钥

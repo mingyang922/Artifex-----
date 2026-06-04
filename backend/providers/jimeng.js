@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 /**
  * 即梦 / Seedream API 提供商（从 proxy.js 提取）
  */
@@ -496,11 +496,12 @@ async function handleJimengLiveTest(req, res, { getUserProviderConfig }) {
 }
 
 function logJimengConfig() {
+    const logger = require('../lib/logger');
     const rc = arkRestConfig.loadArkRestConfig();
     const fromFile = !!(rc && String(rc.apiKey || '').trim());
     const fromEnv = !!(process.env.JIMENG_API_KEY || process.env.ARK_API_KEY);
     const ok = fromFile || fromEnv;
-    console.log(
+    logger.info(
         'JIMENG/ARK 即梦:',
         ok ? '已配置' : '未配置',
         fromFile ? '[密钥: config/ark-rest-api.local.json · REST]' : fromEnv ? '[密钥: .env]' : ''
@@ -510,7 +511,7 @@ function logJimengConfig() {
         const rawKey = (rc && rc.apiKey) || process.env.JIMENG_API_KEY || process.env.ARK_API_KEY || '';
         const k = normalizeJimengApiKey(rawKey);
         if (k) {
-            console.log(
+            logger.info(
                 `[即梦] 密钥摘要: 长度=${k.length} 前缀=${k.slice(0, 4)} 尾缀=...${k.slice(-4)}`
             );
         }

@@ -1,7 +1,7 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.1 */
+ * 版本: 1.3.3 */
 'use strict';
 
 const express = require('express');
@@ -15,6 +15,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 
 // —— 本地模块 ——
+const logger = require('./lib/logger');
 const arkRestConfig = require('./ark-rest-config');
 const {
     getTencentCamCredentials,
@@ -39,13 +40,13 @@ envFiles.forEach((envPath) => dotenv.config({ path: envPath, override: false }))
 const isProd = (process.env.NODE_ENV || 'development') === 'production';
 
 if (!isProd) {
-    console.log('环境变量加载状态:');
-    console.log('HUNYUAN_SECRET_ID:', process.env.HUNYUAN_SECRET_ID ? '已加载' : '未加载');
-    console.log('HUNYUAN_SECRET_KEY:', process.env.HUNYUAN_SECRET_KEY ? '已加载' : '未加载');
-    console.log('DASHSCOPE_API_KEY:', process.env.DASHSCOPE_API_KEY ? '已加载' : '未加载');
-    console.log('IMAGE_API_KEY:', process.env.IMAGE_API_KEY ? '已加载' : '未加载');
+    logger.info('环境变量加载状态:');
+    logger.info('HUNYUAN_SECRET_ID:', process.env.HUNYUAN_SECRET_ID ? '已加载' : '未加载');
+    logger.info('HUNYUAN_SECRET_KEY:', process.env.HUNYUAN_SECRET_KEY ? '已加载' : '未加载');
+    logger.info('DASHSCOPE_API_KEY:', process.env.DASHSCOPE_API_KEY ? '已加载' : '未加载');
+    logger.info('IMAGE_API_KEY:', process.env.IMAGE_API_KEY ? '已加载' : '未加载');
 } else {
-    console.log('[artifex] production mode: API key presence logs suppressed');
+    logger.info('[artifex] production mode: API key presence logs suppressed');
 }
 
 function resolveSessionSecret() {
@@ -56,7 +57,7 @@ function resolveSessionSecret() {
 }
 const resolvedSessionSecret = resolveSessionSecret();
 if (!resolvedSessionSecret) {
-    console.error('FATAL: NODE_ENV=production requires SESSION_SECRET to be set to a non-empty value.');
+    logger.error('FATAL: NODE_ENV=production requires SESSION_SECRET to be set to a non-empty value.');
     process.exit(1);
 }
 
@@ -111,7 +112,7 @@ function disableDeadLocalProxyIfPresent() {
     const mergedNoProxy = normalizeNoProxy(process.env.NO_PROXY || process.env.no_proxy || '', hosts);
     process.env.NO_PROXY = mergedNoProxy;
     process.env.no_proxy = mergedNoProxy;
-    console.warn('[proxy] 已检测到失效的本机代理 127.0.0.1:7897，外部 AI 请求将改为直连。');
+    logger.warn('[proxy] 已检测到失效的本机代理 127.0.0.1:7897，外部 AI 请求将改为直连。');
 }
 disableDeadLocalProxyIfPresent();
 
@@ -121,7 +122,7 @@ const corsAllowedList = process.env.ALLOWED_ORIGINS
     : isProd ? [] : ['*'];
 
 if (isProd && corsAllowedList.length === 0) {
-    console.error('FATAL: NODE_ENV=production requires ALLOWED_ORIGINS (comma-separated origins), e.g. https://your-host');
+    logger.error('FATAL: NODE_ENV=production requires ALLOWED_ORIGINS (comma-separated origins), e.g. https://your-host');
     process.exit(1);
 }
 
@@ -165,7 +166,7 @@ app.use(session({
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
         sameSite: 'lax',
-        secure: false,
+        secure: isProd,
     },
 }));
 
@@ -239,27 +240,27 @@ const runtimeConfig = {
 
 // ── 启动日志 ─────────────────────────────────────────────────────
 if (!isProd) {
-    console.log('运行时配置状态:');
-    console.log('hunyuan secretId:', runtimeConfig.hunyuan.secretId ? '已配置' : '未配置');
-    console.log('hunyuan secretKey:', runtimeConfig.hunyuan.secretKey ? '已配置' : '未配置');
-    console.log('alibaba apiKey:', runtimeConfig.alibaba.apiKey ? '已配置' : '未配置');
-    console.log('tencent secretId:', runtimeConfig.tencent.secretId ? '已配置' : '未配置');
-    console.log('tencent secretKey:', runtimeConfig.tencent.secretKey ? '已配置' : '未配置');
-    console.log('imageApiKey:', runtimeConfig.image.apiKey ? '已配置' : '未配置');
+    logger.info('运行时配置状态:');
+    logger.info('hunyuan secretId:', runtimeConfig.hunyuan.secretId ? '已配置' : '未配置');
+    logger.info('hunyuan secretKey:', runtimeConfig.hunyuan.secretKey ? '已配置' : '未配置');
+    logger.info('alibaba apiKey:', runtimeConfig.alibaba.apiKey ? '已配置' : '未配置');
+    logger.info('tencent secretId:', runtimeConfig.tencent.secretId ? '已配置' : '未配置');
+    logger.info('tencent secretKey:', runtimeConfig.tencent.secretKey ? '已配置' : '未配置');
+    logger.info('imageApiKey:', runtimeConfig.image.apiKey ? '已配置' : '未配置');
 }
 const _tencentCam = getTencentCamCredentials();
 const _tencentCamValid = validateTencentCamCredential(_tencentCam.secretId, _tencentCam.secretKey);
 if (!isProd) {
-    console.log('hunyuan configured:', _tencentCamValid.ok);
-    console.log('alibaba configured:', runtimeConfig.alibaba.apiKey !== 'YOUR_ALIBABA_API_KEY');
-    console.log('tencent image configured:', _tencentCamValid.ok, _tencentCamValid.ok ? '' : `(${_tencentCamValid.code})`);
+    logger.info('hunyuan configured:', _tencentCamValid.ok);
+    logger.info('alibaba configured:', runtimeConfig.alibaba.apiKey !== 'YOUR_ALIBABA_API_KEY');
+    logger.info('tencent image configured:', _tencentCamValid.ok, _tencentCamValid.ok ? '' : `(${_tencentCamValid.code})`);
 }
 if (!_tencentCamValid.ok && _tencentCam.secretId) {
-    console.warn('[腾讯云] 密钥校验未通过:', _tencentCamValid.message);
+    logger.warn('[腾讯云] 密钥校验未通过:', _tencentCamValid.message);
 }
 if (!isProd) {
-    console.log('SD_WEBUI_URL:', process.env.SD_WEBUI_URL || '(默认 http://127.0.0.1:7860)');
-    console.log(
+    logger.info('SD_WEBUI_URL:', process.env.SD_WEBUI_URL || '(默认 http://127.0.0.1:7860)');
+    logger.info(
         'SD_WEBUI_LORA 自动前缀:',
         process.env.SD_WEBUI_LORA_DISABLED === '1'
             ? '已关闭'
@@ -272,7 +273,7 @@ if (!isProd) {
 
 // AI 服务商路由（即梦/SD/混元/阿里云）
 app.use('/api', createAiProviderRouter({
-    requireAuth, runtimeConfig, API_CONFIG, getUserProviderConfig, isAdminUser,
+    requireAuth, csrfProtection, runtimeConfig, API_CONFIG, getUserProviderConfig, isAdminUser,
     tencentProvider, alibabaProvider, jimengProvider, sdWebUiProvider,
 }));
 
@@ -291,6 +292,31 @@ app.use('/api', createAssetLibraryRouter({ usersDb, requireAuth, csrfProtection 
 
 // 管理员路由（用量统计/用户管理）
 app.use('/api', createAdminRouter({ usersDb, requireAuth, isAdminUser }));
+
+// ── 活动日志 API ───────────────────────────────────────────────
+
+// 当前用户的活动日志
+app.get('/api/activity-log', requireAuth, (req, res) => {
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
+    const offset = (page - 1) * limit;
+    const total = usersDb.getActivityLogCount(req.currentUser.id);
+    const logs = usersDb.getActivityLog(req.currentUser.id, limit, offset);
+    res.json({ ok: true, logs, total, page, limit });
+});
+
+// 管理员：所有用户的活动日志
+app.get('/api/admin/activity-log', requireAuth, (req, res) => {
+    if (!isAdminUser(req.currentUser)) {
+        return res.status(403).json({ error: '权限不足' });
+    }
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
+    const offset = (page - 1) * limit;
+    const total = usersDb.getRecentActivityCount();
+    const logs = usersDb.getRecentActivity(limit);
+    res.json({ ok: true, logs, total, page, limit });
+});
 
 // ── 配置状态（保留在此，依赖 runtimeConfig） ───────────────────
 
@@ -329,6 +355,7 @@ app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
         service: 'Artifex AI Platform',
+        version: API_CONFIG.version || '1.3.3',
         timestamp: new Date().toISOString(),
     });
 });
@@ -369,26 +396,31 @@ app.get('/api/health/detail', requireAuth, (req, res) => {
 const openapiPath = path.join(__dirname, '..', 'docs', 'openapi.json');
 if (fs.existsSync(openapiPath)) {
     app.get('/api/docs', (req, res) => {
-        res.json(JSON.parse(fs.readFileSync(openapiPath, 'utf-8')));
+        try {
+            res.json(JSON.parse(fs.readFileSync(openapiPath, 'utf-8')));
+        } catch (e) {
+            logger.error('[openapi] 读取文档失败:', e.message);
+            res.status(500).json({ error: 'API 文档加载失败' });
+        }
     });
 }
 
 // ── 启动服务器 ───────────────────────────────────────────────────
 const PORT = process.env.PORT || API_CONFIG.proxy.port;
 const server = app.listen(PORT, () => {
-    console.log(`\n  Artifex API Server`);
-    console.log(`  Port: ${PORT}`);
-    console.log(`  Health: http://localhost:${PORT}/api/health`);
-    console.log(`  Docs:   http://localhost:${PORT}/api/docs\n`);
+    logger.info(`\n  Artifex API Server`);
+    logger.info(`  Port: ${PORT}`);
+    logger.info(`  Health: http://localhost:${PORT}/api/health`);
+    logger.info(`  Docs:   http://localhost:${PORT}/api/docs\n`);
 });
 
 server.on('error', (err) => {
     if (err?.code === 'EADDRINUSE') {
-        console.error(`\n[端口占用] ${PORT} 已被占用。可选：`);
-        console.error(`  1) 关掉占用端口的进程`);
-        console.error(`  2) 换端口启动：PORT=3001 node backend/proxy.js\n`);
+        logger.error(`\n[端口占用] ${PORT} 已被占用。可选：`);
+        logger.error(`  1) 关掉占用端口的进程`);
+        logger.error(`  2) 换端口启动：PORT=3001 node backend/proxy.js\n`);
         process.exit(1);
     }
-    console.error(err);
+    logger.error(err);
     process.exit(1);
 });

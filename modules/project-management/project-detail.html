@@ -4,10 +4,10 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>项目详情 - 游戏美术资产生成平台</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+        <link rel="stylesheet" href="../../vendor/css/font-awesome.min.css" />
         <link rel="stylesheet" href="style.css" />
         <link rel="stylesheet" href="../../styles/ui-kit.css" />
-        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet" />
+        <link href="../../vendor/css/google-fonts.css" rel="stylesheet" />
         <link rel="stylesheet" href="../../styles/app-shell.css" />
         <style>
             /* 项目详情页面特定样式 */
@@ -637,6 +637,40 @@
                     transform: none !important;
                 }
             }
+
+            /* 素材列表搜索栏 */
+            .asset-list-search {
+                position: relative;
+                margin-bottom: 16px;
+            }
+            .asset-list-search input {
+                width: 100%;
+                padding: 10px 15px 10px 38px;
+                background: rgba(5, 8, 16, 0.65);
+                border: 1px solid rgba(0, 240, 255, 0.18);
+                border-radius: 6px;
+                color: #f0f4fc;
+                font-size: 15px;
+                font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+                outline: none;
+                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+            .asset-list-search input:focus {
+                border-color: rgba(0, 240, 255, 0.55);
+                box-shadow: 0 0 12px rgba(0, 240, 255, 0.15);
+            }
+            .asset-list-search input::placeholder {
+                color: #6b7a94;
+            }
+            .asset-list-search i {
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #6b7a94;
+                font-size: 14px;
+                pointer-events: none;
+            }
         </style>
     </head>
     <body class="app-shell">
@@ -885,6 +919,10 @@
             <!-- 素材列表 -->
             <div class="asset-list-section">
                 <h3>项目素材</h3>
+                <div class="asset-list-search">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <input type="text" id="assetSearchInput" placeholder="搜索素材名称..." aria-label="搜索素材" />
+                </div>
                 <div id="empty-assets" class="empty-assets hidden">
                     <i class="fas fa-image"></i>
                     <p>暂无素材，点击上方"添加素材"按钮开始添加</p>
@@ -992,8 +1030,11 @@
         </div>
         </main>
 
+        <script src="../../js/keyboard-shortcuts.js"></script>
+        <script src="../../js/i18n.js"></script>
         <script src="../../js/user-storage-scope.js"></script>
         <script src="../../js/api-utils.js"></script>
+        <script src="../../js/html-utils.js"></script>
         <script src="../../js/scroll-animations.js"></script>
         <script src="../../js/ui-kit.js"></script>
         <script src="pm-shared.js"></script>

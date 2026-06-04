@@ -26,7 +26,7 @@ function createAuthRouter(deps) {
         if (!row) return null;
         let profile = {};
         try { profile = JSON.parse(row.profile_json || '{}'); } catch { profile = {}; }
-        return { id: row.id, username: row.username, email: row.email, created_at: row.created_at, profile };
+        return { id: row.id, username: row.username, email: row.email, role: row.role || 'user', created_at: row.created_at, profile };
     }
 
     const authLimiter = rateLimit({
@@ -74,6 +74,7 @@ function createAuthRouter(deps) {
             req.session.regenerate((err) => {
                 if (err) { console.error('session regenerate', err); return res.status(500).json({ error: '登录失败' }); }
                 req.session.userId = row.id;
+                try { usersDb.addActivity(row.id, '用户登录', 'auth', null, null); } catch (_) { /* 活动日志非关键 */ }
                 res.json({ ok: true, user: publicUser(row) });
             });
         } catch (e) {
@@ -119,7 +120,18 @@ function createAuthRouter(deps) {
     router.put('/me/profile', requireAuth, csrfProtection, (req, res) => {
         const { profile } = req.body || {};
         if (!profile || typeof profile !== 'object') return res.status(400).json({ error: '无效资料' });
-        usersDb.updateProfile(req.currentUser.id, profile);
+        // 限制 profile JSON 大小不超过 50KB
+        const profileStr = JSON.stringify(profile);
+        if (profileStr.length > 50 * 1024) {
+            return res.status(400).json({ error: '资料数据过大' });
+        }
+        // 字段白名单：只允许更新预期的字段
+        const ALLOWED_FIELDS = ['nickname', 'gender', 'bio', 'country', 'language', 'avatar', 'settings'];
+        const sanitized = {};
+        for (const key of ALLOWED_FIELDS) {
+            if (profile[key] !== undefined) sanitized[key] = profile[key];
+        }
+        usersDb.updateProfile(req.currentUser.id, sanitized);
         res.json({ ok: true });
     });
 

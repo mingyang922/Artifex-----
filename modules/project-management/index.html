@@ -4,15 +4,13 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>项目管理 - Artifex</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;500;600&display=swap"
+            href="../../vendor/css/google-fonts.css"
             rel="stylesheet"
         />
         <link rel="stylesheet" href="./style.css" />
         <link rel="stylesheet" href="../../styles/ui-kit.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+        <link rel="stylesheet" href="../../vendor/css/font-awesome.min.css" />
         <style>
             :root {
                 --mx: 50vw;
@@ -645,37 +643,37 @@
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="home">
                             <i class="fas fa-home"></i>
-                            <span>主页</span>
+                            <span data-i18n="nav.home">主页</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="project-management">
                             <i class="fas fa-project-diagram"></i>
-                            <span>项目管理</span>
+                            <span data-i18n="nav.projects">项目管理</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="ai-generate">
                             <i class="fas fa-magic"></i>
-                            <span>AI 生成</span>
+                            <span data-i18n="nav.ai">AI 生成</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="asset-library">
                             <i class="fas fa-images"></i>
-                            <span>素材库</span>
+                            <span data-i18n="nav.assets">素材库</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="style-presets">
                             <i class="fas fa-swatchbook"></i>
-                            <span>风格预设</span>
+                            <span data-i18n="nav.presets">风格预设</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="user-center">
                             <i class="fas fa-user-circle"></i>
-                            <span>账户</span>
+                            <span data-i18n="nav.account">账户</span>
                         </a>
                     </li>
                 </ul>
@@ -730,6 +728,37 @@
                     <!-- 项目创建表单（默认隐藏，点击"新建项目"显示） -->
                     <div id="create-project-form" class="project-form hidden">
                         <h3>创建新项目</h3>
+                        <!-- 项目模板选择 -->
+                        <div id="projectTemplates" style="margin-bottom:18px;">
+                            <label style="display:block;margin-bottom:10px;color:rgba(0,240,255,0.88);font-family:Orbitron,sans-serif;font-weight:700;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;">快速模板</label>
+                            <div id="templateCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+                                <div class="template-card" data-tpl="blank" style="background:rgba(0,240,255,0.08);border:1px solid rgba(0,240,255,0.35);border-radius:8px;padding:14px;cursor:pointer;text-align:center;transition:all 0.2s;">
+                                    <i class="fas fa-plus-circle" style="font-size:22px;color:#00f0ff;margin-bottom:6px;display:block;"></i>
+                                    <div style="font-weight:600;color:#e0faff;font-size:13px;">空白项目</div>
+                                    <div style="font-size:11px;color:#8090a8;margin-top:4px;">从零开始</div>
+                                </div>
+                                <div class="template-card" data-tpl="rpg" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;cursor:pointer;text-align:center;transition:all 0.2s;">
+                                    <i class="fas fa-dragon" style="font-size:22px;color:#a78bfa;margin-bottom:6px;display:block;"></i>
+                                    <div style="font-weight:600;color:#e0faff;font-size:13px;">RPG 游戏</div>
+                                    <div style="font-size:11px;color:#8090a8;margin-top:4px;">角色 / 地图 / UI / 道具</div>
+                                </div>
+                                <div class="template-card" data-tpl="platformer" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;cursor:pointer;text-align:center;transition:all 0.2s;">
+                                    <i class="fas fa-running" style="font-size:22px;color:#4ade80;margin-bottom:6px;display:block;"></i>
+                                    <div style="font-weight:600;color:#e0faff;font-size:13px;">平台跳跃</div>
+                                    <div style="font-size:11px;color:#8090a8;margin-top:4px;">角色 / 背景 / 平台 / 道具</div>
+                                </div>
+                                <div class="template-card" data-tpl="puzzle" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;cursor:pointer;text-align:center;transition:all 0.2s;">
+                                    <i class="fas fa-puzzle-piece" style="font-size:22px;color:#f59e0b;margin-bottom:6px;display:block;"></i>
+                                    <div style="font-weight:600;color:#e0faff;font-size:13px;">消除游戏</div>
+                                    <div style="font-size:11px;color:#8090a8;margin-top:4px;">宝石 / 特效 / UI / 背景</div>
+                                </div>
+                                <div class="template-card" data-tpl="ui-kit" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;cursor:pointer;text-align:center;transition:all 0.2s;">
+                                    <i class="fas fa-layer-group" style="font-size:22px;color:#00f0ff;margin-bottom:6px;display:block;"></i>
+                                    <div style="font-weight:600;color:#e0faff;font-size:13px;">UI 套件</div>
+                                    <div style="font-size:11px;color:#8090a8;margin-top:4px;">按钮 / 血条 / 弹窗 / 图标</div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label>项目名称*</label>
                             <input type="text" id="project-name" placeholder="输入项目名称" required />
@@ -1013,9 +1042,12 @@
             <i class="fas fa-bars"></i>
         </button>
 
+        <script src="../../js/keyboard-shortcuts.js"></script>
+        <script src="../../js/i18n.js"></script>
         <script src="../../js/ui-kit.js"></script>
         <script src="../../js/user-storage-scope.js"></script>
         <script src="../../js/api-utils.js"></script>
+        <script src="../../js/html-utils.js"></script>
         <script src="./pm-shared.js"></script>
         <script src="index-init.js"></script>
         <script src="../../js/navigation.js"></script>

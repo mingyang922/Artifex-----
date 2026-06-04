@@ -1,52 +1,50 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 'use strict';
 /**
  * 通知组件 - 可复用的通知下拉菜单
  */
 
-/** 转义 HTML 特殊字符，防止 XSS */
-function escapeNotificationHtml(str) {
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
+/** 转义 HTML 特殊字符，防止 XSS — 委托给 html-utils.js 全局函数 */
+var escapeNotificationHtml = (typeof escapeHtml === 'function') ? escapeHtml : function(s) { return String(s); };
 
 class NotificationComponent {
     constructor() {
-        this.notifications = [
+        // 演示数据：实际使用时通过 loadFromServer() 从后端加载
+        this.notifications = this.getDemoNotifications();
+        this.init();
+    }
+
+    /** 获取演示通知数据 */
+    getDemoNotifications() {
+        return [
             {
                 id: 1,
-                title: '新用户注册',
-                message: '用户 "张三" 刚刚注册了账户',
-                time: '2分钟前',
-                icon: 'fas fa-user-plus',
+                title: '欢迎使用 Artifex',
+                message: '您已成功登录，可以开始创建项目和生成 AI 资产',
+                time: '刚刚',
+                icon: 'fas fa-hand-sparkles',
                 unread: true,
-            },
-            {
-                id: 2,
-                title: '安全提醒',
-                message: '检测到异常登录活动，请检查账户安全',
-                time: '1小时前',
-                icon: 'fas fa-shield-alt',
-                unread: true,
-            },
-            {
-                id: 3,
-                title: '系统更新',
-                message: '系统已更新到最新版本，新增多项功能',
-                time: '3小时前',
-                icon: 'fas fa-cog',
-                unread: false,
             },
         ];
+    }
 
-        this.init();
+    /** 从服务端加载通知数据（待后端 API 实现后启用） */
+    async loadFromServer() {
+        try {
+            const res = await fetch('/api/notifications', { credentials: 'include' });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.ok && Array.isArray(data.notifications)) {
+                    this.notifications = data.notifications;
+                    this.updateNotificationBadge();
+                }
+            }
+        } catch (_) {
+            // 服务端 API 未实现时静默回退到演示数据
+        }
     }
 
     /**
@@ -139,7 +137,7 @@ class NotificationComponent {
         return this.notifications
             .map(
                 (notification) => `
-            <div class="notification-item ${notification.unread ? 'unread' : ''}" data-id="${notification.id}">
+            <div class="notification-item ${notification.unread ? 'unread' : ''}" data-id="${escapeNotificationHtml(notification.id)}">
                 <div class="notification-icon">
                     <i class="${escapeNotificationHtml(notification.icon)}"></i>
                 </div>
@@ -183,36 +181,28 @@ class NotificationComponent {
         window.addEventListener('resize', () => this.repositionVisibleDropdowns());
         window.addEventListener('scroll', () => this.repositionVisibleDropdowns(), true);
 
-        // 全部已读按钮
+        // 统一的 document click 事件委托（合并 4 个监听器为 1 个）
         document.addEventListener('click', (e) => {
+            // 全部已读按钮
             if (e.target.classList.contains('mark-all-read')) {
                 this.markAllAsRead();
+                return;
             }
-        });
-
-        // 通知项点击事件
-        document.addEventListener('click', (e) => {
+            // 通知项点击
             const notificationItem = e.target.closest('.notification-item');
             if (notificationItem) {
                 this.handleNotificationClick(notificationItem);
+                return;
             }
-        });
-
-        // 查看所有通知点击事件
-        document.addEventListener('click', (e) => {
+            // 查看所有通知
             if (e.target.classList.contains('view-all-notifications') || e.target.closest('.view-all-notifications')) {
                 e.preventDefault();
                 this.navigateToMessageCenter();
+                return;
             }
-        });
-
-        // 点击外部关闭下拉菜单
-        document.addEventListener('click', (e) => {
+            // 点击外部关闭下拉菜单
             if (!e.target.closest('.notification-container')) {
-                const dropdowns = document.querySelectorAll('.notification-dropdown');
-                dropdowns.forEach((dropdown) => {
-                    dropdown.classList.remove('show');
-                });
+                document.querySelectorAll('.notification-dropdown.show').forEach((d) => d.classList.remove('show'));
             }
         });
     }

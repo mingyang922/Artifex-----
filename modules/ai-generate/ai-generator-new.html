@@ -4,13 +4,11 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>AI生成器 - Artifex</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;500;600&display=swap"
+            href="../../vendor/css/google-fonts.css"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+        <link rel="stylesheet" href="../../vendor/css/font-awesome.min.css" />
         <link rel="stylesheet" href="../../styles/ui-kit.css" />
         <link rel="stylesheet" href="style.css" />
     </head>
@@ -33,37 +31,37 @@
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="home">
                             <i class="fas fa-home"></i>
-                            <span>主页</span>
+                            <span data-i18n="nav.home">主页</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="project-management">
                             <i class="fas fa-project-diagram"></i>
-                            <span>项目管理</span>
+                            <span data-i18n="nav.projects">项目管理</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link active" data-module="ai-generate">
                             <i class="fas fa-magic"></i>
-                            <span>AI 生成</span>
+                            <span data-i18n="nav.ai">AI 生成</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="asset-library">
                             <i class="fas fa-images"></i>
-                            <span>素材库</span>
+                            <span data-i18n="nav.assets">素材库</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="style-presets">
                             <i class="fas fa-swatchbook"></i>
-                            <span>风格预设</span>
+                            <span data-i18n="nav.presets">风格预设</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="user-center">
                             <i class="fas fa-user-gear"></i>
-                            <span>账户</span>
+                            <span data-i18n="nav.account">账户</span>
                         </a>
                     </li>
                 </ul>
@@ -75,10 +73,10 @@
                 <div class="top-bar">
                     <div class="search-bar">
                         <i class="fas fa-search" aria-hidden="true"></i>
-                        <input type="text" placeholder="搜索项目、资产或文档..." aria-label="搜索" />
+                        <input type="text" placeholder="搜索项目、资产或文档..." data-i18n="dashboard.searchPlaceholder" data-i18n-aria="common.search" aria-label="搜索" />
                     </div>
                     <div class="user-menu">
-                        <button class="notification-btn" aria-label="通知">
+                        <button class="notification-btn" data-i18n-aria="misc.notifications" aria-label="通知">
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge">3</span>
                         </button>
@@ -105,11 +103,11 @@
                     <div class="tab-container">
                         <div class="tab-buttons">
                             <button class="tab-button active" data-tab="code">
-                                <i class="fas fa-wand-sparkles"></i> 资产微调
+                                <i class="fas fa-wand-sparkles"></i> <span data-i18n="ai.assetEditor">资产微调</span>
                             </button>
-                            <button class="tab-button" data-tab="image"><i class="fas fa-image"></i> 图片生成</button>
+                            <button class="tab-button" data-tab="image"><i class="fas fa-image"></i> <span data-i18n="ai.imageGenerate">图片生成</span></button>
                             <button class="tab-button" data-tab="action-group">
-                                <i class="fas fa-person-running"></i> 角色动作组
+                                <i class="fas fa-person-running"></i> <span data-i18n="ai.actionGroup">角色动作组</span>
                             </button>
                         </div>
                     </div>
@@ -484,6 +482,12 @@
                                                 <i class="fas fa-folder-plus"></i> 存回素材库
                                             </button>
                                         </div>
+                                        <div class="ae-panel-section">
+                                            <div class="ae-panel-sub-title"><i class="fas fa-swatchbook"></i> 调色板</div>
+                                            <button class="ae-small-btn" id="aeExtractPalette">
+                                                <i class="fas fa-eye-dropper"></i> 提取调色板
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -587,6 +591,18 @@
                                                 <input type="radio" name="imageMode" value="img2img" />
                                                 <span><i class="fas fa-image"></i> 线稿/草图 → 成品图</span>
                                             </label>
+                                            <label class="mode-option">
+                                                <input type="radio" name="imageMode" value="styleTransfer" />
+                                                <span><i class="fas fa-palette"></i> 风格迁移</span>
+                                            </label>
+                                            <label class="mode-option">
+                                                <input type="radio" name="imageMode" value="upscale" />
+                                                <span><i class="fas fa-expand-arrows-alt"></i> 图片放大</span>
+                                            </label>
+                                            <label class="mode-option">
+                                                <input type="radio" name="imageMode" value="removeBg" />
+                                                <span><i class="fas fa-eraser"></i> 背景去除</span>
+                                            </label>
                                         </div>
                                     </div>
                                     <div
@@ -620,6 +636,99 @@
                                                 class="strength-slider"
                                             />
                                         </div>
+                                    </div>
+                                    <div
+                                        id="styleTransferZone"
+                                        class="form-group full-width img2img-zone"
+                                        style="display: none"
+                                    >
+                                        <div class="st-upload-row">
+                                            <div class="st-upload-col">
+                                                <label for="stContentFile"
+                                                    >内容图 <span class="label-hint">(将应用风格的原始图片)</span></label
+                                                >
+                                                <div class="sketch-upload-wrap">
+                                                    <input
+                                                        type="file"
+                                                        id="stContentFile"
+                                                        accept="image/jpeg,image/png,image/webp"
+                                                        class="sketch-file-input"
+                                                    />
+                                                    <div id="stContentPreview" class="sketch-preview"></div>
+                                                </div>
+                                            </div>
+                                            <div class="st-upload-col">
+                                                <label for="stRefFile"
+                                                    >风格参考图 <span class="label-hint">(提供艺术风格的图片)</span></label
+                                                >
+                                                <div class="sketch-upload-wrap">
+                                                    <input
+                                                        type="file"
+                                                        id="stRefFile"
+                                                        accept="image/jpeg,image/png,image/webp"
+                                                        class="sketch-file-input"
+                                                    />
+                                                    <div id="stRefPreview" class="sketch-preview"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group strength-row">
+                                            <label for="stStrength"
+                                                >风格强度 <span id="stStrengthValue">0.6</span>（越大风格越明显）</label
+                                            >
+                                            <input
+                                                type="range"
+                                                id="stStrength"
+                                                min="0.2"
+                                                max="0.9"
+                                                step="0.05"
+                                                value="0.6"
+                                                class="strength-slider"
+                                            />
+                                        </div>
+                                        <p class="hint-text" style="font-size: 12px; color: #888; margin-top: 8px">
+                                            <i class="fas fa-info-circle" style="color: #00f0ff"></i>
+                                            风格迁移效果取决于所选 AI 服务商。系统将使用内容图作为基础，结合风格参考图的艺术特征生成新图片。
+                                        </p>
+                                    </div>
+                                    <!-- 图片放大 -->
+                                    <div
+                                        id="upscaleZone"
+                                        class="form-group full-width img2img-zone"
+                                        style="display: none"
+                                    >
+                                        <label for="upscaleFile">上传源图片 <span class="label-hint">(需要放大的低分辨率图片)</span></label>
+                                        <div class="sketch-upload-wrap">
+                                            <input type="file" id="upscaleFile" accept="image/jpeg,image/png,image/webp" class="sketch-file-input" />
+                                            <div id="upscalePreview" class="sketch-preview"></div>
+                                        </div>
+                                        <div class="form-group" style="margin-top: 12px">
+                                            <label for="upscaleFactor">放大倍数</label>
+                                            <select id="upscaleFactor" class="form-select" style="max-width: 200px">
+                                                <option value="2">2x 放大</option>
+                                                <option value="4">4x 放大</option>
+                                            </select>
+                                        </div>
+                                        <p class="hint-text" style="font-size: 12px; color: #888; margin-top: 8px">
+                                            <i class="fas fa-info-circle" style="color: #00f0ff"></i>
+                                            图片放大效果取决于 AI 服务商，建议使用即梦以获得最佳效果。
+                                        </p>
+                                    </div>
+                                    <!-- 背景去除 -->
+                                    <div
+                                        id="removeBgZone"
+                                        class="form-group full-width img2img-zone"
+                                        style="display: none"
+                                    >
+                                        <label for="removeBgFile">上传源图片 <span class="label-hint">(需要去除背景的图片)</span></label>
+                                        <div class="sketch-upload-wrap">
+                                            <input type="file" id="removeBgFile" accept="image/jpeg,image/png,image/webp" class="sketch-file-input" />
+                                            <div id="removeBgPreview" class="sketch-preview"></div>
+                                        </div>
+                                        <p class="hint-text" style="font-size: 12px; color: #888; margin-top: 8px">
+                                            <i class="fas fa-info-circle" style="color: #00f0ff"></i>
+                                            输出为透明背景 PNG。效果取决于 AI 服务商，建议使用即梦以获得最佳抠图效果。
+                                        </p>
                                     </div>
                                 </div>
 
@@ -687,6 +796,27 @@
                                         </div>
                                     </div>
 
+                                    <!-- 模板快捷选择 -->
+                                    <div id="templateSection" class="template-section">
+                                        <div class="form-section-title" style="margin-bottom: 14px">
+                                            <i class="fas fa-th-large"></i> 游戏 UI 模板
+                                            <span style="font-size: 11px; color: #607080; font-weight: normal; text-transform: none; letter-spacing: normal">
+                                                (点击分类展开，选择模板自动填入 prompt)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 批量生成选项 -->
+                                    <div id="batchGenWrap" style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                                        <label style="font-family:var(--font-tech-display);font-size:11px;color:#00f0ff;letter-spacing:0.08em;text-transform:uppercase;font-weight:700;">生成数量</label>
+                                        <div id="batchCountBtns" style="display:flex;gap:4px;">
+                                            <button type="button" class="batch-count-btn" data-count="1" style="min-width:36px;padding:6px 10px;border-radius:6px;border:1px solid rgba(0,240,255,0.35);background:rgba(0,240,255,0.18);color:#00f0ff;font-family:var(--font-tech-display);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;">1</button>
+                                            <button type="button" class="batch-count-btn" data-count="2" style="min-width:36px;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#b0b0c0;font-family:var(--font-tech-display);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;">2</button>
+                                            <button type="button" class="batch-count-btn" data-count="4" style="min-width:36px;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#b0b0c0;font-family:var(--font-tech-display);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;">4</button>
+                                            <button type="button" class="batch-count-btn" data-count="8" style="min-width:36px;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#b0b0c0;font-family:var(--font-tech-display);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;">8</button>
+                                        </div>
+                                        <input type="hidden" id="batchCount" value="1" />
+                                    </div>
                                     <button type="submit" class="generate-btn" id="imageGenBtn">
                                         <i class="fas fa-image"></i><span id="imageGenBtnText">开始生成图片</span>
                                     </button>
@@ -1081,8 +1211,11 @@
             </div>
         </div>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+        <script src="../../vendor/jszip.min.js"></script>
+        <script src="../../js/keyboard-shortcuts.js"></script>
+        <script src="../../js/i18n.js"></script>
         <script src="../../js/ui-kit.js"></script>
+        <script src="../../js/html-utils.js"></script>
         <script src="../../js/navigation.js"></script>
         <script src="../../js/notification-component.js"></script>
         <script src="../../js/avatar-manager.js"></script>
@@ -1096,5 +1229,6 @@
         <script src="action-group.js"></script>
         <script src="asset-editor.js"></script>
         <script src="image-generator.js"></script>
+        <script src="templates.js"></script>
     </body>
 </html>

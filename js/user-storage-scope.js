@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 /**
  * 按登录用户隔离 localStorage 键，并在各页启动前拉取 /api/me。
  * 依赖后端 express-session（proxy.js）与 cookie。
@@ -18,6 +18,9 @@
             return 'login.html';
         }
     }
+
+    // 暴露到全局，供其他模块使用
+    global.loginHtmlPath = loginHtmlPath;
 
     const GameUiUserScope = {
         userId: null,

@@ -38,13 +38,16 @@ function createAssetLibraryRouter(deps) {
             return res.status(413).json({ error: '素材内容过大，最大允许 10MB' });
         }
         const item = usersDb.addAssetLibraryItem(req.currentUser.id, { name, type, content, desc, source, tags });
+        try { usersDb.addActivity(req.currentUser.id, '保存素材', 'asset', item.id, name); } catch (_) { /* 活动日志非关键 */ }
         res.json({ ok: true, item });
     });
 
     // 更新素材
     router.put('/asset-library/:id', requireAuth, csrfProtection, (req, res) => {
+        const assetId = Number(req.params.id);
+        if (!assetId || isNaN(assetId)) return res.status(400).json({ error: '无效的素材 ID' });
         const updates = req.body || {};
-        const item = usersDb.updateAssetLibraryItem(req.currentUser.id, req.params.id, updates);
+        const item = usersDb.updateAssetLibraryItem(req.currentUser.id, assetId, updates);
         if (!item) {
             return res.status(404).json({ error: '素材不存在' });
         }
@@ -53,7 +56,9 @@ function createAssetLibraryRouter(deps) {
 
     // 删除素材
     router.delete('/asset-library/:id', requireAuth, csrfProtection, (req, res) => {
-        usersDb.deleteAssetLibraryItem(req.currentUser.id, req.params.id);
+        const assetId = Number(req.params.id);
+        if (!assetId || isNaN(assetId)) return res.status(400).json({ error: '无效的素材 ID' });
+        usersDb.deleteAssetLibraryItem(req.currentUser.id, assetId);
         res.json({ ok: true });
     });
 

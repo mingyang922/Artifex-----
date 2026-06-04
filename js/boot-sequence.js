@@ -1,12 +1,14 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 (function () {
     'use strict';
 
+    var APP_VERSION = (typeof window !== 'undefined' && window.API_CONFIG && window.API_CONFIG.version) || '1.3.3';
+
     var BOOT_LINES = [
-        { text: '> ARTIFEX ENGINE v1.0.0', color: '#00f0ff' },
+        { text: '> ARTIFEX ENGINE v' + APP_VERSION, color: '#00f0ff' },
         { text: '> 加载资源管线...', color: 'rgba(0, 240, 255, 0.7)' },
         { text: '> 初始化 AI 模块...', color: 'rgba(0, 240, 255, 0.7)' },
         { text: '> 连接生成服务...', color: 'rgba(139, 92, 246, 0.8)' },
@@ -22,7 +24,7 @@
 
         // 加载字体
         var fontLink = document.createElement('link');
-        fontLink.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;500&display=swap';
+        fontLink.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;500;600&display=swap';
         fontLink.rel = 'stylesheet';
         document.head.appendChild(fontLink);
 

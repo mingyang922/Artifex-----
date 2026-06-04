@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 'use strict';
 const PMSharedLib = window.PMShared || {};
 const pmStorageKey = PMSharedLib.pmStorageKey || ((base) => base);
@@ -213,7 +213,7 @@ async function loadProjects() {
     try {
         const res = await fetch('/api/projects', { credentials: 'include' });
         if (res.status === 401) {
-            window.location.href = '../../login.html';
+            window.location.href = loginHtmlPath();
             return;
         }
         const data = await res.json();
@@ -254,12 +254,12 @@ function debounce(func, wait) {
 }
 
 // 保存项目到服务端（单个项目更新）
-async function saveProjectToServer(project) {
+async function saveProjectToServer(project, versionDesc) {
     try {
         const csrfToken = await getCsrfToken();
         if (project.id && !project.id.startsWith('new_')) {
             // 更新现有项目
-            await fetch(`/api/projects/${project.id}`, {
+            const res = await fetch(`/api/projects/${project.id}`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': csrfToken },
@@ -267,8 +267,21 @@ async function saveProjectToServer(project) {
                     name: project.name,
                     description: project.desc,
                     type: project.type,
+                    versionDesc: versionDesc || '项目更新',
                 }),
             });
+            if (!res.ok) {
+                throw new Error('保存项目失败');
+            }
+            const data = await res.json();
+            // 用服务端返回的最新数据同步本地版本号
+            if (data.ok && data.project) {
+                project.version = data.project.version;
+                project.versionHistory = (data.project.versionHistory || []).map(v => ({
+                    time: v.created_at,
+                    desc: v.description,
+                }));
+            }
         }
     } catch (error) {
         console.error('保存项目失败:', error);
@@ -284,9 +297,9 @@ function syncProjectsToLocalStorage() {
 }
 
 // 批量保存项目到服务端
-let saveProjectsToStorage = debounce(function () {
+let saveProjectsToStorage = debounce(function (versionDesc) {
     // 批量保存时，逐个同步到服务端
-    projects.forEach(p => saveProjectToServer(p));
+    projects.forEach(p => saveProjectToServer(p, versionDesc));
     projectsCache = projects;
 }, 300);
 
@@ -333,8 +346,8 @@ function renderProjectList() {
             <p class="project-desc">${esc(project.desc || project.description || '无描述')}</p>
             <div class="project-meta">
                 <span>创建时间: ${esc(formatDate(project.createTime || project.created_at))}</span>
-                <span>版本: v${project.version}</span>
-                <span>素材数: ${project.assets ? project.assets.length : 0}
+                <span>版本: v${esc(project.version)}</span>
+                <span>素材数: ${project.assets ? project.assets.length : 0}</span>
             </div>
             <div class="project-card-actions">
                 <button class="icon-btn edit-project" title="编辑项目">
@@ -741,34 +754,30 @@ async function saveEditProject() {
     const projectIndex = projects.findIndex((p) => p.id === projectId);
     if (projectIndex === -1) return;
 
-    // 记录版本历史
-    projects[projectIndex].version += 1;
-    projects[projectIndex].versionHistory.push({
-        time: new Date().toISOString(),
-        desc: '项目信息更新',
-    });
-
-    // 更新基本信息
+    // 更新基本信息（版本号由服务端自动递增）
     projects[projectIndex].name = nameInput.value.trim();
     projects[projectIndex].desc = descInput.value.trim();
     projects[projectIndex].type = typeInput.value;
 
-    saveProjectsToStorage();
+    saveProjectsToStorage('项目信息更新');
     syncProjectsToLocalStorage();
     renderProjectList();
     document.getElementById('edit-project-modal').classList.add('hidden');
-    uiToast('项目更新成功！版本已升级至 v' + projects[projectIndex].version, 'success');
+    uiToast('项目更新成功！', 'success');
 }
 
 // 删除项目
 async function deleteProject(projectId) {
     try {
         const csrfToken = await getCsrfToken();
-        await fetch(`/api/projects/${projectId}`, {
+        const res = await fetch(`/api/projects/${projectId}`, {
             method: 'DELETE',
             credentials: 'include',
             headers: { 'X-XSRF-Token': csrfToken },
         });
+        if (!res.ok) {
+            throw new Error('删除项目失败');
+        }
         projects = projects.filter((p) => p.id !== projectId);
         projectsCache = projects;
         syncProjectsToLocalStorage();
@@ -1082,11 +1091,6 @@ async function addProjectAsset() {
     };
 
     project.assets.push(newAsset);
-    project.version += 0.1; // 小版本更新
-    project.versionHistory.push({
-        time: new Date().toISOString(),
-        desc: '添加素材：' + assetName,
-    });
     const syncResult = await syncProjectAssetToLibrary(project, newAsset);
 
     saveProjectsToStorage();
@@ -1144,13 +1148,7 @@ function bindAssetEvents() {
 
             const project = projects.find((p) => p.id === projectId);
             if (project && project.assets && project.assets[index]) {
-                const deletedAssetName = project.assets[index].name;
                 project.assets.splice(index, 1);
-                project.version += 0.1;
-                project.versionHistory.push({
-                    time: new Date().toISOString(),
-                    desc: '删除素材：' + deletedAssetName,
-                });
                 saveProjectsToStorage();
                 openAssetsModal(projectId);
             }
@@ -1197,3 +1195,146 @@ async function initModule() {
 
 // 提供给dashboard调用的接口
 window.initModule = initModule;
+// ── Project Templates ──
+(function () {
+    "use strict";
+
+    var PROJECT_TEMPLATES = {
+        rpg: {
+            name: "RPG 游戏",
+            desc: "角色扮演游戏模板",
+            type: "game",
+            assets: ["角色", "地图", "UI", "道具"]
+        },
+        platformer: {
+            name: "平台跳跃",
+            desc: "2D 平台跳跃游戏模板",
+            type: "game",
+            assets: ["角色", "背景", "平台", "道具"]
+        },
+        puzzle: {
+            name: "消除游戏",
+            desc: "三消/益智游戏模板",
+            type: "game",
+            assets: ["宝石", "特效", "UI", "背景"]
+        },
+        "ui-kit": {
+            name: "UI 套件",
+            desc: "通用游戏 UI 组件集",
+            type: "ui",
+            assets: ["按钮", "血条", "弹窗", "图标"]
+        }
+    };
+
+    var selectedTemplate = "blank";
+
+    function initTemplateCards() {
+        var cards = document.querySelectorAll("#templateCards .template-card");
+        cards.forEach(function (card) {
+            card.addEventListener("click", function () {
+                cards.forEach(function (c) {
+                    c.style.background = "rgba(255,255,255,0.03)";
+                    c.style.borderColor = "rgba(255,255,255,0.08)";
+                });
+                card.style.background = "rgba(0,240,255,0.08)";
+                card.style.borderColor = "rgba(0,240,255,0.35)";
+                selectedTemplate = card.dataset.tpl;
+                applyTemplate(selectedTemplate);
+            });
+            card.addEventListener("mouseenter", function () {
+                if (card.dataset.tpl !== selectedTemplate) {
+                    card.style.background = "rgba(255,255,255,0.06)";
+                    card.style.borderColor = "rgba(255,255,255,0.15)";
+                }
+            });
+            card.addEventListener("mouseleave", function () {
+                if (card.dataset.tpl !== selectedTemplate) {
+                    card.style.background = "rgba(255,255,255,0.03)";
+                    card.style.borderColor = "rgba(255,255,255,0.08)";
+                }
+            });
+        });
+    }
+
+    function applyTemplate(tplKey) {
+        var tpl = PROJECT_TEMPLATES[tplKey];
+        if (!tpl) return;
+        var nameInput = document.getElementById("project-name");
+        var descInput = document.getElementById("project-desc");
+        var typeInput = document.getElementById("project-type");
+        if (nameInput && !nameInput.value.trim()) {
+            nameInput.value = tpl.name;
+        }
+        if (descInput && !descInput.value.trim()) {
+            descInput.value = tpl.desc;
+        }
+        if (typeInput) {
+            typeInput.value = tpl.type;
+            typeInput.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+    }
+
+    function getSelectedTemplate() {
+        return selectedTemplate;
+    }
+
+    function getTemplateData(tplKey) {
+        return PROJECT_TEMPLATES[tplKey] || null;
+    }
+
+    // Inject into init flow
+    var origInit = window.init;
+    if (typeof origInit === "function") {
+        window.init = async function () {
+            await origInit();
+            initTemplateCards();
+        };
+    } else {
+        document.addEventListener("DOMContentLoaded", initTemplateCards);
+    }
+
+    // Expose for createProject
+    window._pmTemplates = {
+        getSelected: getSelectedTemplate,
+        getData: getTemplateData,
+        TEMPLATES: PROJECT_TEMPLATES
+    };
+
+    // Override createProject to handle templates
+    var origCreateProject = window.createProject;
+    if (typeof origCreateProject === "function") {
+        window.createProject = async function () {
+            var tplKey = getSelectedTemplate();
+            var tpl = getTemplateData(tplKey);
+
+            // Call original create
+            await origCreateProject();
+
+            // If template selected and project was created, add placeholder categories
+            if (tpl && tpl.assets && tpl.assets.length > 0) {
+                var projectsRaw = localStorage.getItem(pmStorageKey("gameui-projects"));
+                if (projectsRaw) {
+                    try {
+                        var projs = JSON.parse(projectsRaw);
+                        if (projs.length > 0) {
+                            var latest = projs[0];
+                            if (!latest.templateApplied) {
+                                latest.templateApplied = tplKey;
+                                latest.templateAssets = tpl.assets;
+                                localStorage.setItem(pmStorageKey("gameui-projects"), JSON.stringify(projs));
+                            }
+                        }
+                    } catch (_) {}
+                }
+            }
+
+            // Reset template selection
+            selectedTemplate = "blank";
+            var cards = document.querySelectorAll("#templateCards .template-card");
+            cards.forEach(function (c) {
+                c.style.background = c.dataset.tpl === "blank" ? "rgba(0,240,255,0.08)" : "rgba(255,255,255,0.03)";
+                c.style.borderColor = c.dataset.tpl === "blank" ? "rgba(0,240,255,0.35)" : "rgba(255,255,255,0.08)";
+            });
+        };
+    }
+})();

@@ -1,15 +1,12 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 'use strict';
 const PMSharedLib = window.PMShared || {};
 const pmStorageKey = PMSharedLib.pmStorageKey || ((base) => base);
 
-function escapeHtml(str) {
-    if (typeof str !== 'string') return '';
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
+// escapeHtml 由 js/html-utils.js 提供（全局函数）
 
 let currentProject = null;
 let projects = [];
@@ -118,7 +115,7 @@ async function loadProjects() {
     try {
         const res = await fetch('/api/projects', { credentials: 'include' });
         if (res.status === 401) {
-            window.location.href = '../../login.html';
+            window.location.href = loginHtmlPath();
             return;
         }
         const data = await res.json();
@@ -160,7 +157,7 @@ async function saveProjectToServer(project) {
     try {
         const csrfToken = await getCsrfToken();
         if (project.id && !project.id.startsWith('new_')) {
-            await fetch(`/api/projects/${project.id}`, {
+            const res = await fetch(`/api/projects/${project.id}`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': csrfToken },
@@ -170,6 +167,9 @@ async function saveProjectToServer(project) {
                     type: project.type,
                 }),
             });
+            if (!res.ok) {
+                throw new Error('保存项目失败');
+            }
         }
     } catch (error) {
         console.error('保存项目失败:', error);
@@ -356,6 +356,16 @@ function renderProjectInfo() {
     document.getElementById('unify-style-project-id').value = currentProject.id;
 }
 
+function filterProjectAssets() {
+    const searchInput = document.getElementById('assetSearchInput');
+    const q = searchInput ? (searchInput.value || '').trim().toLowerCase() : '';
+    const allAssets = currentProject.assets || [];
+    if (!q) return allAssets.map((a, i) => ({ asset: a, index: i }));
+    return allAssets
+        .map((a, i) => ({ asset: a, index: i }))
+        .filter((item) => (item.asset.name || '').toLowerCase().includes(q));
+}
+
 function renderAssetList() {
     const assetGrid = document.getElementById('asset-grid');
     const emptyAssets = document.getElementById('empty-assets');
@@ -366,11 +376,21 @@ function renderAssetList() {
         return;
     }
 
+    const filtered = filterProjectAssets();
+
+    if (filtered.length === 0) {
+        assetGrid.innerHTML = '';
+        emptyAssets.classList.remove('hidden');
+        emptyAssets.querySelector('p').textContent = '没有匹配的素材';
+        return;
+    }
+
     emptyAssets.classList.add('hidden');
+    emptyAssets.querySelector('p').textContent = '暂无素材，点击上方"添加素材"按钮开始添加';
 
     const fragment = document.createDocumentFragment();
 
-    currentProject.assets.forEach((asset, index) => {
+    filtered.forEach(({ asset, index }) => {
         const assetCard = document.createElement('div');
         assetCard.className = 'asset-card';
         assetCard.dataset.index = index;
@@ -386,8 +406,8 @@ function renderAssetList() {
                 <h4>${safeName}</h4>
                 <p>${safeDesc}</p>
                 <div class="asset-meta">
-                    <span>${getAssetTypeName(asset.type)}</span>
-                    <span>${formatDate(asset.createTime)}</span>
+                    <span>${escapeHtml(getAssetTypeName(asset.type))}</span>
+                    <span>${escapeHtml(formatDate(asset.createTime))}</span>
                     ${asset.isAIGenerated ? '<span class="ai-generated">AI生成</span>' : ''}
                 </div>
                 <div class="asset-actions">
@@ -559,6 +579,12 @@ function bindEventListeners() {
     });
 
     document.getElementById('copy-link-btn').addEventListener('click', copyShareLink);
+
+    // 素材搜索
+    const assetSearchInput = document.getElementById('assetSearchInput');
+    if (assetSearchInput) {
+        assetSearchInput.addEventListener('input', () => renderAssetList());
+    }
 }
 
 function navigateBack() {

@@ -5,13 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Artifex - 用户中心</title>
         <link rel="stylesheet" href="../../styles/app-shell.css" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;500;600&display=swap"
+            href="../../vendor/css/google-fonts.css"
             rel="stylesheet"
         />
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+        <link href="../../vendor/css/font-awesome.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="../../styles/ui-kit.css" />
         <style>
             /* 主界面特有样式 - 修改背景色并设置横屏布局基础 */
@@ -589,6 +587,12 @@
 
             .form-group.tech-select-open {
                 z-index: 10001;
+            }
+
+            .tech-select-disabled .tech-select-trigger {
+                opacity: 0.5;
+                cursor: not-allowed;
+                pointer-events: none;
             }
 
             /* 用户ID输入框特殊样式 - 始终不可编辑 */
@@ -1404,6 +1408,133 @@
                 }
             }
 
+            /* ── 活动日志时间线 ── */
+            .activity-timeline {
+                position: relative;
+                padding-left: 32px;
+            }
+
+            .activity-timeline::before {
+                content: '';
+                position: absolute;
+                left: 14px;
+                top: 0;
+                bottom: 0;
+                width: 2px;
+                background: linear-gradient(180deg, rgba(0, 240, 255, 0.4) 0%, rgba(0, 240, 255, 0.05) 100%);
+            }
+
+            .activity-item {
+                position: relative;
+                padding: 14px 18px;
+                margin-bottom: 12px;
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                border-radius: 10px;
+                transition: all 0.3s ease;
+                animation: activityFadeIn 0.4s ease-out;
+            }
+
+            @keyframes activityFadeIn {
+                from { opacity: 0; transform: translateY(8px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            .activity-item:hover {
+                background: rgba(0, 240, 255, 0.04);
+                border-color: rgba(0, 240, 255, 0.2);
+                transform: translateX(3px);
+            }
+
+            .activity-item::before {
+                content: '';
+                position: absolute;
+                left: -24px;
+                top: 20px;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: #00f0ff;
+                box-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+            }
+
+            .activity-item-header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 6px;
+            }
+
+            .activity-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                font-size: 14px;
+            }
+
+            .activity-icon--project {
+                background: rgba(0, 240, 255, 0.12);
+                color: #00f0ff;
+            }
+
+            .activity-icon--asset {
+                background: rgba(168, 85, 247, 0.12);
+                color: #a855f7;
+            }
+
+            .activity-icon--image {
+                background: rgba(255, 180, 4, 0.12);
+                color: #ffb404;
+            }
+
+            .activity-icon--auth {
+                background: rgba(82, 196, 26, 0.12);
+                color: #52c41a;
+            }
+
+            .activity-action {
+                color: #e0e0e0;
+                font-size: 14px;
+                font-weight: 500;
+                flex: 1;
+            }
+
+            .activity-action .activity-detail {
+                color: #00f0ff;
+                font-weight: 600;
+            }
+
+            .activity-time {
+                color: #666;
+                font-size: 12px;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .activity-loading {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 40px 0;
+            }
+
+            .activity-empty {
+                text-align: center;
+                padding: 40px 0;
+                color: #666;
+            }
+
+            .activity-empty i {
+                font-size: 36px;
+                color: rgba(0, 240, 255, 0.2);
+                display: block;
+                margin-bottom: 12px;
+            }
+
             /* ── 赛博朋克滚动条 ── */
             * {
                 scrollbar-width: thin;
@@ -1439,43 +1570,43 @@
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="home">
                             <i class="fas fa-home"></i>
-                            <span>主页</span>
+                            <span data-i18n="nav.home">主页</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="project-management">
                             <i class="fas fa-project-diagram"></i>
-                            <span>项目管理</span>
+                            <span data-i18n="nav.projects">项目管理</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="ai-generate">
                             <i class="fas fa-magic"></i>
-                            <span>AI 生成</span>
+                            <span data-i18n="nav.ai">AI 生成</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="asset-library">
                             <i class="fas fa-images"></i>
-                            <span>素材库</span>
+                            <span data-i18n="nav.assets">素材库</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="style-presets">
                             <i class="fas fa-swatchbook"></i>
-                            <span>风格预设</span>
+                            <span data-i18n="nav.presets">风格预设</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="user-center">
                             <i class="fas fa-user-circle"></i>
-                            <span>账户</span>
+                            <span data-i18n="nav.account">账户</span>
                         </a>
                     </li>
                     <li class="nav-item" id="admin-nav-item" style="display: none">
                         <a href="../admin/admin.html" class="nav-link">
                             <i class="fas fa-shield-alt"></i>
-                            <span>管理面板</span>
+                            <span data-i18n="nav.admin">管理面板</span>
                         </a>
                     </li>
                 </ul>
@@ -1487,7 +1618,7 @@
                 <div class="top-bar">
                     <div class="search-bar">
                         <i class="fas fa-search" aria-hidden="true"></i>
-                        <input type="text" placeholder="搜索用户设置..." aria-label="搜索" />
+                        <input type="text" placeholder="搜索用户设置..." data-i18n="common.search" data-i18n-aria="common.search" aria-label="搜索" />
                     </div>
                     <div class="user-menu">
                         <div class="notification-container">
@@ -1552,11 +1683,12 @@
 
                 <!-- 用户中心选项卡 -->
                 <div class="user-center-tabs">
-                    <div class="user-center-tab active" data-tab="personal-info">个人信息</div>
-                    <div class="user-center-tab" data-tab="api-settings">API设置</div>
-                    <div class="user-center-tab" data-tab="change-password">修改密码</div>
-                    <div class="user-center-tab" data-tab="permissions">权限设置</div>
-                    <div class="user-center-tab" data-tab="avatar-upload">头像上传</div>
+                    <div class="user-center-tab active" data-tab="personal-info" data-i18n="uc.personalInfo">个人信息</div>
+                    <div class="user-center-tab" data-tab="api-settings" data-i18n="uc.apiSettings">API设置</div>
+                    <div class="user-center-tab" data-tab="change-password" data-i18n="uc.changePassword">修改密码</div>
+                    <div class="user-center-tab" data-tab="permissions" data-i18n="uc.permissions">权限设置</div>
+                    <div class="user-center-tab" data-tab="avatar-upload" data-i18n="uc.avatarUpload">头像上传</div>
+                    <div class="user-center-tab" data-tab="activity-log" data-i18n="uc.activityLog">活动日志</div>
                 </div>
 
                 <!-- 个人信息选项卡内容 -->
@@ -1566,7 +1698,7 @@
                             <div class="info-card-icon">
                                 <i class="fas fa-user-cog"></i>
                             </div>
-                            <h3 class="info-card-title">个人中心</h3>
+                            <h3 class="info-card-title" data-i18n="uc.personalCenter">个人中心</h3>
                         </div>
 
                         <div class="user-info-grid">
@@ -1576,11 +1708,11 @@
                                     <div class="info-card-icon">
                                         <i class="fas fa-user"></i>
                                     </div>
-                                    <h3 class="info-card-title">基本信息</h3>
+                                    <h3 class="info-card-title" data-i18n="uc.basicInfo">基本信息</h3>
                                 </div>
                                 <form id="personal-info-form">
                                     <div class="form-group">
-                                        <label class="form-label" for="username">用户ID</label>
+                                        <label class="form-label" for="username" data-i18n="uc.userId">用户ID</label>
                                         <input
                                             type="text"
                                             class="form-input user-id"
@@ -1591,7 +1723,26 @@
                                         />
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label" for="email">电子邮箱</label>
+                                        <label class="form-label" data-i18n="uc.role">身份</label>
+                                        <div id="userRole" style="
+                                            padding: 10px 15px;
+                                            background: rgba(0, 240, 255, 0.06);
+                                            border: 1px solid rgba(0, 240, 255, 0.2);
+                                            border-radius: 8px;
+                                            color: #00f0ff;
+                                            font-size: 14px;
+                                            font-weight: 600;
+                                            letter-spacing: 1px;
+                                            display: flex;
+                                            align-items: center;
+                                            gap: 8px;
+                                        ">
+                                            <i class="fas fa-shield-alt" style="font-size: 13px; opacity: 0.7;"></i>
+                                            <span>普通用户</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="email" data-i18n="uc.email">电子邮箱</label>
                                         <input
                                             type="email"
                                             class="form-input"
@@ -1601,7 +1752,7 @@
                                         />
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label" for="nickname">昵称</label>
+                                        <label class="form-label" for="nickname" data-i18n="uc.nickname">昵称</label>
                                         <input
                                             type="text"
                                             class="form-input"
@@ -1611,23 +1762,27 @@
                                         />
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label" for="gender">性别</label>
-                                        <select class="form-select" id="gender" disabled>
-                                            <option value="">请选择</option>
-                                            <option value="male">男</option>
-                                            <option value="female">女</option>
-                                            <option value="private">不愿透露</option>
-                                        </select>
+                                        <label class="form-label" for="gender" data-i18n="uc.gender">性别</label>
+                                        <input type="hidden" id="gender" value="">
+                                        <div class="tech-select tech-select-disabled" id="genderSelect" data-value="">
+                                            <div class="tech-select-trigger">请选择</div>
+                                            <div class="tech-select-menu">
+                                                <div class="tech-select-option" data-value="">请选择</div>
+                                                <div class="tech-select-option" data-value="male">男</div>
+                                                <div class="tech-select-option" data-value="female">女</div>
+                                                <div class="tech-select-option" data-value="private">不愿透露</div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label" for="bio">个人简介</label>
+                                        <label class="form-label" for="bio" data-i18n="uc.bio">个人简介</label>
                                         <textarea class="form-textarea" id="bio" readonly>
 热爱游戏UI设计的开发者，拥有5年游戏界面设计经验。</textarea
                                         >
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label" for="country">国家/地区</label>
-                                        <select class="form-select" id="country" disabled>
+                                        <label class="form-label" for="country" data-i18n="uc.country">国家/地区</label>
+                                        <select class="form-select tech-select-native" id="country" disabled>
                                             <option value="">请选择国家/地区</option>
                                             <option value="cn">中国 (CN/CHN)</option>
                                             <option value="us">美国 (US/USA)</option>
@@ -1832,8 +1987,8 @@
                                         />
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label" for="language">偏好语言</label>
-                                        <select class="form-select" id="language" disabled>
+                                        <label class="form-label" for="language" data-i18n="uc.language">偏好语言</label>
+                                        <select class="form-select tech-select-native" id="language" disabled>
                                             <option value="zh" selected>简体中文</option>
                                             <option value="en">English</option>
                                             <option value="ja">日本語</option>
@@ -1841,7 +1996,7 @@
                                         </select>
                                     </div>
                                     <div style="display: flex; gap: 10px; margin-top: 20px">
-                                        <button type="button" class="btn btn-primary" id="edit-info-btn">
+                                        <button type="button" class="btn btn-primary" id="edit-info-btn" data-i18n="uc.editInfo">
                                             修改信息
                                         </button>
                                         <button
@@ -1849,6 +2004,7 @@
                                             class="btn btn-primary"
                                             id="save-changes-btn"
                                             style="display: none"
+                                            data-i18n="uc.saveChanges"
                                         >
                                             保存更改
                                         </button>
@@ -1857,6 +2013,7 @@
                                             class="btn btn-secondary"
                                             id="cancel-changes-btn"
                                             style="display: none"
+                                            data-i18n="uc.cancel"
                                         >
                                             取消
                                         </button>
@@ -1870,29 +2027,29 @@
                                     <div class="info-card-icon">
                                         <i class="fas fa-chart-line"></i>
                                     </div>
-                                    <h3 class="info-card-title" data-translate="account-stats">账户统计</h3>
+                                    <h3 class="info-card-title" data-translate="account-stats" data-i18n="uc.accountStats">账户统计</h3>
                                 </div>
                                 <div style="display: flex; flex-direction: column; gap: 15px">
                                     <div style="display: flex; justify-content: space-between; align-items: center">
-                                        <span style="color: #b0b0c0">创建项目数</span>
+                                        <span style="color: #b0b0c0" data-i18n="uc.projectCount">创建项目数</span>
                                         <span style="color: white; font-weight: bold">28</span>
                                     </div>
                                     <div style="display: flex; justify-content: space-between; align-items: center">
-                                        <span style="color: #b0b0c0">已完成项目</span>
+                                        <span style="color: #b0b0c0" data-i18n="uc.completedProjects">已完成项目</span>
                                         <span style="color: white; font-weight: bold">23</span>
                                     </div>
                                     <div style="display: flex; justify-content: space-between; align-items: center">
-                                        <span style="color: #b0b0c0">收藏模板数</span>
+                                        <span style="color: #b0b0c0" data-i18n="uc.savedTemplates">收藏模板数</span>
                                         <span style="color: white; font-weight: bold">15</span>
                                     </div>
                                     <div style="display: flex; justify-content: space-between; align-items: center">
-                                        <span style="color: #b0b0c0">账户注册时间</span>
+                                        <span style="color: #b0b0c0" data-i18n="uc.registrationTime">账户注册时间</span>
                                         <span id="registration-time" style="color: white; font-weight: bold"
                                             >加载中...</span
                                         >
                                     </div>
                                     <div style="display: flex; justify-content: space-between; align-items: center">
-                                        <span style="color: #b0b0c0">上次登录时间</span>
+                                        <span style="color: #b0b0c0" data-i18n="uc.lastLogin">上次登录时间</span>
                                         <span id="last-login-time" style="color: white; font-weight: bold"
                                             >2023-06-20</span
                                         >
@@ -2023,7 +2180,7 @@
                                             placeholder="请输入当前密码"
                                             autocomplete="current-password"
                                         />
-                                        <button type="button" class="password-toggle" id="toggle-current-password">
+                                        <button type="button" class="password-toggle" id="toggle-current-password" aria-label="显示密码">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -2060,7 +2217,7 @@
                                             placeholder="请输入新密码"
                                             autocomplete="new-password"
                                         />
-                                        <button type="button" class="password-toggle" id="toggle-new-password">
+                                        <button type="button" class="password-toggle" id="toggle-new-password" aria-label="显示密码">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -2138,7 +2295,7 @@
                                             placeholder="请再次输入新密码"
                                             autocomplete="new-password"
                                         />
-                                        <button type="button" class="password-toggle" id="toggle-confirm-password">
+                                        <button type="button" class="password-toggle" id="toggle-confirm-password" aria-label="显示密码">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -2273,7 +2430,7 @@
                             <div class="info-card-icon">
                                 <i class="fas fa-user-cog"></i>
                             </div>
-                            <h3 class="info-card-title">隐私与安全设置</h3>
+                            <h3 class="info-card-title" data-i18n="uc.privacySecurity">隐私与安全设置</h3>
                         </div>
                         <div class="info-card nested-card">
                             <div class="permissions-grid">
@@ -2283,8 +2440,8 @@
                                             <i class="fas fa-user-friends"></i>
                                         </div>
                                         <div class="permission-details">
-                                            <h4>个人资料可见性</h4>
-                                            <p>允许其他用户查看我的个人资料</p>
+                                            <h4 data-i18n="uc.profileVisibility">个人资料可见性</h4>
+                                            <p data-i18n="uc.profileVisibilityDesc">允许其他用户查看我的个人资料</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -2298,8 +2455,8 @@
                                             <i class="fas fa-download"></i>
                                         </div>
                                         <div class="permission-details">
-                                            <h4>允许下载我的作品</h4>
-                                            <p>允许其他用户下载我上传的UI作品</p>
+                                            <h4 data-i18n="uc.allowDownload">允许下载我的作品</h4>
+                                            <p data-i18n="uc.allowDownloadDesc">允许其他用户下载我上传的UI作品</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -2313,8 +2470,8 @@
                                             <i class="fas fa-comments"></i>
                                         </div>
                                         <div class="permission-details">
-                                            <h4>接收消息</h4>
-                                            <p>允许其他用户给我发送私信</p>
+                                            <h4 data-i18n="uc.receiveMessages">接收消息</h4>
+                                            <p data-i18n="uc.receiveMessagesDesc">允许其他用户给我发送私信</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -2328,8 +2485,8 @@
                                             <i class="fas fa-bell"></i>
                                         </div>
                                         <div class="permission-details">
-                                            <h4>邮件通知</h4>
-                                            <p>接收重要更新和活动邮件通知</p>
+                                            <h4 data-i18n="uc.emailNotifications">邮件通知</h4>
+                                            <p data-i18n="uc.emailNotificationsDesc">接收重要更新和活动邮件通知</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -2344,8 +2501,8 @@
                                             <i class="fas fa-lock"></i>
                                         </div>
                                         <div class="permission-details">
-                                            <h4>双重验证</h4>
-                                            <p>启用账户双重验证保护</p>
+                                            <h4 data-i18n="uc.twoFactor">双重验证</h4>
+                                            <p data-i18n="uc.twoFactorDesc">启用账户双重验证保护</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -2359,8 +2516,8 @@
                                             <i class="fas fa-history"></i>
                                         </div>
                                         <div class="permission-details">
-                                            <h4>浏览历史记录</h4>
-                                            <p>保存我的浏览和搜索历史记录</p>
+                                            <h4 data-i18n="uc.browseHistory">浏览历史记录</h4>
+                                            <p data-i18n="uc.browseHistoryDesc">保存我的浏览和搜索历史记录</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -2370,7 +2527,7 @@
                                 </div>
                             </div>
                             <div style="margin-top: 30px">
-                                <button type="button" class="btn btn-primary" id="save-permissions">保存设置</button>
+                                <button type="button" class="btn btn-primary" id="save-permissions" data-i18n="uc.saveSettings">保存设置</button>
                             </div>
                         </div>
                     </div>
@@ -2403,11 +2560,11 @@
                                         ×
                                     </button>
                                 </div>
-                                <p style="color: #888; font-size: 14px; margin-bottom: 12px">
+                                <p style="color: #888; font-size: 14px; margin-bottom: 12px" data-i18n="uc.avatarFormats">
                                     支持JPG、PNG、GIF格式，建议尺寸200x200像素
                                 </p>
                                 <div class="avatar-upload-actions">
-                                    <button type="button" class="btn btn-primary" id="upload-avatar-btn">
+                                    <button type="button" class="btn btn-primary" id="upload-avatar-btn" data-i18n="uc.uploadAvatar">
                                         上传新头像
                                     </button>
                                     <button
@@ -2416,13 +2573,14 @@
                                         id="resetDefaultAvatarBtn"
                                         disabled
                                         title="当前已是默认头像"
+                                        data-i18n="uc.resetAvatar"
                                     >
                                         恢复默认头像
                                     </button>
                                 </div>
                             </div>
                             <div style="margin-top: 30px">
-                                <h4 style="color: white; margin-bottom: 15px">头像历史</h4>
+                                <h4 style="color: white; margin-bottom: 15px" data-i18n="uc.avatarHistory">头像历史</h4>
                                 <div
                                     id="avatar-history-container"
                                     style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px"
@@ -2433,16 +2591,44 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- 活动日志选项卡内容 -->
+                <div class="tab-content" id="activity-log" style="display: none">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <div class="info-card-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <h3 class="info-card-title">活动日志</h3>
+                        </div>
+                        <div class="info-card nested-card">
+                            <div id="activity-log-list" class="activity-timeline">
+                                <div class="activity-loading">
+                                    <i class="fas fa-spinner fa-spin" style="color: #00f0ff; font-size: 24px"></i>
+                                    <span style="color: #b0b0c0; margin-left: 10px">加载中...</span>
+                                </div>
+                            </div>
+                            <div id="activity-load-more-wrap" style="text-align: center; margin-top: 20px; display: none">
+                                <button type="button" class="btn btn-secondary" id="activity-load-more-btn">
+                                    <i class="fas fa-chevron-down" style="margin-right: 6px"></i>加载更多
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
 
         <!-- 移动端菜单按钮 -->
-        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="菜单">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" data-i18n-aria="misc.menu" aria-label="菜单">
             <i class="fas fa-bars"></i>
         </button>
 
+        <script src="../../js/keyboard-shortcuts.js"></script>
+        <script src="../../js/i18n.js"></script>
         <script src="../../js/user-storage-scope.js"></script>
         <script src="../../js/ui-kit.js"></script>
+        <script src="../../js/html-utils.js"></script>
         <script src="../../js/navigation.js"></script>
         <script src="../../js/notification-component.js"></script>
         <script src="../../js/avatar-manager.js"></script>

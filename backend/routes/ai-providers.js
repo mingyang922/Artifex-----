@@ -22,13 +22,13 @@ const { Router } = require('express');
 function createAiProviderRouter(deps) {
     const router = Router();
     const {
-        requireAuth, runtimeConfig, API_CONFIG, getUserProviderConfig, isAdminUser,
+        requireAuth, csrfProtection, runtimeConfig, API_CONFIG, getUserProviderConfig, isAdminUser,
         tencentProvider, alibabaProvider, jimengProvider, sdWebUiProvider,
     } = deps;
 
     // 腾讯混元
     const _tencentDeps = { runtimeConfig, API_CONFIG, getUserProviderConfig, isAdminUser };
-    router.post('/hunyuan-proxy', requireAuth, (req, res) => tencentProvider.handleHunyuanProxy(req, res, _tencentDeps));
+    router.post('/hunyuan-proxy', requireAuth, csrfProtection, (req, res) => tencentProvider.handleHunyuanProxy(req, res, _tencentDeps));
 
     // SD WebUI 状态
     router.get('/sd-webui/status', requireAuth, (req, res) => sdWebUiProvider.handleSdWebUiStatus(req, res, { getUserProviderConfig }));
@@ -40,15 +40,15 @@ function createAiProviderRouter(deps) {
     router.get('/jimeng/live-test', requireAuth, (req, res) => jimengProvider.handleJimengLiveTest(req, res, { getUserProviderConfig }));
 
     // SD WebUI 文生图
-    router.post('/sd-webui/txt2img', requireAuth, (req, res) => sdWebUiProvider.handleSdWebUiTxt2Img(req, res, { getUserProviderConfig }));
+    router.post('/sd-webui/txt2img', requireAuth, csrfProtection, (req, res) => sdWebUiProvider.handleSdWebUiTxt2Img(req, res, { getUserProviderConfig }));
 
     // 阿里云文生图
-    router.post('/alibaba-proxy', requireAuth, (req, res) =>
+    router.post('/alibaba-proxy', requireAuth, csrfProtection, (req, res) =>
         alibabaProvider.handleAlibabaProxy(req, res, { runtimeConfig, API_CONFIG, getUserProviderConfig })
     );
 
     // 阿里云视觉
-    router.post('/alibaba-vision-proxy', requireAuth, (req, res) =>
+    router.post('/alibaba-vision-proxy', requireAuth, csrfProtection, (req, res) =>
         alibabaProvider.handleAlibabaVisionProxy(req, res, { runtimeConfig, API_CONFIG, getUserProviderConfig })
     );
 

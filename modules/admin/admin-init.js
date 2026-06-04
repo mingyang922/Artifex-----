@@ -1,4 +1,9 @@
-            'use strict';
+/**
+ * Artifex - 二维游戏美术协作与 AI 资产生成平台
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
+ * 版本: 1.3.3 */
+'use strict';
+            // escapeHtml 由 js/html-utils.js 提供（全局函数）
             // Tab 切换
             document.querySelectorAll('.admin-tab').forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -14,7 +19,7 @@
                 try {
                     // 检查权限
                     const meRes = await fetch('/api/me', { credentials: 'include' });
-                    if (meRes.status === 401) { window.location.href = '../../login.html'; return; }
+                    if (meRes.status === 401) { window.location.href = loginHtmlPath(); return; }
                     const me = await meRes.json();
 
                     // 加载用户列表
@@ -25,11 +30,11 @@
                         const tbody = document.getElementById('users-table-body');
                         tbody.innerHTML = usersData.users.map(u => `
                             <tr>
-                                <td>${u.id}</td>
-                                <td>${u.username}</td>
-                                <td>${u.email}</td>
-                                <td><span class="badge ${u.role === 'admin' ? 'badge-info' : 'badge-success'}">${u.role}</span></td>
-                                <td>${new Date(u.created_at).toLocaleDateString()}</td>
+                                <td>${escapeHtml(u.id)}</td>
+                                <td>${escapeHtml(u.username)}</td>
+                                <td>${escapeHtml(u.email)}</td>
+                                <td><span class="badge ${u.role === 'admin' ? 'badge-info' : 'badge-success'}">${escapeHtml(u.role)}</span></td>
+                                <td>${escapeHtml(new Date(u.created_at).toLocaleDateString())}</td>
                             </tr>
                         `).join('');
                     }
@@ -44,19 +49,19 @@
                         const providerBody = document.getElementById('provider-stats-body');
                         providerBody.innerHTML = usageData.summary.byProvider.map(p => `
                             <tr>
-                                <td>${p.provider}</td>
-                                <td>${p.count}</td>
+                                <td>${escapeHtml(p.provider)}</td>
+                                <td>${escapeHtml(p.count)}</td>
                             </tr>
                         `).join('');
 
                         const detailsBody = document.getElementById('usage-details-body');
                         detailsBody.innerHTML = usageData.details.slice(0, 50).map(d => `
                             <tr>
-                                <td>${d.username}</td>
-                                <td>${d.provider}</td>
-                                <td>${d.operation}</td>
-                                <td><span class="badge ${d.status === 'success' ? 'badge-success' : 'badge-error'}">${d.status}</span></td>
-                                <td>${d.count}</td>
+                                <td>${escapeHtml(d.username)}</td>
+                                <td>${escapeHtml(d.provider)}</td>
+                                <td>${escapeHtml(d.operation)}</td>
+                                <td><span class="badge ${d.status === 'success' ? 'badge-success' : 'badge-error'}">${escapeHtml(d.status)}</span></td>
+                                <td>${escapeHtml(d.count)}</td>
                             </tr>
                         `).join('');
                     }

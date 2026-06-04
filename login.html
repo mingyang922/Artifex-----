@@ -4,8 +4,8 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Artifex - 登录注册</title>
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet" />
+        <link href="vendor/css/font-awesome.min.css" rel="stylesheet" />
+        <link href="vendor/css/google-fonts.css" rel="stylesheet" />
         <link rel="stylesheet" href="styles/app-shell.css" />
         <style>
             /* ═══ 赛博朋克登录页 ═══ */
@@ -506,19 +506,19 @@
                 <!-- 登录表单 -->
                 <div class="form-wrapper login-form" id="loginForm">
                     <div class="form-header">
-                        <h2>欢迎回来，开发者</h2>
-                        <p>登录您的账户继续创建游戏UI资产</p>
+                        <h2 data-i18n="login.welcome">欢迎回来，开发者</h2>
+                        <p data-i18n="login.subtitle">登录您的账户继续创建游戏UI资产</p>
                     </div>
                     <form id="login">
                         <div class="input-group">
                             <i class="fas fa-user-circle"></i>
-                            <input type="email" id="loginEmail" placeholder="邮箱地址" required aria-label="邮箱地址" />
+                            <input type="email" id="loginEmail" placeholder="邮箱地址" data-i18n="login.email" required aria-label="邮箱地址" />
                         </div>
                         <div class="input-group">
                             <i class="fas fa-lock"></i>
                             <div class="password-input-container">
-                                <input type="password" id="loginPassword" placeholder="密码" required aria-label="密码" />
-                                <button type="button" class="password-toggle" id="toggle-login-password">
+                                <input type="password" id="loginPassword" placeholder="密码" data-i18n="login.password" required aria-label="密码" />
+                                <button type="button" class="password-toggle" id="toggle-login-password" data-i18n-aria="login.showPassword" aria-label="显示密码">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
@@ -527,13 +527,13 @@
                             <label class="remember-me">
                                 <input type="checkbox" id="rememberMe" />
                                 <span class="checkmark"></span>
-                                记住我
+                                <span data-i18n="login.remember">记住我</span>
                             </label>
-                            <a href="#" class="forgot-password">忘记密码？</a>
+                            <a href="#" class="forgot-password" data-i18n="login.forgot">忘记密码？</a>
                         </div>
-                        <button type="submit" class="btn btn-primary">登录账户</button>
+                        <button type="submit" class="btn btn-primary" data-i18n="login.submit">登录账户</button>
                         <div class="form-footer">
-                            <p>还没有账户？ <a href="#" data-switch-form="registerForm">立即注册</a></p>
+                            <p><span data-i18n="login.noAccount">还没有账户？</span> <a href="#" data-switch-form="registerForm" data-i18n="login.register">立即注册</a></p>
                         </div>
                     </form>
                 </div>
@@ -541,23 +541,23 @@
                 <!-- 注册表单 -->
                 <div class="form-wrapper register-form hidden" id="registerForm">
                     <div class="form-header">
-                        <h2>创建账户</h2>
-                        <p>注册成为 Artifex 开发者</p>
+                        <h2 data-i18n="login.registerTitle">创建账户</h2>
+                        <p data-i18n="login.registerSubtitle">注册成为 Artifex 开发者</p>
                     </div>
                     <form id="register">
                         <div class="input-group">
                             <i class="fas fa-user"></i>
-                            <input type="text" id="registerUsername" placeholder="用户名" required aria-label="用户名" />
+                            <input type="text" id="registerUsername" placeholder="用户名" data-i18n="login.username" required aria-label="用户名" />
                         </div>
                         <div class="input-group">
                             <i class="fas fa-envelope"></i>
-                            <input type="email" id="registerEmail" placeholder="邮箱地址" required aria-label="邮箱地址" />
+                            <input type="email" id="registerEmail" placeholder="邮箱地址" data-i18n="login.email" required aria-label="邮箱地址" />
                         </div>
                         <div class="input-group">
                             <i class="fas fa-lock"></i>
                             <div class="password-input-container">
-                                <input type="password" id="registerPassword" placeholder="设置密码" required aria-label="设置密码" />
-                                <button type="button" class="password-toggle" id="toggle-register-password">
+                                <input type="password" id="registerPassword" placeholder="设置密码" data-i18n="login.setPassword" required aria-label="设置密码" />
+                                <button type="button" class="password-toggle" id="toggle-register-password" data-i18n-aria="login.showPassword" aria-label="显示密码">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
@@ -575,14 +575,12 @@
                             <label class="terms-agreement">
                                 <input type="checkbox" id="agreeTerms" required />
                                 <span class="checkmark"></span>
-                                我同意<a href="#" class="terms-link">服务条款</a>和<a href="#" class="terms-link"
-                                    >隐私政策</a
-                                >
+                                <span data-i18n="login.agreeTerms">我同意</span><a href="#" class="terms-link" data-i18n="login.terms">服务条款</a><span>和</span><a href="#" class="terms-link" data-i18n="login.privacy">隐私政策</a>
                             </label>
                         </div>
-                        <button type="submit" class="btn btn-primary">创建账户</button>
+                        <button type="submit" class="btn btn-primary" data-i18n="login.registerTitle">创建账户</button>
                         <div class="form-footer">
-                            <p>已有账户？ <a href="#" data-switch-form="loginForm">立即登录</a></p>
+                            <p><span data-i18n="login.hasAccount">已有账户？</span> <a href="#" data-switch-form="loginForm" data-i18n="login.loginNow">立即登录</a></p>
                         </div>
                     </form>
                 </div>
@@ -592,6 +590,7 @@
         <!-- 消息提示 -->
         <div class="message" id="message"></div>
 
+        <script src="js/i18n.js"></script>
         <script src="js/login-init.js"></script>
         <script src="js/api-utils.js"></script>
         <script src="js/login-page.js"></script>

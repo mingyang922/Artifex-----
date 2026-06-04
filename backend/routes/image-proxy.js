@@ -7,6 +7,7 @@
 const axios = require('axios');
 const { generateMockImage, callFreeImageAPI } = require('../lib/utils');
 const { imageGenerationLimiter } = require('../lib/rate-limiter');
+const usersDbForActivity = require('../db/users-db');
 const tencentProvider = require('../providers/tencent');
 const alibabaProvider = require('../providers/alibaba');
 const jimengProvider = require('../providers/jimeng');
@@ -44,15 +45,6 @@ function createImageRouter(deps) {
 
             const normalizedProvider = String(provider || '').trim().toLowerCase();
             const currentIsAdmin = isAdminUser(req.currentUser);
-
-            // 权限校验
-            if ((normalizedProvider === 'free' || normalizedProvider === 'mock') && !currentIsAdmin) {
-                return res.status(403).json({
-                    error: '权限不足',
-                    message: 'free/mock 仅管理员可用，请改用并配置正式 API 服务商',
-                    provider: normalizedProvider,
-                });
-            }
 
             // 即梦尺寸校验
             if (normalizedProvider === 'jimeng') {
@@ -134,6 +126,9 @@ function createImageRouter(deps) {
                 if (typeof logApiCall === 'function') {
                     logApiCall(req.currentUser.id, normalizedProvider, isImg2Img ? 'img2img' : 'text2img', 'success', Date.now() - startTime);
                 }
+
+                // 记录活动日志
+                try { usersDbForActivity.addActivity(req.currentUser.id, 'AI 生成', 'image', null, normalizedProvider); } catch (_) { /* 活动日志非关键 */ }
 
                 res.json({
                     image_url: imageUrl,

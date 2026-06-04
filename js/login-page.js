@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 'use strict';
 
 /**
@@ -188,7 +188,7 @@ function setupRegisterForm() {
                 username: data.user && data.user.username,
                 email: data.user && data.user.email,
             };
-            localStorage.setItem('userRegistrationData', JSON.stringify(registrationData));
+            sessionStorage.setItem('userRegistrationData', JSON.stringify(registrationData));
             showMessage('注册成功！已自动登录，正在进入控制台...', 'success');
             setTimeout(() => {
                 sessionStorage.removeItem('artifex-boot-seen');

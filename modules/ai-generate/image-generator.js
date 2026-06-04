@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 'use strict';
 // ImageGenerator类 - 负责AI图片生成功能
 class ImageGenerator {
@@ -24,6 +24,10 @@ class ImageGenerator {
         this.generatedImages = JSON.parse(localStorage.getItem('generatedImages') || '[]');
         this.sketchBase64 = null; // 线稿图 base64（图生图模式用）
         this._styleRefRawDataUrl = null; // 风格提取用参考图 data URL
+        this.styleTransferContentBase64 = null; // 风格迁移：内容图 base64
+        this.styleTransferRefBase64 = null; // 风格迁移：风格参考图 base64
+        this.upscaleBase64 = null; // 图片放大：源图 base64
+        this.removeBgBase64 = null; // 背景去除：源图 base64
         this.init();
     }
 
@@ -55,15 +59,19 @@ class ImageGenerator {
         if (form) {
             form.addEventListener('submit', (e) => this.handleSubmit(e));
         }
-        // 生成模式切换：显示/隐藏线稿上传区
+        // 生成模式切换：显示/隐藏线稿上传区 / 风格迁移区
         document.querySelectorAll('input[name="imageMode"]').forEach((radio) => {
             radio.addEventListener('change', () => {
+                const mode = document.querySelector('input[name="imageMode"]:checked').value;
                 const zone = document.getElementById('img2imgZone');
-                if (zone)
-                    zone.style.display =
-                        document.querySelector('input[name="imageMode"]:checked').value === 'img2img'
-                            ? 'block'
-                            : 'none';
+                if (zone) zone.style.display = mode === 'img2img' ? 'block' : 'none';
+                const stZone = document.getElementById('styleTransferZone');
+                if (stZone) stZone.style.display = mode === 'styleTransfer' ? 'block' : 'none';
+                const upZone = document.getElementById('upscaleZone');
+                if (upZone) upZone.style.display = mode === 'upscale' ? 'block' : 'none';
+                const rbZone = document.getElementById('removeBgZone');
+                if (rbZone) rbZone.style.display = mode === 'removeBg' ? 'block' : 'none';
+                this.persistGeneratorUiState();
             });
         });
         // 线稿文件选择：预览 + 读取 Base64
@@ -127,6 +135,116 @@ class ImageGenerator {
             strengthSlider.addEventListener('input', () => {
                 strengthValue.textContent = strengthSlider.value;
                 this.persistGeneratorUiState();
+            });
+        }
+
+        // 风格迁移：强度滑块数值显示
+        const stStrengthSlider = document.getElementById('stStrength');
+        const stStrengthValue = document.getElementById('stStrengthValue');
+        if (stStrengthSlider && stStrengthValue) {
+            stStrengthSlider.addEventListener('input', () => {
+                stStrengthValue.textContent = stStrengthSlider.value;
+                this.persistGeneratorUiState();
+            });
+        }
+
+        // 风格迁移：内容图上传
+        const stContentFile = document.getElementById('stContentFile');
+        if (stContentFile) {
+            stContentFile.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                const preview = document.getElementById('stContentPreview');
+                this.styleTransferContentBase64 = null;
+                if (preview) preview.innerHTML = '';
+                if (!file || !file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    this.styleTransferContentBase64 = reader.result;
+                    if (preview) {
+                        preview.innerHTML = '';
+                        const _img = document.createElement('img');
+                        _img.src = this.styleTransferContentBase64;
+                        _img.alt = '内容图预览';
+                        preview.appendChild(_img);
+                    }
+                    this.persistGeneratorUiState();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 风格迁移：风格参考图上传
+        const stRefFile = document.getElementById('stRefFile');
+        if (stRefFile) {
+            stRefFile.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                const preview = document.getElementById('stRefPreview');
+                this.styleTransferRefBase64 = null;
+                if (preview) preview.innerHTML = '';
+                if (!file || !file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    this.styleTransferRefBase64 = reader.result;
+                    if (preview) {
+                        preview.innerHTML = '';
+                        const _img = document.createElement('img');
+                        _img.src = this.styleTransferRefBase64;
+                        _img.alt = '风格参考图预览';
+                        preview.appendChild(_img);
+                    }
+                    this.persistGeneratorUiState();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 图片放大：源图上传
+        const upscaleFile = document.getElementById('upscaleFile');
+        if (upscaleFile) {
+            upscaleFile.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                const preview = document.getElementById('upscalePreview');
+                this.upscaleBase64 = null;
+                if (preview) preview.innerHTML = '';
+                if (!file || !file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    this.upscaleBase64 = reader.result;
+                    if (preview) {
+                        preview.innerHTML = '';
+                        const _img = document.createElement('img');
+                        _img.src = this.upscaleBase64;
+                        _img.alt = '放大源图预览';
+                        preview.appendChild(_img);
+                    }
+                    this.persistGeneratorUiState();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 背景去除：源图上传
+        const removeBgFile = document.getElementById('removeBgFile');
+        if (removeBgFile) {
+            removeBgFile.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                const preview = document.getElementById('removeBgPreview');
+                this.removeBgBase64 = null;
+                if (preview) preview.innerHTML = '';
+                if (!file || !file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    this.removeBgBase64 = reader.result;
+                    if (preview) {
+                        preview.innerHTML = '';
+                        const _img = document.createElement('img');
+                        _img.src = this.removeBgBase64;
+                        _img.alt = '背景去除源图预览';
+                        preview.appendChild(_img);
+                    }
+                    this.persistGeneratorUiState();
+                };
+                reader.readAsDataURL(file);
             });
         }
 
@@ -296,7 +414,7 @@ class ImageGenerator {
                 credentials: 'include',
             });
             if (res.status === 401) {
-                window.location.href = '../../login.html';
+                window.location.href = loginHtmlPath();
                 return;
             }
             payload = await res.json();
@@ -306,18 +424,17 @@ class ImageGenerator {
         const status = (payload && payload.status) || {};
         const isAdmin = !!(payload && payload.isAdmin);
         const optionMap = new Map(Array.from(select.options).map((opt) => [opt.value, opt]));
-        ['free', 'mock'].forEach((value) => {
-            const opt = optionMap.get(value);
-            if (!opt) return;
-            opt.disabled = !isAdmin;
-            opt.hidden = !isAdmin;
-        });
+        // free/mock 对所有用户可用
+        // jimeng/alibaba/tencent/sdwebui：管理员可直接用项目密钥，普通用户需自行配置
         ['jimeng', 'alibaba', 'tencent', 'sdwebui'].forEach((value) => {
             const opt = optionMap.get(value);
             if (!opt) return;
-            opt.disabled = !status[value];
-            if (!status[value]) {
+            const configured = !!status[value];
+            opt.disabled = !configured && !isAdmin;
+            if (!configured && !isAdmin) {
                 opt.textContent = opt.textContent.replace('（未配置）', '') + '（未配置）';
+            } else {
+                opt.textContent = opt.textContent.replace('（未配置）', '');
             }
         });
         if (select.options[select.selectedIndex] && select.options[select.selectedIndex].disabled) {
@@ -472,7 +589,7 @@ class ImageGenerator {
             }
             const response = await fetch(API_BASE + '/api/alibaba-vision-proxy', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': await getCsrfToken() },
                 credentials: 'include',
                 body: JSON.stringify({
                     image_base64: payloadImage,
@@ -579,6 +696,9 @@ class ImageGenerator {
         if (imageMode === 'img2img' && !sketchImageBase64 && presetReferenceThumb) {
             sketchImageBase64 = presetReferenceThumb;
         }
+
+        const stStrengthEl = document.getElementById('stStrength');
+        const stStrength = stStrengthEl ? parseFloat(stStrengthEl.value) : 0.6;
         const apiProvider = document.getElementById('apiProvider').value;
         const styleReferenceImageForApi =
             imageMode === 'text2img' && apiProvider === 'jimeng' && presetReferenceThumb
@@ -600,6 +720,14 @@ class ImageGenerator {
             stylePresetSnippet: stylePresetSnippet,
             presetId: presetId,
             styleReferenceImageForApi: styleReferenceImageForApi,
+            // 风格迁移专用字段
+            styleTransferContentBase64: this.styleTransferContentBase64,
+            styleTransferRefBase64: this.styleTransferRefBase64,
+            stStrength: stStrength,
+            // 图片放大 / 背景去除
+            upscaleBase64: this.upscaleBase64,
+            removeBgBase64: this.removeBgBase64,
+            upscaleFactor: document.getElementById('upscaleFactor')?.value || '2',
         };
     }
 
@@ -618,6 +746,31 @@ class ImageGenerator {
                 return false;
             }
         }
+        if (data.imageMode === 'styleTransfer') {
+            if (!data.styleTransferContentBase64) {
+                themedWarn('风格迁移模式下请先上传内容图');
+                return false;
+            }
+            if (!data.styleTransferRefBase64) {
+                themedWarn('风格迁移模式下请先上传风格参考图');
+                return false;
+            }
+            return true;
+        }
+        if (data.imageMode === 'upscale') {
+            if (!data.upscaleBase64) {
+                themedWarn('图片放大模式下请先上传源图片');
+                return false;
+            }
+            return true;
+        }
+        if (data.imageMode === 'removeBg') {
+            if (!data.removeBgBase64) {
+                themedWarn('背景去除模式下请先上传源图片');
+                return false;
+            }
+            return true;
+        }
         for (const key of ['imageType', 'style', 'colorScheme', 'imageSize', 'apiProvider', 'description']) {
             if (!data[key]) {
                 themedWarn(`请填写${labels[key] || key}`);
@@ -625,18 +778,6 @@ class ImageGenerator {
             }
         }
         return true;
-    }
-
-    getFieldLabel(key) {
-        const labels = {
-            imageType: '图片类型',
-            imageStyle: '设计风格',
-            imageColorScheme: '配色方案',
-            imageSize: '图片尺寸',
-            apiProvider: 'API服务商',
-            imageDescription: '详细描述',
-        };
-        return labels[key] || key;
     }
 
     showLoading() {
@@ -668,7 +809,16 @@ class ImageGenerator {
 
     async generateImage(formData) {
         let prompt;
-        if (formData._finalPrompt) {
+        if (formData.imageMode === 'styleTransfer') {
+            prompt = '将此图片转换为参考图的艺术风格，保留原始内容和构图，应用参考图的色彩、笔触和纹理特征';
+            const sn = (formData.stylePresetSnippet && String(formData.stylePresetSnippet).trim()) || '';
+            if (sn) prompt += `。画风参考：${sn}`;
+        } else if (formData.imageMode === 'upscale') {
+            prompt = '高清放大，保持原始风格和细节，提升分辨率';
+            if (formData.upscaleFactor === '4') prompt += '，4倍超分辨率放大';
+        } else if (formData.imageMode === 'removeBg') {
+            prompt = '去除背景，保留主体，透明背景，干净抠图';
+        } else if (formData._finalPrompt) {
             prompt = formData._finalPrompt;
             const sn = (formData.stylePresetSnippet && String(formData.stylePresetSnippet).trim()) || '';
             if (sn && !prompt.includes(sn)) {
@@ -680,14 +830,21 @@ class ImageGenerator {
 
         try {
             const imageUrl = await this.callImageAPI(prompt, formData);
+            const mode = formData.imageMode;
+            const modeNames = { styleTransfer: '风格迁移', upscale: '图片放大', removeBg: '背景去除' };
+            const modeName = modeNames[mode];
             return {
                 id: Date.now().toString(),
-                name: `${formData.imageType}_${formData.style}_${Date.now()}`,
-                type: formData.imageType,
-                style: formData.style,
-                colorScheme: formData.colorScheme,
+                name: modeName
+                    ? `${modeName}_${Date.now()}`
+                    : `${formData.imageType}_${formData.style}_${Date.now()}`,
+                type: modeName || formData.imageType,
+                style: modeName || formData.style,
+                colorScheme: modeName ? '—' : formData.colorScheme,
                 imageSize: formData.imageSize,
-                description: formData.description,
+                description: modeName
+                    ? `${modeName}模式`
+                    : formData.description,
                 imageUrl: imageUrl,
                 prompt: prompt,
                 promptMode: formData.promptMode,
@@ -720,7 +877,7 @@ class ImageGenerator {
         try {
             const response = await fetch(API_BASE + '/api/alibaba-proxy', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': await getCsrfToken() },
                 credentials: 'include',
                 body: JSON.stringify({
                     prompt: systemPrompt,
@@ -767,6 +924,24 @@ class ImageGenerator {
             requestData.image = formData.sketchImageBase64;
             requestData.strength = formData.strength !== null ? formData.strength : 0.7;
         }
+        if (formData.imageMode === 'styleTransfer') {
+            requestData.mode = 'img2img';
+            requestData.image = formData.styleTransferContentBase64;
+            requestData.strength = formData.stStrength || 0.6;
+            if (formData.styleTransferRefBase64) {
+                requestData.styleReferenceImage = formData.styleTransferRefBase64;
+            }
+        }
+        if (formData.imageMode === 'upscale') {
+            requestData.mode = 'img2img';
+            requestData.image = formData.upscaleBase64;
+            requestData.strength = 0.3;
+        }
+        if (formData.imageMode === 'removeBg') {
+            requestData.mode = 'img2img';
+            requestData.image = formData.removeBgBase64;
+            requestData.strength = 0.4;
+        }
         if (provider === 'jimeng') {
             requestData.jimeng = {
                 response_format: 'url',
@@ -778,10 +953,12 @@ class ImageGenerator {
         }
 
         try {
+            const csrfToken = await getCsrfToken();
             const response = await fetch(this.apiConfig.endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-XSRF-Token': csrfToken,
                 },
                 credentials: 'include',
                 body: JSON.stringify(requestData),
@@ -844,6 +1021,7 @@ class ImageGenerator {
         const esc = ImageGenerator.escapeHtml;
         const escJs = ImageGenerator.escapeJsStr;
         const safeUrl = esc(result.imageUrl || '');
+        const safeUrlJs = escJs(result.imageUrl || '');
         const safeId = escJs(result.id || '');
         const safeType = esc(result.type || '');
         const safeStyle = esc(result.style || '');
@@ -863,7 +1041,7 @@ class ImageGenerator {
                                 <img src="${safeUrl}"
                                      alt="生成的图片"
                                      style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 2px solid #00f0ff;"
-                                     onerror="console.error('图片加载失败:', this.src); this.style.display='none'; document.getElementById('error-msg').style.display='block';">
+                                     onerror="this.style.display='none'; document.getElementById('error-msg').style.display='block';">
 
                                 <div id="error-msg" style="display: none; color: #ff6b6b; padding: 20px;">
                                     <p>❌ 图片无法显示</p>
@@ -883,7 +1061,7 @@ class ImageGenerator {
                             </div>
 
                             <div style="margin-top: 20px;">
-                                <button onclick="window.open('${safeUrl}', '_blank')"
+                                <button onclick="window.open('${safeUrlJs}', '_blank')"
                                         style="background: #00f0ff; color: #1a1a2e; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">
                                     🔗 在新窗口打开
                                 </button>
@@ -1004,6 +1182,12 @@ class ImageGenerator {
                 strength: document.getElementById('img2imgStrength')?.value || '',
                 proPrompt: document.getElementById('proPromptTextarea')?.value || '',
                 sketchBase64: this.sketchBase64 || '',
+                stStrength: document.getElementById('stStrength')?.value || '',
+                styleTransferContentBase64: this.styleTransferContentBase64 || '',
+                styleTransferRefBase64: this.styleTransferRefBase64 || '',
+                upscaleBase64: this.upscaleBase64 || '',
+                removeBgBase64: this.removeBgBase64 || '',
+                upscaleFactor: document.getElementById('upscaleFactor')?.value || '2',
             };
             sessionStorage.setItem(this.getGeneratorUiStateKey(), JSON.stringify(state));
         } catch (e) {
@@ -1038,6 +1222,7 @@ class ImageGenerator {
         setValue('qwenModelSelect', state.qwenModel);
         setValue('img2imgStrength', state.strength);
         setValue('proPromptTextarea', state.proPrompt);
+        setValue('stStrength', state.stStrength);
 
         const imageModeEl = document.querySelector(`input[name="imageMode"][value="${state.imageMode || 'text2img'}"]`);
         if (imageModeEl) imageModeEl.checked = true;
@@ -1060,6 +1245,65 @@ class ImageGenerator {
         const img2imgZone = document.getElementById('img2imgZone');
         if (img2imgZone) {
             img2imgZone.style.display = (state.imageMode || 'text2img') === 'img2img' ? 'block' : 'none';
+        }
+        const stZone = document.getElementById('styleTransferZone');
+        if (stZone) {
+            stZone.style.display = (state.imageMode || 'text2img') === 'styleTransfer' ? 'block' : 'none';
+        }
+        const upZone = document.getElementById('upscaleZone');
+        if (upZone) {
+            upZone.style.display = (state.imageMode || 'text2img') === 'upscale' ? 'block' : 'none';
+        }
+        const rbZone = document.getElementById('removeBgZone');
+        if (rbZone) {
+            rbZone.style.display = (state.imageMode || 'text2img') === 'removeBg' ? 'block' : 'none';
+        }
+        setValue('upscaleFactor', state.upscaleFactor);
+
+        // 风格迁移图片预览恢复
+        if (state.styleTransferContentBase64) {
+            this.styleTransferContentBase64 = state.styleTransferContentBase64;
+            const preview = document.getElementById('stContentPreview');
+            if (preview) {
+                preview.innerHTML = '';
+                const _img = document.createElement('img');
+                _img.src = this.styleTransferContentBase64;
+                _img.alt = '内容图预览';
+                preview.appendChild(_img);
+            }
+        }
+        if (state.styleTransferRefBase64) {
+            this.styleTransferRefBase64 = state.styleTransferRefBase64;
+            const preview = document.getElementById('stRefPreview');
+            if (preview) {
+                preview.innerHTML = '';
+                const _img = document.createElement('img');
+                _img.src = this.styleTransferRefBase64;
+                _img.alt = '风格参考图预览';
+                preview.appendChild(_img);
+            }
+        }
+        if (state.upscaleBase64) {
+            this.upscaleBase64 = state.upscaleBase64;
+            const preview = document.getElementById('upscalePreview');
+            if (preview) {
+                preview.innerHTML = '';
+                const _img = document.createElement('img');
+                _img.src = this.upscaleBase64;
+                _img.alt = '放大源图预览';
+                preview.appendChild(_img);
+            }
+        }
+        if (state.removeBgBase64) {
+            this.removeBgBase64 = state.removeBgBase64;
+            const preview = document.getElementById('removeBgPreview');
+            if (preview) {
+                preview.innerHTML = '';
+                const _img = document.createElement('img');
+                _img.src = this.removeBgBase64;
+                _img.alt = '背景去除源图预览';
+                preview.appendChild(_img);
+            }
         }
 
         const qwenModelEl = document.getElementById('qwenModelSelect');
@@ -1225,18 +1469,29 @@ class ImageGenerator {
         const image = this.generatedImages.find((i) => i.id === imageId);
         if (image) {
             const newWindow = window.open('', '_blank');
-            newWindow.document.write(`
-                        <html>
-                        <head><title>${ImageGenerator.escapeHtml(image.name)}</title></head>
-                        <body style="margin: 0; padding: 20px; background: #1a1a2e; color: white; text-align: center;">
-                            <h2>${ImageGenerator.escapeHtml(image.name)}</h2>
-                            <img src="${ImageGenerator.escapeHtml(image.imageUrl)}" alt="${ImageGenerator.escapeHtml(image.name)}" style="max-width: 90%; max-height: 80vh; border-radius: 8px;">
-                            <div style="margin-top: 20px;">
-                                <button onclick="window.close()" style="padding: 10px 20px; background: #00f0ff; color: #1a1a2e; border: none; border-radius: 4px; cursor: pointer;">关闭</button>
-                            </div>
-                        </body>
-                        </html>
-                    `);
+            const doc = newWindow.document;
+            doc.open();
+            doc.write('<!DOCTYPE html><html><head><title></title></head><body></body></html>');
+            doc.close();
+            doc.title = image.name || '图片预览';
+            const body = doc.body;
+            body.style.cssText = 'margin:0; padding:20px; background:#1a1a2e; color:white; text-align:center;';
+            const h2 = doc.createElement('h2');
+            h2.textContent = image.name || '';
+            body.appendChild(h2);
+            const img = doc.createElement('img');
+            img.src = image.imageUrl || '';
+            img.alt = image.name || '';
+            img.style.cssText = 'max-width:90%; max-height:80vh; border-radius:8px;';
+            body.appendChild(img);
+            const div = doc.createElement('div');
+            div.style.marginTop = '20px';
+            const btn = doc.createElement('button');
+            btn.textContent = '关闭';
+            btn.style.cssText = 'padding:10px 20px; background:#00f0ff; color:#1a1a2e; border:none; border-radius:4px; cursor:pointer;';
+            btn.addEventListener('click', function() { newWindow.close(); });
+            div.appendChild(btn);
+            body.appendChild(div);
         }
     }
 
@@ -1302,3 +1557,157 @@ class ImageGenerator {
 // 页面加载完成后初始化
 let aiGenerator;
 let imageGenerator;
+// ── Batch generation extension ──
+(function () {
+    "use strict";
+
+    var origBind = ImageGenerator.prototype.bindEvents;
+    ImageGenerator.prototype.bindEvents = function () {
+        origBind.call(this);
+        this.initBatchCountButtons();
+    };
+
+    ImageGenerator.prototype.initBatchCountButtons = function () {
+        var btns = document.querySelectorAll(".batch-count-btn");
+        var hiddenInput = document.getElementById("batchCount");
+        if (!btns.length || !hiddenInput) return;
+        btns.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                btns.forEach(function (b) {
+                    b.style.background = "rgba(255,255,255,0.04)";
+                    b.style.borderColor = "rgba(255,255,255,0.1)";
+                    b.style.color = "#b0b0c0";
+                });
+                btn.style.background = "rgba(0,240,255,0.18)";
+                btn.style.borderColor = "rgba(0,240,255,0.35)";
+                btn.style.color = "#00f0ff";
+                hiddenInput.value = btn.dataset.count;
+            });
+        });
+    };
+
+    ImageGenerator.prototype.getBatchCount = function () {
+        var el = document.getElementById("batchCount");
+        return el ? Math.max(1, Math.min(8, parseInt(el.value, 10) || 1)) : 1;
+    };
+
+    var origDoGenerate = ImageGenerator.prototype.doGenerateImage;
+    ImageGenerator.prototype.doGenerateImage = async function (formData) {
+        var count = this.getBatchCount();
+        if (count <= 1) {
+            return origDoGenerate.call(this, formData);
+        }
+        await this.doBatchGenerate(formData, count);
+    };
+
+    ImageGenerator.prototype.doBatchGenerate = async function (formData, count) {
+        var self = this;
+        self.showLoading();
+        var progressText = document.getElementById("progressText");
+        if (progressText) progressText.textContent = "正在批量生成 " + count + " 张图片...";
+
+        var results = [];
+        var errors = [];
+        var promises = [];
+        for (var i = 0; i < count; i++) {
+            (function (idx) {
+                promises.push(
+                    self.generateImage(formData)
+                        .then(function (result) {
+                            result._batchIndex = idx;
+                            results.push(result);
+                            if (progressText) {
+                                progressText.textContent = "已完成 " + results.length + "/" + count + " 张...";
+                            }
+                            return result;
+                        })
+                        .catch(function (err) {
+                            errors.push({ index: idx, error: err });
+                        })
+                );
+            })(i);
+        }
+
+        await Promise.all(promises);
+        self.hideLoading();
+
+        results.forEach(function (r) {
+            self.saveImage(r);
+            self.autoSaveGeneratedImageToCurrentProject(r);
+        });
+
+        if (results.length > 0) {
+            self.displayBatchResults(results);
+        }
+        if (errors.length > 0) {
+            themedWarn(errors.length + "/" + count + " 张生成失败");
+        }
+    };
+
+    ImageGenerator.prototype.displayBatchResults = function (results) {
+        var container = document.getElementById("result-body");
+        if (!container) return;
+        var esc = ImageGenerator.escapeHtml;
+        var escJs = ImageGenerator.escapeJsStr;
+
+        var gridHtml = results.map(function (r) {
+            var safeUrl = esc(r.imageUrl || "");
+            var safeId = escJs(r.id || "");
+            var safeName = esc(r.name || "");
+            return "<div style=\"background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;text-align:center;\">" +
+                "<img src=\"" + safeUrl + "\" alt=\"" + safeName + "\" " +
+                "style=\"width:100%;height:180px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,240,255,0.15);\" " +
+                "onerror=\"this.style.display='none';\">" +
+                "<div style=\"margin-top:10px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;\">" +
+                "<button onclick=\"imageGenerator.downloadImage('" + safeId + "')\" " +
+                "style=\"background:rgba(0,240,255,0.12);color:#00f0ff;border:1px solid rgba(0,240,255,0.3);padding:5px 10px;border-radius:4px;cursor:pointer;font-size:11px;\">" +
+                "<i class=\"fas fa-download\"></i> 下载</button>" +
+                "<button onclick=\"imageGenerator.saveToAssetLibrary('" + safeId + "')\" " +
+                "style=\"background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);padding:5px 10px;border-radius:4px;cursor:pointer;font-size:11px;\">" +
+                "<i class=\"fas fa-plus\"></i> 存素材库</button>" +
+                "<button onclick=\"imageGenerator.saveToCurrentProject('" + safeId + "')\" " +
+                "style=\"background:rgba(167,139,250,0.12);color:#a78bfa;border:1px solid rgba(167,139,250,0.3);padding:5px 10px;border-radius:4px;cursor:pointer;font-size:11px;\">" +
+                "<i class=\"fas fa-thumbtack\"></i> 加入项目</button>" +
+                "</div></div>";
+        }).join("");
+
+        var idsArr = results.map(function (r) { return r.id; });
+
+        container.innerHTML =
+            "<div style=\"text-align:center;padding:20px;\">" +
+            "<h3 style=\"color:#00f0ff;margin-bottom:16px;\">" +
+            "<i class=\"fas fa-images\"></i> 批量生成完成 (" + results.length + " 张)</h3>" +
+            "<div style=\"display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin:16px 0;\">" +
+            gridHtml + "</div>" +
+            "<div style=\"margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;\">" +
+            "<button id=\"batchSaveAllBtn\" " +
+            "style=\"background:linear-gradient(135deg,#00f0ff,#0077ff);color:#050810;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-family:var(--font-tech-display);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;\">" +
+            "<i class=\"fas fa-save\"></i> 全部存入素材库</button>" +
+            "<button id=\"batchDownloadAllBtn\" " +
+            "style=\"background:rgba(255,255,255,0.06);color:#e0e0e0;border:1px solid rgba(0,240,255,0.2);padding:10px 20px;border-radius:6px;cursor:pointer;font-family:var(--font-tech-display);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;\">" +
+            "<i class=\"fas fa-download\"></i> 全部下载</button></div></div>";
+
+        var self = this;
+        document.getElementById("batchSaveAllBtn").addEventListener("click", function () {
+            self.batchSaveAllToLibrary(idsArr);
+        });
+        document.getElementById("batchDownloadAllBtn").addEventListener("click", function () {
+            self.batchDownloadAll(idsArr);
+        });
+    };
+
+    ImageGenerator.prototype.batchSaveAllToLibrary = async function (ids) {
+        var self = this;
+        var ok = 0;
+        for (var i = 0; i < ids.length; i++) {
+            try { await self.saveToAssetLibrary(ids[i]); ok++; } catch (_) {}
+        }
+        themedSuccess("已将 " + ok + "/" + ids.length + " 张存入素材库");
+    };
+
+    ImageGenerator.prototype.batchDownloadAll = function (ids) {
+        var self = this;
+        ids.forEach(function (id) { self.downloadImage(id); });
+        themedSuccess("正在下载 " + ids.length + " 张图片");
+    };
+})();

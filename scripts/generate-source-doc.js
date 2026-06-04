@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 
 /**
  * 源代码文档生成脚本
@@ -73,7 +73,7 @@ const totalPages = Math.ceil(allLines.length / LINES_PER_PAGE);
 console.log(`总页数: ${totalPages}`);
 
 let output = '';
-output += 'Artifex 二维游戏美术协作与 AI 资产生成平台 V1.0.0\n';
+output += 'Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3\n';
 output += '源代码文档\n';
 output += `生成时间: ${new Date().toISOString().split('T')[0]}\n`;
 output += `总行数: ${allLines.length}  总页数: ${totalPages}\n`;

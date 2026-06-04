@@ -34,13 +34,16 @@ function createProjectRouter(deps) {
             return res.status(400).json({ error: '项目名称不能为空' });
         }
         const project = usersDb.createProject(req.currentUser.id, name.trim(), description, type);
+        try { usersDb.addActivity(req.currentUser.id, '创建项目', 'project', project.id, name.trim()); } catch (_) { /* 活动日志非关键 */ }
         res.json({ ok: true, project });
     });
 
     // 更新项目
     router.put('/projects/:id', requireAuth, csrfProtection, (req, res) => {
+        const projectId = Number(req.params.id);
+        if (!projectId || isNaN(projectId)) return res.status(400).json({ error: '无效的项目 ID' });
         const { name, description, type, versionDesc } = req.body || {};
-        const project = usersDb.updateProject(req.params.id, req.currentUser.id, { name, description, type, versionDesc });
+        const project = usersDb.updateProject(projectId, req.currentUser.id, { name, description, type, versionDesc });
         if (!project) {
             return res.status(404).json({ error: '项目不存在' });
         }
@@ -49,7 +52,14 @@ function createProjectRouter(deps) {
 
     // 删除项目
     router.delete('/projects/:id', requireAuth, csrfProtection, (req, res) => {
-        usersDb.deleteProject(req.params.id, req.currentUser.id);
+        const projectId = Number(req.params.id);
+        if (!projectId || isNaN(projectId)) return res.status(400).json({ error: '无效的项目 ID' });
+        const project = usersDb.getProject(projectId);
+        if (!project || project.user_id !== req.currentUser.id) {
+            return res.status(404).json({ error: '项目不存在' });
+        }
+        usersDb.deleteProject(projectId, req.currentUser.id);
+        try { usersDb.addActivity(req.currentUser.id, '删除项目', 'project', projectId, project.name); } catch (_) { /* 活动日志非关键 */ }
         res.json({ ok: true });
     });
 

@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 (function () {
     'use strict';
 
@@ -11,9 +11,13 @@
     function initHolographic() {
         const selectors = '.tool-card, .project-card, .stat-card, .asset-card, .ai-feature-card';
         document.querySelectorAll(selectors).forEach(bindCard);
-        // Observe for dynamically added cards
+        // Observe for dynamically added cards (debounced)
+        let debounceTimer = null;
         const observer = new MutationObserver(() => {
-            document.querySelectorAll(selectors).forEach(bindCard);
+            if (debounceTimer) clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                document.querySelectorAll(selectors).forEach(bindCard);
+            }, 200);
         });
         observer.observe(document.body, { childList: true, subtree: true });
     }

@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 'use strict';
 class AssetEditor {
     constructor() {
@@ -94,6 +94,7 @@ class AssetEditor {
             const imgEl = document.createElement('img');
             imgEl.className = 'ae-asset-thumb';
             imgEl.title = a.name || '';
+            imgEl.alt = '素材预览';
             imgEl.src = src.startsWith('http') ? getProxyImageUrl(src) : src;
             imgEl.addEventListener('click', () => this.loadImage(imgEl.src));
             list.appendChild(imgEl);
@@ -688,6 +689,7 @@ class AssetEditor {
         $('aeSaveToLib')?.addEventListener('click', () => this.saveToLib());
         $('aeAdjApply')?.addEventListener('click', () => this.applyColorAdj());
         $('aeAdjReset')?.addEventListener('click', () => this.resetColorAdj());
+        $('aeExtractPalette')?.addEventListener('click', () => this.extractPalette());
     }
 
     bindKeyboard() {
@@ -1063,7 +1065,8 @@ class AssetEditor {
         try {
             res = await fetch(endpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': await getCsrfToken() },
+                credentials: 'include',
                 body: JSON.stringify(payload),
                 signal: controller.signal,
             });
@@ -1219,6 +1222,204 @@ class AssetEditor {
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-palette"></i> AI 风格迁移';
+        }
+    }
+
+    /* ── 调色板提取（K-means 聚类） ── */
+
+    /**
+     * K-means 颜色聚类
+     * @param {Array<{r:number,g:number,b:number}>} pixels
+     * @param {number} k
+     * @param {number} maxIter
+     * @returns {Array<{r:number,g:number,b:number,count:number}>}
+     */
+    kMeansColors(pixels, k = 8, maxIter = 20) {
+        if (pixels.length === 0) return [];
+        // 随机初始化聚类中心
+        const shuffled = pixels.slice().sort(() => Math.random() - 0.5);
+        let centroids = shuffled.slice(0, k).map((p) => ({ r: p.r, g: p.g, b: p.b }));
+        let assignments = new Int32Array(pixels.length);
+
+        for (let iter = 0; iter < maxIter; iter++) {
+            let changed = false;
+            // 分配每个像素到最近的聚类中心
+            for (let i = 0; i < pixels.length; i++) {
+                let minDist = Infinity;
+                let minIdx = 0;
+                const p = pixels[i];
+                for (let c = 0; c < centroids.length; c++) {
+                    const ct = centroids[c];
+                    const dr = p.r - ct.r;
+                    const dg = p.g - ct.g;
+                    const db = p.b - ct.b;
+                    const dist = dr * dr + dg * dg + db * db;
+                    if (dist < minDist) {
+                        minDist = dist;
+                        minIdx = c;
+                    }
+                }
+                if (assignments[i] !== minIdx) {
+                    assignments[i] = minIdx;
+                    changed = true;
+                }
+            }
+            if (!changed) break;
+            // 重新计算聚类中心
+            const sums = centroids.map(() => ({ r: 0, g: 0, b: 0, count: 0 }));
+            for (let i = 0; i < pixels.length; i++) {
+                const c = assignments[i];
+                sums[c].r += pixels[i].r;
+                sums[c].g += pixels[i].g;
+                sums[c].b += pixels[i].b;
+                sums[c].count++;
+            }
+            for (let c = 0; c < centroids.length; c++) {
+                if (sums[c].count > 0) {
+                    centroids[c] = {
+                        r: Math.round(sums[c].r / sums[c].count),
+                        g: Math.round(sums[c].g / sums[c].count),
+                        b: Math.round(sums[c].b / sums[c].count),
+                    };
+                }
+            }
+        }
+        // 按像素数量排序（降序），并计算每个聚类的占比
+        const results = centroids.map((ct, i) => {
+            let count = 0;
+            for (let j = 0; j < assignments.length; j++) {
+                if (assignments[j] === i) count++;
+            }
+            return { r: ct.r, g: ct.g, b: ct.b, count: count };
+        });
+        results.sort((a, b) => b.count - a.count);
+        return results;
+    }
+
+    /**
+     * 从画布采样像素（跳过透明像素，使用步长采样提高性能）
+     */
+    samplePixels(sampleStep = 4) {
+        if (!this.imageLoaded) return [];
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const imgData = this.ctx.getImageData(0, 0, w, h);
+        const d = imgData.data;
+        const pixels = [];
+        for (let y = 0; y < h; y += sampleStep) {
+            for (let x = 0; x < w; x += sampleStep) {
+                const i = (y * w + x) * 4;
+                const a = d[i + 3];
+                if (a < 128) continue; // 跳过透明像素
+                pixels.push({ r: d[i], g: d[i + 1], b: d[i + 2] });
+            }
+        }
+        return pixels;
+    }
+
+    /**
+     * RGB 转 hex 字符串
+     */
+    rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map((c) => Math.max(0, Math.min(255, Math.round(c))).toString(16).padStart(2, '0')).join('');
+    }
+
+    /**
+     * 从当前画布提取调色板并显示
+     */
+    extractPalette() {
+        if (!this.imageLoaded) {
+            themedWarn('请先加载一张图片');
+            return;
+        }
+        const pixels = this.samplePixels(3);
+        if (pixels.length < 8) {
+            themedWarn('图片像素太少，无法提取调色板');
+            return;
+        }
+        const palette = this.kMeansColors(pixels, 8, 15);
+        this.showPalettePanel(palette, pixels.length);
+    }
+
+    /**
+     * 显示调色板面板（赛博朋克风格）
+     */
+    showPalettePanel(palette, totalPixels) {
+        // 移除已有的面板
+        const old = document.getElementById('aePalettePanel');
+        if (old) old.remove();
+
+        const panel = document.createElement('div');
+        panel.id = 'aePalettePanel';
+        panel.className = 'ae-palette-panel';
+
+        // 标题栏
+        const header = document.createElement('div');
+        header.className = 'ae-palette-header';
+        header.innerHTML = '<i class="fas fa-swatchbook"></i> 提取调色板';
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'ae-palette-close';
+        closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        closeBtn.addEventListener('click', () => panel.remove());
+        header.appendChild(closeBtn);
+        panel.appendChild(header);
+
+        // 色卡网格
+        const grid = document.createElement('div');
+        grid.className = 'ae-palette-grid';
+
+        palette.forEach((color, idx) => {
+            const swatch = document.createElement('div');
+            swatch.className = 'ae-palette-swatch';
+
+            const colorBlock = document.createElement('div');
+            colorBlock.className = 'ae-palette-color';
+            colorBlock.style.backgroundColor = `rgb(${color.r},${color.g},${color.b})`;
+
+            const hex = this.rgbToHex(color.r, color.g, color.b);
+            const percent = totalPixels > 0 ? ((color.count / totalPixels) * 100).toFixed(1) : '0';
+
+            const label = document.createElement('div');
+            label.className = 'ae-palette-label';
+            label.innerHTML = `<span class="ae-palette-hex">${hex}</span><span class="ae-palette-pct">${percent}%</span>`;
+
+            // 点击复制颜色值
+            swatch.title = '点击复制 ' + hex;
+            swatch.addEventListener('click', () => {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(hex).then(() => {
+                        themedSuccess('已复制: ' + hex);
+                    });
+                } else {
+                    // 降级方案
+                    const ta = document.createElement('textarea');
+                    ta.value = hex;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    themedSuccess('已复制: ' + hex);
+                }
+                // 视觉反馈
+                swatch.classList.add('ae-palette-copied');
+                setTimeout(() => swatch.classList.remove('ae-palette-copied'), 600);
+            });
+
+            swatch.appendChild(colorBlock);
+            swatch.appendChild(label);
+            grid.appendChild(swatch);
+        });
+
+        panel.appendChild(grid);
+
+        // 将面板插入到编辑器面板区域
+        const target = document.querySelector('.ae-right-panel') || document.querySelector('.ae-side-panel') || this.wrap.parentElement;
+        if (target) {
+            target.appendChild(panel);
+        } else {
+            document.body.appendChild(panel);
         }
     }
 }

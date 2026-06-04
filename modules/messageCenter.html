@@ -4,8 +4,8 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>消息中心 - Artifex</title>
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet" />
+        <link href="../../vendor/css/font-awesome.min.css" rel="stylesheet" />
+        <link href="../../vendor/css/google-fonts.css" rel="stylesheet" />
         <link rel="stylesheet" href="../styles/ui-kit.css" />
         <style>
             * {
@@ -296,7 +296,7 @@
         <div class="message-center-container">
             <div class="message-center-header">
                 <h2>消息中心</h2>
-                <button class="close-message-center" id="closeMessageCenter">
+                <button class="close-message-center" id="closeMessageCenter" aria-label="关闭">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -364,6 +364,8 @@
             </div>
         </div>
 
+        <script src="../js/keyboard-shortcuts.js"></script>
+        <script src="../js/i18n.js"></script>
         <script src="../js/ui-kit.js"></script>
         <script src="../js/scroll-animations.js"></script>
         <script src="message-center.js"></script>

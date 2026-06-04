@@ -1,3 +1,10 @@
+/**
+ * Artifex - 二维游戏美术协作与 AI 资产生成平台
+ * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
+ * 版本: 1.3.3 */
+'use strict';
+            // escapeHtml 由 js/html-utils.js 提供（全局函数）
+
             function formatDate(dateString) {
                 if (!dateString) return '';
                 var d = new Date(dateString);
@@ -59,7 +66,6 @@
                     var raw = localStorage.getItem(GameUiUserScope.key('gameui-projects'));
                     if (raw) projects = JSON.parse(raw) || [];
                 } catch (e) { /* ignore */ }
-                console.log('[Dashboard] localStorage projects:', projects.length);
                 renderProjectCards(grid, projects);
             }
 
@@ -90,16 +96,16 @@
                         '</div>' +
                         '<div class="project-info">' +
                         '<h3 class="project-title">' +
-                        (project.name || '未命名项目') +
+                        (project.name ? escapeHtml(project.name) : '未命名项目') +
                         '</h3>' +
                         '<p class="project-desc">' +
-                        (project.desc || '无描述') +
+                        (project.desc ? escapeHtml(project.desc) : '无描述') +
                         '</p>' +
                         '<div class="project-meta">' +
                         '<div class="project-date">' +
                         '<i class="fas fa-clock"></i>' +
                         '<span>' +
-                        formatDate(project.createTime) +
+                        escapeHtml(formatDate(project.createTime)) +
                         '</span>' +
                         '</div>' +
                         '<div class="project-actions">' +
@@ -122,10 +128,8 @@
             }
 
             document.addEventListener('DOMContentLoaded', async function () {
-                console.log('[Dashboard] init start');
                 try {
                     await GameUiUserScope.ensure();
-                    console.log('[Dashboard] logged in, userId:', GameUiUserScope.userId);
                 } catch (e) {
                     console.warn('用户态校验失败，继续渲染主页：', e);
                 }

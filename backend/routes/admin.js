@@ -11,11 +11,12 @@ const { Router } = require('express');
  * @param {object} deps.usersDb
  * @param {Function} deps.requireAuth
  * @param {Function} deps.isAdminUser
+ * @param {Function} [deps.csrfProtection] - CSRF 中间件（预留，当前仅 GET 路由不需要）
  * @returns {import('express').Router}
  */
 function createAdminRouter(deps) {
     const router = Router();
-    const { usersDb, requireAuth, isAdminUser } = deps;
+    const { usersDb, requireAuth, isAdminUser, csrfProtection } = deps;
 
     // 用户自己的用量
     router.get('/me/usage', requireAuth, (req, res) => {

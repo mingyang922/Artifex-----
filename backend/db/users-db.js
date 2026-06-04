@@ -1,11 +1,12 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
 const { encryptSensitiveFields, decryptSensitiveFields } = require('../lib/utils');
+const logger = require('../lib/logger');
 
 const dataDir = path.join(__dirname, '..', 'data');
 const dbPath = process.env.USERS_DB_PATH || path.join(dataDir, 'users.sqlite');
@@ -72,7 +73,7 @@ function migrateFromJsonIfEmpty() {
         db.prepare("DELETE FROM sqlite_sequence WHERE name = 'users'").run();
         db.prepare("INSERT INTO sqlite_sequence (name, seq) VALUES ('users', ?)").run(maxId);
     }
-    console.log(`已从 users.json 迁移 ${users.length} 条用户到 SQLite`);
+    logger.info(`已从 users.json 迁移 ${users.length} 条用户到 SQLite`);
 }
 
 function init() {
@@ -81,7 +82,7 @@ function init() {
     }
     db = new Database(dbPath);
     db.pragma('journal_mode = WAL');
-    console.log('[users-db] 用户库文件（请用 DB Browser 打开此路径）:', path.resolve(dbPath));
+    logger.info('[users-db] 用户库文件:', path.resolve(dbPath));
     db.exec(`
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -167,13 +168,25 @@ function init() {
         CREATE INDEX IF NOT EXISTS idx_asset_library_user ON asset_library(user_id);
         CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id);
         CREATE INDEX IF NOT EXISTS idx_project_assets_project ON project_assets(project_id);
+        CREATE TABLE IF NOT EXISTS activity_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            action TEXT NOT NULL,
+            target_type TEXT,
+            target_id TEXT,
+            details TEXT,
+            created_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_activity_log_user ON activity_log(user_id);
+        CREATE INDEX IF NOT EXISTS idx_activity_log_created ON activity_log(created_at);
     `);
 
     // Migration: add role column to users if missing
     const userCols = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
     if (!userCols.includes('role')) {
         db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'");
-        console.log('[users-db] 已添加 role 列到 users 表');
+        logger.info('[users-db] 已添加 role 列到 users 表');
     }
     // Ensure user ID 1 is admin
     db.prepare("UPDATE users SET role = 'admin' WHERE id = 1 AND role != 'admin'").run();
@@ -309,7 +322,7 @@ function getAllUsers() {
     const rows = db.prepare('SELECT id, username, email, role, profile_json, created_at FROM users ORDER BY created_at DESC').all();
     return rows.map((row) => {
         let profile = {};
-        try { profile = JSON.parse(row.profile_json || '{}'); } catch (_) {}
+        try { profile = JSON.parse(row.profile_json || '{}'); } catch (_) { /* profile_json 损坏时降级为空对象 */ }
         return {
             id: row.id,
             username: row.username,
@@ -515,6 +528,43 @@ function getGlobalUsageSummary() {
     return { total: total.c, today: todayCount.c, byProvider };
 }
 
+// ─── 活动日志 ───
+
+function addActivity(userId, action, targetType, targetId, details) {
+    const now = new Date().toISOString();
+    db.prepare(
+        `INSERT INTO activity_log (user_id, action, target_type, target_id, details, created_at)
+         VALUES (?, ?, ?, ?, ?, ?)`
+    ).run(Number(userId), action, targetType || null, targetId != null ? String(targetId) : null, details || null, now);
+}
+
+function getActivityLog(userId, limit, offset) {
+    const lim = Math.min(100, Math.max(1, Number(limit) || 20));
+    const off = Math.max(0, Number(offset) || 0);
+    return db.prepare(
+        `SELECT * FROM activity_log WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`
+    ).all(Number(userId), lim, off);
+}
+
+function getActivityLogCount(userId) {
+    const row = db.prepare('SELECT COUNT(*) AS count FROM activity_log WHERE user_id = ?').get(Number(userId));
+    return row ? row.count : 0;
+}
+
+function getRecentActivity(limit) {
+    const lim = Math.min(200, Math.max(1, Number(limit) || 50));
+    return db.prepare(
+        `SELECT al.*, u.username FROM activity_log al
+         JOIN users u ON u.id = al.user_id
+         ORDER BY al.created_at DESC LIMIT ?`
+    ).all(lim);
+}
+
+function getRecentActivityCount() {
+    const row = db.prepare('SELECT COUNT(*) AS count FROM activity_log').get();
+    return row ? row.count : 0;
+}
+
 // ─── 配额管理 ───
 
 function getUserQuota(userId, provider) {
@@ -605,4 +655,9 @@ module.exports = {
     addAssetLibraryItem,
     updateAssetLibraryItem,
     deleteAssetLibraryItem,
+    addActivity,
+    getActivityLog,
+    getActivityLogCount,
+    getRecentActivity,
+    getRecentActivityCount,
 };

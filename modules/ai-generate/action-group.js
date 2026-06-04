@@ -1,8 +1,9 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 'use strict';
+// escapeHtml 由 js/html-utils.js 提供（全局函数）
 window.lastThreeViewImageUrl = null;
 window.lastThreeViewFrontDataUrl = null;
 window.lastActionSketchDataUrl = null;
@@ -204,7 +205,7 @@ function parsePromptActions(text) {
         try {
             const res = await fetch(API_BASE + '/api/image-proxy', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': await getCsrfToken() },
                 credentials: 'include',
                 body: JSON.stringify({
                     mode: 'img2img',
@@ -244,7 +245,7 @@ function parsePromptActions(text) {
             window.lastThreeViewParams = { presetKey, size, strength, extra };
             resBox.innerHTML =
                 '<img src="' +
-                getProxyImageUrl(imageUrl) +
+                escapeHtml(getProxyImageUrl(imageUrl)) +
                 '" alt="三视图" style="max-width:100%;max-height:360px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);">';
             resWrap.style.display = 'block';
             try {
@@ -353,7 +354,7 @@ document.getElementById('actionGroupGenerateBtn')?.addEventListener('click', asy
             };
             const res = await fetch(endpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': await getCsrfToken() },
                 credentials: 'include',
                 body: JSON.stringify(payload),
             });
@@ -362,14 +363,14 @@ document.getElementById('actionGroupGenerateBtn')?.addEventListener('click', asy
             try {
                 data = text ? JSON.parse(text) : {};
             } catch (parseErr) {
-                failMessages.push(`第 ${i + 1} 帧: 响应不是 JSON (${res.status}) ${text.slice(0, 120)}`);
+                failMessages.push(`第 ${i + 1} 帧: 响应不是 JSON (${res.status}) ${escapeHtml(text.slice(0, 120))}`);
                 console.error('action group frame parse error', res.status, text);
                 continue;
             }
             if (!res.ok) {
                 const msg = data.message || data.error || data.details || JSON.stringify(data);
                 const tag = res.status === 400 ? '参数' : res.status === 401 ? '鉴权' : res.status >= 500 ? 'API' : '';
-                failMessages.push(`第 ${i + 1} 帧 [${tag || 'HTTP'}${res.status}]: ${msg}`);
+                failMessages.push(`第 ${i + 1} 帧 [${tag || 'HTTP'}${res.status}]: ${escapeHtml(msg)}`);
                 console.error('action group API error', res.status, data);
                 continue;
             }
@@ -410,23 +411,23 @@ document.getElementById('actionGroupGenerateBtn')?.addEventListener('click', asy
     let tailHint = provider === 'jimeng' ? tailHintJimeng : tailHintGeneric;
     const errHint = failMessages.length
         ? '<p style="color:#f0a0a0;font-size:13px;margin-top:10px;white-space:pre-wrap;word-break:break-word;">' +
-          failMessages.slice(0, 5).join('\n') +
+          escapeHtml(failMessages.slice(0, 5).join('\n')) +
           (failMessages.length > 5 ? '\n… 其余省略，请打开开发者工具 Console 查看' : '') +
           tailHint
         : '';
     previewEl.innerHTML = results.length
         ? results.reduce((acc, r) => {
-              const key = r.action + '_' + r.frameIndex;
+              const key = escapeHtml(r.action) + '_' + escapeHtml(r.frameIndex);
               return (
                   acc +
                   '<img src="' +
-                  getProxyImageUrl(r.imageUrl) +
+                  escapeHtml(getProxyImageUrl(r.imageUrl)) +
                   '" alt="' +
                   key +
                   '" style="width:80px;height:80px;object-fit:contain;border:1px solid rgba(255,255,255,0.2);border-radius:4px;margin:2px;" title="' +
-                  r.action +
+                  escapeHtml(r.action) +
                   ' ' +
-                  r.frameIndex +
+                  escapeHtml(r.frameIndex) +
                   '">'
               );
           }, '')

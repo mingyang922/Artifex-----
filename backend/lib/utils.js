@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 /**
  * 共享工具函数（从 proxy.js 提取）
  */
@@ -267,8 +267,13 @@ const crypto = require('crypto');
 // 加密密钥（优先使用 ENCRYPTION_KEY，否则使用 SESSION_SECRET）
 function getEncryptionKey() {
     const key = process.env.ENCRYPTION_KEY || process.env.SESSION_SECRET;
+    const isProd = (process.env.NODE_ENV || 'development') === 'production';
+    if (!key && isProd) {
+        console.error('FATAL: NODE_ENV=production requires ENCRYPTION_KEY or SESSION_SECRET for API key encryption.');
+        process.exit(1);
+    }
     if (!key) {
-        console.warn('[utils] 警告: 未设置 ENCRYPTION_KEY 或 SESSION_SECRET，API 密钥加密使用默认值');
+        console.warn('[utils] 警告: 未设置 ENCRYPTION_KEY 或 SESSION_SECRET，API 密钥加密使用默认值（仅限开发环境）');
     }
     // 确保密钥为 32 字节
     return crypto.createHash('sha256').update(key || 'artifex-dev-only-default-key').digest();

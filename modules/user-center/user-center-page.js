@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.0.0 */
+ * 版本: 1.3.3 */
 'use strict';
 const DEFAULT_AVATAR_ICON_HTML = '<i class="fas fa-user" aria-hidden="true"></i>';
 if (window.PageEffects && typeof window.PageEffects.initPointerGlow === 'function') {
@@ -33,6 +33,92 @@ tabs.forEach((tab) => {
         saveTabSelection(tabId);
     });
 });
+
+// ── 自定义下拉框初始化 ──
+function initTechSelects() {
+    // 初始化已有的 tech-select（如性别）
+    document.querySelectorAll('.tech-select').forEach((select) => {
+        if (select.dataset.initialized) return;
+        select.dataset.initialized = '1';
+        const trigger = select.querySelector('.tech-select-trigger');
+        const menu = select.querySelector('.tech-select-menu');
+        const options = select.querySelectorAll('.tech-select-option');
+        const hiddenId = select.id.replace('Select', '');
+        const hiddenInput = document.getElementById(hiddenId);
+
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = select.classList.contains('is-open');
+            document.querySelectorAll('.tech-select.is-open').forEach((s) => s.classList.remove('is-open'));
+            if (!isOpen) select.classList.add('is-open');
+        });
+
+        options.forEach((opt) => {
+            opt.addEventListener('click', () => {
+                const value = opt.dataset.value;
+                const text = opt.textContent;
+                select.dataset.value = value;
+                trigger.textContent = text;
+                options.forEach((o) => o.classList.remove('is-selected'));
+                opt.classList.add('is-selected');
+                select.classList.remove('is-open');
+                if (hiddenInput) hiddenInput.value = value;
+            });
+        });
+    });
+
+    // 将带 tech-select-native 类的原生 select 转为自定义下拉
+    document.querySelectorAll('select.tech-select-native').forEach((nativeSelect) => {
+        if (nativeSelect.dataset.converted) return;
+        nativeSelect.dataset.converted = '1';
+        nativeSelect.style.display = 'none';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'tech-select';
+        wrapper.dataset.value = nativeSelect.value;
+
+        const trigger = document.createElement('div');
+        trigger.className = 'tech-select-trigger';
+        const selectedOpt = nativeSelect.options[nativeSelect.selectedIndex];
+        trigger.textContent = selectedOpt ? selectedOpt.text : '请选择';
+
+        const menu = document.createElement('div');
+        menu.className = 'tech-select-menu';
+
+        Array.from(nativeSelect.options).forEach((opt) => {
+            const item = document.createElement('div');
+            item.className = 'tech-select-option' + (opt.value === nativeSelect.value ? ' is-selected' : '');
+            item.dataset.value = opt.value;
+            item.textContent = opt.text;
+            item.addEventListener('click', () => {
+                nativeSelect.value = opt.value;
+                wrapper.dataset.value = opt.value;
+                trigger.textContent = opt.text;
+                menu.querySelectorAll('.tech-select-option').forEach((o) => o.classList.remove('is-selected'));
+                item.classList.add('is-selected');
+                wrapper.classList.remove('is-open');
+                nativeSelect.dispatchEvent(new Event('change'));
+            });
+            menu.appendChild(item);
+        });
+
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = wrapper.classList.contains('is-open');
+            document.querySelectorAll('.tech-select.is-open').forEach((s) => s.classList.remove('is-open'));
+            if (!isOpen) wrapper.classList.add('is-open');
+        });
+
+        wrapper.appendChild(trigger);
+        wrapper.appendChild(menu);
+        nativeSelect.parentNode.insertBefore(wrapper, nativeSelect.nextSibling);
+    });
+
+    // 点击外部关闭所有下拉
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.tech-select.is-open').forEach((s) => s.classList.remove('is-open'));
+    });
+}
 
 // 保存配置到localStorage
 // 修改saveUserConfig函数以包含性别字段
@@ -88,7 +174,15 @@ function saveUserConfig() {
                 body: JSON.stringify({ profile: serverProfile }),
             })
         )
-        .catch(() => {});
+        .then((res) => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then((data) => {
+            if (!data.ok) throw new Error(data.error || '保存失败');
+            window.TechUI.toast('个人资料已保存', 'success');
+        })
+        .catch(() => { window.TechUI.toast('保存个人资料失败', 'error'); });
 }
 
 // 修改loadUserConfig函数以加载性别字段
@@ -107,11 +201,28 @@ function loadUserConfig() {
     // 加载个人信息
     if (config.personalInfo) {
         const { email, nickname, gender, bio, country, language } = config.personalInfo;
-        document.getElementById('email').value = email;
-        document.getElementById('nickname').value = nickname;
-        document.getElementById('gender').value = gender || '';
-        document.getElementById('bio').value = bio;
-        document.getElementById('language').value = language;
+        const elEmail = document.getElementById('email');
+        const elNickname = document.getElementById('nickname');
+        const elGender = document.getElementById('gender');
+        const elBio = document.getElementById('bio');
+        const elLanguage = document.getElementById('language');
+        if (elEmail) elEmail.value = email || '';
+        if (elNickname) elNickname.value = nickname || '';
+        if (elGender) elGender.value = gender || '';
+        if (elBio) elBio.value = bio || '';
+        if (elLanguage) elLanguage.value = language || '';
+
+        // 同步自定义下拉框显示
+        const genderSelect = document.getElementById('genderSelect');
+        if (genderSelect) {
+            const genderOpt = genderSelect.querySelector(`.tech-select-option[data-value="${gender || ''}"]`);
+            if (genderOpt) {
+                genderSelect.querySelector('.tech-select-trigger').textContent = genderOpt.textContent;
+                genderSelect.dataset.value = gender || '';
+                genderSelect.querySelectorAll('.tech-select-option').forEach((o) => o.classList.remove('is-selected'));
+                genderOpt.classList.add('is-selected');
+            }
+        }
 
         // 处理国家/地区加载
         const countrySelect = document.getElementById('country');
@@ -126,6 +237,18 @@ function loadUserConfig() {
             countrySelect.value = 'other';
             countryOtherInput.value = country;
         }
+
+        // 同步国家/语言自定义下拉框
+        document.querySelectorAll('select.tech-select-native').forEach((nativeSelect) => {
+            const wrapper = nativeSelect.nextElementSibling;
+            if (wrapper && wrapper.classList.contains('tech-select')) {
+                const selectedOpt = nativeSelect.options[nativeSelect.selectedIndex];
+                if (selectedOpt) {
+                    wrapper.querySelector('.tech-select-trigger').textContent = selectedOpt.text;
+                    wrapper.dataset.value = nativeSelect.value;
+                }
+            }
+        });
     }
 
     // 加载权限设置
@@ -1832,7 +1955,7 @@ async function syncSessionAndProfile() {
     try {
         const r = await fetch('/api/me', { credentials: 'include' });
         if (r.status === 401) {
-            window.location.href = '../../login.html';
+            window.location.href = loginHtmlPath();
             return false;
         }
         if (!r.ok) throw new Error('me');
@@ -1859,6 +1982,16 @@ async function syncSessionAndProfile() {
             avatarHistory: Array.isArray(profile.avatarHistory) ? profile.avatarHistory : [],
         };
         localStorage.setItem('userConfig', JSON.stringify(config));
+        // 更新身份显示
+        const roleEl = document.getElementById('userRole');
+        if (roleEl) {
+            const isAdmin = data.role === 'admin';
+            roleEl.querySelector('span').textContent = isAdmin ? '管理员' : '普通用户';
+            roleEl.style.borderColor = isAdmin ? 'rgba(139, 92, 246, 0.4)' : 'rgba(0, 240, 255, 0.2)';
+            roleEl.style.color = isAdmin ? '#8b5cf6' : '#00f0ff';
+            roleEl.style.background = isAdmin ? 'rgba(139, 92, 246, 0.08)' : 'rgba(0, 240, 255, 0.06)';
+            roleEl.querySelector('i').className = isAdmin ? 'fas fa-crown' : 'fas fa-shield-alt';
+        }
         const created = new Date(data.created_at);
         localStorage.setItem(
             'userRegistrationData',
@@ -1873,7 +2006,7 @@ async function syncSessionAndProfile() {
         return true;
     } catch (e) {
         console.error(e);
-        window.location.href = '../../login.html';
+        window.location.href = loginHtmlPath();
         return false;
     }
 }
@@ -1961,7 +2094,7 @@ async function refreshApiSettingsStatus() {
     try {
         const r = await fetch('/api/me/api-settings/status', { credentials: 'include' });
         if (r.status === 401) {
-            window.location.href = '../../login.html';
+            window.location.href = loginHtmlPath();
             return null;
         }
         const data = await r.json();
@@ -1991,43 +2124,53 @@ function initApiSettingsCenter() {
     syncSchema();
 
     saveBtn.addEventListener('click', async () => {
-        const provider = providerSelect.value;
-        const credentials = buildApiCredentialPayload(provider);
-        if (!credentials || Object.keys(credentials).length === 0) {
-            window.TechUI.toast('请至少填写一个有效字段', 'error');
-            return;
+        try {
+            const provider = providerSelect.value;
+            const credentials = buildApiCredentialPayload(provider);
+            if (!credentials || Object.keys(credentials).length === 0) {
+                window.TechUI.toast('请至少填写一个有效字段', 'error');
+                return;
+            }
+            const csrfToken = await getCsrfToken();
+            const r = await fetch('/api/me/api-settings', {
+                method: 'PUT',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': csrfToken },
+                body: JSON.stringify({ provider, credentials }),
+            });
+            if (!r.ok) {
+                const err = await r.json().catch(() => ({}));
+                window.TechUI.toast((err && err.message) || '保存失败', 'error');
+                return;
+            }
+            window.TechUI.toast('API 配置已保存', 'success');
+            refreshApiSettingsStatus();
+        } catch (error) {
+            console.error('保存 API 配置失败:', error);
+            window.TechUI.toast('保存失败，请重试', 'error');
         }
-        const csrfToken = await getCsrfToken();
-        const r = await fetch('/api/me/api-settings', {
-            method: 'PUT',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': csrfToken },
-            body: JSON.stringify({ provider, credentials }),
-        });
-        if (!r.ok) {
-            const err = await r.json().catch(() => ({}));
-            window.TechUI.toast((err && err.message) || '保存失败', 'error');
-            return;
-        }
-        window.TechUI.toast('API 配置已保存', 'success');
-        refreshApiSettingsStatus();
     });
 
     clearBtn.addEventListener('click', async () => {
-        const provider = providerSelect.value;
-        const csrfToken = await getCsrfToken();
-        const r = await fetch(`/api/me/api-settings/${encodeURIComponent(provider)}`, {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: { 'X-XSRF-Token': csrfToken },
-        });
-        if (!r.ok) {
-            const err = await r.json().catch(() => ({}));
-            window.TechUI.toast((err && err.message) || '清空失败', 'error');
-            return;
+        try {
+            const provider = providerSelect.value;
+            const csrfToken = await getCsrfToken();
+            const r = await fetch(`/api/me/api-settings/${encodeURIComponent(provider)}`, {
+                method: 'DELETE',
+                credentials: 'include',
+                headers: { 'X-XSRF-Token': csrfToken },
+            });
+            if (!r.ok) {
+                const err = await r.json().catch(() => ({}));
+                window.TechUI.toast((err && err.message) || '清空失败', 'error');
+                return;
+            }
+            window.TechUI.toast('当前服务商配置已清空', 'success');
+            refreshApiSettingsStatus();
+        } catch (error) {
+            console.error('清空 API 配置失败:', error);
+            window.TechUI.toast('清空失败，请重试', 'error');
         }
-        window.TechUI.toast('当前服务商配置已清空', 'success');
-        refreshApiSettingsStatus();
     });
 
     refreshBtn.addEventListener('click', () => {
@@ -2043,6 +2186,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (!ok) return;
     initUserId(); // 初始化用户ID（已有服务端用户名则不再随机生成）
     loadUserConfig();
+    initTechSelects(); // 初始化自定义下拉框
     loadTabSelection();
     loadRegistrationTime(); // 加载注册时间
     initNotificationSystem(); // 初始化通知系统
@@ -2057,6 +2201,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     loadLastLoginTime();
     initApiSettingsCenter();
 
+    // 初始化活动日志
+    initActivityLog();
+
+    // 初始化语言选择器（i18n）
+    initLanguageSelector();
+
     // 检查管理员权限，显示管理面板入口
     try {
         const res = await fetch('/api/me/api-settings/status', { credentials: 'include' });
@@ -2067,6 +2217,29 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     } catch (e) { /* ignore */ }
 });
+
+// 初始化语言选择器
+function initLanguageSelector() {
+    var langSelect = document.getElementById('language');
+    if (!langSelect) return;
+
+    // 设置当前语言
+    if (window.i18n) {
+        langSelect.value = window.i18n.getLanguage();
+    }
+
+    // 监听语言切换
+    langSelect.addEventListener('change', function () {
+        if (window.i18n) {
+            window.i18n.setLanguage(this.value);
+        }
+    });
+
+    // 监听语言变更事件，同步 select 值
+    window.addEventListener('languageChanged', function (e) {
+        langSelect.value = e.detail.lang;
+    });
+}
 
 // 页面卸载时更新登录时间
 window.addEventListener('beforeunload', () => {
@@ -2103,19 +2276,20 @@ function initEditInfoFunctionality() {
             // 启用编辑模式
             inputs.forEach((input) => {
                 if (input.id !== 'username') {
-                    // 用户名不允许修改
-                    // 对于select元素，只需要移除disabled属性
                     if (input.tagName === 'SELECT') {
                         input.removeAttribute('disabled');
                     } else {
-                        // 对于input和textarea元素，移除readonly属性
                         input.removeAttribute('readonly');
                     }
                 } else {
-                    // 确保用户ID输入框始终保持禁用状态
                     input.setAttribute('disabled', 'disabled');
                     input.setAttribute('readonly', 'readonly');
                 }
+            });
+
+            // 启用自定义下拉框
+            document.querySelectorAll('.tech-select').forEach((ts) => {
+                ts.classList.remove('tech-select-disabled');
             });
 
             // 显示保存和取消按钮
@@ -2177,17 +2351,20 @@ function initEditInfoFunctionality() {
             // 恢复只读状态
             inputs.forEach((input) => {
                 if (input.id !== 'username') {
-                    // 用户名不允许修改
                     if (input.tagName === 'SELECT') {
                         input.setAttribute('disabled', 'disabled');
                     } else {
                         input.setAttribute('readonly', 'readonly');
                     }
                 } else {
-                    // 确保用户ID输入框始终保持禁用状态
                     input.setAttribute('disabled', 'disabled');
                     input.setAttribute('readonly', 'readonly');
                 }
+            });
+
+            // 禁用自定义下拉框
+            document.querySelectorAll('.tech-select').forEach((ts) => {
+                ts.classList.add('tech-select-disabled');
             });
 
             // 隐藏保存和取消按钮
@@ -2199,5 +2376,127 @@ function initEditInfoFunctionality() {
 
             window.TechUI.toast('已取消修改', 'info');
         });
+    }
+}
+
+// ── 活动日志 ──────────────────────────────────────────────────────
+
+const _activityLogState = { page: 1, loading: false, hasMore: true };
+
+function formatRelativeTime(dateStr) {
+    if (!dateStr) return '';
+    const now = Date.now();
+    const then = new Date(dateStr).getTime();
+    const diffMs = now - then;
+    if (diffMs < 0) return '刚刚';
+    const seconds = Math.floor(diffMs / 1000);
+    if (seconds < 60) return '刚刚';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}分钟前`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}小时前`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days}天前`;
+    const d = new Date(dateStr);
+    return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate();
+}
+
+function getActivityIcon(action) {
+    if (!action) return { icon: 'fa-circle', cls: 'auth' };
+    if (action.includes('项目')) return { icon: 'fa-folder', cls: 'project' };
+    if (action.includes('素材')) return { icon: 'fa-image', cls: 'asset' };
+    if (action.includes('AI') || action.includes('生成')) return { icon: 'fa-magic', cls: 'image' };
+    if (action.includes('登录') || action.includes('注册') || action.includes('认证')) return { icon: 'fa-user', cls: 'auth' };
+    return { icon: 'fa-circle', cls: 'auth' };
+}
+
+function buildActivityItem(log) {
+    const iconInfo = getActivityIcon(log.action);
+    let detailHtml = '';
+    if (log.details) {
+        detailHtml = ` <span class="activity-detail">${escapeHtml(log.details)}</span>`;
+    }
+    return `
+        <div class="activity-item">
+            <div class="activity-item-header">
+                <div class="activity-icon activity-icon--${iconInfo.cls}">
+                    <i class="fas ${iconInfo.icon}"></i>
+                </div>
+                <span class="activity-action">${escapeHtml(log.action)}${detailHtml}</span>
+                <span class="activity-time">${formatRelativeTime(log.created_at)}</span>
+            </div>
+        </div>
+    `;
+}
+
+// escapeHtml 由 js/html-utils.js 提供（全局函数）
+
+async function loadActivityLog(page) {
+    if (_activityLogState.loading) return;
+    _activityLogState.loading = true;
+    const listEl = document.getElementById('activity-log-list');
+    const loadMoreWrap = document.getElementById('activity-load-more-wrap');
+    if (!listEl) { _activityLogState.loading = false; return; }
+
+    if (page === 1) {
+        listEl.innerHTML = '<div class="activity-loading"><i class="fas fa-spinner fa-spin" style="color:#00f0ff;font-size:24px"></i><span style="color:#b0b0c0;margin-left:10px">加载中...</span></div>';
+        _activityLogState.hasMore = true;
+    }
+
+    try {
+        const r = await fetch(`/api/activity-log?page=${page}&limit=20`, { credentials: 'include' });
+        if (r.status === 401) { window.location.href = loginHtmlPath(); return; }
+        const data = await r.json();
+        const logs = data.logs || [];
+
+        if (page === 1) listEl.innerHTML = '';
+
+        if (logs.length === 0 && page === 1) {
+            listEl.innerHTML = '<div class="activity-empty"><i class="fas fa-inbox"></i><span>暂无活动记录</span></div>';
+            if (loadMoreWrap) loadMoreWrap.style.display = 'none';
+            _activityLogState.hasMore = false;
+        } else {
+            logs.forEach((log) => {
+                listEl.insertAdjacentHTML('beforeend', buildActivityItem(log));
+            });
+            const totalPages = Math.ceil((data.total || 0) / (data.limit || 20));
+            if (page >= totalPages) {
+                _activityLogState.hasMore = false;
+                if (loadMoreWrap) loadMoreWrap.style.display = 'none';
+            } else {
+                if (loadMoreWrap) loadMoreWrap.style.display = '';
+            }
+        }
+    } catch (e) {
+        if (page === 1) {
+            listEl.innerHTML = '<div class="activity-empty"><i class="fas fa-exclamation-triangle"></i><span>加载失败，请稍后重试</span></div>';
+        }
+    }
+
+    _activityLogState.loading = false;
+}
+
+function initActivityLog() {
+    const loadMoreBtn = document.getElementById('activity-load-more-btn');
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', () => {
+            _activityLogState.page++;
+            loadActivityLog(_activityLogState.page);
+        });
+    }
+
+    // Hook into tab switching: load data when activity-log tab becomes visible
+    const activityTab = document.querySelector('.user-center-tab[data-tab="activity-log"]');
+    if (activityTab) {
+        activityTab.addEventListener('click', () => {
+            if (_activityLogState.page === 1 && !_activityLogState.loading) {
+                loadActivityLog(1);
+            }
+        });
+    }
+
+    // If activity-log tab is already active on load, fetch immediately
+    if (activityTab && activityTab.classList.contains('active')) {
+        loadActivityLog(1);
     }
 }
