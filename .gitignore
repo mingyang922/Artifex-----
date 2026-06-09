@@ -17,7 +17,11 @@ backend/data/users.json
 logs/
 
 # 部署包
-artifex-deploy.tgz
+*.tar.gz
+*.tgz
+
+# 测试结果
+test-results/
 
 # 依赖
 node_modules/
