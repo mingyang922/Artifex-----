@@ -1,34 +1,70 @@
-FROM node:22-alpine
+# ============================================================
+# Stage 1: deps - Install production dependencies only
+# ============================================================
+FROM node:22-alpine AS deps
 
 WORKDIR /app
 
-# 安装构建工具（better-sqlite3 需要）
+# better-sqlite3 needs python3, make, g++ to compile native addons
 RUN apk add --no-cache python3 make g++
 
-# 复制依赖文件
 COPY package.json package-lock.json ./
 
-# 安装依赖
 RUN npm ci --omit=dev
 
-# 复制源码
-COPY backend/ ./backend/
-COPY config/ ./config/
+# ============================================================
+# Stage 2: build - Build frontend assets with Vite
+# ============================================================
+FROM node:22-alpine AS build
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+
+# Install all dependencies (including devDependencies for Vite)
+RUN npm ci
+
+# Copy source files needed for the Vite build
+COPY vite.config.js ./
 COPY js/ ./js/
 COPY styles/ ./styles/
 COPY modules/ ./modules/
-COPY docs/ ./docs/
 COPY *.html ./
+COPY vendor/ ./vendor/
 
-# 创建数据目录
+# Build frontend assets -> dist/
+RUN npm run build
+
+# ============================================================
+# Stage 3: production - Minimal runtime image
+# ============================================================
+FROM node:22-alpine AS production
+
+WORKDIR /app
+
+# better-sqlite3 runtime needs libstdc++
+RUN apk add --no-cache libstdc++
+
+# Copy production node_modules from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy built frontend assets from build stage
+COPY --from=build /app/dist ./dist
+
+# Copy backend server code (needed at runtime)
+COPY backend/ ./backend/
+COPY config/ ./config/
+COPY scripts/ ./scripts/
+
+# Create data directory for SQLite databases
 RUN mkdir -p backend/data
 
-# 暴露端口
+ENV NODE_ENV=production
+
 EXPOSE 3000
 
-# 健康检查
+# Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
   CMD wget -qO- http://localhost:3000/api/health || exit 1
 
-# 启动
 CMD ["node", "backend/proxy.js"]

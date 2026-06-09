@@ -6,10 +6,9 @@
  * 全局滚动渐显动画 - 所有页面共用
  * 为带 .scroll-section 的区块在进入视口时添加 .visible，触发 CSS 过渡
  */
-(function () {
-    'use strict';
+'use strict';
 
-    var style = document.createElement('style');
+    const style = document.createElement('style');
     style.textContent = [
         '.scroll-section {',
         '  opacity: 0;',
@@ -40,7 +39,7 @@
     document.head.appendChild(style);
 
     function run() {
-        var sections = document.querySelectorAll('.scroll-section');
+        const sections = document.querySelectorAll('.scroll-section');
         if (!sections.length) return;
 
         if (!('IntersectionObserver' in window)) {
@@ -50,7 +49,7 @@
             return;
         }
 
-        var observer = new IntersectionObserver(
+        const observer = new IntersectionObserver(
             function (entries) {
                 entries.forEach(function (entry) {
                     if (entry.isIntersecting) {
@@ -72,4 +71,3 @@
     } else {
         run();
     }
-})();

@@ -21,7 +21,11 @@ class ImageGenerator {
         this.apiConfig = {
             endpoint: API_BASE + '/api/image-proxy',
         };
-        this.generatedImages = JSON.parse(localStorage.getItem('generatedImages') || '[]');
+        try {
+            this.generatedImages = JSON.parse(localStorage.getItem(aiStorageKey('generatedImages')) || '[]');
+        } catch (_) {
+            this.generatedImages = [];
+        }
         this.sketchBase64 = null; // 线稿图 base64（图生图模式用）
         this._styleRefRawDataUrl = null; // 风格提取用参考图 data URL
         this.styleTransferContentBase64 = null; // 风格迁移：内容图 base64
@@ -50,7 +54,7 @@ class ImageGenerator {
             return image && image.id && image.name && this.isRenderableImageUrl(image.imageUrl);
         });
         if (this.generatedImages.length !== before) {
-            localStorage.setItem('generatedImages', JSON.stringify(this.generatedImages));
+            localStorage.setItem(aiStorageKey('generatedImages'), JSON.stringify(this.generatedImages));
         }
     }
 
@@ -262,7 +266,7 @@ class ImageGenerator {
         const apiProviderEl = document.getElementById('apiProvider');
         const wanxModelEl = document.getElementById('wanxModelSelect');
         const imageSizeEl = document.getElementById('imageSize');
-        const jimengMinPixels = 921600;
+        const jimengMinPixels = (window.ArtifexConstants && window.ArtifexConstants.JIMENG_MIN_PIXELS) || 921600;
         const updateImageSizeForProvider = () => {
             if (!imageSizeEl) return;
             const isJimeng = apiProviderEl && apiProviderEl.value === 'jimeng';
@@ -315,12 +319,15 @@ class ImageGenerator {
             confirmBtn.addEventListener('click', () => this.handleConfirmGenImage());
         }
 
+        // 表单状态持久化（加 300ms 防抖，避免输入/滑块拖动时高频写入 sessionStorage）
+        let _persistTimer = null;
+        const debouncedPersist = () => { clearTimeout(_persistTimer); _persistTimer = setTimeout(() => this.persistGeneratorUiState(), 300); };
         document
             .querySelectorAll('#imageGeneratorForm input, #imageGeneratorForm textarea, #imageGeneratorForm select')
-            .forEach((el) => {
-                el.addEventListener('change', () => this.persistGeneratorUiState());
-                el.addEventListener('input', () => this.persistGeneratorUiState());
-            });
+                .forEach((el) => {
+                    el.addEventListener('change', () => this.persistGeneratorUiState());
+                    el.addEventListener('input', debouncedPersist);
+                });
 
         this.bindStylePresetEvents();
     }
@@ -511,7 +518,8 @@ class ImageGenerator {
                     try {
                         referenceThumb = await compressDataUrlImage(this._styleRefRawDataUrl, 512, 'image/webp', 0.72);
                     } catch (err) {
-                        console.warn('参考图压缩失败', err);
+                        console.debug('[image-generator] 参考图压缩失败', err);
+                        themedWarn('参考图压缩失败，将使用原图');
                     }
                 }
                 const name = (nameInp && nameInp.value.trim()) || '我的风格 ' + new Date().toLocaleString('zh-CN');
@@ -580,7 +588,7 @@ class ImageGenerator {
         try {
             payloadImage = await compressDataUrlImage(this._styleRefRawDataUrl, 1280, 'image/webp', 0.82);
         } catch (e) {
-            console.warn('压缩参考图失败，使用原图', e);
+            console.debug('[image-generator] 压缩参考图失败，使用原图', e);
         }
         try {
             if (extractBtn) {
@@ -1096,14 +1104,15 @@ class ImageGenerator {
 
     saveImage(image) {
         if (!image || !this.isRenderableImageUrl(image.imageUrl)) {
-            console.warn('跳过保存无效图片:', image);
+            console.debug('[image-generator] 跳过保存无效图片:', image);
             return false;
         }
         this.generatedImages.unshift(image);
-        if (this.generatedImages.length > 15) {
-            this.generatedImages = this.generatedImages.slice(0, 15);
+        const maxImages = (window.ArtifexConstants && window.ArtifexConstants.GENERATED_IMAGES_MAX) || 15;
+        if (this.generatedImages.length > maxImages) {
+            this.generatedImages = this.generatedImages.slice(0, maxImages);
         }
-        localStorage.setItem('generatedImages', JSON.stringify(this.generatedImages));
+        localStorage.setItem(aiStorageKey('generatedImages'), JSON.stringify(this.generatedImages));
         this.renderImages();
         return true;
     }
@@ -1148,7 +1157,7 @@ class ImageGenerator {
         const before = this.generatedImages.length;
         this.generatedImages = this.generatedImages.filter((image) => image && image.id !== imageId);
         if (this.generatedImages.length !== before) {
-            localStorage.setItem('generatedImages', JSON.stringify(this.generatedImages));
+            localStorage.setItem(aiStorageKey('generatedImages'), JSON.stringify(this.generatedImages));
             this.renderImages();
         }
     }
@@ -1469,6 +1478,7 @@ class ImageGenerator {
         const image = this.generatedImages.find((i) => i.id === imageId);
         if (image) {
             const newWindow = window.open('', '_blank');
+            if (!newWindow) { themedWarn('弹窗被浏览器阻止，请允许弹窗后重试'); return; }
             const doc = newWindow.document;
             doc.open();
             doc.write('<!DOCTYPE html><html><head><title></title></head><body></body></html>');
@@ -1515,7 +1525,7 @@ class ImageGenerator {
             const ok = await window.TechUI.confirm('确定要删除这张图片吗？', '删除图片', '删除', '取消');
             if (!ok) return;
             this.generatedImages = this.generatedImages.filter((i) => i.id !== imageId);
-            localStorage.setItem('generatedImages', JSON.stringify(this.generatedImages));
+            localStorage.setItem(aiStorageKey('generatedImages'), JSON.stringify(this.generatedImages));
             this.renderImages();
         })();
     }
@@ -1539,7 +1549,6 @@ class ImageGenerator {
                             </div>
                             <div style="margin-top: 20px;">
                                 <button class="image-action" onclick="imageGenerator.retry()" style="background: #00f0ff; color: #1a1a2e; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">🔄 重试</button>
-                                <button class="image-action" onclick="location.reload()" style="background: #667eea; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px;">🔄 刷新页面</button>
                             </div>
                         </div>
                     `;
@@ -1561,15 +1570,15 @@ let imageGenerator;
 (function () {
     "use strict";
 
-    var origBind = ImageGenerator.prototype.bindEvents;
+    const origBind = ImageGenerator.prototype.bindEvents;
     ImageGenerator.prototype.bindEvents = function () {
         origBind.call(this);
         this.initBatchCountButtons();
     };
 
     ImageGenerator.prototype.initBatchCountButtons = function () {
-        var btns = document.querySelectorAll(".batch-count-btn");
-        var hiddenInput = document.getElementById("batchCount");
+        const btns = document.querySelectorAll(".batch-count-btn");
+        const hiddenInput = document.getElementById("batchCount");
         if (!btns.length || !hiddenInput) return;
         btns.forEach(function (btn) {
             btn.addEventListener("click", function () {
@@ -1587,13 +1596,13 @@ let imageGenerator;
     };
 
     ImageGenerator.prototype.getBatchCount = function () {
-        var el = document.getElementById("batchCount");
+        const el = document.getElementById("batchCount");
         return el ? Math.max(1, Math.min(8, parseInt(el.value, 10) || 1)) : 1;
     };
 
-    var origDoGenerate = ImageGenerator.prototype.doGenerateImage;
+    const origDoGenerate = ImageGenerator.prototype.doGenerateImage;
     ImageGenerator.prototype.doGenerateImage = async function (formData) {
-        var count = this.getBatchCount();
+        const count = this.getBatchCount();
         if (count <= 1) {
             return origDoGenerate.call(this, formData);
         }
@@ -1601,15 +1610,15 @@ let imageGenerator;
     };
 
     ImageGenerator.prototype.doBatchGenerate = async function (formData, count) {
-        var self = this;
+        const self = this;
         self.showLoading();
-        var progressText = document.getElementById("progressText");
+        const progressText = document.getElementById("progressText");
         if (progressText) progressText.textContent = "正在批量生成 " + count + " 张图片...";
 
-        var results = [];
-        var errors = [];
-        var promises = [];
-        for (var i = 0; i < count; i++) {
+        const results = [];
+        const errors = [];
+        const promises = [];
+        for (let i = 0; i < count; i++) {
             (function (idx) {
                 promises.push(
                     self.generateImage(formData)
@@ -1645,15 +1654,15 @@ let imageGenerator;
     };
 
     ImageGenerator.prototype.displayBatchResults = function (results) {
-        var container = document.getElementById("result-body");
+        const container = document.getElementById("result-body");
         if (!container) return;
-        var esc = ImageGenerator.escapeHtml;
-        var escJs = ImageGenerator.escapeJsStr;
+        const esc = ImageGenerator.escapeHtml;
+        const escJs = ImageGenerator.escapeJsStr;
 
-        var gridHtml = results.map(function (r) {
-            var safeUrl = esc(r.imageUrl || "");
-            var safeId = escJs(r.id || "");
-            var safeName = esc(r.name || "");
+        const gridHtml = results.map(function (r) {
+            const safeUrl = esc(r.imageUrl || "");
+            const safeId = escJs(r.id || "");
+            const safeName = esc(r.name || "");
             return "<div style=\"background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;text-align:center;\">" +
                 "<img src=\"" + safeUrl + "\" alt=\"" + safeName + "\" " +
                 "style=\"width:100%;height:180px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,240,255,0.15);\" " +
@@ -1671,7 +1680,7 @@ let imageGenerator;
                 "</div></div>";
         }).join("");
 
-        var idsArr = results.map(function (r) { return r.id; });
+        const idsArr = results.map(function (r) { return r.id; });
 
         container.innerHTML =
             "<div style=\"text-align:center;padding:20px;\">" +
@@ -1687,7 +1696,7 @@ let imageGenerator;
             "style=\"background:rgba(255,255,255,0.06);color:#e0e0e0;border:1px solid rgba(0,240,255,0.2);padding:10px 20px;border-radius:6px;cursor:pointer;font-family:var(--font-tech-display);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;\">" +
             "<i class=\"fas fa-download\"></i> 全部下载</button></div></div>";
 
-        var self = this;
+        const self = this;
         document.getElementById("batchSaveAllBtn").addEventListener("click", function () {
             self.batchSaveAllToLibrary(idsArr);
         });
@@ -1697,16 +1706,16 @@ let imageGenerator;
     };
 
     ImageGenerator.prototype.batchSaveAllToLibrary = async function (ids) {
-        var self = this;
-        var ok = 0;
-        for (var i = 0; i < ids.length; i++) {
+        const self = this;
+        let ok = 0;
+        for (let i = 0; i < ids.length; i++) {
             try { await self.saveToAssetLibrary(ids[i]); ok++; } catch (_) {}
         }
         themedSuccess("已将 " + ok + "/" + ids.length + " 张存入素材库");
     };
 
     ImageGenerator.prototype.batchDownloadAll = function (ids) {
-        var self = this;
+        const self = this;
         ids.forEach(function (id) { self.downloadImage(id); });
         themedSuccess("正在下载 " + ids.length + " 张图片");
     };

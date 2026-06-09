@@ -47,16 +47,10 @@
                 }
             }
             function uiConfirm(message, title) {
-                if (window.TechUI && typeof window.TechUI.confirm === 'function') {
-                    return window.TechUI.confirm(message, title || '请确认', '确定', '取消');
-                }
-                return Promise.resolve(confirm(message));
+                return window.TechUI.confirm(message, title || '请确认', '确定', '取消');
             }
             function uiPrompt(title, label, value) {
-                if (window.TechUI && typeof window.TechUI.prompt === 'function') {
-                    return window.TechUI.prompt(title, label, value || '', '确定', '取消');
-                }
-                return Promise.resolve(prompt(label, value || ''));
+                return window.TechUI.prompt(title, label, value || '', '确定', '取消');
             }
 
             const STYLE_PRESETS_STORE = 'style_presets_v1';

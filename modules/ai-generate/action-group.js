@@ -316,9 +316,11 @@ document.getElementById('actionGroupGenerateBtn')?.addEventListener('click', asy
     const endpoint = API_BASE + '/api/image-proxy';
     const results = [];
     const failMessages = [];
-    for (let i = 0; i < frames.length; i++) {
-        const f = frames[i];
-        progressText.textContent = `正在生成 ${i + 1}/${frames.length} …`;
+    let completedCount = 0;
+    const CONCURRENCY = 4; // 最大并发请求数
+
+    // 生成单帧的辅助函数
+    async function generateFrame(f, index) {
         try {
             const payload = { prompt: f.prompt, size, provider, num_images: 1 };
             const hasThreeViewRef = !!window.lastThreeViewImageUrl;
@@ -363,29 +365,48 @@ document.getElementById('actionGroupGenerateBtn')?.addEventListener('click', asy
             try {
                 data = text ? JSON.parse(text) : {};
             } catch (parseErr) {
-                failMessages.push(`第 ${i + 1} 帧: 响应不是 JSON (${res.status}) ${escapeHtml(text.slice(0, 120))}`);
+                failMessages.push(`第 ${index + 1} 帧: 响应不是 JSON (${res.status}) ${escapeHtml(text.slice(0, 120))}`);
                 console.error('action group frame parse error', res.status, text);
-                continue;
+                return;
             }
             if (!res.ok) {
                 const msg = data.message || data.error || data.details || JSON.stringify(data);
                 const tag = res.status === 400 ? '参数' : res.status === 401 ? '鉴权' : res.status >= 500 ? 'API' : '';
-                failMessages.push(`第 ${i + 1} 帧 [${tag || 'HTTP'}${res.status}]: ${escapeHtml(msg)}`);
+                failMessages.push(`第 ${index + 1} 帧 [${tag || 'HTTP'}${res.status}]: ${escapeHtml(msg)}`);
                 console.error('action group API error', res.status, data);
-                continue;
+                return;
             }
             const imageUrl = data.image_url || (data.images && data.images[0] && data.images[0].url);
             if (imageUrl) {
                 results.push({ action: f.action, frameIndex: f.frameIndex, imageUrl, prompt: f.prompt });
             } else {
-                failMessages.push(`第 ${i + 1} 帧: 成功响应但无 image_url`);
-                console.warn('action group no image_url', data);
+                failMessages.push(`第 ${index + 1} 帧: 成功响应但无 image_url`);
+                console.debug('[action-group] no image_url', data);
             }
         } catch (e) {
-            failMessages.push(`第 ${i + 1} 帧: ${e.message || e}`);
-            console.warn('frame failed', f, e);
+            failMessages.push(`第 ${index + 1} 帧: ${e.message || e}`);
+            console.debug('[action-group] frame failed', f, e);
+        } finally {
+            completedCount++;
+            progressText.textContent = `正在生成 ${completedCount}/${frames.length} …`;
         }
     }
+
+    // 并发执行帧生成（限制并发数）
+    const queue = frames.slice();
+    let nextIndex = 0;
+    const workers = [];
+    for (let w = 0; w < Math.min(CONCURRENCY, queue.length); w++) {
+        workers.push((async () => {
+            while (queue.length > 0) {
+                const f = queue.shift();
+                const idx = nextIndex++;
+                await generateFrame(f, idx);
+            }
+        })());
+    }
+    await Promise.all(workers);
+
     progressEl.style.display = 'none';
     this.disabled = false;
     const [w, h] = size.split('x').map(Number);
@@ -455,7 +476,7 @@ async function exportSpritesheetPng() {
                 const img = await loadImage(getProxyImageUrl(frame.imageUrl));
                 ctx.drawImage(img, col * r.frameWidth, row * r.frameHeight, r.frameWidth, r.frameHeight);
             } catch (e) {
-                console.warn(e);
+                console.debug('[action-group] 导出帧绘制失败', e);
             }
         }
     }

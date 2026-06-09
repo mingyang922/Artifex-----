@@ -87,6 +87,8 @@ docs/                        部署与接入文档
 - `GET /api/me/api-settings/status`
 - `PUT /api/me/api-settings`
 - `DELETE /api/me/api-settings/:provider`
+- `POST /api/me/api-settings/validate`
+- `POST /api/me/change-password`
 
 ## 开发说明
 
@@ -95,10 +97,35 @@ docs/                        部署与接入文档
 - 环境变量示例见 `backend/.env.example`。
 - 生产环境必须设置 `SESSION_SECRET`，并按需限制 `ALLOWED_ORIGINS`。
 - `backend/data/*.sqlite`、`.env`、日志等本地数据不应提交到仓库。
+- 可选设置 `ADMIN_USER_ID` 指定管理员用户 ID（默认首个注册用户）。
+- 可选设置 `ENCRYPTION_KEY` 指定 API 密钥加密密钥（默认使用 `SESSION_SECRET`）。
+
+## 安全特性
+
+- API 密钥采用 **AES-256-GCM** 认证加密存储（防篡改）
+- SSRF 防护：URL 校验 + DNS 解析后二次校验（防 DNS rebinding）
+- CSRF 防护：Double-Submit Cookie 模式
+- 密码 bcrypt 哈希加密
+- 接口限流：按用户限流（图片生成 10次/分钟，登录 20次/15分钟，修改密码 5次/15分钟）
+
+## 多语言
+
+支持 **5 种语言**：简体中文（默认）、繁體中文、English、日本語、한국어。用户可在用户中心切换。
+
+## 备案信息
+
+- 京公网安备11010802048813号
+- 京ICP备2026031602号
 
 ## 相关文档
 
-- `更新日志.md`
+- `更新日志.md` — 版本更新记录
+- `docs/用户手册.md` — 用户使用指南
+- `docs/软件说明书.md` — 软件功能说明
+- `docs/安全审计文档.md` — 安全特性与审计结果
+- `docs/性能基准文档.md` — 性能优化措施与基准数据
+- `docs/openapi.json` — API 接口文档
+- `docs/源代码文档.txt` — 源代码文档（软著材料）
 - `CONTRIBUTING.md` — 贡献指南
 - `SECURITY.md` — 安全策略
 - `docs/DEPLOY_TENCENT_SINGLE_SERVER.md`

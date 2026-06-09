@@ -2,23 +2,34 @@
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.3.3 */
+'use strict';
 /**
  * 腾讯云混元 / 文生图 / 图生图 API 提供商（从 proxy.js 提取）
  */
-const axios = require('axios');
 const {
     getTencentCamCredentials,
     validateTencentCamCredential,
     assertTencentCamCredential,
-    generateSignature,
 } = require('../lib/utils');
 
-// 腾讯云混元API代理（用户级配置）
+// 腾讯云混元API代理（用户级配置，使用官方SDK）
 async function handleHunyuanProxy(req, res, { runtimeConfig, API_CONFIG, getUserProviderConfig, isAdminUser }) {
     try {
         const userTencentConfig = getUserProviderConfig(req.currentUser.id, 'tencent');
         const { secretId: SecretId, secretKey: SecretKey } = getTencentCamCredentials(userTencentConfig);
         const { SecretId: _dropSecretId, SecretKey: _dropSecretKey, ...requestData } = req.body || {};
+
+        // 普通用户必须自配密钥，管理员可用平台默认密钥
+        const isAdmin = isAdminUser(req.currentUser);
+        const hasOwnKeys = !!(userTencentConfig && userTencentConfig.secretId && userTencentConfig.secretKey);
+        if (!isAdmin && !hasOwnKeys) {
+            return res.status(403).json({
+                error: '未配置个人密钥',
+                message: '请先在「用户中心」配置你自己的腾讯云 SecretId / SecretKey，再使用混元对话功能。',
+                code: 'no_personal_credentials',
+                provider: 'tencent',
+            });
+        }
 
         const camCheck = validateTencentCamCredential(SecretId, SecretKey);
         if (!camCheck.ok) {
@@ -32,40 +43,32 @@ async function handleHunyuanProxy(req, res, { runtimeConfig, API_CONFIG, getUser
             });
         }
 
-        const timestamp = Math.floor(Date.now() / 1000);
-        const signature = generateSignature(SecretId, SecretKey, timestamp, JSON.stringify(requestData));
-
-        const response = await axios.post(runtimeConfig.hunyuan.endpoint, requestData, {
-            headers: {
-                Authorization: signature,
-                'Content-Type': 'application/json',
-                'X-TC-Timestamp': timestamp.toString(),
-                'X-TC-Version': runtimeConfig.hunyuan.version,
-                'X-TC-Action': 'ChatCompletions',
-            },
-            timeout: API_CONFIG.frontend.timeout,
+        const tencentcloud = require('tencentcloud-sdk-nodejs');
+        const HunyuanClient = tencentcloud.hunyuan.v20230901.Client;
+        const client = new HunyuanClient({
+            credential: { secretId: SecretId, secretKey: SecretKey },
+            region: 'ap-guangzhou',
+            profile: { httpProfile: { endpoint: 'hunyuan.tencentcloudapi.com' } },
         });
 
-        res.json(response.data);
+        const result = await client.ChatCompletions(requestData);
+        res.json({ Response: result });
     } catch (error) {
         console.error('API代理错误:', error);
 
-        if (error.response) {
-            res.status(error.response.status).json({
-                error: '腾讯云API错误',
-                message:
-                    typeof error.response.data === 'string'
-                        ? error.response.data
-                        : (error.response.data && error.response.data.message) || JSON.stringify(error.response.data),
-                provider: 'tencent',
-                code: error.response.status,
-            });
-        } else if (error.code === 'ECONNABORTED') {
+        if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
             res.status(408).json({
                 error: '请求超时',
                 message: '混元 API 调用超时，请稍后重试',
                 provider: 'tencent',
                 code: 408,
+            });
+        } else if (error.code && error.message) {
+            res.status(400).json({
+                error: '腾讯云API错误',
+                message: error.message,
+                provider: 'tencent',
+                code: error.code,
             });
         } else {
             res.status(500).json({
@@ -165,14 +168,24 @@ async function callTencentImageAPI(prompt, size, userConfig) {
 }
 
 // 腾讯云密钥与连通性自检
-async function handleTencentStatus(req, res, { getUserProviderConfig }) {
-    const { secretId, secretKey } = getTencentCamCredentials(getUserProviderConfig(req.currentUser.id, 'tencent'));
+async function handleTencentStatus(req, res, { getUserProviderConfig, isAdminUser }) {
+    const userCfg = getUserProviderConfig(req.currentUser.id, 'tencent');
+    const hasOwnKeys = !!(userCfg && userCfg.secretId && userCfg.secretKey);
+    const { secretId, secretKey } = getTencentCamCredentials(userCfg);
     const validation = validateTencentCamCredential(secretId, secretKey);
+    const isAdmin = isAdminUser ? isAdminUser(req.currentUser) : false;
     const out = {
         configured: validation.ok,
+        hasOwnKeys,
+        usesPlatformKeys: validation.ok && !hasOwnKeys,
+        isAdmin,
         validation,
         secretIdPrefix: secretId ? secretId.slice(0, 8) + '…' : null,
-        hint: '图片生成页需选择「腾讯云文生图」；密钥须来自 https://console.cloud.tencent.com/cam/capi',
+        hint: hasOwnKeys
+            ? '使用你自配的腾讯云密钥'
+            : isAdmin
+                ? '使用平台默认密钥（管理员权限）'
+                : '请在「用户中心」配置你自己的腾讯云 SecretId / SecretKey',
     };
     if (!validation.ok) {
         return res.json(out);

@@ -4,6 +4,8 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Artifex - 用户中心</title>
+        <link rel="manifest" href="../../manifest.json">
+        <meta name="theme-color" content="#00f0ff">
         <link rel="stylesheet" href="../../styles/app-shell.css" />
         <link
             href="../../vendor/css/google-fonts.css"
@@ -1990,6 +1992,7 @@
                                         <label class="form-label" for="language" data-i18n="uc.language">偏好语言</label>
                                         <select class="form-select tech-select-native" id="language" disabled>
                                             <option value="zh" selected>简体中文</option>
+                                            <option value="zht">繁體中文</option>
                                             <option value="en">English</option>
                                             <option value="ja">日本語</option>
                                             <option value="ko">한국어</option>
@@ -2624,19 +2627,30 @@
             <i class="fas fa-bars"></i>
         </button>
 
-        <script src="../../js/keyboard-shortcuts.js"></script>
+        <!-- 备案信息 -->
+        <footer class="beian-footer">
+            <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
+                <img src="../../vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+            </a>
+            <span class="beian-separator">|</span>
+            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
+        </footer>
+
+        <script defer src="../../js/keyboard-shortcuts.js"></script>
         <script src="../../js/i18n.js"></script>
-        <script src="../../js/user-storage-scope.js"></script>
-        <script src="../../js/ui-kit.js"></script>
-        <script src="../../js/html-utils.js"></script>
-        <script src="../../js/navigation.js"></script>
-        <script src="../../js/notification-component.js"></script>
-        <script src="../../js/avatar-manager.js"></script>
-        <script src="../../js/notification-manager.js"></script>
-        <script src="../../js/scroll-animations.js"></script>
-        <script src="../../js/page-effects.js"></script>
-        <script src="../../js/api-utils.js"></script>
-        <script src="user-center-page.js" defer></script>
-        <script src="user-center-init.js"></script>
+        <script defer src="../../js/user-storage-scope.js"></script>
+        <script defer src="../../js/ui-kit.js"></script>
+        <script defer src="../../js/html-utils.js"></script>
+        <script defer src="../../js/navigation.js"></script>
+        <script defer src="../../js/notification-component.js"></script>
+        <script defer src="../../js/avatar-manager.js"></script>
+        <script defer src="../../js/notification-manager.js"></script>
+        <script defer src="../../js/scroll-animations.js"></script>
+        <script defer src="../../js/page-effects.js"></script>
+        <script defer src="../../js/api-utils.js"></script>
+        <script defer src="password-security.js"></script>
+        <script defer src="user-center-page.js"></script>
+        <script defer src="user-center-init.js"></script>
+            <script defer src="../../js/sw-register.js"></script>
     </body>
 </html>

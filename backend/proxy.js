@@ -16,6 +16,7 @@ const compression = require('compression');
 
 // —— 本地模块 ——
 const logger = require('./lib/logger');
+const { WsServer } = require('./lib/ws-server');
 const arkRestConfig = require('./ark-rest-config');
 const {
     getTencentCamCredentials,
@@ -73,7 +74,7 @@ app.use(helmet({
             scriptSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
             fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
-            imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+            imgSrc: ["'self'", 'data:', 'blob:'],
             connectSrc: ["'self'"],
             upgradeInsecureRequests: null,
         },
@@ -81,8 +82,15 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false,
 }));
 
-// Gzip 压缩
-app.use(compression());
+// Gzip 压缩（跳过已压缩的图片格式）
+app.use(compression({
+    filter: (req, res) => {
+        if (req.headers['x-no-compression']) return false;
+        const type = res.getHeader('Content-Type') || '';
+        if (/image\/(jpeg|png|webp|gif)/.test(type)) return false;
+        return compression.filter(req, res);
+    },
+}));
 
 app.use(express.json({ limit: '48mb' }));
 
@@ -205,7 +213,16 @@ app.use('/api', createAuthRouter({
 }));
 
 // ── 静态文件 ─────────────────────────────────────────────────────
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, '..'), {
+    maxAge: isProd ? '7d' : 0,
+    etag: true,
+    setHeaders: (res, filePath) => {
+        // HTML 文件不长缓存（含会话状态）
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache');
+        }
+    },
+}));
 app.get('/', (req, res) => res.redirect('/login.html'));
 
 // ── 运行时配置 ───────────────────────────────────────────────────
@@ -413,6 +430,11 @@ const server = app.listen(PORT, () => {
     logger.info(`  Health: http://localhost:${PORT}/api/health`);
     logger.info(`  Docs:   http://localhost:${PORT}/api/docs\n`);
 });
+
+// ── WebSocket 实时通知 ──────────────────────────────────────────
+const wsServer = new WsServer(server);
+// 暴露给路由使用
+app.set('wsServer', wsServer);
 
 server.on('error', (err) => {
     if (err?.code === 'EADDRINUSE') {

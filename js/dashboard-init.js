@@ -7,16 +7,16 @@
 
             function formatDate(dateString) {
                 if (!dateString) return '';
-                var d = new Date(dateString);
+                const d = new Date(dateString);
                 if (isNaN(d.getTime())) return '';
-                var y = d.getFullYear();
-                var m = String(d.getMonth() + 1).padStart(2, '0');
-                var day = String(d.getDate()).padStart(2, '0');
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
                 return y + '-' + m + '-' + day;
             }
 
             function getProjectTypeName(type) {
-                var map = {
+                const map = {
                     ui: 'UI设计',
                     game: '游戏界面',
                     other: '其他',
@@ -25,18 +25,20 @@
             }
 
             function renderRecentProjects() {
-                var grid = document.getElementById('recent-projects-grid');
+                const grid = document.getElementById('recent-projects-grid');
                 if (!grid) return;
 
                 grid.innerHTML = '<p style="color:#666;text-align:center;">加载中...</p>';
 
                 fetch('/api/projects?page=1&limit=3', { credentials: 'include' })
                     .then(function (res) {
+                        if (res.status === 401) { window.location.href = loginHtmlPath(); return null; }
                         if (!res.ok) throw new Error('API ' + res.status);
                         return res.json();
                     })
                     .then(function (data) {
-                        var projects = [];
+                        if (!data) return;
+                        let projects = [];
                         if (data.ok && data.projects) {
                             projects = data.projects.map(function (p) {
                                 return {
@@ -61,10 +63,15 @@
             }
 
             function renderFromLocalStorage(grid) {
-                var projects = [];
+                let projects = [];
                 try {
-                    var raw = localStorage.getItem(GameUiUserScope.key('gameui-projects'));
-                    if (raw) projects = JSON.parse(raw) || [];
+                    if (typeof GameUiUserScope !== 'undefined' && GameUiUserScope.key) {
+                        const raw = localStorage.getItem(GameUiUserScope.key('gameui-projects'));
+                        if (raw) projects = JSON.parse(raw) || [];
+                    } else {
+                        const raw = localStorage.getItem('gameui-projects');
+                        if (raw) projects = JSON.parse(raw) || [];
+                    }
                 } catch (e) { /* ignore */ }
                 renderProjectCards(grid, projects);
             }
@@ -78,14 +85,14 @@
                     return;
                 }
 
-                var recent = projects.slice(0, 3);
+                const recent = projects.slice(0, 3);
 
                 recent.forEach(function (project) {
-                    var statusText = '进行中';
+                    let statusText = '进行中';
                     if (project.status === 'done') statusText = '已完成';
                     if (project.status === 'paused') statusText = '已暂停';
 
-                    var card = document.createElement('div');
+                    const card = document.createElement('div');
                     card.className = 'project-card';
 
                     card.innerHTML =
@@ -114,7 +121,7 @@
                         '</div>' +
                         '</div>';
 
-                    var openDetail = function () {
+                    const openDetail = function () {
                         if (!project.id) return;
                         window.location.href =
                             'modules/project-management/project-detail.html?id=' + encodeURIComponent(project.id);

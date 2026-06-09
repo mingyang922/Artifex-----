@@ -41,3 +41,4 @@ Desktop.ini
 # 备份
 *.bak
 *.backup
+dist/

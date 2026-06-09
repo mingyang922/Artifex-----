@@ -2,6 +2,7 @@
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.3.3 */
+'use strict';
 
 /**
  * 按用户限流器
@@ -15,8 +16,21 @@ class UserRateLimiter {
         this.message = options.message || '请求过于频繁，请稍后再试';
         this.store = new Map(); // userId -> { count, resetTime }
 
-        // 定期清理过期记录
-        setInterval(() => this.cleanup(), this.windowMs * 2);
+        // 定期清理过期记录，保存引用以便销毁时清理
+        this._cleanupInterval = setInterval(() => this.cleanup(), this.windowMs * 2);
+        // 允许 Node.js 正常退出，不因定时器阻塞
+        if (this._cleanupInterval.unref) this._cleanupInterval.unref();
+    }
+
+    /**
+     * 销毁限流器，清理定时器
+     */
+    destroy() {
+        if (this._cleanupInterval) {
+            clearInterval(this._cleanupInterval);
+            this._cleanupInterval = null;
+        }
+        this.store.clear();
     }
 
     /**

@@ -2,6 +2,7 @@
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.3.3 */
+'use strict';
 /**
  * 即梦 / Seedream API 提供商（从 proxy.js 提取）
  */
@@ -279,7 +280,7 @@ async function callJimengImageAPIAxios(apiKey, prompt, extra, model, sizeParam, 
     const out = parseJimengImageResponse(r.data);
     const requestedSize = normalizePixelSize(body.size);
     const actualSize = extractJimengOutputSize(r.data);
-    if (extra && extra.require_exact_size && requestedSize && actualSize && requestedSize != actualSize) {
+    if (extra && extra.require_exact_size && requestedSize && actualSize && requestedSize !== actualSize) {
         throw new Error(`即梦返回尺寸与请求不一致：请求 ${requestedSize}，返回 ${actualSize}。请重试或调整尺寸。`);
     }
     if (!out) {

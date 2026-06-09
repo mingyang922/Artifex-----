@@ -4,6 +4,8 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>项目详情 - 游戏美术资产生成平台</title>
+        <link rel="manifest" href="../../manifest.json">
+        <meta name="theme-color" content="#00f0ff">
         <link rel="stylesheet" href="../../vendor/css/font-awesome.min.css" />
         <link rel="stylesheet" href="style.css" />
         <link rel="stylesheet" href="../../styles/ui-kit.css" />
@@ -883,8 +885,8 @@
                     <!-- 素材库预览 -->
                     <div class="asset-library-grid">
                         <div class="asset-library-item" data-id="lib1">
-                            <div class="asset-preview">
-                                <img src="https://via.placeholder.com/280x200?text=角色1" alt="角色素材" />
+                            <div class="asset-preview" style="background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(139,92,246,0.1));display:flex;align-items:center;justify-content:center;height:120px;color:#8b5cf6;font-size:14px;">
+                                <i class="fas fa-user" style="font-size:24px;margin-right:8px;"></i> 角色素材
                             </div>
                             <div class="asset-info">
                                 <h4>卡通角色</h4>
@@ -893,8 +895,8 @@
                             </div>
                         </div>
                         <div class="asset-library-item" data-id="lib2">
-                            <div class="asset-preview">
-                                <img src="https://via.placeholder.com/280x200?text=场景1" alt="场景素材" />
+                            <div class="asset-preview" style="background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(139,92,246,0.1));display:flex;align-items:center;justify-content:center;height:120px;color:#00f0ff;font-size:14px;">
+                                <i class="fas fa-mountain" style="font-size:24px;margin-right:8px;"></i> 场景素材
                             </div>
                             <div class="asset-info">
                                 <h4>森林场景</h4>
@@ -903,8 +905,8 @@
                             </div>
                         </div>
                         <div class="asset-library-item" data-id="lib3">
-                            <div class="asset-preview">
-                                <img src="https://via.placeholder.com/280x200?text=道具1" alt="道具素材" />
+                            <div class="asset-preview" style="background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(139,92,246,0.1));display:flex;align-items:center;justify-content:center;height:120px;color:#f59e0b;font-size:14px;">
+                                <i class="fas fa-cube" style="font-size:24px;margin-right:8px;"></i> 道具素材
                             </div>
                             <div class="asset-info">
                                 <h4>魔法书</h4>
@@ -1030,15 +1032,25 @@
         </div>
         </main>
 
-        <script src="../../js/keyboard-shortcuts.js"></script>
+        <!-- 备案信息 -->
+        <footer class="beian-footer">
+            <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
+                <img src="../../vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+            </a>
+            <span class="beian-separator">|</span>
+            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
+        </footer>
+
+        <script defer src="../../js/keyboard-shortcuts.js"></script>
         <script src="../../js/i18n.js"></script>
-        <script src="../../js/user-storage-scope.js"></script>
-        <script src="../../js/api-utils.js"></script>
-        <script src="../../js/html-utils.js"></script>
-        <script src="../../js/scroll-animations.js"></script>
-        <script src="../../js/ui-kit.js"></script>
-        <script src="pm-shared.js"></script>
-        <script src="project-detail-init.js"></script>
-        <script src="project-detail.js"></script>
+        <script defer src="../../js/user-storage-scope.js"></script>
+        <script defer src="../../js/api-utils.js"></script>
+        <script defer src="../../js/html-utils.js"></script>
+        <script defer src="../../js/scroll-animations.js"></script>
+        <script defer src="../../js/ui-kit.js"></script>
+        <script defer src="pm-shared.js"></script>
+        <script defer src="project-detail-init.js"></script>
+        <script defer src="project-detail.js"></script>
+            <script defer src="../../js/sw-register.js"></script>
     </body>
 </html>

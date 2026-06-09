@@ -1,0 +1,28 @@
+{
+    "name": "Artifex - 二维游戏美术协作平台",
+    "short_name": "Artifex",
+    "description": "2D游戏美术协作与AI资产生成平台",
+    "start_url": "/login.html",
+    "display": "standalone",
+    "background_color": "#0a0e18",
+    "theme_color": "#00f0ff",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "vendor/images/app-icon.svg",
+            "sizes": "192x192 512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "vendor/images/app-icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "vendor/images/app-icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

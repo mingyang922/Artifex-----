@@ -1,7 +1,7 @@
 Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
 源代码文档
-生成时间: 2026-06-03
-总行数: 35177  总页数: 704
+生成时间: 2026-06-08
+总行数: 36127  总页数: 723
 ================================================================================
 
 【前30页】
@@ -14,6 +14,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Artifex - 登录注册</title>
+        <link rel="manifest" href="manifest.json">
+        <meta name="theme-color" content="#00f0ff">
         <link href="vendor/css/font-awesome.min.css" rel="stylesheet" />
         <link href="vendor/css/google-fonts.css" rel="stylesheet" />
         <link rel="stylesheet" href="styles/app-shell.css" />
@@ -56,9 +58,9 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                 z-index: 0;
             }
 
-            @keyframes loginFlowBg {
-
 --- 第 2 页 ---
+
+            @keyframes loginFlowBg {
                 0% { transform: translate(0, 0) scale(1); }
                 33% { transform: translate(2%, -1%) scale(1.03); }
                 66% { transform: translate(-1%, 2%) scale(0.98); }
@@ -107,10 +109,10 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                 content: '';
                 position: absolute;
                 top: 0;
-                left: -100%;
-                width: 200%;
 
 --- 第 3 页 ---
+                left: -100%;
+                width: 200%;
                 height: 2px;
                 background: linear-gradient(90deg, transparent, var(--login-cyan), var(--login-violet), transparent);
                 animation: cardShine 3s ease-in-out infinite;
@@ -159,10 +161,10 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                 color: white;
                 font-family: 'Rajdhani', sans-serif;
                 font-size: 20px;
-                font-weight: 600;
-                margin: 0 0 8px 0;
 
 --- 第 4 页 ---
+                font-weight: 600;
+                margin: 0 0 8px 0;
             }
 
             .form-header p {
@@ -211,10 +213,10 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                 color: var(--login-cyan);
             }
 
-            .input-group input::placeholder {
-                color: var(--login-muted);
 
 --- 第 5 页 ---
+            .input-group input::placeholder {
+                color: var(--login-muted);
             }
 
             /* 密码输入框容器样式 */
@@ -263,10 +265,10 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                 box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.4);
             }
 
-            .password-toggle i {
-                font-size: 14px;
 
 --- 第 6 页 ---
+            .password-toggle i {
+                font-size: 14px;
                 line-height: 1;
             }
 
@@ -315,10 +317,10 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                 cursor: pointer;
                 transition: all 0.3s ease;
                 position: relative;
-                overflow: hidden;
-            }
 
 --- 第 7 页 ---
+                overflow: hidden;
+            }
 
             .btn-primary {
                 background: linear-gradient(135deg, #00f0ff, #0099cc);
@@ -367,10 +369,10 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                 width: 20px;
                 height: 20px;
                 border: 2px solid transparent;
-                border-top: 2px solid white;
-                border-radius: 50%;
 
 --- 第 8 页 ---
+                border-top: 2px solid white;
+                border-radius: 50%;
                 animation: spin 1s linear infinite;
             }
 
@@ -419,10 +421,10 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
             }
 
             .strength-fill {
-                height: 100%;
-                transition: all 0.3s ease;
 
 --- 第 9 页 ---
+                height: 100%;
+                transition: all 0.3s ease;
                 border-radius: 2px;
             }
 
@@ -471,10 +473,10 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
             }
 
             .message {
-                position: fixed;
-                top: 20px;
 
 --- 第 10 页 ---
+                position: fixed;
+                top: 20px;
                 right: 20px;
                 padding: 12px 20px;
                 border-radius: 8px;
@@ -523,10 +525,10 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
         </style>
     </head>
     <body>
-        <div class="container">
-            <div class="form-container">
 
 --- 第 11 页 ---
+        <div class="container">
+            <div class="form-container">
                 <!-- 游戏平台Logo -->
                 <div class="platform-logo">
                     <img src="js/logo-main.png" alt="Artifex" />
@@ -575,10 +577,10 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                         <p data-i18n="login.registerSubtitle">注册成为 Artifex 开发者</p>
                     </div>
                     <form id="register">
-                        <div class="input-group">
-                            <i class="fas fa-user"></i>
 
 --- 第 12 页 ---
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
                             <input type="text" id="registerUsername" placeholder="用户名" data-i18n="login.username" required aria-label="用户名" />
                         </div>
                         <div class="input-group">
@@ -622,15 +624,25 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
         <!-- 消息提示 -->
         <div class="message" id="message"></div>
 
+        <!-- 备案信息 -->
+        <footer class="beian-footer">
+            <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
+                <img src="vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+            </a>
+
+--- 第 13 页 ---
+            <span class="beian-separator">|</span>
+            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
+        </footer>
+
         <script src="js/i18n.js"></script>
-        <script src="js/login-init.js"></script>
-        <script src="js/api-utils.js"></script>
-        <script src="js/login-page.js"></script>
+        <script defer src="js/login-init.js"></script>
+        <script defer src="js/api-utils.js"></script>
+        <script defer src="js/login-page.js"></script>
+        <script defer src="js/sw-register.js"></script>
     </body>
 </html>
 
-
---- 第 13 页 ---
 
 // ===== 文件: dashboard.html =====
 <!doctype html>
@@ -639,6 +651,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Artifex - 主控制台</title>
+        <link rel="manifest" href="manifest.json">
+        <meta name="theme-color" content="#00f0ff">
         <link
             href="vendor/css/google-fonts.css"
             rel="stylesheet"
@@ -667,6 +681,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                     <h1>Artifex</h1>
                 </div>
                 <ul class="nav-menu">
+
+--- 第 14 页 ---
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="home">
                             <i class="fas fa-home"></i>
@@ -681,8 +697,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="ai-generate">
-
---- 第 14 页 ---
                             <i class="fas fa-magic"></i>
                             <span data-i18n="nav.ai">AI 生成</span>
                         </a>
@@ -719,6 +733,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                     <div class="user-menu">
                         <button class="notification-btn" data-i18n-aria="misc.notifications" aria-label="通知">
                             <i class="fas fa-bell"></i>
+
+--- 第 15 页 ---
                             <span class="notification-badge">3</span>
                         </button>
                         <div class="user-avatar user-avatar--placeholder" role="img" aria-label="用户头像">
@@ -733,8 +749,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                         <div class="tool-card" data-target="project-management">
                             <i class="fas fa-plus-circle"></i>
                             <h3 data-i18n="dashboard.newProject">新建项目</h3>
-
---- 第 15 页 ---
                             <p data-i18n="dashboard.newProjectDesc">创建全新的UI设计项目</p>
                         </div>
                         <div class="tool-card rotating-border" data-target="ai-generate">
@@ -771,6 +785,8 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                         border: 1px solid rgba(0, 240, 255, 0.18);
                         background: rgba(15, 22, 41, 0.55);
                         max-width: 920px;
+
+--- 第 16 页 ---
                     "
                 >
                     <div class="section-header" style="margin-bottom: 10px">
@@ -785,8 +801,6 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                     <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
                         <button
                             type="button"
-
---- 第 16 页 ---
                             id="artifex-export-local-btn"
                             class="project-action"
                             title="导出为 JSON 文件"
@@ -824,25 +838,36 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
             <i class="fas fa-bars"></i>
         </button>
 
+--- 第 17 页 ---
+
+        <!-- 备案信息 -->
+        <footer class="beian-footer">
+            <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
+                <img src="vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+            </a>
+            <span class="beian-separator">|</span>
+            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
+        </footer>
+
         <!-- 简化的JavaScript代码 -->
         <script src="js/i18n.js"></script>
-        <script src="js/ui-kit.js"></script>
-        <script src="js/api-utils.js"></script>
-        <script src="js/user-storage-scope.js"></script>
-        <script src="js/data-portability.js"></script>
-        <script src="js/html-utils.js"></script>
-        <script src="js/navigation.js"></script>
-        <script src="js/notification-component.js"></script>
-        <script src="js/avatar-manager.js"></script>
-        <script src="js/notification-manager.js"></script>
-        <script src="js/scroll-animations.js"></script>
-        <script src="js/page-effects.js"></script>
-
---- 第 17 页 ---
-        <script src="js/boot-sequence.js"></script>
-        <script src="js/holographic-cards.js"></script>
-        <script src="js/keyboard-shortcuts.js"></script>
+        <script defer src="js/ui-kit.js"></script>
+        <script defer src="js/api-utils.js"></script>
+        <script defer src="js/user-storage-scope.js"></script>
+        <script defer src="js/data-portability.js"></script>
+        <script defer src="js/html-utils.js"></script>
+        <script defer src="js/navigation.js"></script>
+        <script defer src="js/notification-component.js"></script>
+        <script defer src="js/avatar-manager.js"></script>
+        <script defer src="js/notification-manager.js"></script>
+        <script defer src="js/scroll-animations.js"></script>
+        <script defer src="js/image-compress.js"></script>
+        <script defer src="js/page-effects.js"></script>
+        <script defer src="js/boot-sequence.js"></script>
+        <script defer src="js/holographic-cards.js"></script>
+        <script defer src="js/keyboard-shortcuts.js"></script>
         <script src="js/dashboard-init.js"></script>
+        <script src="js/sw-register.js"></script>
     </body>
 </html>
 
@@ -852,6 +877,7 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.3.3 */
+'use strict';
 /**
  * 官方 REST 接入：读取 config/ark-rest-api.local.json（与 curl 一致），不依赖系统环境变量。
  * 文档：图片生成 API https://www.volcengine.com/docs/82379/1541523
@@ -863,6 +889,8 @@ const CONFIG_NAME = 'ark-rest-api.local.json';
 
 function getConfigPath() {
     return path.join(__dirname, '..', 'config', CONFIG_NAME);
+
+--- 第 18 页 ---
 }
 
 /**
@@ -889,8 +917,6 @@ function loadArkRestConfig() {
                 }
             }
         }
-
---- 第 18 页 ---
         return j;
     } catch (e) {
         console.warn(`[即梦 REST] 读取 ${CONFIG_NAME} 失败:`, e.message);
@@ -914,6 +940,9 @@ module.exports = {
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.3.3 */
+'use strict';
+
+--- 第 19 页 ---
 const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
@@ -925,11 +954,17 @@ const dbPath = process.env.USERS_DB_PATH || path.join(dataDir, 'users.sqlite');
 const legacyJsonPath = path.join(dataDir, 'users.json');
 
 let db;
+let _checkpointTimer = null;
+
+// 预编译语句缓存（init() 中初始化）
+let stmtGetUserById, stmtGetUserByEmail, stmtGetUserByUsername, stmtLogApiCall;
+let stmtCheckQuotaDaily, stmtCheckQuotaMonthly;
 
 /**
  * 把 WAL 里的已提交页合并进主库文件，便于用 DB Browser 等外部工具立刻看到最新行。
  */
 function checkpointWal() {
+    if (!db) return;
     try {
         if (typeof db.checkpoint === 'function') {
             db.checkpoint('main');
@@ -941,8 +976,6 @@ function checkpointWal() {
             db.pragma('wal_checkpoint(TRUNCATE)');
         } catch (e2) {
             /* ignore */
-
---- 第 19 页 ---
         }
     }
 }
@@ -960,6 +993,8 @@ function migrateFromJsonIfEmpty() {
     } catch {
         return;
     }
+
+--- 第 20 页 ---
     const users = data.users || [];
     if (users.length === 0) return;
     const insert = db.prepare(
@@ -993,8 +1028,6 @@ function migrateFromJsonIfEmpty() {
 function init() {
     if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
-
---- 第 20 页 ---
     }
     db = new Database(dbPath);
     db.pragma('journal_mode = WAL');
@@ -1012,6 +1045,8 @@ function init() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             provider TEXT NOT NULL,
+
+--- 第 21 页 ---
             credentials_json TEXT NOT NULL,
             updated_at TEXT NOT NULL,
             UNIQUE(user_id, provider),
@@ -1029,6 +1064,7 @@ function init() {
         );
         CREATE INDEX IF NOT EXISTS idx_usage_logs_user ON usage_logs(user_id);
         CREATE INDEX IF NOT EXISTS idx_usage_logs_created ON usage_logs(created_at);
+        CREATE INDEX IF NOT EXISTS idx_usage_logs_user_provider_created ON usage_logs(user_id, provider, created_at);
         CREATE TABLE IF NOT EXISTS user_quotas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
@@ -1045,8 +1081,6 @@ function init() {
             name TEXT NOT NULL,
             description TEXT DEFAULT '',
             type TEXT DEFAULT 'other',
-
---- 第 21 页 ---
             version INTEGER DEFAULT 1,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
@@ -1063,6 +1097,8 @@ function init() {
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
+
+--- 第 22 页 ---
         CREATE TABLE IF NOT EXISTS version_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             project_id INTEGER NOT NULL,
@@ -1081,7 +1117,7 @@ function init() {
             source TEXT DEFAULT '',
             tags TEXT DEFAULT '[]',
             created_at TEXT DEFAULT (datetime('now')),
-            FOREIGN KEY (user_id) REFERENCES users(id)
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
         CREATE INDEX IF NOT EXISTS idx_asset_library_user ON asset_library(user_id);
         CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id);
@@ -1094,11 +1130,9 @@ function init() {
             target_id TEXT,
             details TEXT,
             created_at TEXT DEFAULT (datetime('now')),
-            FOREIGN KEY (user_id) REFERENCES users(id)
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
         CREATE INDEX IF NOT EXISTS idx_activity_log_user ON activity_log(user_id);
-
---- 第 22 页 ---
         CREATE INDEX IF NOT EXISTS idx_activity_log_created ON activity_log(created_at);
     `);
 
@@ -1108,26 +1142,53 @@ function init() {
         db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'");
         logger.info('[users-db] 已添加 role 列到 users 表');
     }
-    // Ensure user ID 1 is admin
-    db.prepare("UPDATE users SET role = 'admin' WHERE id = 1 AND role != 'admin'").run();
+    // 自动提升首个用户为 admin（仅当 ADMIN_USER_ID 未指定时）
+    const adminUserId = process.env.ADMIN_USER_ID;
+    if (adminUserId) {
+        db.prepare("UPDATE users SET role = 'admin' WHERE id = ? AND role != 'admin'").run(Number(adminUserId));
+    } else {
+        // 默认将 ID=1 设为管理员（向后兼容）
+        db.prepare("UPDATE users SET role = 'admin' WHERE id = 1 AND role != 'admin'").run();
+
+--- 第 23 页 ---
+    }
 
     migrateFromJsonIfEmpty();
+
+    // 预编译高频查询语句，避免每次调用重复解析 SQL
+    stmtGetUserById = db.prepare('SELECT * FROM users WHERE id = ?');
+    stmtGetUserByEmail = db.prepare('SELECT * FROM users WHERE email = ?');
+    stmtGetUserByUsername = db.prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE');
+    stmtLogApiCall = db.prepare(
+        'INSERT INTO usage_logs (user_id, provider, operation, status, duration_ms, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+    );
+    stmtCheckQuotaDaily = db.prepare(
+        'SELECT COUNT(*) AS c FROM usage_logs WHERE user_id = ? AND provider = ? AND created_at >= ?'
+    );
+    stmtCheckQuotaMonthly = db.prepare(
+        'SELECT COUNT(*) AS c FROM usage_logs WHERE user_id = ? AND provider = ? AND created_at >= ?'
+    );
+
+    // 定时 WAL checkpoint（每 30 秒），替代每次写操作后的 checkpoint
+    if (_checkpointTimer) clearInterval(_checkpointTimer);
+    _checkpointTimer = setInterval(checkpointWal, 30 * 1000);
+    if (_checkpointTimer.unref) _checkpointTimer.unref();
 }
 
 function getUserById(id) {
-    return db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    return stmtGetUserById.get(id);
 }
 
 function getUserByEmail(email) {
     const em = String(email || '')
         .trim()
         .toLowerCase();
-    return db.prepare('SELECT * FROM users WHERE email = ?').get(em);
+    return stmtGetUserByEmail.get(em);
 }
 
 function getUserByUsername(username) {
     const u = String(username || '').trim();
-    return db.prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE').get(u);
+    return stmtGetUserByUsername.get(u);
 }
 
 function createUser(username, email, passwordHash) {
@@ -1138,20 +1199,27 @@ function createUser(username, email, passwordHash) {
              VALUES (?, ?, ?, ?, ?)`
         )
         .run(username, email, passwordHash, '{}', created_at);
-    checkpointWal();
-    return getUserById(Number(info.lastInsertRowid));
+    const newUserId = Number(info.lastInsertRowid);
+    // 首个注册用户自动成为管理员
+
+--- 第 24 页 ---
+    const adminUserId = process.env.ADMIN_USER_ID;
+    if (adminUserId) {
+        if (newUserId === Number(adminUserId)) {
+            db.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(newUserId);
+        }
+    } else if (newUserId === 1) {
+        db.prepare("UPDATE users SET role = 'admin' WHERE id = 1").run();
+    }
+    return getUserById(newUserId);
 }
 
 function updateProfile(userId, profileObj) {
     db.prepare('UPDATE users SET profile_json = ? WHERE id = ?').run(JSON.stringify(profileObj), userId);
-    checkpointWal();
 }
 
 function updatePassword(userId, passwordHash) {
     db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, Number(userId));
-
---- 第 23 页 ---
-    checkpointWal();
 }
 
 function getUserRole(userId) {
@@ -1185,6 +1253,8 @@ function getUserApiCredentials(userId, provider) {
     }
 }
 
+
+--- 第 25 页 ---
 function getAllUserApiCredentials(userId) {
     const rows = db
         .prepare('SELECT provider, credentials_json, updated_at FROM user_api_credentials WHERE user_id = ?')
@@ -1201,8 +1271,6 @@ function getAllUserApiCredentials(userId) {
             out[row.provider] = { updatedAt: row.updated_at };
         }
     }
-
---- 第 24 页 ---
     return out;
 }
 
@@ -1220,23 +1288,25 @@ function upsertUserApiCredentials(userId, provider, credentialsObj) {
          ON CONFLICT(user_id, provider)
          DO UPDATE SET credentials_json = excluded.credentials_json, updated_at = excluded.updated_at`
     ).run(Number(userId), p, payload, now);
-    checkpointWal();
 }
 
 function deleteUserApiCredentials(userId, provider) {
     const p = normalizeProvider(provider);
     if (!p) return;
     db.prepare('DELETE FROM user_api_credentials WHERE user_id = ? AND provider = ?').run(Number(userId), p);
-    checkpointWal();
 }
 
 function getUserApiCredentialStatus(userId) {
     const providers = ['jimeng', 'alibaba', 'tencent', 'sdwebui'];
+    // 单次查询获取已配置的 provider 列表，避免 N+1
+    const rows = db.prepare('SELECT provider FROM user_api_credentials WHERE user_id = ?').all(Number(userId));
+    const configured = new Set(rows.map((r) => r.provider));
     const out = {};
     for (const provider of providers) {
-        const cfg = getUserApiCredentials(userId, provider);
-        out[provider] = !!(cfg && typeof cfg === 'object' && Object.keys(cfg).length > 0);
+        out[provider] = configured.has(provider);
     }
+
+--- 第 26 页 ---
     return out;
 }
 
@@ -1246,15 +1316,13 @@ function getAllUsers() {
     const rows = db.prepare('SELECT id, username, email, role, profile_json, created_at FROM users ORDER BY created_at DESC').all();
     return rows.map((row) => {
         let profile = {};
-        try { profile = JSON.parse(row.profile_json || '{}'); } catch (_) {}
+        try { profile = JSON.parse(row.profile_json || '{}'); } catch (_) { /* profile_json 损坏时降级为空对象 */ }
         return {
             id: row.id,
             username: row.username,
             email: row.email,
-            role: row.role || profile.role || 'user',
+            role: row.role || 'user',
             created_at: row.created_at,
-
---- 第 25 页 ---
         };
     });
 }
@@ -1271,15 +1339,14 @@ function createProject(userId, name, description, type) {
     db.prepare(
         'INSERT INTO version_history (project_id, version, description, created_at) VALUES (?, 1, ?, ?)'
     ).run(projectId, '项目创建', now);
-    checkpointWal();
     return getProject(projectId);
 }
 
 function getProject(projectId) {
     const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(Number(projectId));
     if (!project) return null;
-    project.assets = db.prepare('SELECT * FROM project_assets WHERE project_id = ? ORDER BY created_at DESC').all(project.id);
-    project.versionHistory = db.prepare('SELECT * FROM version_history WHERE project_id = ? ORDER BY created_at DESC').all(project.id);
+    project.assets = db.prepare('SELECT * FROM project_assets WHERE project_id = ? ORDER BY created_at DESC LIMIT 200').all(project.id);
+    project.versionHistory = db.prepare('SELECT * FROM version_history WHERE project_id = ? ORDER BY created_at DESC LIMIT 50').all(project.id);
     return project;
 }
 
@@ -1290,10 +1357,22 @@ function getUserProjects(userId, limit, offset) {
             .all(Number(userId), Number(limit), Number(offset));
     } else {
         projects = db.prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC').all(Number(userId));
+
+--- 第 27 页 ---
     }
+    if (projects.length === 0) return projects;
+    // 批量查询 assets 和 version_history，避免 N+1
+    const ids = projects.map((p) => p.id);
+    const placeholders = ids.map(() => '?').join(',');
+    const allAssets = db.prepare(`SELECT * FROM project_assets WHERE project_id IN (${placeholders}) ORDER BY created_at DESC`).all(...ids);
+    const allHistory = db.prepare(`SELECT * FROM version_history WHERE project_id IN (${placeholders}) ORDER BY created_at DESC`).all(...ids);
+    const assetsMap = new Map();
+    allAssets.forEach((a) => { if (!assetsMap.has(a.project_id)) assetsMap.set(a.project_id, []); assetsMap.get(a.project_id).push(a); });
+    const historyMap = new Map();
+    allHistory.forEach((h) => { if (!historyMap.has(h.project_id)) historyMap.set(h.project_id, []); historyMap.get(h.project_id).push(h); });
     return projects.map((p) => {
-        p.assets = db.prepare('SELECT * FROM project_assets WHERE project_id = ?').all(p.id);
-        p.versionHistory = db.prepare('SELECT * FROM version_history WHERE project_id = ? ORDER BY created_at DESC').all(p.id);
+        p.assets = assetsMap.get(p.id) || [];
+        p.versionHistory = historyMap.get(p.id) || [];
         return p;
     });
 }
@@ -1305,8 +1384,6 @@ function getProjectCount(userId) {
 
 function updateProject(projectId, userId, updates) {
     const now = new Date().toISOString();
-
---- 第 26 页 ---
     const project = db.prepare('SELECT * FROM projects WHERE id = ? AND user_id = ?').get(Number(projectId), Number(userId));
     if (!project) return null;
     const newVersion = (project.version || 1) + 1;
@@ -1323,29 +1400,27 @@ function updateProject(projectId, userId, updates) {
     db.prepare(
         'INSERT INTO version_history (project_id, version, description, created_at) VALUES (?, ?, ?, ?)'
     ).run(Number(projectId), newVersion, updates.versionDesc || '项目更新', now);
-    checkpointWal();
     return getProject(projectId);
 }
 
 function deleteProject(projectId, userId) {
     db.prepare('DELETE FROM projects WHERE id = ? AND user_id = ?').run(Number(projectId), Number(userId));
-    checkpointWal();
 }
 
 // ─── 项目素材 ───
 
+
+--- 第 28 页 ---
 function addProjectAsset(projectId, userId, name, type, content) {
     const now = new Date().toISOString();
     const info = db.prepare(
         'INSERT INTO project_assets (project_id, user_id, name, type, content, created_at) VALUES (?, ?, ?, ?, ?, ?)'
     ).run(Number(projectId), Number(userId), name, type || 'image', content, now);
-    checkpointWal();
     return { id: Number(info.lastInsertRowid), project_id: projectId, name, type, content, created_at: now };
 }
 
 function deleteProjectAsset(assetId, userId) {
     db.prepare('DELETE FROM project_assets WHERE id = ? AND user_id = ?').run(Number(assetId), Number(userId));
-    checkpointWal();
 }
 
 // ─── 素材库 ───
@@ -1357,8 +1432,6 @@ function getAssetLibrary(userId, limit, offset) {
     }
     return db.prepare('SELECT * FROM asset_library WHERE user_id = ? ORDER BY created_at DESC').all(Number(userId));
 }
-
---- 第 27 页 ---
 
 function getAssetLibraryCount(userId) {
     const row = db.prepare('SELECT COUNT(*) AS count FROM asset_library WHERE user_id = ?').get(Number(userId));
@@ -1380,7 +1453,6 @@ function addAssetLibraryItem(userId, item) {
         tags,
         now
     );
-    checkpointWal();
     return { id: Number(info.lastInsertRowid), user_id: userId, ...item, tags, created_at: now };
 }
 
@@ -1389,6 +1461,8 @@ function updateAssetLibraryItem(userId, itemId, updates) {
     if (!existing) return null;
     const tags = updates.tags != undefined
         ? (typeof updates.tags === 'string' ? updates.tags : JSON.stringify(updates.tags))
+
+--- 第 29 页 ---
         : existing.tags;
     db.prepare(
         'UPDATE asset_library SET name = ?, type = ?, content = ?, desc = ?, source = ?, tags = ? WHERE id = ? AND user_id = ?'
@@ -1402,25 +1476,18 @@ function updateAssetLibraryItem(userId, itemId, updates) {
         Number(itemId),
         Number(userId)
     );
-    checkpointWal();
     return db.prepare('SELECT * FROM asset_library WHERE id = ?').get(Number(itemId));
 }
 
 function deleteAssetLibraryItem(userId, itemId) {
     db.prepare('DELETE FROM asset_library WHERE id = ? AND user_id = ?').run(Number(itemId), Number(userId));
-    checkpointWal();
-
---- 第 28 页 ---
 }
 
 // ─── 用量追踪 ───
 
 function logApiCall(userId, provider, operation, status, durationMs) {
     const now = new Date().toISOString();
-    db.prepare(
-        `INSERT INTO usage_logs (user_id, provider, operation, status, duration_ms, created_at)
-         VALUES (?, ?, ?, ?, ?, ?)`
-    ).run(Number(userId), normalizeProvider(provider), operation, status, durationMs || 0, now);
+    stmtLogApiCall.run(Number(userId), normalizeProvider(provider), operation, status, durationMs || 0, now);
 }
 
 function getUserUsageStats(userId) {
@@ -1446,6 +1513,8 @@ function getGlobalUsageStats() {
          FROM usage_logs ul
          JOIN users u ON u.id = ul.user_id
          GROUP BY ul.user_id, ul.provider, ul.operation, ul.status
+
+--- 第 30 页 ---
          ORDER BY count DESC`
     ).all();
 }
@@ -1461,8 +1530,6 @@ function getGlobalUsageSummary() {
 }
 
 // ─── 活动日志 ───
-
---- 第 29 页 ---
 
 function addActivity(userId, action, targetType, targetId, details) {
     const now = new Date().toISOString();
@@ -1499,131 +1566,16 @@ function getRecentActivityCount() {
     return row ? row.count : 0;
 }
 
-// ─── 配额管理 ───
-
-function getUserQuota(userId, provider) {
-    const p = normalizeProvider(provider);
-    if (!p) return null;
-    return db.prepare('SELECT * FROM user_quotas WHERE user_id = ? AND provider = ?').get(Number(userId), p);
-}
-
-function setUserQuota(userId, provider, dailyLimit, monthlyLimit) {
-    const p = normalizeProvider(provider);
-    if (!p) throw new Error('provider is required');
-    const now = new Date().toISOString();
-    db.prepare(
-        `INSERT INTO user_quotas (user_id, provider, daily_limit, monthly_limit, updated_at)
-
---- 第 30 页 ---
-         VALUES (?, ?, ?, ?, ?)
-         ON CONFLICT(user_id, provider)
-         DO UPDATE SET daily_limit = excluded.daily_limit, monthly_limit = excluded.monthly_limit, updated_at = excluded.updated_at`
-    ).run(Number(userId), p, dailyLimit || 100, monthlyLimit || 3000, now);
-    checkpointWal();
-}
-
-function checkQuota(userId, provider) {
-    const p = normalizeProvider(provider);
-    if (!p) return { ok: true };
-
-    // 获取用户配额，如果没有则使用默认值
-    const quota = getUserQuota(userId, p);
-    const dailyLimit = quota ? quota.daily_limit : 100;
-    const monthlyLimit = quota ? quota.monthly_limit : 3000;
-
-    // 检查今日用量
-    const today = new Date().toISOString().split('T')[0];
-    const todayCount = db.prepare(
-        'SELECT COUNT(*) AS c FROM usage_logs WHERE user_id = ? AND provider = ? AND created_at >= ?'
-    ).get(Number(userId), p, today + 'T00:00:00.000Z');
-
-    if (todayCount.c >= dailyLimit) {
-        return { ok: false, reason: 'daily', limit: dailyLimit, used: todayCount.c };
-    }
-
-    // 检查本月用量
-    const monthStart = today.substring(0, 7) + '-01';
-    const monthCount = db.prepare(
-        'SELECT COUNT(*) AS c FROM usage_logs WHERE user_id = ? AND provider = ? AND created_at >= ?'
-    ).get(Number(userId), p, monthStart + 'T00:00:00.000Z');
-
-    if (monthCount.c >= monthlyLimit) {
-        return { ok: false, reason: 'monthly', limit: monthlyLimit, used: monthCount.c };
-    }
-
-    return { ok: true, dailyUsed: todayCount.c, dailyLimit, monthlyUsed: monthCount.c, monthlyLimit };
-}
-
-module.exports = {
-    init,
-    getUserById,
-    getUserByEmail,
-    getUserByUsername,
-    createUser,
-    updateProfile,
-    updatePassword,
-    getUserRole,
-    isAdminRole,
-    getUserApiCredentials,
-
 
 ... （中间省略） ...
 
 【后30页】
 
---- 第 675 页 ---
- * 各功能页在 head 末尾引入本文件，以覆盖页面内旧版侧栏样式。
- */
-:root {
-    --font-display: "Orbitron", "Segoe UI", sans-serif;
-    --font-ui: "Rajdhani", "Segoe UI", sans-serif;
-    --shell-bg: #0a0e18;
-    --shell-text: #e8ecf4;
-    --shell-muted: #b0b0c0;
-    --shell-accent: #00f0ff;
-    --shell-sidebar-w: 240px;
-    --mx: 50vw;
-    --my: 50vh;
-}
-
-html,
-body.app-shell {
-    height: 100%;
-}
-
-body.app-shell {
-    background: var(--shell-bg);
-    color: var(--shell-text);
-    margin: 0;
-    min-height: 100vh;
-    font-family: var(--font-ui);
-    font-weight: 500;
-    font-size: 17px;
-    overflow-x: hidden;
-}
-
-body.app-shell::before {
-    content: "";
-    position: fixed;
-    inset: -20%;
-    background:
-        radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.24) 0%, rgba(0, 240, 255, 0) 38%),
-        radial-gradient(circle at 80% 30%, rgba(124, 58, 237, 0.28) 0%, rgba(124, 58, 237, 0) 40%),
-        radial-gradient(circle at 50% 85%, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0) 37%);
-    filter: blur(28px);
-    transform: translate3d(0, 0, 0);
-    animation: appShellFlowBg 7.2s ease-in-out infinite alternate;
-    pointer-events: none;
-    z-index: 0;
-}
-
-@keyframes appShellFlowBg {
+--- 第 694 页 ---
     0% { transform: translate3d(-3%, -2%, 0) scale(1.01); }
     50% { transform: translate3d(3%, 2%, 0) scale(1.08); }
     100% { transform: translate3d(-2%, 3%, 0) scale(1.04); }
 }
-
---- 第 676 页 ---
 
 body.app-shell .pointer-glow {
     position: fixed;
@@ -1670,12 +1622,12 @@ body.app-shell .dashboard-container {
 }
 
 body.app-shell .sidebar {
+
+--- 第 695 页 ---
     width: var(--shell-sidebar-w);
     background: linear-gradient(180deg, #0f1629 0%, #0a0e18 100%);
     padding: 20px 0;
     transition: left 0.3s ease, width 0.3s ease, padding 0.3s ease;
-
---- 第 677 页 ---
     box-shadow: 4px 0 32px rgba(0, 0, 0, 0.45), inset -1px 0 0 rgba(0, 240, 255, 0.12);
     z-index: 100;
     height: 100vh;
@@ -1722,12 +1674,12 @@ body.app-shell .sidebar-logo h1 {
     font-family: var(--font-display);
     font-size: 13px;
     font-weight: 700;
+
+--- 第 696 页 ---
     letter-spacing: 0.06em;
     color: #f0f4fc;
     margin: 0;
 }
-
---- 第 678 页 ---
 
 body.app-shell .nav-menu {
     list-style: none;
@@ -1774,12 +1726,12 @@ body.app-shell .main-content {
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 240, 255, 0.35) rgba(10, 18, 34, 0.6);
     position: relative;
+
+--- 第 697 页 ---
     background:
         linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
     background-size: 48px 48px;
-
---- 第 679 页 ---
     background-color: rgba(10, 14, 24, 0.3);
 }
 
@@ -1826,12 +1778,12 @@ body.app-shell .top-bar {
     align-items: center;
     margin-bottom: 24px;
     padding: 14px 18px;
+
+--- 第 698 页 ---
     border-radius: 10px;
     border: 1px solid rgba(0, 240, 255, 0.15);
     background: rgba(15, 22, 41, 0.65);
     backdrop-filter: blur(12px);
-
---- 第 680 页 ---
     -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 0 28px rgba(0, 240, 255, 0.06);
     position: relative;
@@ -1878,12 +1830,12 @@ body.app-shell .top-bar .search-bar input {
     color: #f0f4fc;
     font-size: 15px;
     font-family: var(--font-ui);
+
+--- 第 699 页 ---
 }
 
 body.app-shell .top-bar .search-bar i {
     position: absolute;
-
---- 第 681 页 ---
     left: 10px;
     top: 50%;
     transform: translateY(-50%);
@@ -1931,11 +1883,11 @@ body.app-shell .notification-badge {
     font-weight: bold;
 }
 
+--- 第 700 页 ---
+
 body.app-shell .user-avatar {
     width: 40px;
     height: 40px;
-
---- 第 682 页 ---
     border-radius: 50%;
     background: var(--shell-accent);
     display: flex;
@@ -1982,12 +1934,12 @@ body.app-shell .user-avatar-dropdown.show {
 body.app-shell .user-avatar-dd-item {
     display: flex;
     align-items: center;
+
+--- 第 701 页 ---
     gap: 10px;
     width: 100%;
     padding: 10px 16px;
     border: none;
-
---- 第 683 页 ---
     background: transparent;
     color: #e8ecf4;
     font-size: 14px;
@@ -2034,12 +1986,12 @@ body.app-shell .mobile-menu-toggle {
         justify-content: center;
         padding: 0 0 16px;
     }
+
+--- 第 702 页 ---
     body.app-shell .sidebar-logo h1 {
         display: none;
     }
     body.app-shell .nav-link {
-
---- 第 684 页 ---
         justify-content: center;
         padding: 14px 10px;
     }
@@ -2086,12 +2038,12 @@ body.app-shell .mobile-menu-toggle {
     body.app-shell .top-bar {
         flex-direction: column;
         align-items: stretch;
+
+--- 第 703 页 ---
         gap: 12px;
     }
     body.app-shell .top-bar .search-bar {
         max-width: none;
-
---- 第 685 页 ---
         margin-right: 0;
     }
     body.app-shell .mobile-menu-toggle {
@@ -2138,12 +2090,12 @@ body.app-shell .search-bar input:focus {
 .rotating-border {
     position: relative;
     border: none !important;
+
+--- 第 704 页 ---
     overflow: visible;
 }
 .rotating-border::before {
     content: '';
-
---- 第 686 页 ---
     position: absolute;
     inset: -2px;
     border-radius: inherit;
@@ -2176,6 +2128,54 @@ body.app-shell .search-bar input:focus {
     #boot-sequence { display: none !important; }
 }
 
+/* ── 备案信息底部栏 ── */
+.beian-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: rgba(10, 14, 24, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 8px 0;
+    text-align: center;
+    font-size: 12px;
+
+--- 第 705 页 ---
+    color: #8888a0;
+}
+.beian-footer a {
+    color: #8888a0;
+    text-decoration: none;
+    transition: color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.beian-footer a:hover {
+    color: #b0b0d0;
+}
+.beian-icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    opacity: 0.8;
+}
+.beian-separator {
+    margin: 0 8px;
+    color: #555;
+}
+/* 为页面底部留出备案栏空间（仅对有侧边栏的页面生效） */
+body.app-shell .main-content {
+    padding-bottom: 40px;
+}
+/* 登录页等无侧边栏页面 */
+body:not(.app-shell) {
+    padding-bottom: 40px;
+}
+
 
 // ===== 文件: styles/dashboard.css =====
             :root {
@@ -2195,7 +2195,7 @@ body.app-shell .search-bar input:focus {
 
             /* 主界面核心样式 */
 
---- 第 687 页 ---
+--- 第 706 页 ---
             body {
                 background: #0a0e18;
                 color: #e8ecf4;
@@ -2247,7 +2247,7 @@ body.app-shell .search-bar input:focus {
                     radial-gradient(circle at 80% 30%, rgba(124, 58, 237, 0.28) 0%, rgba(124, 58, 237, 0) 40%),
                     radial-gradient(circle at 50% 85%, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0) 37%);
 
---- 第 688 页 ---
+--- 第 707 页 ---
                 filter: blur(28px);
                 transform: translate3d(0, 0, 0);
                 animation: aiFlowBg 7.2s ease-in-out infinite alternate;
@@ -2299,7 +2299,7 @@ body.app-shell .search-bar input:focus {
                 pointer-events: none;
                 animation: sidebarEdgeFlow 2.4s ease-in-out infinite;
 
---- 第 689 页 ---
+--- 第 708 页 ---
             }
 
             @keyframes sidebarEdgeFlow {
@@ -2351,7 +2351,7 @@ body.app-shell .search-bar input:focus {
             }
 
 
---- 第 690 页 ---
+--- 第 709 页 ---
             .nav-link:hover, .nav-link.active {
                 background: rgba(0, 240, 255, 0.1);
                 color: #00f0ff;
@@ -2403,7 +2403,7 @@ body.app-shell .search-bar input:focus {
                 position: relative;
                 z-index: 1;
 
---- 第 691 页 ---
+--- 第 710 页 ---
             }
 
             /* 加载状态 */
@@ -2455,7 +2455,7 @@ body.app-shell .search-bar input:focus {
 
             .top-bar > * {
 
---- 第 692 页 ---
+--- 第 711 页 ---
                 position: relative;
                 z-index: 1;
             }
@@ -2507,7 +2507,7 @@ body.app-shell .search-bar input:focus {
             .notification-badge {
                 position: absolute;
 
---- 第 693 页 ---
+--- 第 712 页 ---
                 top: -5px;
                 right: -5px;
                 width: 16px;
@@ -2559,7 +2559,7 @@ body.app-shell .search-bar input:focus {
             .tool-card::before {
                 content: "";
 
---- 第 694 页 ---
+--- 第 713 页 ---
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -2611,7 +2611,7 @@ body.app-shell .search-bar input:focus {
 
             .tool-card h3 {
 
---- 第 695 页 ---
+--- 第 714 页 ---
                 font-family: var(--font-display);
                 font-size: 11px;
                 font-weight: 700;
@@ -2663,7 +2663,7 @@ body.app-shell .search-bar input:focus {
 
             .project-card {
 
---- 第 696 页 ---
+--- 第 715 页 ---
                 background: rgba(8, 12, 24, 0.75);
                 border-radius: 10px;
                 overflow: hidden;
@@ -2715,7 +2715,7 @@ body.app-shell .search-bar input:focus {
             .project-card > * {
                 position: relative;
 
---- 第 697 页 ---
+--- 第 716 页 ---
                 z-index: 1;
             }
 
@@ -2767,7 +2767,7 @@ body.app-shell .search-bar input:focus {
                 overflow: hidden;
             }
 
---- 第 698 页 ---
+--- 第 717 页 ---
 
             .project-meta {
                 display: flex;
@@ -2819,7 +2819,7 @@ body.app-shell .search-bar input:focus {
             }
 
 
---- 第 699 页 ---
+--- 第 718 页 ---
             @media (max-width: 992px) {
                 .sidebar {
                     width: 60px;
@@ -2871,7 +2871,7 @@ body.app-shell .search-bar input:focus {
                 .top-bar {
                     flex-direction: column;
 
---- 第 700 页 ---
+--- 第 719 页 ---
                     align-items: flex-start;
                     gap: 15px;
                 }
@@ -2923,7 +2923,7 @@ body.app-shell .search-bar input:focus {
                     animation: none !important;
                 }
 
---- 第 701 页 ---
+--- 第 720 页 ---
                 .pointer-glow,
                 .pointer-glow--lag {
                     display: none !important;
@@ -2975,7 +2975,7 @@ body.app-shell .search-bar input:focus {
     font-weight: 700;
     letter-spacing: 0.1em;
 
---- 第 702 页 ---
+--- 第 721 页 ---
     text-transform: uppercase;
     color: var(--ui-accent);
 }
@@ -3027,7 +3027,7 @@ body.app-shell .search-bar input:focus {
     align-items: center;
     justify-content: center;
 
---- 第 703 页 ---
+--- 第 722 页 ---
     border-radius: 7px;
     border: 1px solid rgba(0, 240, 255, 0.2);
     background: rgba(255, 255, 255, 0.04);
@@ -3079,7 +3079,7 @@ body.app-shell .search-bar input:focus {
 
 .tech-ui-toast--warn {
 
---- 第 704 页 ---
+--- 第 723 页 ---
     border-color: rgba(255, 180, 0, 0.42);
 }
 

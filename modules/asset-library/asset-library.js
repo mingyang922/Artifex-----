@@ -188,17 +188,11 @@
             }
 
             function uiConfirm(message, title) {
-                if (window.TechUI && typeof window.TechUI.confirm === 'function') {
-                    return window.TechUI.confirm(message, title || '请确认', '确定', '取消');
-                }
-                return Promise.resolve(confirm(message));
+                return window.TechUI.confirm(message, title || '请确认', '确定', '取消');
             }
 
             function uiPrompt(title, label, value) {
-                if (window.TechUI && typeof window.TechUI.prompt === 'function') {
-                    return window.TechUI.prompt(title, label, value || '', '确定', '取消');
-                }
-                return Promise.resolve(prompt(label, value || ''));
+                return window.TechUI.prompt(title, label, value || '', '确定', '取消');
             }
 
             // 本地存储键（登录后 bootAssetLibrary 中设为按用户隔离）
@@ -274,7 +268,7 @@
                 try {
                     localStorage.setItem(STORAGE_KEY + '_categories', JSON.stringify(categories));
                 } catch (e) {
-                    console.warn('保存分类失败', e);
+                    console.debug('[asset-library] 保存分类失败', e);
                 }
                 return true;
             }
@@ -490,6 +484,14 @@
                     if (a.type && a.type.startsWith('image/')) {
                         // 对于图片，直接在新窗口打开并提示用户右键保存
                         const newWindow = window.open('', '_blank');
+                        if (!newWindow) {
+                            // 弹窗被阻止，回退到直接下载
+                            const link = document.createElement('a');
+                            link.href = a.dataURL;
+                            link.download = fileName;
+                            link.click();
+                            return;
+                        }
                         const doc = newWindow.document;
                         doc.open();
                         doc.write('<!DOCTYPE html><html><head><title></title></head><body></body></html>');
@@ -640,7 +642,7 @@
             }
 
             async function addAssetFromFile(file, defaultNameVal, categoryVal) {
-                const MAX_NON_IMAGE_FILE_SIZE = 2.5 * 1024 * 1024;
+                const MAX_NON_IMAGE_FILE_SIZE = (window.ArtifexConstants && window.ArtifexConstants.MAX_NON_IMAGE_FILE_SIZE) || 2.5 * 1024 * 1024;
                 const isImage = !!(file.type && file.type.startsWith('image/'));
                 if (!isImage && file.size > MAX_NON_IMAGE_FILE_SIZE) {
                     throw new Error(`文件过大（${(file.size / 1024 / 1024).toFixed(1)}MB），非图片建议不超过 2.5MB`);
@@ -716,7 +718,7 @@
                     uiToast(`上传失败：${failed} 个文件未保存`, 'warn');
                 }
                 if (failMessages.length) {
-                    console.warn('上传失败详情:\n' + failMessages.join('\n'));
+                    console.debug('[asset-library] 上传失败详情:\n' + failMessages.join('\n'));
                 }
             }
 
@@ -734,17 +736,21 @@
                 handleFiles(e.dataTransfer.files);
             });
 
-            btnChoose.addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+            if (btnChoose && fileInput) {
+                btnChoose.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+            }
 
-            // 搜索与筛选
-            searchEl.addEventListener('input', () => renderAssets());
-            categoryFilterEl.addEventListener('change', () => renderAssets());
-            if (assetSearchEl) assetSearchEl.addEventListener('input', () => renderAssets());
+            // 搜索与筛选（搜索框加 300ms 防抖，避免大量素材时输入卡顿）
+            let _searchTimer = null;
+            const debouncedRender = () => { clearTimeout(_searchTimer); _searchTimer = setTimeout(renderAssets, 300); };
+            if (searchEl) searchEl.addEventListener('input', debouncedRender);
+            if (categoryFilterEl) categoryFilterEl.addEventListener('change', () => renderAssets());
+            if (assetSearchEl) assetSearchEl.addEventListener('input', debouncedRender);
             if (typeFilterEl) typeFilterEl.addEventListener('change', () => renderAssets());
             if (sortOrderEl) sortOrderEl.addEventListener('change', () => renderAssets());
 
-            btnAddCategory.addEventListener('click', async () => {
+            if (btnAddCategory) btnAddCategory.addEventListener('click', async () => {
                 const v = await uiPrompt('新增分类', '输入新分类名称：', '');
                 if (v && v.trim()) {
                     categories.unshift(v.trim());
@@ -753,7 +759,7 @@
                 }
             });
 
-            btnClearAll.addEventListener('click', async () => {
+            if (btnClearAll) btnClearAll.addEventListener('click', async () => {
                 const ok = await uiConfirm(
                     '确定要删除所有素材并清空吗？此操作不可撤销',
                     '清空素材库'

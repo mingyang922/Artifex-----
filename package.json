@@ -9,7 +9,10 @@
         "check:node": "node scripts/check-node-version.js",
         "start": "node backend/proxy.js",
         "start:open": "concurrently -n backend,ready \"cross-env NODE_ENV=development npm start\" \"wait-on http://127.0.0.1:3000/api/health -t 120000 && node scripts/open-browser.js\"",
-        "dev": "nodemon backend/proxy.js",
+        "dev": "concurrently -n backend,vite \"nodemon backend/proxy.js\" \"vite\"",
+        "build": "vite build",
+        "build:with-sw": "vite build && node scripts/generate-sw-manifest.js",
+        "preview": "vite preview",
         "lint": "eslint --no-error-on-unmatched-pattern backend js modules scripts *.js",
         "lint:fix": "npm run lint -- --fix",
         "format": "prettier --write \"backend/**/*.{js,json}\" \"js/**/*.{js,json}\" \"modules/**/*.{js,css,html,json}\" \"scripts/**/*.{js,json}\" \"*.{html,css,js,json,md}\"",
@@ -17,6 +20,7 @@
         "install-deps": "npm install express axios dotenv",
         "setup": "npm run install-deps && echo \"请在 config/.env 中配置 API 密钥等变量（见 README）\"",
         "test": "node --test tests/backend.test.js tests/routes.test.js",
+        "test:e2e": "npx playwright test",
         "ci": "npm run lint && npm test",
         "precommit": "npm run lint"
     },
@@ -31,9 +35,17 @@
         "express-session": "^1.19.0",
         "form-data": "^4.0.5",
         "helmet": "^8.2.0",
-        "tencentcloud-sdk-nodejs": "^4.1.237"
+        "tencentcloud-sdk-nodejs": "^4.1.237",
+        "ws": "^8.21.0"
     },
     "devDependencies": {
+        "@playwright/test": "^1.60.0",
+        "@types/bcryptjs": "^2.4.6",
+        "@types/better-sqlite3": "^7.6.13",
+        "@types/compression": "^1.8.1",
+        "@types/express": "^5.0.6",
+        "@types/express-session": "^1.19.0",
+        "@types/node": "^25.9.2",
         "concurrently": "^9.1.2",
         "cross-env": "^7.0.3",
         "eslint": "^9.38.0",
@@ -41,6 +53,8 @@
         "nodemon": "^3.1.14",
         "prettier": "^3.6.2",
         "supertest": "^7.2.2",
+        "typescript": "^6.0.3",
+        "vite": "^8.0.16",
         "wait-on": "^8.0.1"
     },
     "keywords": [

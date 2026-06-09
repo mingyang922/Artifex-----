@@ -5,6 +5,7 @@
 'use strict';
 
 const axios = require('axios');
+const dns = require('dns').promises;
 const { generateMockImage, callFreeImageAPI } = require('../lib/utils');
 const { imageGenerationLimiter } = require('../lib/rate-limiter');
 const usersDbForActivity = require('../db/users-db');
@@ -67,6 +68,20 @@ function createImageRouter(deps) {
                         message: `已达到${quota.reason === 'daily' ? '每日' : '每月'}调用上限（${quota.limit}次）`,
                         provider: normalizedProvider,
                         quota,
+                    });
+                }
+            }
+
+            // 腾讯云：普通用户必须自配密钥，管理员可用平台默认密钥
+            if (normalizedProvider === 'tencent') {
+                const userTencentCfg = getUserProviderConfig(req.currentUser.id, 'tencent');
+                const hasOwnKeys = !!(userTencentCfg && userTencentCfg.secretId && userTencentCfg.secretKey);
+                if (!currentIsAdmin && !hasOwnKeys) {
+                    return res.status(403).json({
+                        error: '未配置个人密钥',
+                        message: '请先在「用户中心」配置你自己的腾讯云 SecretId / SecretKey，再使用腾讯云图片生成。',
+                        code: 'no_personal_credentials',
+                        provider: 'tencent',
                     });
                 }
             }
@@ -164,14 +179,14 @@ function createImageRouter(deps) {
             return res.status(400).json({ error: '缺少 url 参数' });
         }
 
-        // SSRF 防护：验证 URL
+        // SSRF 防护：验证 URL + DNS 解析后二次校验
         try {
             const parsed = new URL(url);
             // 只允许 http/https 协议
             if (!['http:', 'https:'].includes(parsed.protocol)) {
                 return res.status(400).json({ error: '只允许 http/https 协议' });
             }
-            // 禁止访问内网地址
+            // 禁止访问内网地址（先检查 hostname 字面值）
             const hostname = parsed.hostname;
             const blockedPatterns = [
                 /^127\./,           // 127.x.x.x
@@ -180,22 +195,49 @@ function createImageRouter(deps) {
                 /^192\.168\./,      // 192.168.x.x
                 /^169\.254\./,      // 169.254.x.x (云元数据)
                 /^0\./,             // 0.x.x.x
+                /^0\.0\.0\.0$/,     // 0.0.0.0
                 /^localhost$/i,     // localhost
-                /^\[::1\]$/,       // IPv6 localhost
-                /^\[fc00:/i,       // IPv6 私有地址
-                /^\[fd00:/i,       // IPv6 私有地址
+                /^::1$/,            // IPv6 localhost（URL.hostname 不含括号）
+                /^fc00:/i,          // IPv6 私有地址
+                /^fd00:/i,          // IPv6 私有地址
+                /^fe80:/i,          // IPv6 链路本地地址
+                /^::$/,             // IPv6 未指定地址
             ];
             if (blockedPatterns.some(pattern => pattern.test(hostname))) {
                 return res.status(403).json({ error: '禁止访问内网地址' });
+            }
+            // DNS 解析后二次校验（防止 DNS rebinding 绕过）
+            try {
+                const { address: resolved } = await dns.lookup(hostname, { family: 0 });
+                if (resolved && blockedPatterns.some(pattern => pattern.test(resolved))) {
+                    return res.status(403).json({ error: '禁止访问内网地址（DNS 解析）' });
+                }
+            } catch (_) {
+                // DNS 解析失败时阻止请求（防止绕过 SSRF 防护）
+                return res.status(502).json({ error: 'DNS 解析失败，无法验证目标地址安全性' });
             }
         } catch (e) {
             return res.status(400).json({ error: '无效的 URL' });
         }
 
+        // 限制允许的 Content-Type
+        const ALLOWED_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp', 'image/tiff'];
+
         try {
-            const response = await axios.get(url, { responseType: 'arraybuffer', timeout: 15000 });
-            const contentType = response.headers['content-type'] || 'image/png';
+            const response = await axios.get(url, {
+                responseType: 'arraybuffer',
+                timeout: 15000,
+                maxContentLength: 20 * 1024 * 1024, // 限制最大 20MB
+                maxBodyLength: 20 * 1024 * 1024,
+            });
+            const contentType = (response.headers['content-type'] || 'image/png').split(';')[0].trim().toLowerCase();
+            // 只允许图片类型，防止代理 HTML/JS 等内容（XSS 风险）
+            if (!ALLOWED_CONTENT_TYPES.some(ct => contentType.startsWith(ct))) {
+                return res.status(403).json({ error: '不允许的内容类型', contentType });
+            }
             res.set('Content-Type', contentType);
+            // 缓存 1 小时，减少重复请求
+            res.set('Cache-Control', 'public, max-age=3600');
             res.send(response.data);
         } catch (error) {
             const upstreamStatus = error?.response?.status || 502;
@@ -232,7 +274,7 @@ async function dispatchImageGeneration(ctx) {
                 return jimengProvider.callJimengImage2ImageAPI(control.prompt, control.image, control.strength, size, control.jimeng || {}, cfg);
             }
             default:
-                return generateMockImage(prompt + '（线稿转成品）', size);
+                throw new Error(`不支持的图生图服务: ${provider}`);
         }
     }
 

@@ -6,8 +6,8 @@
  * 按登录用户隔离 localStorage 键，并在各页启动前拉取 /api/me。
  * 依赖后端 express-session（proxy.js）与 cookie。
  */
-(function (global) {
-    'use strict';
+'use strict';
+const global = typeof window !== 'undefined' ? window : this;
 
     function loginHtmlPath() {
         try {
@@ -74,4 +74,3 @@
     };
 
     global.GameUiUserScope = GameUiUserScope;
-})(typeof window !== 'undefined' ? window : this);

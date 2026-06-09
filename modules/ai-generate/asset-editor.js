@@ -24,7 +24,7 @@ class AssetEditor {
         this.fillTolerance = 32;
         this.history = [];
         this.historyIdx = -1;
-        this.maxHistory = 40;
+        this.maxHistory = 20; // 限制历史记录数量，防止大画布时内存溢出
         this.isDragging = false;
         this.isDrawing = false;
         this.lastPx = 0;
@@ -76,7 +76,8 @@ class AssetEditor {
                 assets = Array.isArray(lib.assets) ? lib.assets : [];
             } catch (_) {}
         }
-        const imgs = JSON.parse(localStorage.getItem('generatedImages') || '[]');
+        let imgs = [];
+        try { imgs = JSON.parse(localStorage.getItem(aiStorageKey('generatedImages')) || '[]'); } catch (_) { imgs = []; }
         imgs.forEach((img) => {
             if (img.imageUrl && !assets.find((a) => a.dataURL === img.imageUrl)) {
                 assets.push({ id: img.id, name: img.name || 'AI图片', dataURL: img.imageUrl, type: 'image' });
@@ -1031,7 +1032,7 @@ class AssetEditor {
     normalizeJimengCanvasSize() {
         const width = Number(this.canvas.width) || 1024;
         const height = Number(this.canvas.height) || 1024;
-        const minPixels = 921600; // 与后端 validateJimengSize 保持一致
+        const minPixels = (window.ArtifexConstants && window.ArtifexConstants.JIMENG_MIN_PIXELS) || 921600;
         let outW = Math.max(256, width);
         let outH = Math.max(256, height);
         const pixels = outW * outH;

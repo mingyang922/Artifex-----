@@ -36,6 +36,13 @@ function createAuthRouter(deps) {
         standardHeaders: true,
         legacyHeaders: false,
     });
+    const passwordChangeLimiter = rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 5,
+        message: { error: '密码修改请求过于频繁，请 15 分钟后再试' },
+        standardHeaders: true,
+        legacyHeaders: false,
+    });
 
     // ── 注册 ──
     router.post('/auth/register', csrfProtection, authLimiter, async (req, res) => {
@@ -43,8 +50,11 @@ function createAuthRouter(deps) {
             const { username, email, password } = req.body || {};
             if (!username || !email || !password) return res.status(400).json({ error: '请填写用户名、邮箱和密码' });
             if (String(password).length < 6) return res.status(400).json({ error: '密码至少 6 位' });
-
+            // 用户名校验：只允许字母、数字、下划线、中文，2-32 字符
             const u = String(username).trim();
+            if (u.length < 2 || u.length > 32) return res.status(400).json({ error: '用户名长度应为 2-32 字符' });
+            if (!/^[\w一-鿿㐀-䶿]+$/.test(u)) return res.status(400).json({ error: '用户名只允许字母、数字、下划线和中文' });
+
             const em = String(email).trim().toLowerCase();
             if (usersDb.getUserByEmail(em)) return res.status(409).json({ error: '该邮箱已注册' });
             if (usersDb.getUserByUsername(u)) return res.status(409).json({ error: '该用户名已被使用' });
@@ -84,12 +94,23 @@ function createAuthRouter(deps) {
     });
 
     // ── 登出 ──
-    router.post('/auth/logout', (req, res) => {
-        req.session.destroy(() => res.json({ ok: true }));
+    router.post('/auth/logout', csrfProtection, (req, res) => {
+        const cookieName = req.session?.cookie?.name || 'connect.sid';
+        // clearCookie 必须传与 Set-Cookie 相同的选项，否则浏览器不会清除
+        const cookieOpts = {
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: req.secure || req.protocol === 'https',
+            path: '/',
+        };
+        req.session.destroy(() => {
+            res.clearCookie(cookieName, cookieOpts);
+            res.json({ ok: true });
+        });
     });
 
     // ── 修改密码 ──
-    router.post('/me/change-password', requireAuth, csrfProtection, async (req, res) => {
+    router.post('/me/change-password', requireAuth, csrfProtection, passwordChangeLimiter, async (req, res) => {
         try {
             const { currentPassword, newPassword } = req.body || {};
             if (!currentPassword || !newPassword) {
@@ -106,6 +127,8 @@ function createAuthRouter(deps) {
             // 更新密码
             const hash = await bcrypt.hash(String(newPassword), 10);
             usersDb.updatePassword(req.currentUser.id, hash);
+            // 审计日志
+            try { usersDb.addActivity(req.currentUser.id, '修改密码', 'security', null, null); } catch (_) {}
             res.json({ ok: true, message: '密码修改成功' });
         } catch (e) {
             console.error('change-password', e);
@@ -166,6 +189,8 @@ function createAuthRouter(deps) {
             return res.status(400).json({ error: '参数错误', message: 'provider 或 credentials 无效' });
         }
         usersDb.upsertUserApiCredentials(req.currentUser.id, provider, credentials);
+        // 审计日志
+        try { usersDb.addActivity(req.currentUser.id, '更新 API 密钥: ' + provider, 'security', null, provider); } catch (_) {}
         res.json({ ok: true, provider, configured: true });
     });
 
@@ -217,6 +242,8 @@ function createAuthRouter(deps) {
     router.delete('/me/api-settings/:provider', requireAuth, csrfProtection, (req, res) => {
         const provider = String(req.params.provider || '').trim().toLowerCase();
         usersDb.deleteUserApiCredentials(req.currentUser.id, provider);
+        // 审计日志
+        try { usersDb.addActivity(req.currentUser.id, '删除 API 密钥: ' + provider, 'security', null, provider); } catch (_) {}
         res.json({ ok: true, provider, configured: false });
     });
 

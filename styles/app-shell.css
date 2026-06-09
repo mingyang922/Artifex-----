@@ -14,12 +14,13 @@
     --my: 50vh;
 }
 
-html,
-body.app-shell {
+html {
     height: 100%;
+    overflow: hidden; /* 防止外层出现双滚动条，滚动由 .main-content 处理 */
 }
 
 body.app-shell {
+    height: 100%;
     background: var(--shell-bg);
     color: var(--shell-text);
     margin: 0;
@@ -27,7 +28,7 @@ body.app-shell {
     font-family: var(--font-ui);
     font-weight: 500;
     font-size: 17px;
-    overflow-x: hidden;
+    overflow: hidden; /* 同上，防止双滚动条 */
 }
 
 body.app-shell::before {
@@ -580,4 +581,50 @@ body.app-shell .search-bar input:focus {
         animation: none !important;
     }
     #boot-sequence { display: none !important; }
+}
+
+/* ── 备案信息底部栏 ── */
+.beian-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: rgba(10, 14, 24, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 8px 0;
+    text-align: center;
+    font-size: 12px;
+    color: #8888a0;
+}
+.beian-footer a {
+    color: #8888a0;
+    text-decoration: none;
+    transition: color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.beian-footer a:hover {
+    color: #b0b0d0;
+}
+.beian-icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    opacity: 0.8;
+}
+.beian-separator {
+    margin: 0 8px;
+    color: #555;
+}
+/* 为页面底部留出备案栏空间（仅对有侧边栏的页面生效） */
+body.app-shell .main-content {
+    padding-bottom: 40px;
+}
+/* 登录页等无侧边栏页面 */
+body:not(.app-shell) {
+    padding-bottom: 40px;
 }

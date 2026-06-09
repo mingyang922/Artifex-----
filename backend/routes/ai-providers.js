@@ -36,8 +36,8 @@ function createAiProviderRouter(deps) {
     // 即梦状态
     router.get('/jimeng/status', requireAuth, (req, res) => jimengProvider.handleJimengStatus(req, res, { getUserProviderConfig }));
 
-    // 即梦在线测试
-    router.get('/jimeng/live-test', requireAuth, (req, res) => jimengProvider.handleJimengLiveTest(req, res, { getUserProviderConfig }));
+    // 即梦在线测试（POST，因为有副作用：消耗 API 配额）
+    router.post('/jimeng/live-test', requireAuth, csrfProtection, (req, res) => jimengProvider.handleJimengLiveTest(req, res, { getUserProviderConfig }));
 
     // SD WebUI 文生图
     router.post('/sd-webui/txt2img', requireAuth, csrfProtection, (req, res) => sdWebUiProvider.handleSdWebUiTxt2Img(req, res, { getUserProviderConfig }));
@@ -53,7 +53,7 @@ function createAiProviderRouter(deps) {
     );
 
     // 腾讯云状态
-    router.get('/tencent/status', requireAuth, (req, res) => tencentProvider.handleTencentStatus(req, res, { getUserProviderConfig }));
+    router.get('/tencent/status', requireAuth, (req, res) => tencentProvider.handleTencentStatus(req, res, { getUserProviderConfig, isAdminUser }));
 
     return router;
 }

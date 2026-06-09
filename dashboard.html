@@ -4,6 +4,8 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Artifex - 主控制台</title>
+        <link rel="manifest" href="manifest.json">
+        <meta name="theme-color" content="#00f0ff">
         <link
             href="vendor/css/google-fonts.css"
             rel="stylesheet"
@@ -183,22 +185,33 @@
             <i class="fas fa-bars"></i>
         </button>
 
+        <!-- 备案信息 -->
+        <footer class="beian-footer">
+            <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
+                <img src="vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+            </a>
+            <span class="beian-separator">|</span>
+            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
+        </footer>
+
         <!-- 简化的JavaScript代码 -->
         <script src="js/i18n.js"></script>
-        <script src="js/ui-kit.js"></script>
-        <script src="js/api-utils.js"></script>
-        <script src="js/user-storage-scope.js"></script>
-        <script src="js/data-portability.js"></script>
-        <script src="js/html-utils.js"></script>
-        <script src="js/navigation.js"></script>
-        <script src="js/notification-component.js"></script>
-        <script src="js/avatar-manager.js"></script>
-        <script src="js/notification-manager.js"></script>
-        <script src="js/scroll-animations.js"></script>
-        <script src="js/page-effects.js"></script>
-        <script src="js/boot-sequence.js"></script>
-        <script src="js/holographic-cards.js"></script>
-        <script src="js/keyboard-shortcuts.js"></script>
+        <script defer src="js/ui-kit.js"></script>
+        <script defer src="js/api-utils.js"></script>
+        <script defer src="js/user-storage-scope.js"></script>
+        <script defer src="js/data-portability.js"></script>
+        <script defer src="js/html-utils.js"></script>
+        <script defer src="js/navigation.js"></script>
+        <script defer src="js/notification-component.js"></script>
+        <script defer src="js/avatar-manager.js"></script>
+        <script defer src="js/notification-manager.js"></script>
+        <script defer src="js/scroll-animations.js"></script>
+        <script defer src="js/image-compress.js"></script>
+        <script defer src="js/page-effects.js"></script>
+        <script defer src="js/boot-sequence.js"></script>
+        <script defer src="js/holographic-cards.js"></script>
+        <script defer src="js/keyboard-shortcuts.js"></script>
         <script src="js/dashboard-init.js"></script>
+        <script src="js/sw-register.js"></script>
     </body>
 </html>

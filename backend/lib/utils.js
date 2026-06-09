@@ -2,6 +2,7 @@
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.3.3 */
+'use strict';
 /**
  * 共享工具函数（从 proxy.js 提取）
  */
@@ -77,7 +78,7 @@ function generateSignature(
     const canonicalRequest = `${method}\n${canonicalUri}\n${canonicalQueryString}\n${canonicalHeaders}\n${signedHeaders}\n${hashedPayload}`;
 
     const algorithm = 'TC3-HMAC-SHA256';
-    const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const date = new Date(timestamp * 1000).toISOString().split('T')[0].replace(/-/g, '');
     const credentialScope = `${date}/${service}/tc3_request`;
 
     const hashedCanonicalRequest = crypto.createHash('sha256').update(canonicalRequest).digest('hex');
@@ -202,8 +203,11 @@ function generateMockImage(prompt, size) {
 async function callFreeImageAPI(prompt, size) {
     const axios = require('axios');
     try {
-        const width = size ? size.split('x')[0] : '512';
-        const height = size ? size.split('x')[1] : '512';
+        const rawW = size ? size.split('x')[0] : '512';
+        const rawH = size ? size.split('x')[1] : '512';
+        // 限制图片尺寸上限，防止内存耗尽
+        const width = String(Math.min(2048, Math.max(64, parseInt(rawW, 10) || 512)));
+        const height = String(Math.min(2048, Math.max(64, parseInt(rawH, 10) || 512)));
         const imageId =
             Math.abs(
                 prompt.split('').reduce((a, b) => {
@@ -280,39 +284,57 @@ function getEncryptionKey() {
 }
 
 /**
- * 加密文本（AES-256-CBC）
+ * 加密文本（AES-256-GCM，带认证标签，防篡改）
  * @param {string} text - 要加密的文本
- * @returns {string} 加密后的文本（IV:密文 格式）
+ * @returns {string} 加密后的文本（IV:AuthTag:密文 格式）
  */
 function encryptText(text) {
     if (!text) return '';
     const key = getEncryptionKey();
     const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    return iv.toString('hex') + ':' + encrypted;
+    const authTag = cipher.getAuthTag().toString('hex');
+    return iv.toString('hex') + ':' + authTag + ':' + encrypted;
 }
 
 /**
- * 解密文本（AES-256-CBC）
- * @param {string} encryptedText - 加密的文本（IV:密文 格式）
- * @returns {string} 解密后的文本
+ * 解密文本（兼容 AES-256-GCM 和旧版 AES-256-CBC）
+ * @param {string} encryptedText - 加密的文本
+ * @returns {string} 解密后的文本，解密失败返回空字符串
  */
 function decryptText(encryptedText) {
     if (!encryptedText) return '';
     try {
         const key = getEncryptionKey();
         const parts = encryptedText.split(':');
-        if (parts.length !== 2) return encryptedText; // 未加密的旧数据
-        const iv = Buffer.from(parts[0], 'hex');
-        const encrypted = parts[1];
-        const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-        let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-        decrypted += decipher.final('utf8');
-        return decrypted;
+        // 新格式：IV:AuthTag:密文（AES-256-GCM）
+        if (parts.length === 3) {
+            const iv = Buffer.from(parts[0], 'hex');
+            const authTag = Buffer.from(parts[1], 'hex');
+            const encrypted = parts[2];
+            const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+            decipher.setAuthTag(authTag);
+            let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+            decrypted += decipher.final('utf8');
+            return decrypted;
+        }
+        // 旧格式：IV:密文（AES-256-CBC，向后兼容）
+        if (parts.length === 2) {
+            const iv = Buffer.from(parts[0], 'hex');
+            const encrypted = parts[1];
+            const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+            let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+            decrypted += decipher.final('utf8');
+            return decrypted;
+        }
+        // 未加密的旧数据
+        return encryptedText;
     } catch (e) {
-        return encryptedText; // 解密失败返回原文
+        // 解密失败（密钥轮换等）返回空字符串，避免使用错误数据
+        console.warn('[utils] decryptText 解密失败，可能密钥已变更:', e.message);
+        return '';
     }
 }
 

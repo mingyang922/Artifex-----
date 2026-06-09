@@ -6,11 +6,11 @@
  * Artifex：浏览器端项目 / 素材 / 风格预设等 localStorage 导出、导入与用量提示。
  * 依赖 GameUiUserScope（与 user-storage-scope.js 一致键名规则）。
  */
-(function (global) {
-    'use strict';
+'use strict';
+const global = typeof window !== 'undefined' ? window : this;
 
-    var EXPORT_VERSION = 1;
-    var BASE_KEYS = ['gameui-projects', 'assetLibrary_v1', 'style_presets_v1', 'generatedImages'];
+    const EXPORT_VERSION = 1;
+    const BASE_KEYS = ['gameui-projects', 'assetLibrary_v1', 'style_presets_v1', 'generatedImages'];
 
     function scopedKey(base) {
         try {
@@ -21,7 +21,7 @@
             /* ignore */
         }
         try {
-            var id = global.localStorage.getItem('gameui-session-user-id');
+            const id = global.localStorage.getItem('gameui-session-user-id');
             return id ? base + ':u' + id : base;
         } catch (e2) {
             return base;
@@ -29,11 +29,11 @@
     }
 
     function collectPayload() {
-        var out = { version: EXPORT_VERSION, exportedAt: new Date().toISOString(), keys: {}, meta: {} };
+        const out = { version: EXPORT_VERSION, exportedAt: new Date().toISOString(), keys: {}, meta: {} };
         BASE_KEYS.forEach(function (base) {
-            var k = scopedKey(base);
+            const k = scopedKey(base);
             try {
-                var v = global.localStorage.getItem(k);
+                const v = global.localStorage.getItem(k);
                 if (v !== null && v !== '') {
                     out.keys[k] = v;
                     out.meta[k] = { bytes: v.length };
@@ -47,12 +47,12 @@
 
     /** 估算当前 origin 下 localStorage 已用字节（近似） */
     function estimateUsedBytes() {
-        var total = 0;
+        let total = 0;
         try {
-            for (var i = 0; i < global.localStorage.length; i++) {
-                var key = global.localStorage.key(i);
+            for (let i = 0; i < global.localStorage.length; i++) {
+                const key = global.localStorage.key(i);
                 if (!key) continue;
-                var val = global.localStorage.getItem(key) || '';
+                const val = global.localStorage.getItem(key) || '';
                 total += key.length + val.length;
             }
         } catch (e) {
@@ -69,8 +69,8 @@
     }
 
     function downloadJson(filename, obj) {
-        var blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json;charset=utf-8' });
-        var a = document.createElement('a');
+        const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json;charset=utf-8' });
+        const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = filename;
         a.rel = 'noopener';
@@ -83,25 +83,32 @@
     }
 
     function exportAll() {
-        var payload = collectPayload();
-        var stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        const payload = collectPayload();
+        const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
         downloadJson('artifex-local-backup-' + stamp + '.json', payload);
         return payload;
     }
 
     function applyImport(payload, mode) {
         if (!payload || typeof payload.keys !== 'object') throw new Error('无效的备份文件');
-        var keys = payload.keys;
+        const keys = payload.keys;
+        const MAX_BACKUP_SIZE = 10 * 1024 * 1024; // 10MB 上限
+        let totalSize = 0;
         Object.keys(keys).forEach(function (k) {
+            const val = keys[k];
+            if (typeof val !== 'string') return; // 跳过非字符串值
+            totalSize += k.length + val.length;
+            if (totalSize > MAX_BACKUP_SIZE) {
+                throw new Error('备份文件过大（超过 10MB 限制）');
+            }
+            // 键名安全检查：只允许字母、数字、连字符、下划线、点号
+            if (!/^[\w.\-]+$/.test(k)) {
+                console.warn('[data-portability] 跳过不安全的键名:', k);
+                return;
+            }
             if (mode === 'replace' || mode === 'merge') {
                 try {
-                    if (mode === 'merge') {
-                        var cur = global.localStorage.getItem(k);
-                        if (cur && (k.indexOf('gameui-projects') !== -1 || k.indexOf('assetLibrary') !== -1)) {
-                            /* 合并：仅对 JSON 数组类简单合并较危险，此处 merge 与 replace 相同写入备份值 */
-                        }
-                    }
-                    global.localStorage.setItem(k, keys[k]);
+                    global.localStorage.setItem(k, val);
                 } catch (e) {
                     throw new Error('写入失败: ' + k + ' — ' + (e && e.message));
                 }
@@ -110,17 +117,17 @@
     }
 
     function bindDashboardUi() {
-        var usageEl = document.getElementById('artifex-storage-usage');
-        var btnExport = document.getElementById('artifex-export-local-btn');
-        var btnImport = document.getElementById('artifex-import-local-btn');
-        var fileInput = document.getElementById('artifex-import-local-file');
+        const usageEl = document.getElementById('artifex-storage-usage');
+        const btnExport = document.getElementById('artifex-export-local-btn');
+        const btnImport = document.getElementById('artifex-import-local-btn');
+        const fileInput = document.getElementById('artifex-import-local-file');
         if (!usageEl && !btnExport) return;
 
         function refreshUsage() {
             if (!usageEl) return;
-            var b = estimateUsedBytes();
-            var approxQuota = 5 * 1024 * 1024;
-            var pct = b !== null ? Math.min(100, Math.round((b / approxQuota) * 100)) : null;
+            const b = estimateUsedBytes();
+            const approxQuota = 5 * 1024 * 1024;
+            const pct = b !== null ? Math.min(100, Math.round((b / approxQuota) * 100)) : null;
             usageEl.textContent =
                 b !== null
                     ? '本地数据约 ' + formatBytes(b) + '（按 ~5MB 浏览器上限粗算约 ' + pct + '%，实际因浏览器而异）'
@@ -148,14 +155,14 @@
                 fileInput.click();
             });
             fileInput.addEventListener('change', function () {
-                var f = fileInput.files && fileInput.files[0];
+                const f = fileInput.files && fileInput.files[0];
                 fileInput.value = '';
                 if (!f) return;
-                var reader = new FileReader();
+                const reader = new FileReader();
                 reader.onload = function () {
                     try {
-                        var payload = JSON.parse(reader.result);
-                        var run = function (mode) {
+                        const payload = JSON.parse(reader.result);
+                        const run = function (mode) {
                             applyImport(payload, mode);
                             refreshUsage();
                             if (global.TechUI && typeof global.TechUI.toast === 'function') {
@@ -198,4 +205,3 @@
     } else {
         bindDashboardUi();
     }
-})(typeof window !== 'undefined' ? window : this);

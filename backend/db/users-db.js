@@ -2,6 +2,7 @@
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.3.3 */
+'use strict';
 const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
@@ -13,11 +14,17 @@ const dbPath = process.env.USERS_DB_PATH || path.join(dataDir, 'users.sqlite');
 const legacyJsonPath = path.join(dataDir, 'users.json');
 
 let db;
+let _checkpointTimer = null;
+
+// 预编译语句缓存（init() 中初始化）
+let stmtGetUserById, stmtGetUserByEmail, stmtGetUserByUsername, stmtLogApiCall;
+let stmtCheckQuotaDaily, stmtCheckQuotaMonthly;
 
 /**
  * 把 WAL 里的已提交页合并进主库文件，便于用 DB Browser 等外部工具立刻看到最新行。
  */
 function checkpointWal() {
+    if (!db) return;
     try {
         if (typeof db.checkpoint === 'function') {
             db.checkpoint('main');
@@ -113,6 +120,7 @@ function init() {
         );
         CREATE INDEX IF NOT EXISTS idx_usage_logs_user ON usage_logs(user_id);
         CREATE INDEX IF NOT EXISTS idx_usage_logs_created ON usage_logs(created_at);
+        CREATE INDEX IF NOT EXISTS idx_usage_logs_user_provider_created ON usage_logs(user_id, provider, created_at);
         CREATE TABLE IF NOT EXISTS user_quotas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
@@ -163,7 +171,7 @@ function init() {
             source TEXT DEFAULT '',
             tags TEXT DEFAULT '[]',
             created_at TEXT DEFAULT (datetime('now')),
-            FOREIGN KEY (user_id) REFERENCES users(id)
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
         CREATE INDEX IF NOT EXISTS idx_asset_library_user ON asset_library(user_id);
         CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id);
@@ -176,7 +184,7 @@ function init() {
             target_id TEXT,
             details TEXT,
             created_at TEXT DEFAULT (datetime('now')),
-            FOREIGN KEY (user_id) REFERENCES users(id)
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
         CREATE INDEX IF NOT EXISTS idx_activity_log_user ON activity_log(user_id);
         CREATE INDEX IF NOT EXISTS idx_activity_log_created ON activity_log(created_at);
@@ -188,26 +196,51 @@ function init() {
         db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'");
         logger.info('[users-db] 已添加 role 列到 users 表');
     }
-    // Ensure user ID 1 is admin
-    db.prepare("UPDATE users SET role = 'admin' WHERE id = 1 AND role != 'admin'").run();
+    // 自动提升首个用户为 admin（仅当 ADMIN_USER_ID 未指定时）
+    const adminUserId = process.env.ADMIN_USER_ID;
+    if (adminUserId) {
+        db.prepare("UPDATE users SET role = 'admin' WHERE id = ? AND role != 'admin'").run(Number(adminUserId));
+    } else {
+        // 默认将 ID=1 设为管理员（向后兼容）
+        db.prepare("UPDATE users SET role = 'admin' WHERE id = 1 AND role != 'admin'").run();
+    }
 
     migrateFromJsonIfEmpty();
+
+    // 预编译高频查询语句，避免每次调用重复解析 SQL
+    stmtGetUserById = db.prepare('SELECT * FROM users WHERE id = ?');
+    stmtGetUserByEmail = db.prepare('SELECT * FROM users WHERE email = ?');
+    stmtGetUserByUsername = db.prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE');
+    stmtLogApiCall = db.prepare(
+        'INSERT INTO usage_logs (user_id, provider, operation, status, duration_ms, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+    );
+    stmtCheckQuotaDaily = db.prepare(
+        'SELECT COUNT(*) AS c FROM usage_logs WHERE user_id = ? AND provider = ? AND created_at >= ?'
+    );
+    stmtCheckQuotaMonthly = db.prepare(
+        'SELECT COUNT(*) AS c FROM usage_logs WHERE user_id = ? AND provider = ? AND created_at >= ?'
+    );
+
+    // 定时 WAL checkpoint（每 30 秒），替代每次写操作后的 checkpoint
+    if (_checkpointTimer) clearInterval(_checkpointTimer);
+    _checkpointTimer = setInterval(checkpointWal, 30 * 1000);
+    if (_checkpointTimer.unref) _checkpointTimer.unref();
 }
 
 function getUserById(id) {
-    return db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    return stmtGetUserById.get(id);
 }
 
 function getUserByEmail(email) {
     const em = String(email || '')
         .trim()
         .toLowerCase();
-    return db.prepare('SELECT * FROM users WHERE email = ?').get(em);
+    return stmtGetUserByEmail.get(em);
 }
 
 function getUserByUsername(username) {
     const u = String(username || '').trim();
-    return db.prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE').get(u);
+    return stmtGetUserByUsername.get(u);
 }
 
 function createUser(username, email, passwordHash) {
@@ -218,18 +251,25 @@ function createUser(username, email, passwordHash) {
              VALUES (?, ?, ?, ?, ?)`
         )
         .run(username, email, passwordHash, '{}', created_at);
-    checkpointWal();
-    return getUserById(Number(info.lastInsertRowid));
+    const newUserId = Number(info.lastInsertRowid);
+    // 首个注册用户自动成为管理员
+    const adminUserId = process.env.ADMIN_USER_ID;
+    if (adminUserId) {
+        if (newUserId === Number(adminUserId)) {
+            db.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(newUserId);
+        }
+    } else if (newUserId === 1) {
+        db.prepare("UPDATE users SET role = 'admin' WHERE id = 1").run();
+    }
+    return getUserById(newUserId);
 }
 
 function updateProfile(userId, profileObj) {
     db.prepare('UPDATE users SET profile_json = ? WHERE id = ?').run(JSON.stringify(profileObj), userId);
-    checkpointWal();
 }
 
 function updatePassword(userId, passwordHash) {
     db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, Number(userId));
-    checkpointWal();
 }
 
 function getUserRole(userId) {
@@ -296,22 +336,22 @@ function upsertUserApiCredentials(userId, provider, credentialsObj) {
          ON CONFLICT(user_id, provider)
          DO UPDATE SET credentials_json = excluded.credentials_json, updated_at = excluded.updated_at`
     ).run(Number(userId), p, payload, now);
-    checkpointWal();
 }
 
 function deleteUserApiCredentials(userId, provider) {
     const p = normalizeProvider(provider);
     if (!p) return;
     db.prepare('DELETE FROM user_api_credentials WHERE user_id = ? AND provider = ?').run(Number(userId), p);
-    checkpointWal();
 }
 
 function getUserApiCredentialStatus(userId) {
     const providers = ['jimeng', 'alibaba', 'tencent', 'sdwebui'];
+    // 单次查询获取已配置的 provider 列表，避免 N+1
+    const rows = db.prepare('SELECT provider FROM user_api_credentials WHERE user_id = ?').all(Number(userId));
+    const configured = new Set(rows.map((r) => r.provider));
     const out = {};
     for (const provider of providers) {
-        const cfg = getUserApiCredentials(userId, provider);
-        out[provider] = !!(cfg && typeof cfg === 'object' && Object.keys(cfg).length > 0);
+        out[provider] = configured.has(provider);
     }
     return out;
 }
@@ -327,7 +367,7 @@ function getAllUsers() {
             id: row.id,
             username: row.username,
             email: row.email,
-            role: row.role || profile.role || 'user',
+            role: row.role || 'user',
             created_at: row.created_at,
         };
     });
@@ -345,15 +385,14 @@ function createProject(userId, name, description, type) {
     db.prepare(
         'INSERT INTO version_history (project_id, version, description, created_at) VALUES (?, 1, ?, ?)'
     ).run(projectId, '项目创建', now);
-    checkpointWal();
     return getProject(projectId);
 }
 
 function getProject(projectId) {
     const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(Number(projectId));
     if (!project) return null;
-    project.assets = db.prepare('SELECT * FROM project_assets WHERE project_id = ? ORDER BY created_at DESC').all(project.id);
-    project.versionHistory = db.prepare('SELECT * FROM version_history WHERE project_id = ? ORDER BY created_at DESC').all(project.id);
+    project.assets = db.prepare('SELECT * FROM project_assets WHERE project_id = ? ORDER BY created_at DESC LIMIT 200').all(project.id);
+    project.versionHistory = db.prepare('SELECT * FROM version_history WHERE project_id = ? ORDER BY created_at DESC LIMIT 50').all(project.id);
     return project;
 }
 
@@ -365,9 +404,19 @@ function getUserProjects(userId, limit, offset) {
     } else {
         projects = db.prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC').all(Number(userId));
     }
+    if (projects.length === 0) return projects;
+    // 批量查询 assets 和 version_history，避免 N+1
+    const ids = projects.map((p) => p.id);
+    const placeholders = ids.map(() => '?').join(',');
+    const allAssets = db.prepare(`SELECT * FROM project_assets WHERE project_id IN (${placeholders}) ORDER BY created_at DESC`).all(...ids);
+    const allHistory = db.prepare(`SELECT * FROM version_history WHERE project_id IN (${placeholders}) ORDER BY created_at DESC`).all(...ids);
+    const assetsMap = new Map();
+    allAssets.forEach((a) => { if (!assetsMap.has(a.project_id)) assetsMap.set(a.project_id, []); assetsMap.get(a.project_id).push(a); });
+    const historyMap = new Map();
+    allHistory.forEach((h) => { if (!historyMap.has(h.project_id)) historyMap.set(h.project_id, []); historyMap.get(h.project_id).push(h); });
     return projects.map((p) => {
-        p.assets = db.prepare('SELECT * FROM project_assets WHERE project_id = ?').all(p.id);
-        p.versionHistory = db.prepare('SELECT * FROM version_history WHERE project_id = ? ORDER BY created_at DESC').all(p.id);
+        p.assets = assetsMap.get(p.id) || [];
+        p.versionHistory = historyMap.get(p.id) || [];
         return p;
     });
 }
@@ -395,13 +444,11 @@ function updateProject(projectId, userId, updates) {
     db.prepare(
         'INSERT INTO version_history (project_id, version, description, created_at) VALUES (?, ?, ?, ?)'
     ).run(Number(projectId), newVersion, updates.versionDesc || '项目更新', now);
-    checkpointWal();
     return getProject(projectId);
 }
 
 function deleteProject(projectId, userId) {
     db.prepare('DELETE FROM projects WHERE id = ? AND user_id = ?').run(Number(projectId), Number(userId));
-    checkpointWal();
 }
 
 // ─── 项目素材 ───
@@ -411,13 +458,11 @@ function addProjectAsset(projectId, userId, name, type, content) {
     const info = db.prepare(
         'INSERT INTO project_assets (project_id, user_id, name, type, content, created_at) VALUES (?, ?, ?, ?, ?, ?)'
     ).run(Number(projectId), Number(userId), name, type || 'image', content, now);
-    checkpointWal();
     return { id: Number(info.lastInsertRowid), project_id: projectId, name, type, content, created_at: now };
 }
 
 function deleteProjectAsset(assetId, userId) {
     db.prepare('DELETE FROM project_assets WHERE id = ? AND user_id = ?').run(Number(assetId), Number(userId));
-    checkpointWal();
 }
 
 // ─── 素材库 ───
@@ -450,7 +495,6 @@ function addAssetLibraryItem(userId, item) {
         tags,
         now
     );
-    checkpointWal();
     return { id: Number(info.lastInsertRowid), user_id: userId, ...item, tags, created_at: now };
 }
 
@@ -472,23 +516,18 @@ function updateAssetLibraryItem(userId, itemId, updates) {
         Number(itemId),
         Number(userId)
     );
-    checkpointWal();
     return db.prepare('SELECT * FROM asset_library WHERE id = ?').get(Number(itemId));
 }
 
 function deleteAssetLibraryItem(userId, itemId) {
     db.prepare('DELETE FROM asset_library WHERE id = ? AND user_id = ?').run(Number(itemId), Number(userId));
-    checkpointWal();
 }
 
 // ─── 用量追踪 ───
 
 function logApiCall(userId, provider, operation, status, durationMs) {
     const now = new Date().toISOString();
-    db.prepare(
-        `INSERT INTO usage_logs (user_id, provider, operation, status, duration_ms, created_at)
-         VALUES (?, ?, ?, ?, ?, ?)`
-    ).run(Number(userId), normalizeProvider(provider), operation, status, durationMs || 0, now);
+    stmtLogApiCall.run(Number(userId), normalizeProvider(provider), operation, status, durationMs || 0, now);
 }
 
 function getUserUsageStats(userId) {
@@ -583,7 +622,6 @@ function setUserQuota(userId, provider, dailyLimit, monthlyLimit) {
          ON CONFLICT(user_id, provider)
          DO UPDATE SET daily_limit = excluded.daily_limit, monthly_limit = excluded.monthly_limit, updated_at = excluded.updated_at`
     ).run(Number(userId), p, dailyLimit || 100, monthlyLimit || 3000, now);
-    checkpointWal();
 }
 
 function checkQuota(userId, provider) {
@@ -597,9 +635,7 @@ function checkQuota(userId, provider) {
 
     // 检查今日用量
     const today = new Date().toISOString().split('T')[0];
-    const todayCount = db.prepare(
-        'SELECT COUNT(*) AS c FROM usage_logs WHERE user_id = ? AND provider = ? AND created_at >= ?'
-    ).get(Number(userId), p, today + 'T00:00:00.000Z');
+    const todayCount = stmtCheckQuotaDaily.get(Number(userId), p, today + 'T00:00:00.000Z');
 
     if (todayCount.c >= dailyLimit) {
         return { ok: false, reason: 'daily', limit: dailyLimit, used: todayCount.c };
@@ -607,9 +643,7 @@ function checkQuota(userId, provider) {
 
     // 检查本月用量
     const monthStart = today.substring(0, 7) + '-01';
-    const monthCount = db.prepare(
-        'SELECT COUNT(*) AS c FROM usage_logs WHERE user_id = ? AND provider = ? AND created_at >= ?'
-    ).get(Number(userId), p, monthStart + 'T00:00:00.000Z');
+    const monthCount = stmtCheckQuotaMonthly.get(Number(userId), p, monthStart + 'T00:00:00.000Z');
 
     if (monthCount.c >= monthlyLimit) {
         return { ok: false, reason: 'monthly', limit: monthlyLimit, used: monthCount.c };
@@ -618,8 +652,24 @@ function checkQuota(userId, provider) {
     return { ok: true, dailyUsed: todayCount.c, dailyLimit, monthlyUsed: monthCount.c, monthlyLimit };
 }
 
+/**
+ * 关闭数据库连接（优雅关闭时调用）
+ */
+function close() {
+    if (db) {
+        try {
+            checkpointWal();
+            db.close();
+        } catch (e) {
+            /* ignore close errors */
+        }
+        db = null;
+    }
+}
+
 module.exports = {
     init,
+    close,
     getUserById,
     getUserByEmail,
     getUserByUsername,

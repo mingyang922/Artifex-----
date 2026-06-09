@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+    <defs>
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0a0e18"/>
+            <stop offset="100%" stop-color="#111827"/>
+        </linearGradient>
+        <linearGradient id="aGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00f0ff"/>
+            <stop offset="100%" stop-color="#6366f1"/>
+        </linearGradient>
+        <filter id="glow">
+            <feGaussianBlur stdDeviation="4" result="blur"/>
+            <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    <!-- Background -->
+    <rect width="512" height="512" rx="80" ry="80" fill="url(#bgGrad)"/>
+    <!-- Border accent -->
+    <rect x="8" y="8" width="496" height="496" rx="74" ry="74" fill="none" stroke="#00f0ff" stroke-width="2" opacity="0.3"/>
+    <!-- Stylized A letter -->
+    <g filter="url(#glow)">
+        <!-- Main A shape -->
+        <path d="M256 80 L390 420 L340 420 L308 340 L204 340 L172 420 L122 420 Z M256 160 L210 290 L302 290 Z" fill="url(#aGrad)"/>
+        <!-- Horizontal bar of A -->
+        <rect x="200" y="290" width="112" height="12" rx="2" fill="#0a0e18" opacity="0.4"/>
+        <!-- Small accent dots -->
+        <circle cx="256" cy="460" r="6" fill="#00f0ff" opacity="0.6"/>
+        <circle cx="220" cy="460" r="4" fill="#6366f1" opacity="0.4"/>
+        <circle cx="292" cy="460" r="4" fill="#6366f1" opacity="0.4"/>
+    </g>
+    <!-- Corner accents -->
+    <line x1="40" y1="40" x2="80" y2="40" stroke="#00f0ff" stroke-width="2" opacity="0.5"/>
+    <line x1="40" y1="40" x2="40" y2="80" stroke="#00f0ff" stroke-width="2" opacity="0.5"/>
+    <line x1="472" y1="40" x2="432" y2="40" stroke="#6366f1" stroke-width="2" opacity="0.5"/>
+    <line x1="472" y1="40" x2="472" y2="80" stroke="#6366f1" stroke-width="2" opacity="0.5"/>
+</svg>

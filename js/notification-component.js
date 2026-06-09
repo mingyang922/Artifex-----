@@ -8,7 +8,9 @@
  */
 
 /** 转义 HTML 特殊字符，防止 XSS — 委托给 html-utils.js 全局函数 */
-var escapeNotificationHtml = (typeof escapeHtml === 'function') ? escapeHtml : function(s) { return String(s); };
+var escapeNotificationHtml = (typeof escapeHtml === 'function') ? escapeHtml : function(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+};
 
 class NotificationComponent {
     constructor() {
@@ -373,15 +375,13 @@ class NotificationComponent {
             animation: spin 1s linear infinite;
         `;
 
-        // 添加旋转动画样式
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
+        // 添加旋转动画样式（一次性注入，避免重复创建）
+        if (!document.getElementById('artifex-spin-animation')) {
+            const style = document.createElement('style');
+            style.id = 'artifex-spin-animation';
+            style.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+            document.head.appendChild(style);
+        }
 
         overlay.appendChild(loader);
         document.body.appendChild(overlay);
