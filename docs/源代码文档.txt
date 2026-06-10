@@ -1,7 +1,7 @@
 Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
 源代码文档
-生成时间: 2026-06-08
-总行数: 36127  总页数: 723
+生成时间: 2026-06-09
+总行数: 36128  总页数: 723
 ================================================================================
 
 【前30页】
@@ -1572,6 +1572,7 @@ function getRecentActivityCount() {
 【后30页】
 
 --- 第 694 页 ---
+@keyframes appShellFlowBg {
     0% { transform: translate3d(-3%, -2%, 0) scale(1.01); }
     50% { transform: translate3d(3%, 2%, 0) scale(1.08); }
     100% { transform: translate3d(-2%, 3%, 0) scale(1.04); }
@@ -1621,9 +1622,9 @@ body.app-shell .dashboard-container {
     z-index: 2;
 }
 
-body.app-shell .sidebar {
 
 --- 第 695 页 ---
+body.app-shell .sidebar {
     width: var(--shell-sidebar-w);
     background: linear-gradient(180deg, #0f1629 0%, #0a0e18 100%);
     padding: 20px 0;
@@ -1673,9 +1674,9 @@ body.app-shell .sidebar-logo .logo-img {
 body.app-shell .sidebar-logo h1 {
     font-family: var(--font-display);
     font-size: 13px;
-    font-weight: 700;
 
 --- 第 696 页 ---
+    font-weight: 700;
     letter-spacing: 0.06em;
     color: #f0f4fc;
     margin: 0;
@@ -1725,9 +1726,9 @@ body.app-shell .main-content {
     box-sizing: border-box;
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 240, 255, 0.35) rgba(10, 18, 34, 0.6);
-    position: relative;
 
 --- 第 697 页 ---
+    position: relative;
     background:
         linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
@@ -1777,9 +1778,9 @@ body.app-shell .top-bar {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
-    padding: 14px 18px;
 
 --- 第 698 页 ---
+    padding: 14px 18px;
     border-radius: 10px;
     border: 1px solid rgba(0, 240, 255, 0.15);
     background: rgba(15, 22, 41, 0.65);
@@ -1829,9 +1830,9 @@ body.app-shell .top-bar .search-bar input {
     border-radius: 6px;
     color: #f0f4fc;
     font-size: 15px;
-    font-family: var(--font-ui);
 
 --- 第 699 页 ---
+    font-family: var(--font-ui);
 }
 
 body.app-shell .top-bar .search-bar i {
@@ -1881,9 +1882,9 @@ body.app-shell .notification-badge {
     align-items: center;
     justify-content: center;
     font-weight: bold;
-}
 
 --- 第 700 页 ---
+}
 
 body.app-shell .user-avatar {
     width: 40px;
@@ -1933,9 +1934,9 @@ body.app-shell .user-avatar-dropdown.show {
 
 body.app-shell .user-avatar-dd-item {
     display: flex;
-    align-items: center;
 
 --- 第 701 页 ---
+    align-items: center;
     gap: 10px;
     width: 100%;
     padding: 10px 16px;
@@ -1985,9 +1986,9 @@ body.app-shell .mobile-menu-toggle {
     body.app-shell .sidebar-logo {
         justify-content: center;
         padding: 0 0 16px;
-    }
 
 --- 第 702 页 ---
+    }
     body.app-shell .sidebar-logo h1 {
         display: none;
     }
@@ -2037,9 +2038,9 @@ body.app-shell .mobile-menu-toggle {
     }
     body.app-shell .top-bar {
         flex-direction: column;
-        align-items: stretch;
 
 --- 第 703 页 ---
+        align-items: stretch;
         gap: 12px;
     }
     body.app-shell .top-bar .search-bar {
@@ -2089,9 +2090,9 @@ body.app-shell .search-bar input:focus {
 }
 .rotating-border {
     position: relative;
-    border: none !important;
 
 --- 第 704 页 ---
+    border: none !important;
     overflow: visible;
 }
 .rotating-border::before {
@@ -2141,9 +2142,9 @@ body.app-shell .search-bar input:focus {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     padding: 8px 0;
     text-align: center;
-    font-size: 12px;
 
 --- 第 705 页 ---
+    font-size: 12px;
     color: #8888a0;
 }
 .beian-footer a {
@@ -2193,9 +2194,9 @@ body:not(.app-shell) {
                 overflow: hidden;
             }
 
-            /* 主界面核心样式 */
 
 --- 第 706 页 ---
+            /* 主界面核心样式 */
             body {
                 background: #0a0e18;
                 color: #e8ecf4;
@@ -2245,9 +2246,9 @@ body:not(.app-shell) {
                 background:
                     radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.24) 0%, rgba(0, 240, 255, 0) 38%),
                     radial-gradient(circle at 80% 30%, rgba(124, 58, 237, 0.28) 0%, rgba(124, 58, 237, 0) 40%),
-                    radial-gradient(circle at 50% 85%, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0) 37%);
 
 --- 第 707 页 ---
+                    radial-gradient(circle at 50% 85%, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0) 37%);
                 filter: blur(28px);
                 transform: translate3d(0, 0, 0);
                 animation: aiFlowBg 7.2s ease-in-out infinite alternate;
@@ -2297,9 +2298,9 @@ body:not(.app-shell) {
                 background: linear-gradient(180deg, transparent 0%, rgba(0, 240, 255, 0.35) 30%, rgba(167, 139, 250, 0.4) 55%, rgba(0, 240, 255, 0.25) 80%, transparent 100%);
                 opacity: 0.85;
                 pointer-events: none;
-                animation: sidebarEdgeFlow 2.4s ease-in-out infinite;
 
 --- 第 708 页 ---
+                animation: sidebarEdgeFlow 2.4s ease-in-out infinite;
             }
 
             @keyframes sidebarEdgeFlow {
@@ -2350,8 +2351,8 @@ body:not(.app-shell) {
                 border-left: 3px solid transparent;
             }
 
-
 --- 第 709 页 ---
+
             .nav-link:hover, .nav-link.active {
                 background: rgba(0, 240, 255, 0.1);
                 color: #00f0ff;
@@ -2401,9 +2402,9 @@ body:not(.app-shell) {
 
             .main-content > * {
                 position: relative;
-                z-index: 1;
 
 --- 第 710 页 ---
+                z-index: 1;
             }
 
             /* 加载状态 */
@@ -2453,9 +2454,9 @@ body:not(.app-shell) {
                 z-index: 0;
             }
 
-            .top-bar > * {
 
 --- 第 711 页 ---
+            .top-bar > * {
                 position: relative;
                 z-index: 1;
             }
@@ -2505,9 +2506,9 @@ body:not(.app-shell) {
             }
 
             .notification-badge {
-                position: absolute;
 
 --- 第 712 页 ---
+                position: absolute;
                 top: -5px;
                 right: -5px;
                 width: 16px;
@@ -2557,9 +2558,9 @@ body:not(.app-shell) {
             }
 
             .tool-card::before {
-                content: "";
 
 --- 第 713 页 ---
+                content: "";
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -2609,9 +2610,9 @@ body:not(.app-shell) {
                 filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.35));
             }
 
-            .tool-card h3 {
 
 --- 第 714 页 ---
+            .tool-card h3 {
                 font-family: var(--font-display);
                 font-size: 11px;
                 font-weight: 700;
@@ -2661,9 +2662,9 @@ body:not(.app-shell) {
                 gap: 25px;
             }
 
-            .project-card {
 
 --- 第 715 页 ---
+            .project-card {
                 background: rgba(8, 12, 24, 0.75);
                 border-radius: 10px;
                 overflow: hidden;
@@ -2713,9 +2714,9 @@ body:not(.app-shell) {
             }
 
             .project-card > * {
-                position: relative;
 
 --- 第 716 页 ---
+                position: relative;
                 z-index: 1;
             }
 
@@ -2765,9 +2766,9 @@ body:not(.app-shell) {
                 -webkit-line-clamp: 2;
                 -webkit-box-orient: vertical;
                 overflow: hidden;
-            }
 
 --- 第 717 页 ---
+            }
 
             .project-meta {
                 display: flex;
@@ -2818,8 +2819,8 @@ body:not(.app-shell) {
                 }
             }
 
-
 --- 第 718 页 ---
+
             @media (max-width: 992px) {
                 .sidebar {
                     width: 60px;
@@ -2869,9 +2870,9 @@ body:not(.app-shell) {
                 }
 
                 .top-bar {
-                    flex-direction: column;
 
 --- 第 719 页 ---
+                    flex-direction: column;
                     align-items: flex-start;
                     gap: 15px;
                 }
@@ -2921,9 +2922,9 @@ body:not(.app-shell) {
                 .sidebar::after,
                 .top-bar::before {
                     animation: none !important;
-                }
 
 --- 第 720 页 ---
+                }
                 .pointer-glow,
                 .pointer-glow--lag {
                     display: none !important;
@@ -2973,9 +2974,9 @@ body:not(.app-shell) {
     font-family: "Orbitron", "Segoe UI", sans-serif;
     font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.1em;
 
 --- 第 721 页 ---
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--ui-accent);
 }
@@ -3025,9 +3026,9 @@ body:not(.app-shell) {
 .tech-ui-btn {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
 
 --- 第 722 页 ---
+    justify-content: center;
     border-radius: 7px;
     border: 1px solid rgba(0, 240, 255, 0.2);
     background: rgba(255, 255, 255, 0.04);
@@ -3077,9 +3078,9 @@ body:not(.app-shell) {
     border-color: rgba(0, 240, 255, 0.42);
 }
 
-.tech-ui-toast--warn {
 
 --- 第 723 页 ---
+.tech-ui-toast--warn {
     border-color: rgba(255, 180, 0, 0.42);
 }
 
