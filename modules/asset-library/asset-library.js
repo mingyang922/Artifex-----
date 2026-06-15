@@ -1360,7 +1360,7 @@
             }
             const _originalFilterAssets = filterAssets;
             filterAssets = function() {
-                const filtered = _originalFilterAssets();
+                let filtered = _originalFilterAssets();
                 if (activeTagFilter) {
                     filtered = filtered.filter(function(a) {
                         return Array.isArray(a.tags) && a.tags.indexOf(activeTagFilter) !== -1;
@@ -1513,7 +1513,7 @@
                 modal.addEventListener('click', function(e) { if (e.target === modal) { modalRoot.style.display = 'none'; modalRoot.innerHTML = ''; } });
             }
             function saveAssetTags(asset, newTags) {
-                const existingTags = {};
+                let existingTags = {};
                 try { existingTags = JSON.parse(asset._rawTags || '{}'); } catch(_) {}
                 existingTags.customTags = newTags;
                 fetchWithCsrf('/api/asset-library/' + encodeURIComponent(asset.id), {
