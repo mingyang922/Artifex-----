@@ -84,7 +84,7 @@ function createAuthRouter(deps) {
             req.session.regenerate((err) => {
                 if (err) { console.error('session regenerate', err); return res.status(500).json({ error: '登录失败' }); }
                 req.session.userId = row.id;
-                try { usersDb.addActivity(row.id, '用户登录', 'auth', null, null); } catch (_) { /* 活动日志非关键 */ }
+                try { usersDb.addActivity(row.id, '用户登录', 'auth', null, null); } catch (__ { /* 活动日志非关键 */ }
                 res.json({ ok: true, user: publicUser(row) });
             });
         } catch (e) {
@@ -128,7 +128,7 @@ function createAuthRouter(deps) {
             const hash = await bcrypt.hash(String(newPassword), 10);
             usersDb.updatePassword(req.currentUser.id, hash);
             // 审计日志
-            try { usersDb.addActivity(req.currentUser.id, '修改密码', 'security', null, null); } catch (_) {}
+            try { usersDb.addActivity(req.currentUser.id, '修改密码', 'security', null, null); } catch (__ {}
             res.json({ ok: true, message: '密码修改成功' });
         } catch (e) {
             console.error('change-password', e);

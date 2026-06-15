@@ -11,7 +11,7 @@ function createUserApiSettingsHelpers(usersDb) {
         const p = String(provider || '')
             .trim()
             .toLowerCase();
-        if (!payload || typeof payload != 'object') return null;
+        if (!payload || typeof payload !== 'object') return null;
 
         function trimLimit(val) {
             return String(val || '').trim().slice(0, MAX_FIELD_LEN);

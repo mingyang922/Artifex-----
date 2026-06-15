@@ -1274,7 +1274,7 @@ async function syncSessionAndProfile() {
         const data = await r.json();
         try {
             localStorage.setItem('gameui-session-user-id', String(data.id));
-        } catch (e) {
+        } catch (_e) {
             /* ignore */
         }
         const profile = data.profile || {};
@@ -1414,7 +1414,7 @@ async function refreshApiSettingsStatus() {
         const parts = ['jimeng', 'alibaba', 'tencent', 'sdwebui'].map((k) => `${k}:${status[k] ? '已配置' : '未配置'}`);
         statusEl.textContent = `配置状态：${parts.join(' | ')}${data.isAdmin ? ' | 角色:管理员' : ' | 角色:普通用户'}`;
         return data;
-    } catch (e) {
+    } catch (_e) {
         statusEl.textContent = '配置状态读取失败，请稍后重试';
         return null;
     }
@@ -1527,7 +1527,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             const adminItem = document.getElementById('admin-nav-item');
             if (adminItem) adminItem.style.display = '';
         }
-    } catch (e) { /* ignore */ }
+    } catch (_e) { /* ignore */ }
 });
 
 // 初始化语言选择器
@@ -1779,7 +1779,7 @@ async function loadActivityLog(page) {
                 if (loadMoreWrap) loadMoreWrap.style.display = '';
             }
         }
-    } catch (e) {
+    } catch (_e) {
         if (page === 1) {
             listEl.innerHTML = '<div class="activity-empty"><i class="fas fa-exclamation-triangle"></i><span>加载失败，请稍后重试</span></div>';
         }

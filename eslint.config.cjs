@@ -1,5 +1,7 @@
 const globals = require('globals');
 
+const noUnusedVarsRule = ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }];
+
 module.exports = [
     {
         files: ['**/*.js'],
@@ -14,12 +16,12 @@ module.exports = [
         },
         rules: {
             eqeqeq: ['warn', 'always'],
-            'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+            'no-unused-vars': noUnusedVarsRule,
             'no-undef': 'off',
         },
     },
     {
-        files: ['js/constants.js', 'js/html-utils.js'],
+        files: ['js/constants.js', 'js/html-utils.js', 'vite.config.js', 'scripts/**/*.js', 'e2e/**/*.js'],
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: 'module',
@@ -29,7 +31,7 @@ module.exports = [
         },
         rules: {
             eqeqeq: ['warn', 'always'],
-            'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+            'no-unused-vars': noUnusedVarsRule,
             'no-undef': 'off',
         },
     },

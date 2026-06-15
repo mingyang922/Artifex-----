@@ -81,7 +81,7 @@ class NotificationManager {
         if (savedNotifications) {
             try {
                 this.notifications = JSON.parse(savedNotifications);
-            } catch (e) {
+            } catch (_e) {
                 this.notifications = [...this.defaultNotifications];
                 this.saveNotificationsToStorage();
             }
@@ -107,7 +107,7 @@ class NotificationManager {
             if (e.key === this.notificationKey) {
                 try {
                     this.notifications = JSON.parse(e.newValue);
-                } catch (err) {
+                } catch (_err) {
                     return;
                 }
                 this.updateAllBadges();

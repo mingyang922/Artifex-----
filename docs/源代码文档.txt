@@ -1,7 +1,7 @@
 Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
 源代码文档
-生成时间: 2026-06-09
-总行数: 36128  总页数: 723
+生成时间: 2026-06-15
+总行数: 36834  总页数: 737
 ================================================================================
 
 【前30页】
@@ -636,6 +636,7 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
         </footer>
 
         <script src="js/i18n.js"></script>
+        <script src="js/session-guard.js"></script>
         <script defer src="js/login-init.js"></script>
         <script defer src="js/api-utils.js"></script>
         <script defer src="js/login-page.js"></script>
@@ -680,9 +681,9 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                     <img src="js/logo-main.png" alt="Artifex" class="logo-img" id="logoImg" />
                     <h1>Artifex</h1>
                 </div>
-                <ul class="nav-menu">
 
 --- 第 14 页 ---
+                <ul class="nav-menu">
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="home">
                             <i class="fas fa-home"></i>
@@ -732,9 +733,9 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                     </div>
                     <div class="user-menu">
                         <button class="notification-btn" data-i18n-aria="misc.notifications" aria-label="通知">
-                            <i class="fas fa-bell"></i>
 
 --- 第 15 页 ---
+                            <i class="fas fa-bell"></i>
                             <span class="notification-badge">3</span>
                         </button>
                         <div class="user-avatar user-avatar--placeholder" role="img" aria-label="用户头像">
@@ -784,9 +785,9 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
                         border-radius: 12px;
                         border: 1px solid rgba(0, 240, 255, 0.18);
                         background: rgba(15, 22, 41, 0.55);
-                        max-width: 920px;
 
 --- 第 16 页 ---
+                        max-width: 920px;
                     "
                 >
                     <div class="section-header" style="margin-bottom: 10px">
@@ -836,9 +837,9 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
         <!-- 移动端菜单按钮 -->
         <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="菜单">
             <i class="fas fa-bars"></i>
-        </button>
 
 --- 第 17 页 ---
+        </button>
 
         <!-- 备案信息 -->
         <footer class="beian-footer">
@@ -851,6 +852,7 @@ Artifex 二维游戏美术协作与 AI 资产生成平台 V1.3.3
 
         <!-- 简化的JavaScript代码 -->
         <script src="js/i18n.js"></script>
+        <script src="js/session-guard.js"></script>
         <script defer src="js/ui-kit.js"></script>
         <script defer src="js/api-utils.js"></script>
         <script defer src="js/user-storage-scope.js"></script>
@@ -887,10 +889,10 @@ const path = require('path');
 
 const CONFIG_NAME = 'ark-rest-api.local.json';
 
-function getConfigPath() {
-    return path.join(__dirname, '..', 'config', CONFIG_NAME);
 
 --- 第 18 页 ---
+function getConfigPath() {
+    return path.join(__dirname, '..', 'config', CONFIG_NAME);
 }
 
 /**
@@ -939,10 +941,10 @@ module.exports = {
 ﻿/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
-'use strict';
 
 --- 第 19 页 ---
+ * 版本: 1.3.3 */
+'use strict';
 const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
@@ -971,10 +973,10 @@ function checkpointWal() {
         } else {
             db.pragma('wal_checkpoint(TRUNCATE)');
         }
-    } catch (e) {
+    } catch (_e) {
         try {
             db.pragma('wal_checkpoint(TRUNCATE)');
-        } catch (e2) {
+        } catch (_e2) {
             /* ignore */
         }
     }
@@ -991,10 +993,10 @@ function migrateFromJsonIfEmpty() {
     try {
         data = JSON.parse(fs.readFileSync(legacyJsonPath, 'utf8'));
     } catch {
-        return;
-    }
 
 --- 第 20 页 ---
+        return;
+    }
     const users = data.users || [];
     if (users.length === 0) return;
     const insert = db.prepare(
@@ -1043,10 +1045,10 @@ function init() {
         );
         CREATE TABLE IF NOT EXISTS user_api_credentials (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            provider TEXT NOT NULL,
 
 --- 第 21 页 ---
+            user_id INTEGER NOT NULL,
+            provider TEXT NOT NULL,
             credentials_json TEXT NOT NULL,
             updated_at TEXT NOT NULL,
             UNIQUE(user_id, provider),
@@ -1095,10 +1097,10 @@ function init() {
             content TEXT NOT NULL,
             created_at TEXT NOT NULL,
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        );
 
 --- 第 22 页 ---
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
         CREATE TABLE IF NOT EXISTS version_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             project_id INTEGER NOT NULL,
@@ -1147,10 +1149,10 @@ function init() {
     if (adminUserId) {
         db.prepare("UPDATE users SET role = 'admin' WHERE id = ? AND role != 'admin'").run(Number(adminUserId));
     } else {
-        // 默认将 ID=1 设为管理员（向后兼容）
-        db.prepare("UPDATE users SET role = 'admin' WHERE id = 1 AND role != 'admin'").run();
 
 --- 第 23 页 ---
+        // 默认将 ID=1 设为管理员（向后兼容）
+        db.prepare("UPDATE users SET role = 'admin' WHERE id = 1 AND role != 'admin'").run();
     }
 
     migrateFromJsonIfEmpty();
@@ -1199,10 +1201,10 @@ function createUser(username, email, passwordHash) {
              VALUES (?, ?, ?, ?, ?)`
         )
         .run(username, email, passwordHash, '{}', created_at);
-    const newUserId = Number(info.lastInsertRowid);
-    // 首个注册用户自动成为管理员
 
 --- 第 24 页 ---
+    const newUserId = Number(info.lastInsertRowid);
+    // 首个注册用户自动成为管理员
     const adminUserId = process.env.ADMIN_USER_ID;
     if (adminUserId) {
         if (newUserId === Number(adminUserId)) {
@@ -1251,10 +1253,10 @@ function getUserApiCredentials(userId, provider) {
     } catch (_) {
         return null;
     }
-}
-
 
 --- 第 25 页 ---
+}
+
 function getAllUserApiCredentials(userId) {
     const rows = db
         .prepare('SELECT provider, credentials_json, updated_at FROM user_api_credentials WHERE user_id = ?')
@@ -1303,10 +1305,10 @@ function getUserApiCredentialStatus(userId) {
     const configured = new Set(rows.map((r) => r.provider));
     const out = {};
     for (const provider of providers) {
-        out[provider] = configured.has(provider);
-    }
 
 --- 第 26 页 ---
+        out[provider] = configured.has(provider);
+    }
     return out;
 }
 
@@ -1352,13 +1354,13 @@ function getProject(projectId) {
 
 function getUserProjects(userId, limit, offset) {
     let projects;
-    if (limit != undefined && offset != undefined) {
+    if (limit !== undefined && offset !== undefined) {
         projects = db.prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?')
             .all(Number(userId), Number(limit), Number(offset));
-    } else {
-        projects = db.prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC').all(Number(userId));
 
 --- 第 27 页 ---
+    } else {
+        projects = db.prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC').all(Number(userId));
     }
     if (projects.length === 0) return projects;
     // 批量查询 assets 和 version_history，避免 N+1
@@ -1391,7 +1393,7 @@ function updateProject(projectId, userId, updates) {
         'UPDATE projects SET name = ?, description = ?, type = ?, version = ?, updated_at = ? WHERE id = ?'
     ).run(
         updates.name || project.name,
-        updates.description != undefined ? updates.description : project.description,
+        updates.description !== undefined ? updates.description : project.description,
         updates.type || project.type,
         newVersion,
         now,
@@ -1407,10 +1409,10 @@ function deleteProject(projectId, userId) {
     db.prepare('DELETE FROM projects WHERE id = ? AND user_id = ?').run(Number(projectId), Number(userId));
 }
 
-// ─── 项目素材 ───
-
 
 --- 第 28 页 ---
+// ─── 项目素材 ───
+
 function addProjectAsset(projectId, userId, name, type, content) {
     const now = new Date().toISOString();
     const info = db.prepare(
@@ -1426,7 +1428,7 @@ function deleteProjectAsset(assetId, userId) {
 // ─── 素材库 ───
 
 function getAssetLibrary(userId, limit, offset) {
-    if (limit != undefined && offset != undefined) {
+    if (limit !== undefined && offset !== undefined) {
         return db.prepare('SELECT * FROM asset_library WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?')
             .all(Number(userId), Number(limit), Number(offset));
     }
@@ -1459,19 +1461,19 @@ function addAssetLibraryItem(userId, item) {
 function updateAssetLibraryItem(userId, itemId, updates) {
     const existing = db.prepare('SELECT * FROM asset_library WHERE id = ? AND user_id = ?').get(Number(itemId), Number(userId));
     if (!existing) return null;
-    const tags = updates.tags != undefined
-        ? (typeof updates.tags === 'string' ? updates.tags : JSON.stringify(updates.tags))
 
 --- 第 29 页 ---
+    const tags = updates.tags !== undefined
+        ? (typeof updates.tags === 'string' ? updates.tags : JSON.stringify(updates.tags))
         : existing.tags;
     db.prepare(
         'UPDATE asset_library SET name = ?, type = ?, content = ?, desc = ?, source = ?, tags = ? WHERE id = ? AND user_id = ?'
     ).run(
-        updates.name != undefined ? updates.name : existing.name,
-        updates.type != undefined ? updates.type : existing.type,
-        updates.content != undefined ? updates.content : existing.content,
-        updates.desc != undefined ? updates.desc : existing.desc,
-        updates.source != undefined ? updates.source : existing.source,
+        updates.name !== undefined ? updates.name : existing.name,
+        updates.type !== undefined ? updates.type : existing.type,
+        updates.content !== undefined ? updates.content : existing.content,
+        updates.desc !== undefined ? updates.desc : existing.desc,
+        updates.source !== undefined ? updates.source : existing.source,
         tags,
         Number(itemId),
         Number(userId)
@@ -1511,10 +1513,10 @@ function getGlobalUsageStats() {
     return db.prepare(
         `SELECT u.username, ul.provider, ul.operation, ul.status, COUNT(*) AS count
          FROM usage_logs ul
-         JOIN users u ON u.id = ul.user_id
-         GROUP BY ul.user_id, ul.provider, ul.operation, ul.status
 
 --- 第 30 页 ---
+         JOIN users u ON u.id = ul.user_id
+         GROUP BY ul.user_id, ul.provider, ul.operation, ul.status
          ORDER BY count DESC`
     ).all();
 }
@@ -1536,7 +1538,7 @@ function addActivity(userId, action, targetType, targetId, details) {
     db.prepare(
         `INSERT INTO activity_log (user_id, action, target_type, target_id, details, created_at)
          VALUES (?, ?, ?, ?, ?, ?)`
-    ).run(Number(userId), action, targetType || null, targetId != null ? String(targetId) : null, details || null, now);
+    ).run(Number(userId), action, targetType || null, targetId !== null ? String(targetId) : null, details || null, now);
 }
 
 function getActivityLog(userId, limit, offset) {
@@ -1563,15 +1565,19 @@ function getRecentActivity(limit) {
 
 function getRecentActivityCount() {
     const row = db.prepare('SELECT COUNT(*) AS count FROM activity_log').get();
-    return row ? row.count : 0;
-}
 
 
 ... （中间省略） ...
 
 【后30页】
 
---- 第 694 页 ---
+--- 第 708 页 ---
+    transform: translate3d(0, 0, 0);
+    animation: appShellFlowBg 7.2s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+}
+
 @keyframes appShellFlowBg {
     0% { transform: translate3d(-3%, -2%, 0) scale(1.01); }
     50% { transform: translate3d(3%, 2%, 0) scale(1.08); }
@@ -1616,14 +1622,14 @@ body.app-shell .dashboard-container {
     width: 100%;
     max-width: 100%;
     padding: 0;
+
+--- 第 709 页 ---
     margin: 0;
     background: transparent;
     position: relative;
     z-index: 2;
 }
 
-
---- 第 695 页 ---
 body.app-shell .sidebar {
     width: var(--shell-sidebar-w);
     background: linear-gradient(180deg, #0f1629 0%, #0a0e18 100%);
@@ -1668,14 +1674,14 @@ body.app-shell .sidebar-logo {
 body.app-shell .sidebar-logo .logo-img {
     height: 40px;
     width: auto;
+
+--- 第 710 页 ---
     object-fit: contain;
 }
 
 body.app-shell .sidebar-logo h1 {
     font-family: var(--font-display);
     font-size: 13px;
-
---- 第 696 页 ---
     font-weight: 700;
     letter-spacing: 0.06em;
     color: #f0f4fc;
@@ -1720,14 +1726,14 @@ body.app-shell .main-content {
     padding: 20px;
     margin-left: var(--shell-sidebar-w);
     overflow-y: auto;
+
+--- 第 711 页 ---
     overflow-x: hidden;
     height: 100vh;
     min-height: 100vh;
     box-sizing: border-box;
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 240, 255, 0.35) rgba(10, 18, 34, 0.6);
-
---- 第 697 页 ---
     position: relative;
     background:
         linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
@@ -1773,13 +1779,13 @@ body.app-shell .main-content > .top-bar {
     z-index: 50;
 }
 
+--- 第 712 页 ---
+
 body.app-shell .top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
-
---- 第 698 页 ---
     padding: 14px 18px;
     border-radius: 10px;
     border: 1px solid rgba(0, 240, 255, 0.15);
@@ -1824,14 +1830,14 @@ body.app-shell .top-bar .search-bar {
 body.app-shell .top-bar .search-bar input {
     width: 100%;
     box-sizing: border-box;
+
+--- 第 713 页 ---
     padding: 10px 15px 10px 35px;
     background: rgba(5, 8, 16, 0.65);
     border: 1px solid rgba(0, 240, 255, 0.18);
     border-radius: 6px;
     color: #f0f4fc;
     font-size: 15px;
-
---- 第 699 页 ---
     font-family: var(--font-ui);
 }
 
@@ -1876,14 +1882,14 @@ body.app-shell .notification-badge {
     padding: 0 4px;
     background: var(--shell-accent);
     color: #1a1a2e;
+
+--- 第 714 页 ---
     border-radius: 50%;
     font-size: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
-
---- 第 700 页 ---
 }
 
 body.app-shell .user-avatar {
@@ -1928,14 +1934,14 @@ body.app-shell .user-avatar-dropdown {
     z-index: 10000;
 }
 
+
+--- 第 715 页 ---
 body.app-shell .user-avatar-dropdown.show {
     display: block;
 }
 
 body.app-shell .user-avatar-dd-item {
     display: flex;
-
---- 第 701 页 ---
     align-items: center;
     gap: 10px;
     width: 100%;
@@ -1980,14 +1986,14 @@ body.app-shell .mobile-menu-toggle {
         padding: 16px 0;
     }
     body.app-shell .sidebar-logo h1,
+
+--- 第 716 页 ---
     body.app-shell .nav-link span {
         display: none;
     }
     body.app-shell .sidebar-logo {
         justify-content: center;
         padding: 0 0 16px;
-
---- 第 702 页 ---
     }
     body.app-shell .sidebar-logo h1 {
         display: none;
@@ -2032,14 +2038,14 @@ body.app-shell .mobile-menu-toggle {
     body.app-shell .nav-link i {
         margin-right: 10px;
     }
+
+--- 第 717 页 ---
     body.app-shell .main-content {
         margin-left: 0;
         padding: 16px;
     }
     body.app-shell .top-bar {
         flex-direction: column;
-
---- 第 703 页 ---
         align-items: stretch;
         gap: 12px;
     }
@@ -2084,14 +2090,14 @@ body.app-shell .search-bar input:focus {
 }
 
 /* ── 旋转渐变边框 ── */
+
+--- 第 718 页 ---
 @keyframes rotate-border {
     0% { --border-angle: 0deg; }
     100% { --border-angle: 360deg; }
 }
 .rotating-border {
     position: relative;
-
---- 第 704 页 ---
     border: none !important;
     overflow: visible;
 }
@@ -2136,14 +2142,14 @@ body.app-shell .search-bar input:focus {
     left: 0;
     right: 0;
     z-index: 999;
+
+--- 第 719 页 ---
     background: rgba(10, 14, 24, 0.92);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     padding: 8px 0;
     text-align: center;
-
---- 第 705 页 ---
     font-size: 12px;
     color: #8888a0;
 }
@@ -2188,14 +2194,14 @@ body:not(.app-shell) {
                 --my: 50vh;
             }
 
+
+--- 第 720 页 ---
             html,
             body {
                 height: 100%;
                 overflow: hidden;
             }
 
-
---- 第 706 页 ---
             /* 主界面核心样式 */
             body {
                 background: #0a0e18;
@@ -2240,14 +2246,14 @@ body:not(.app-shell) {
             }
 
             body::before {
+
+--- 第 721 页 ---
                 content: "";
                 position: fixed;
                 inset: -20%;
                 background:
                     radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.24) 0%, rgba(0, 240, 255, 0) 38%),
                     radial-gradient(circle at 80% 30%, rgba(124, 58, 237, 0.28) 0%, rgba(124, 58, 237, 0) 40%),
-
---- 第 707 页 ---
                     radial-gradient(circle at 50% 85%, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0) 37%);
                 filter: blur(28px);
                 transform: translate3d(0, 0, 0);
@@ -2292,14 +2298,14 @@ body:not(.app-shell) {
                 content: "";
                 position: absolute;
                 top: 0;
+
+--- 第 722 页 ---
                 right: 0;
                 bottom: 0;
                 width: 1px;
                 background: linear-gradient(180deg, transparent 0%, rgba(0, 240, 255, 0.35) 30%, rgba(167, 139, 250, 0.4) 55%, rgba(0, 240, 255, 0.25) 80%, transparent 100%);
                 opacity: 0.85;
                 pointer-events: none;
-
---- 第 708 页 ---
                 animation: sidebarEdgeFlow 2.4s ease-in-out infinite;
             }
 
@@ -2344,14 +2350,14 @@ body:not(.app-shell) {
             .nav-link {
                 display: flex;
                 align-items: center;
+
+--- 第 723 页 ---
                 padding: 12px 20px;
                 color: #b0b0c0;
                 text-decoration: none;
                 transition: all 0.3s ease;
                 border-left: 3px solid transparent;
             }
-
---- 第 709 页 ---
 
             .nav-link:hover, .nav-link.active {
                 background: rgba(0, 240, 255, 0.1);
@@ -2396,14 +2402,14 @@ body:not(.app-shell) {
                     rgba(0, 0, 0, 0.07) 2px,
                     rgba(0, 0, 0, 0.07) 4px
                 );
+
+--- 第 724 页 ---
                 opacity: 0.3;
                 mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 75%);
             }
 
             .main-content > * {
                 position: relative;
-
---- 第 710 页 ---
                 z-index: 1;
             }
 
@@ -2448,14 +2454,14 @@ body:not(.app-shell) {
                 inset: 0;
                 border-radius: 10px;
                 background: linear-gradient(105deg, transparent 0%, rgba(0, 240, 255, 0.12) 45%, rgba(167, 139, 250, 0.14) 55%, transparent 100%);
+
+--- 第 725 页 ---
                 background-size: 200% 100%;
                 pointer-events: none;
                 animation: topBarShine 1.9s ease-in-out infinite;
                 z-index: 0;
             }
 
-
---- 第 711 页 ---
             .top-bar > * {
                 position: relative;
                 z-index: 1;
@@ -2500,14 +2506,14 @@ body:not(.app-shell) {
                 border: none;
                 color: #b0b0c0;
                 font-size: 18px;
+
+--- 第 726 页 ---
                 margin-right: 20px;
                 cursor: pointer;
                 position: relative;
             }
 
             .notification-badge {
-
---- 第 712 页 ---
                 position: absolute;
                 top: -5px;
                 right: -5px;
@@ -2552,14 +2558,14 @@ body:not(.app-shell) {
                 cursor: pointer;
                 transition: all 0.3s ease;
                 border: 1px solid rgba(0, 240, 255, 0.12);
+
+--- 第 727 页 ---
                 position: relative;
                 overflow: hidden;
                 box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
             }
 
             .tool-card::before {
-
---- 第 713 页 ---
                 content: "";
                 position: absolute;
                 top: 0;
@@ -2604,14 +2610,14 @@ body:not(.app-shell) {
             }
 
             .tool-card i {
+
+--- 第 728 页 ---
                 font-size: 26px;
                 color: #00f0ff;
                 margin-bottom: 10px;
                 filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.35));
             }
 
-
---- 第 714 页 ---
             .tool-card h3 {
                 font-family: var(--font-display);
                 font-size: 11px;
@@ -2656,14 +2662,14 @@ body:not(.app-shell) {
                 letter-spacing: 0.04em;
             }
 
+
+--- 第 729 页 ---
             .projects-grid {
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
                 gap: 25px;
             }
 
-
---- 第 715 页 ---
             .project-card {
                 background: rgba(8, 12, 24, 0.75);
                 border-radius: 10px;
@@ -2709,13 +2715,13 @@ body:not(.app-shell) {
                 z-index: 0;
             }
 
+--- 第 730 页 ---
+
             .project-card:hover::after {
                 opacity: 1;
             }
 
             .project-card > * {
-
---- 第 716 页 ---
                 position: relative;
                 z-index: 1;
             }
@@ -2760,14 +2766,14 @@ body:not(.app-shell) {
 
             .project-desc {
                 font-size: 12px;
+
+--- 第 731 页 ---
                 color: #b0b0c0;
                 margin: 0 0 15px;
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
                 -webkit-box-orient: vertical;
                 overflow: hidden;
-
---- 第 717 页 ---
             }
 
             .project-meta {
@@ -2812,14 +2818,14 @@ body:not(.app-shell) {
                 color: #00f0ff;
             }
 
+
+--- 第 732 页 ---
             /* 响应式设计调整 */
             @media (max-width: 1200px) {
                 .projects-grid {
                     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
                 }
             }
-
---- 第 718 页 ---
 
             @media (max-width: 992px) {
                 .sidebar {
@@ -2865,13 +2871,13 @@ body:not(.app-shell) {
                     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
                 }
 
+--- 第 733 页 ---
+
                 .search-bar {
                     width: 100%;
                 }
 
                 .top-bar {
-
---- 第 719 页 ---
                     flex-direction: column;
                     align-items: flex-start;
                     gap: 15px;
@@ -2917,13 +2923,13 @@ body:not(.app-shell) {
                 }
             }
 
+--- 第 734 页 ---
+
             @media (prefers-reduced-motion: reduce) {
                 body::before,
                 .sidebar::after,
                 .top-bar::before {
                     animation: none !important;
-
---- 第 720 页 ---
                 }
                 .pointer-glow,
                 .pointer-glow--lag {
@@ -2968,14 +2974,14 @@ body:not(.app-shell) {
     font-family: "Rajdhani", "Segoe UI", sans-serif;
 }
 
+
+--- 第 735 页 ---
 .tech-ui-header {
     padding: 14px 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     font-family: "Orbitron", "Segoe UI", sans-serif;
     font-size: 12px;
     font-weight: 700;
-
---- 第 721 页 ---
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--ui-accent);
@@ -3020,14 +3026,14 @@ body:not(.app-shell) {
     color: var(--ui-text);
     font-size: 15px;
     font-family: "Rajdhani", "Segoe UI", sans-serif;
+
+--- 第 736 页 ---
     outline: none;
 }
 
 .tech-ui-btn {
     display: inline-flex;
     align-items: center;
-
---- 第 722 页 ---
     justify-content: center;
     border-radius: 7px;
     border: 1px solid rgba(0, 240, 255, 0.2);
@@ -3072,14 +3078,14 @@ body:not(.app-shell) {
     font-family: "Rajdhani", "Segoe UI", sans-serif;
     font-size: 14px;
     line-height: 1.4;
+
+--- 第 737 页 ---
 }
 
 .tech-ui-toast--success {
     border-color: rgba(0, 240, 255, 0.42);
 }
 
-
---- 第 723 页 ---
 .tech-ui-toast--warn {
     border-color: rgba(255, 180, 0, 0.42);
 }

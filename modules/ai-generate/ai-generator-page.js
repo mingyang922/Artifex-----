@@ -52,10 +52,10 @@ const aiPageUtils =
     window.AiPageUtils && typeof window.AiPageUtils.create === 'function'
         ? window.AiPageUtils.create({ apiBase: API_BASE, toast: themedToast })
         : null;
-const showApiError = aiPageUtils ? aiPageUtils.showApiError : () => {};
+const _showApiError = aiPageUtils ? aiPageUtils.showApiError : () => {};
 const getProxyImageUrl = aiPageUtils ? aiPageUtils.getProxyImageUrl : (v) => v;
-const extractOriginalUrlFromProxy = aiPageUtils ? aiPageUtils.extractOriginalUrlFromProxy : () => null;
-const fetchImageAsBlob = aiPageUtils ? aiPageUtils.fetchImageAsBlob : () => Promise.reject(new Error('utils missing'));
+const _extractOriginalUrlFromProxy = aiPageUtils ? aiPageUtils.extractOriginalUrlFromProxy : () => null;
+const _fetchImageAsBlob = aiPageUtils ? aiPageUtils.fetchImageAsBlob : () => Promise.reject(new Error('utils missing'));
 const loadImage = aiPageUtils ? aiPageUtils.loadImage : () => Promise.reject(new Error('utils missing'));
 
 let imagePreviewOverlay, imagePreviewModalImg, previewZoomInBtn, previewZoomOutBtn, previewZoomResetBtn, previewCloseBtn;
@@ -425,7 +425,7 @@ function _compressDataUrlImage(dataUrl, maxSide, outMime, quality) {
             const mime = outMime || 'image/webp';
             try {
                 resolve(c.toDataURL(mime, quality !== null ? quality : 0.82));
-            } catch (e) {
+            } catch (_e) {
                 resolve(c.toDataURL('image/jpeg', 0.85));
             }
         };
@@ -435,7 +435,7 @@ function _compressDataUrlImage(dataUrl, maxSide, outMime, quality) {
 }
 
 /** 移除 tech-select 包装，便于动态重建 options 后重新 init */
-function teardownTechSelectForSelect(selectEl) {
+function _teardownTechSelectForSelect(selectEl) {
     if (!selectEl) return;
     selectEl.dataset.techSelectReady = '0';
     selectEl.classList.remove('tech-select-native');

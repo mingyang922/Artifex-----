@@ -13,7 +13,7 @@ const {
 } = require('../lib/utils');
 
 // 腾讯云混元API代理（用户级配置，使用官方SDK）
-async function handleHunyuanProxy(req, res, { runtimeConfig, API_CONFIG, getUserProviderConfig, isAdminUser }) {
+async function handleHunyuanProxy(req, res, { _runtimeConfig, _API_CONFIG, getUserProviderConfig, isAdminUser }) {
     try {
         const userTencentConfig = getUserProviderConfig(req.currentUser.id, 'tencent');
         const { secretId: SecretId, secretKey: SecretKey } = getTencentCamCredentials(userTencentConfig);

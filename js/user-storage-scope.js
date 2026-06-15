@@ -14,7 +14,7 @@ const global = typeof window !== 'undefined' ? window : this;
             const path = String(global.location.pathname || '').replace(/\\/g, '/');
             if (path.includes('/modules/')) return '../../login.html';
             return 'login.html';
-        } catch (e) {
+        } catch (_e) {
             return 'login.html';
         }
     }
@@ -32,7 +32,7 @@ const global = typeof window !== 'undefined' ? window : this;
                 const id =
                     this.userId !== null ? String(this.userId) : global.localStorage.getItem('gameui-session-user-id');
                 return id ? base + ':u' + id : base;
-            } catch (e) {
+            } catch (_e) {
                 return base;
             }
         },
@@ -60,7 +60,7 @@ const global = typeof window !== 'undefined' ? window : this;
                         if (id !== null) {
                             global.localStorage.setItem('gameui-session-user-id', String(id));
                         }
-                    } catch (e) {
+                    } catch (_e) {
                         /* ignore */
                     }
                 } catch (e) {

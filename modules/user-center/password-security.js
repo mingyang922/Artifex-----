@@ -689,7 +689,7 @@ class PasswordSecurityManager {
 }
 
 // 初始化密码安全管理系统（包裹在 DOMContentLoaded 中，确保 DOM 和依赖变量就绪）
-let passwordSecurityManager;
+let _passwordSecurityManager;
 
 document.addEventListener('DOMContentLoaded', () => {
     // 安全获取可能由 user-center-page.js 定义的变量

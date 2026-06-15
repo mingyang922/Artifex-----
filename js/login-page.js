@@ -125,7 +125,7 @@ function setupLoginForm() {
             if (data.user && data.user.id !== null) {
                 try {
                     localStorage.setItem('gameui-session-user-id', String(data.user.id));
-                } catch (e) {
+                } catch (_e) {
                     /* ignore */
                 }
             }
@@ -134,7 +134,7 @@ function setupLoginForm() {
                 sessionStorage.removeItem('artifex-boot-seen');
                 window.location.href = 'dashboard.html';
             }, 600);
-        } catch (err) {
+        } catch (_err) {
             showMessage('无法连接服务器，请确认已运行 npm start', 'error');
         } finally {
             btn.classList.remove('loading');
@@ -170,7 +170,7 @@ function setupRegisterForm() {
             if (data.user && data.user.id !== null) {
                 try {
                     localStorage.setItem('gameui-session-user-id', String(data.user.id));
-                } catch (e) {
+                } catch (_e) {
                     /* ignore */
                 }
             }
@@ -194,7 +194,7 @@ function setupRegisterForm() {
                 sessionStorage.removeItem('artifex-boot-seen');
                 window.location.href = 'dashboard.html';
             }, 800);
-        } catch (err) {
+        } catch (_err) {
             showMessage('无法连接服务器，请确认已运行 npm start', 'error');
         } finally {
             btn.classList.remove('loading');

@@ -17,13 +17,13 @@ const global = typeof window !== 'undefined' ? window : this;
             if (global.GameUiUserScope && typeof global.GameUiUserScope.key === 'function') {
                 return global.GameUiUserScope.key(base);
             }
-        } catch (e) {
+        } catch (_e) {
             /* ignore */
         }
         try {
             const id = global.localStorage.getItem('gameui-session-user-id');
             return id ? base + ':u' + id : base;
-        } catch (e2) {
+        } catch (_e2) {
             return base;
         }
     }
@@ -55,7 +55,7 @@ const global = typeof window !== 'undefined' ? window : this;
                 const val = global.localStorage.getItem(key) || '';
                 total += key.length + val.length;
             }
-        } catch (e) {
+        } catch (_e) {
             return null;
         }
         return total;

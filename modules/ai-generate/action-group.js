@@ -228,7 +228,7 @@ function parsePromptActions(text) {
             let data;
             try {
                 data = text ? JSON.parse(text) : {};
-            } catch (e) {
+            } catch (_e) {
                 themedError('三视图接口返回非 JSON：' + text.slice(0, 200));
                 return;
             }
@@ -364,7 +364,7 @@ document.getElementById('actionGroupGenerateBtn')?.addEventListener('click', asy
             let data;
             try {
                 data = text ? JSON.parse(text) : {};
-            } catch (parseErr) {
+            } catch (_parseErr) {
                 failMessages.push(`第 ${index + 1} 帧: 响应不是 JSON (${res.status}) ${escapeHtml(text.slice(0, 120))}`);
                 console.error('action group frame parse error', res.status, text);
                 return;
