@@ -5,10 +5,10 @@
 (function () {
     'use strict';
 
-    var _redirecting = false;
+    const _redirecting = false;
 
     // 静默路径：这些接口返回 401 是正常逻辑，不弹窗
-    var SILENT_PATHS = [
+    const SILENT_PATHS = [
         '/api/me',
         '/api/csrf-token',
         '/api/health',
@@ -20,9 +20,9 @@
     }
 
     // 拦截 fetch，检测 401 响应
-    var originalFetch = window.fetch;
+    const originalFetch = window.fetch;
     window.fetch = function () {
-        var args = arguments;
+        const args = arguments;
         return originalFetch.apply(this, args).then(function (response) {
             if (response.status === 401 && !_redirecting) {
                 // 静默请求不弹窗
