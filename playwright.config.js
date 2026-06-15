@@ -20,7 +20,7 @@ module.exports = defineConfig({
         },
     ],
     webServer: {
-        command: 'node backend/proxy.js',
+        command: 'cross-env NODE_ENV=test node backend/proxy.js',
         port: 3000,
         reuseExistingServer: true,
         timeout: 15000,
