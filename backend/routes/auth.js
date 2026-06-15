@@ -66,7 +66,7 @@ function createAuthRouter(deps) {
                 req.session.userId = row.id;
                 res.json({ ok: true, user: publicUser(row) });
             });
-        } catch (_e) {
+        } catch (e) {
             console.error('register', e);
             res.status(500).json({ error: '注册失败' });
         }
@@ -87,7 +87,7 @@ function createAuthRouter(deps) {
                 try { usersDb.addActivity(row.id, '用户登录', 'auth', null, null); } catch (_) { /* 活动日志非关键 */ }
                 res.json({ ok: true, user: publicUser(row) });
             });
-        } catch (_e) {
+        } catch (e) {
             console.error('login', e);
             res.status(500).json({ error: '登录失败' });
         }
@@ -130,7 +130,7 @@ function createAuthRouter(deps) {
             // 审计日志
             try { usersDb.addActivity(req.currentUser.id, '修改密码', 'security', null, null); } catch (_) {}
             res.json({ ok: true, message: '密码修改成功' });
-        } catch (_e) {
+        } catch (e) {
             console.error('change-password', e);
             res.status(500).json({ error: '密码修改失败' });
         }

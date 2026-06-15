@@ -5,25 +5,36 @@
 (function () {
     'use strict';
 
-    let _redirecting = false;
+    var _redirecting = false;
+
+    // 静默路径：这些接口返回 401 是正常逻辑，不弹窗
+    var SILENT_PATHS = [
+        '/api/me',
+        '/api/csrf-token',
+        '/api/health',
+    ];
+
+    function isSilentRequest(url) {
+        if (typeof url !== 'string') return false;
+        return SILENT_PATHS.some(function (p) { return url.includes(p); });
+    }
 
     // 拦截 fetch，检测 401 响应
-    const originalFetch = window.fetch;
+    var originalFetch = window.fetch;
     window.fetch = function () {
-        return originalFetch.apply(this, arguments).then(function (response) {
+        var args = arguments;
+        return originalFetch.apply(this, args).then(function (response) {
             if (response.status === 401 && !_redirecting) {
+                // 静默请求不弹窗
+                if (isSilentRequest(args[0])) return response;
+
                 _redirecting = true;
-                // 静默 401（如 /api/me 初始检查）不弹窗，只在用户操作时弹窗
-                const url = arguments[0];
-                const isSilent = typeof url === 'string' && url.includes('/api/me') && !arguments[1];
-                if (!isSilent) {
-                    if (window.TechUI && typeof window.TechUI.toast === 'function') {
-                        window.TechUI.toast('会话已过期，请重新登录', 'warn');
-                    }
-                    setTimeout(function () {
-                        window.location.href = '/login.html';
-                    }, 1500);
+                if (window.TechUI && typeof window.TechUI.toast === 'function') {
+                    window.TechUI.toast('会话已过期，请重新登录', 'warn');
                 }
+                setTimeout(function () {
+                    window.location.href = '/login.html';
+                }, 1500);
             }
             return response;
         });

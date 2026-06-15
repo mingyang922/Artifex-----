@@ -32,6 +32,9 @@ class ImageGenerator {
         this.styleTransferRefBase64 = null; // 风格迁移：风格参考图 base64
         this.upscaleBase64 = null; // 图片放大：源图 base64
         this.removeBgBase64 = null; // 背景去除：源图 base64
+        // 初始化拆分模块
+        if (window.ImageStorage) window.ImageStorage.init(this);
+        if (window.ImageStylePresets) window.ImageStylePresets.init(this);
         this.init();
     }
 

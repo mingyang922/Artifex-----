@@ -159,6 +159,7 @@ app.use((req, res, next) => {
 
 // ── 用户库 + Session ─────────────────────────────────────────────
 const session = require('express-session');
+const SQLiteStore = require('connect-sqlite3')(session);
 const usersDb = require('./db/users-db');
 const { createAuthPolicy } = require('./lib/auth-policy');
 const { createUserApiSettingsHelpers } = require('./lib/user-api-settings');
@@ -167,6 +168,12 @@ const { requireAuth, isAdminUser } = createAuthPolicy(usersDb);
 const { sanitizeApiSettingsPayload, getUserProviderConfig } = createUserApiSettingsHelpers(usersDb);
 
 app.use(session({
+    store: new SQLiteStore({
+        db: 'sessions.sqlite',
+        dir: path.join(__dirname, 'data'),
+        ttl: 24 * 60 * 60, // 24 小时
+        cleanupInterval: 30 * 60 * 1000, // 30 分钟清理过期会话
+    }),
     secret: resolvedSessionSecret,
     resave: false,
     saveUninitialized: false,

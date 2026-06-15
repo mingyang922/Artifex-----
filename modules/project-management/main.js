@@ -1226,7 +1226,7 @@ window.initModule = initModule;
         }
     };
 
-    const selectedTemplate = "blank";
+    let selectedTemplate = "blank";
 
     function initTemplateCards() {
         const cards = document.querySelectorAll("#templateCards .template-card");
