@@ -207,7 +207,7 @@
                 }),
             });
             const errText = await response.text();
-            const data;
+            let data;
             try {
                 data = JSON.parse(errText);
             } catch (_) {
