@@ -1426,8 +1426,8 @@ class AssetEditor {
 }
 
 // 兼容旧代码引用
-const AIGenerator = AssetEditor;
+const _AIGenerator = AssetEditor;
 
-const STYLE_PRESETS_KEY = 'style_presets_v1';
+const _STYLE_PRESETS_KEY = 'style_presets_v1';
 
 /** 将 data URL 缩放压缩，用于上传 API 或本地预设（减小体积） */

@@ -229,7 +229,7 @@
                 try {
                     const raw = localStorage.getItem(STORAGE_KEY + '_categories');
                     categories = raw ? JSON.parse(raw) : DEFAULT_CATEGORIES.slice();
-                } catch (e) {
+                } catch (_e) {
                     categories = DEFAULT_CATEGORIES.slice();
                 }
                 if (!Array.isArray(categories) || categories.length === 0) {
@@ -258,7 +258,7 @@
                             });
                         }
                     }
-                } catch (e) {
+                } catch (_e) {
                     console.warn('读取 currentProjectContext 失败：', e);
                 }
             }
@@ -267,7 +267,7 @@
                 // Save categories to localStorage (lightweight user preference)
                 try {
                     localStorage.setItem(STORAGE_KEY + '_categories', JSON.stringify(categories));
-                } catch (e) {
+                } catch (_e) {
                     console.debug('[asset-library] 保存分类失败', e);
                 }
                 return true;
@@ -552,7 +552,7 @@
                     }
                     assets = assets.filter((x) => x.id !== id);
                     renderAssets();
-                } catch (e) {
+                } catch (_e) {
                     console.error('删除素材失败', e);
                     uiToast('删除失败：' + (e.message || '请重试'), 'warn');
                 }
@@ -583,7 +583,7 @@
                     maxWidth: options.maxWidth || 1600,
                     maxHeight: options.maxHeight || 1600,
                     mimeType: options.mimeType || 'image/webp',
-                    quality: options.quality == null ? 0.82 : options.quality,
+                    quality: options.quality === null ? 0.82 : options.quality,
                 };
                 const img = await dataUrlToImage(dataURL);
                 const ratio = Math.min(opt.maxWidth / img.naturalWidth, opt.maxHeight / img.naturalHeight, 1);
@@ -634,7 +634,7 @@
                     assets.unshift(serverItem);
                     renderAssets();
                     return true;
-                } catch (e) {
+                } catch (_e) {
                     console.error('保存素材到服务器失败', e);
                     uiToast('保存失败：' + (e.message || '请重试'), 'warn');
                     return false;
@@ -661,7 +661,7 @@
                             quality: 0.82,
                         });
                         outType = 'image/webp';
-                    } catch (e) {
+                    } catch (_e) {
                         console.warn('预压缩失败，回退原图：', e);
                     }
                 }
@@ -701,7 +701,7 @@
                     try {
                         await addAssetFromFile(f, defaultNameVal || f.name, cat);
                         success++;
-                    } catch (e) {
+                    } catch (_e) {
                         failed++;
                         const msg = e && e.message ? e.message : '读取文件失败';
                         failMessages.push(`${f.name}: ${msg}`);
@@ -806,7 +806,7 @@
                             assets = assets.filter((x) => x.id !== id);
                             deleted++;
                         }
-                    } catch (e) {
+                    } catch (_e) {
                         console.error('批量删除素材失败', id, e);
                     }
                 }
@@ -888,7 +888,7 @@
                     } else if (format === 'spritesheet') {
                         await exportGenericSpriteSheet(imageAssets);
                     }
-                } catch (e) {
+                } catch (_e) {
                     console.error('导出失败:', e);
                     uiToast('导出失败: ' + (e.message || '未知错误'), 'warn');
                 }
@@ -968,8 +968,8 @@
 
                 for (const a of imageAssets) {
                     const img = await loadImageFromDataURL(a.dataURL);
-                    const w = img.naturalWidth;
-                    const h = img.naturalHeight;
+                    const _w = img.naturalWidth;
+                    const _h = img.naturalHeight;
                     const safeName = (a.name || a.fileName || 'asset').replace(/[^a-zA-Z0-9_一-鿿]/g, '_');
                     const pngName = safeName + '.png';
 
@@ -1108,7 +1108,7 @@
                     if (data.ok && Array.isArray(data.items)) {
                         assets = data.items.map(dbItemToFrontend);
                     }
-                } catch (e) {
+                } catch (_e) {
                     console.error('从服务器加载素材失败', e);
                     uiToast('加载素材库失败，将使用本地备份', 'warn');
                     // Fallback to localStorage backup
@@ -1277,7 +1277,7 @@
                         scopedKey,
                         JSON.stringify({ categories: scopedCategories, assets: scopedAssets })
                     );
-                } catch (e) {
+                } catch (_e) {
                     console.warn('迁移旧素材库数据失败：', e);
                 }
             }
@@ -1285,7 +1285,7 @@
             async function bootAssetLibrary() {
                 try {
                     await GameUiUserScope.ensure();
-                } catch (e) {
+                } catch (_e) {
                     console.warn('用户态校验失败，继续初始化素材库：', e);
                 }
                 if (typeof GameUiUserScope !== 'undefined' && typeof GameUiUserScope.key === 'function') {
@@ -1331,7 +1331,7 @@
             // 额外：支持按回车上传当前选中文件名（不实际选文件）——保留轻量交互
             // --- tag system ---
             function getAllTags() {
-                var tagSet = new Set();
+                const tagSet = new Set();
                 assets.forEach(function(a) {
                     if (Array.isArray(a.tags)) {
                         a.tags.forEach(function(t) { if (t) tagSet.add(t); });
@@ -1339,16 +1339,16 @@
                 });
                 return Array.from(tagSet).sort();
             }
-            var activeTagFilter = null;
+            let activeTagFilter = null;
             function renderTagFilterBar() {
-                var bar = document.getElementById('tagFilterBar');
-                var chips = document.getElementById('tagFilterChips');
+                const bar = document.getElementById('tagFilterBar');
+                const chips = document.getElementById('tagFilterChips');
                 if (!bar || !chips) return;
-                var allTags = getAllTags();
+                const allTags = getAllTags();
                 if (allTags.length === 0) { bar.style.display = 'none'; return; }
                 bar.style.display = 'flex'; chips.innerHTML = '';
                 allTags.forEach(function(tag) {
-                    var chip = document.createElement('span');
+                    const chip = document.createElement('span');
                     chip.className = 'tag-filter-chip' + (activeTagFilter === tag ? ' is-active' : '');
                     chip.textContent = tag;
                     chip.addEventListener('click', function() {
@@ -1358,9 +1358,9 @@
                     chips.appendChild(chip);
                 });
             }
-            var _originalFilterAssets = filterAssets;
+            const _originalFilterAssets = filterAssets;
             filterAssets = function() {
-                var filtered = _originalFilterAssets();
+                const filtered = _originalFilterAssets();
                 if (activeTagFilter) {
                     filtered = filtered.filter(function(a) {
                         return Array.isArray(a.tags) && a.tags.indexOf(activeTagFilter) !== -1;
@@ -1368,29 +1368,29 @@
                 }
                 return filtered;
             };
-            var _originalRenderAssets = renderAssets;
+            const _originalRenderAssets = renderAssets;
             renderAssets = function() {
                 _originalRenderAssets();
                 renderTagFilterBar();
-                var cards = assetGrid.querySelectorAll('.asset-card');
-                var filtered = filterAssets();
+                const cards = assetGrid.querySelectorAll('.asset-card');
+                const filtered = filterAssets();
                 cards.forEach(function(card, idx) {
-                    var a = filtered[idx];
+                    const a = filtered[idx];
                     if (!a) return;
                     if (Array.isArray(a.tags) && a.tags.length > 0) {
-                        var tagsDiv = document.createElement('div');
+                        const tagsDiv = document.createElement('div');
                         tagsDiv.className = 'asset-tags';
                         a.tags.forEach(function(tag) {
-                            var chip = document.createElement('span');
+                            const chip = document.createElement('span');
                             chip.className = 'tag-chip'; chip.textContent = tag;
                             tagsDiv.appendChild(chip);
                         });
-                        var meta = card.querySelector('.meta');
+                        const meta = card.querySelector('.meta');
                         if (meta) meta.insertAdjacentElement('afterend', tagsDiv);
                     }
-                    var actions = card.querySelector('.card-actions');
+                    const actions = card.querySelector('.card-actions');
                     if (actions) {
-                        var moreBtn = document.createElement('button');
+                        const moreBtn = document.createElement('button');
                         moreBtn.className = 'btn btn-small card-more-btn';
                         moreBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
                         moreBtn.addEventListener('click', function(e) {
@@ -1404,17 +1404,17 @@
             // --- context menu ---
             function showCardContextMenu(asset, anchorEl) {
                 document.querySelectorAll('.card-context-menu.is-open').forEach(function(m) { m.remove(); });
-                var menu = document.createElement('div');
+                const menu = document.createElement('div');
                 menu.className = 'card-context-menu is-open';
-                var btnCopy = document.createElement('button');
+                const btnCopy = document.createElement('button');
                 btnCopy.innerHTML = '<i class="fas fa-copy"></i> 复制到项目';
                 btnCopy.addEventListener('click', function(e) { e.stopPropagation(); menu.remove(); showProjectSelector(asset); });
-                var btnTags = document.createElement('button');
+                const btnTags = document.createElement('button');
                 btnTags.innerHTML = '<i class="fas fa-tags"></i> 编辑标签';
                 btnTags.addEventListener('click', function(e) { e.stopPropagation(); menu.remove(); showTagEditor(asset); });
                 menu.appendChild(btnCopy); menu.appendChild(btnTags);
                 document.body.appendChild(menu);
-                var rect = anchorEl.getBoundingClientRect();
+                const rect = anchorEl.getBoundingClientRect();
                 menu.style.left = Math.min(rect.left, window.innerWidth - 180) + 'px';
                 menu.style.top = (rect.bottom + 4) + 'px';
                 setTimeout(function() {
@@ -1423,11 +1423,11 @@
             }
             // --- cross-project copy ---
             function showProjectSelector(asset) {
-                var dialog = document.createElement('div'); dialog.className = 'project-selector-dialog';
-                var box = document.createElement('div'); box.className = 'project-selector-box';
-                var title = document.createElement('h3'); title.textContent = '选择目标项目'; box.appendChild(title);
-                var listDiv = document.createElement('div'); listDiv.innerHTML = '<div class="project-selector-empty">加载中...</div>'; box.appendChild(listDiv);
-                var closeBtn = document.createElement('button'); closeBtn.className = 'project-selector-close'; closeBtn.textContent = '取消';
+                const dialog = document.createElement('div'); dialog.className = 'project-selector-dialog';
+                const box = document.createElement('div'); box.className = 'project-selector-box';
+                const title = document.createElement('h3'); title.textContent = '选择目标项目'; box.appendChild(title);
+                const listDiv = document.createElement('div'); listDiv.innerHTML = '<div class="project-selector-empty">加载中...</div>'; box.appendChild(listDiv);
+                const closeBtn = document.createElement('button'); closeBtn.className = 'project-selector-close'; closeBtn.textContent = '取消';
                 closeBtn.addEventListener('click', function() { dialog.remove(); });
                 box.appendChild(closeBtn); dialog.appendChild(box);
                 dialog.addEventListener('click', function(e) { if (e.target === dialog) dialog.remove(); });
@@ -1439,9 +1439,9 @@
                         listDiv.innerHTML = '<div class="project-selector-empty">暂无项目，请先创建项目</div>'; return;
                     }
                     data.projects.forEach(function(proj) {
-                        var item = document.createElement('div'); item.className = 'project-list-item';
-                        var nameSpan = document.createElement('span'); nameSpan.className = 'project-item-name'; nameSpan.textContent = proj.name;
-                        var typeSpan = document.createElement('span'); typeSpan.className = 'project-item-type'; typeSpan.textContent = proj.type || '';
+                        const item = document.createElement('div'); item.className = 'project-list-item';
+                        const nameSpan = document.createElement('span'); nameSpan.className = 'project-item-name'; nameSpan.textContent = proj.name;
+                        const typeSpan = document.createElement('span'); typeSpan.className = 'project-item-type'; typeSpan.textContent = proj.type || '';
                         item.appendChild(nameSpan); item.appendChild(typeSpan);
                         item.addEventListener('click', function() { copyAssetToProject(asset, proj, dialog); });
                         listDiv.appendChild(item);
@@ -1449,7 +1449,7 @@
                 }).catch(function() { listDiv.innerHTML = '<div class="project-selector-empty">加载失败</div>'; });
             }
             function copyAssetToProject(asset, project, dialog) {
-                var assetName = asset.name || asset.fileName || '未命名';
+                const assetName = asset.name || asset.fileName || '未命名';
                 fetchWithCsrf('/api/projects/' + project.id + '/assets', {
                     method: 'POST', body: JSON.stringify({ name: assetName, type: asset.type || 'image', content: asset.dataURL || '' }),
                 }).then(function(r) { return r.json(); })
@@ -1461,30 +1461,30 @@
             // --- tag editor ---
             function showTagEditor(asset) {
                 modalRoot.innerHTML = '';
-                var modal = document.createElement('div'); modal.className = 'modal';
-                var box = document.createElement('div'); box.className = 'box'; box.style.width = '400px';
-                var title = document.createElement('div'); title.style.marginBottom = '12px';
+                const modal = document.createElement('div'); modal.className = 'modal';
+                const box = document.createElement('div'); box.className = 'box'; box.style.width = '400px';
+                const title = document.createElement('div'); title.style.marginBottom = '12px';
                 title.innerHTML = '<strong>编辑标签 - ' + escapeHtml(asset.name || asset.fileName) + '</strong>';
                 box.appendChild(title);
-                var currentTags = Array.isArray(asset.tags) ? asset.tags.slice() : [];
-                var tagInputWrap = document.createElement('div'); tagInputWrap.className = 'tag-input-wrap'; tagInputWrap.style.position = 'relative';
-                var input = document.createElement('input'); input.type = 'text'; input.placeholder = '输入标签后按回车...';
-                var autocomplete = document.createElement('div'); autocomplete.className = 'tag-autocomplete';
+                const currentTags = Array.isArray(asset.tags) ? asset.tags.slice() : [];
+                const tagInputWrap = document.createElement('div'); tagInputWrap.className = 'tag-input-wrap'; tagInputWrap.style.position = 'relative';
+                const input = document.createElement('input'); input.type = 'text'; input.placeholder = '输入标签后按回车...';
+                const autocomplete = document.createElement('div'); autocomplete.className = 'tag-autocomplete';
                 function renderTagChips() {
                     tagInputWrap.querySelectorAll('.tag-chip').forEach(function(c) { c.remove(); });
                     currentTags.forEach(function(tag, tidx) {
-                        var chip = document.createElement('span'); chip.className = 'tag-chip'; chip.textContent = tag;
-                        var removeBtn = document.createElement('span'); removeBtn.className = 'tag-remove'; removeBtn.textContent = '\u00d7';
+                        const chip = document.createElement('span'); chip.className = 'tag-chip'; chip.textContent = tag;
+                        const removeBtn = document.createElement('span'); removeBtn.className = 'tag-remove'; removeBtn.textContent = '\u00d7';
                         removeBtn.addEventListener('click', function() { currentTags.splice(tidx, 1); renderTagChips(); });
                         chip.appendChild(removeBtn); tagInputWrap.insertBefore(chip, input);
                     });
                 }
                 function showAutocomplete(query) {
-                    var allTags = getAllTags().filter(function(t) { return currentTags.indexOf(t) === -1 && t.toLowerCase().indexOf(query.toLowerCase()) !== -1; });
+                    const allTags = getAllTags().filter(function(t) { return currentTags.indexOf(t) === -1 && t.toLowerCase().indexOf(query.toLowerCase()) !== -1; });
                     autocomplete.innerHTML = '';
                     if (allTags.length === 0 || !query) { autocomplete.classList.remove('is-open'); return; }
                     allTags.slice(0, 8).forEach(function(tag) {
-                        var btn = document.createElement('button'); btn.className = 'tag-autocomplete-item'; btn.textContent = tag;
+                        const btn = document.createElement('button'); btn.className = 'tag-autocomplete-item'; btn.textContent = tag;
                         btn.addEventListener('click', function() {
                             if (currentTags.indexOf(tag) === -1) currentTags.push(tag);
                             input.value = ''; autocomplete.classList.remove('is-open'); renderTagChips();
@@ -1496,24 +1496,24 @@
                 input.addEventListener('input', function() { showAutocomplete(input.value); });
                 input.addEventListener('keydown', function(e) {
                     if (e.key === 'Enter' && input.value.trim()) {
-                        e.preventDefault(); var val = input.value.trim();
+                        e.preventDefault(); const val = input.value.trim();
                         if (currentTags.indexOf(val) === -1) currentTags.push(val);
                         input.value = ''; autocomplete.classList.remove('is-open'); renderTagChips();
                     }
                 });
                 tagInputWrap.appendChild(input); tagInputWrap.appendChild(autocomplete); renderTagChips();
                 box.appendChild(tagInputWrap);
-                var actionsDiv = document.createElement('div'); actionsDiv.style.marginTop = '16px'; actionsDiv.style.display = 'flex'; actionsDiv.style.gap = '8px'; actionsDiv.style.justifyContent = 'flex-end';
-                var saveBtn = document.createElement('button'); saveBtn.className = 'btn btn-primary'; saveBtn.textContent = '保存';
+                const actionsDiv = document.createElement('div'); actionsDiv.style.marginTop = '16px'; actionsDiv.style.display = 'flex'; actionsDiv.style.gap = '8px'; actionsDiv.style.justifyContent = 'flex-end';
+                const saveBtn = document.createElement('button'); saveBtn.className = 'btn btn-primary'; saveBtn.textContent = '保存';
                 saveBtn.addEventListener('click', function() { saveAssetTags(asset, currentTags); modalRoot.style.display = 'none'; modalRoot.innerHTML = ''; });
-                var cancelBtn = document.createElement('button'); cancelBtn.className = 'btn'; cancelBtn.textContent = '取消';
+                const cancelBtn = document.createElement('button'); cancelBtn.className = 'btn'; cancelBtn.textContent = '取消';
                 cancelBtn.addEventListener('click', function() { modalRoot.style.display = 'none'; modalRoot.innerHTML = ''; });
                 actionsDiv.appendChild(cancelBtn); actionsDiv.appendChild(saveBtn); box.appendChild(actionsDiv);
                 modal.appendChild(box); modalRoot.appendChild(modal); modalRoot.style.display = 'block';
                 modal.addEventListener('click', function(e) { if (e.target === modal) { modalRoot.style.display = 'none'; modalRoot.innerHTML = ''; } });
             }
             function saveAssetTags(asset, newTags) {
-                var existingTags = {};
+                const existingTags = {};
                 try { existingTags = JSON.parse(asset._rawTags || '{}'); } catch(_) {}
                 existingTags.customTags = newTags;
                 fetchWithCsrf('/api/asset-library/' + encodeURIComponent(asset.id), {
@@ -1525,41 +1525,41 @@
                 }).catch(function() { uiToast('保存失败', 'warn'); });
             }
             // --- URL import ---
-            var btnUrlImport = document.getElementById('btnUrlImport');
+            const btnUrlImport = document.getElementById('btnUrlImport');
             if (btnUrlImport) { btnUrlImport.addEventListener('click', function() { showUrlImportDialog(); }); }
             function showUrlImportDialog() {
-                var dialog = document.createElement('div'); dialog.className = 'url-import-dialog';
-                var box = document.createElement('div'); box.className = 'url-import-box';
-                var title = document.createElement('h3'); title.textContent = '从 URL 导入图片'; box.appendChild(title);
-                var urlField = document.createElement('input'); urlField.type = 'text'; urlField.className = 'url-field'; urlField.placeholder = '输入图片 URL (http/https)...';
+                const dialog = document.createElement('div'); dialog.className = 'url-import-dialog';
+                const box = document.createElement('div'); box.className = 'url-import-box';
+                const title = document.createElement('h3'); title.textContent = '从 URL 导入图片'; box.appendChild(title);
+                const urlField = document.createElement('input'); urlField.type = 'text'; urlField.className = 'url-field'; urlField.placeholder = '输入图片 URL (http/https)...';
                 box.appendChild(urlField);
-                var preview = document.createElement('div'); preview.className = 'url-preview-area';
+                const preview = document.createElement('div'); preview.className = 'url-preview-area';
                 preview.innerHTML = '<div class="preview-placeholder">输入 URL 后预览图片</div>';
                 box.appendChild(preview);
-                var loadingDiv = document.createElement('div'); loadingDiv.className = 'url-import-loading'; loadingDiv.style.display = 'none';
+                const loadingDiv = document.createElement('div'); loadingDiv.className = 'url-import-loading'; loadingDiv.style.display = 'none';
                 loadingDiv.innerHTML = '<div class="spinner"></div> 加载中...';
                 box.appendChild(loadingDiv);
-                var actionsDiv = document.createElement('div'); actionsDiv.className = 'url-import-actions';
-                var importBtn = document.createElement('button'); importBtn.className = 'btn btn-primary'; importBtn.textContent = '导入'; importBtn.disabled = true; importBtn.style.opacity = '0.5';
-                var cancelBtn = document.createElement('button'); cancelBtn.className = 'btn'; cancelBtn.textContent = '取消'; cancelBtn.addEventListener('click', function() { dialog.remove(); });
+                const actionsDiv = document.createElement('div'); actionsDiv.className = 'url-import-actions';
+                const importBtn = document.createElement('button'); importBtn.className = 'btn btn-primary'; importBtn.textContent = '导入'; importBtn.disabled = true; importBtn.style.opacity = '0.5';
+                const cancelBtn = document.createElement('button'); cancelBtn.className = 'btn'; cancelBtn.textContent = '取消'; cancelBtn.addEventListener('click', function() { dialog.remove(); });
                 actionsDiv.appendChild(cancelBtn); actionsDiv.appendChild(importBtn); box.appendChild(actionsDiv);
                 dialog.appendChild(box); dialog.addEventListener('click', function(e) { if (e.target === dialog) dialog.remove(); });
                 document.body.appendChild(dialog);
-                var previewDataUrl = null; var debounceTimer = null;
+                let previewDataUrl = null; let debounceTimer = null;
                 urlField.addEventListener('input', function() {
-                    clearTimeout(debounceTimer); var url = urlField.value.trim();
+                    clearTimeout(debounceTimer); const url = urlField.value.trim();
                     if (!url) { preview.innerHTML = '<div class="preview-placeholder">输入 URL 后预览图片</div>'; importBtn.disabled = true; importBtn.style.opacity = '0.5'; previewDataUrl = null; return; }
-                    try { var parsed = new URL(url); if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') { preview.innerHTML = '<div class="preview-placeholder">仅支持 http/https 协议</div>'; return; } }
-                    catch(e) { preview.innerHTML = '<div class="preview-placeholder">无效的 URL</div>'; return; }
+                    try { const parsed = new URL(url); if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') { preview.innerHTML = '<div class="preview-placeholder">仅支持 http/https 协议</div>'; return; } }
+                    catch (_e) { preview.innerHTML = '<div class="preview-placeholder">无效的 URL</div>'; return; }
                     debounceTimer = setTimeout(function() {
                         loadingDiv.style.display = 'flex'; preview.innerHTML = '';
-                        var proxyUrl = '/api/proxy-image?url=' + encodeURIComponent(url);
+                        const proxyUrl = '/api/proxy-image?url=' + encodeURIComponent(url);
                         fetch(proxyUrl, { credentials: 'include' })
                         .then(function(r) { if (!r.ok) throw new Error('图片加载失败'); return r.blob(); })
-                        .then(function(blob) { return new Promise(function(resolve, reject) { var reader = new FileReader(); reader.onload = function() { resolve(reader.result); }; reader.onerror = reject; reader.readAsDataURL(blob); }); })
+                        .then(function(blob) { return new Promise(function(resolve, reject) { const reader = new FileReader(); reader.onload = function() { resolve(reader.result); }; reader.onerror = reject; reader.readAsDataURL(blob); }); })
                         .then(function(dataUrl) {
                             previewDataUrl = dataUrl; preview.innerHTML = '';
-                            var img = document.createElement('img'); img.src = dataUrl; preview.appendChild(img);
+                            const img = document.createElement('img'); img.src = dataUrl; preview.appendChild(img);
                             importBtn.disabled = false; importBtn.style.opacity = '1'; loadingDiv.style.display = 'none';
                         })
                         .catch(function(err) {
@@ -1571,9 +1571,9 @@
                 importBtn.addEventListener('click', function() {
                     if (!previewDataUrl) return;
                     importBtn.disabled = true; importBtn.textContent = '导入中...';
-                    var cat = (typeof uploadCategoryEl !== 'undefined' && uploadCategoryEl) ? uploadCategoryEl.value : '其他';
-                    var fileName = 'url_import_' + Date.now();
-                    var item = { id: 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8), name: fileName, fileName: fileName, category: cat, type: 'image', dataURL: previewDataUrl, favorite: false, tags: [], createdAt: Date.now() };
+                    const cat = (typeof uploadCategoryEl !== 'undefined' && uploadCategoryEl) ? uploadCategoryEl.value : '其他';
+                    const fileName = 'url_import_' + Date.now();
+                    const item = { id: 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8), name: fileName, fileName: fileName, category: cat, type: 'image', dataURL: previewDataUrl, favorite: false, tags: [], createdAt: Date.now() };
                     persistAssetItem(item).then(function(ok) {
                         if (ok) { uiToast('URL 图片导入成功', 'success'); dialog.remove(); }
                         else { uiToast('导入失败', 'warn'); importBtn.disabled = false; importBtn.textContent = '导入'; }
@@ -1582,26 +1582,26 @@
             }
 
             // --- 相似度检测 ---
-            var btnFindSimilar = document.getElementById('btnFindSimilar');
+            const btnFindSimilar = document.getElementById('btnFindSimilar');
             if (btnFindSimilar) {
                 btnFindSimilar.addEventListener('click', function() { findSimilarAssets(); });
             }
 
             function perceptualHash(dataUrl) {
                 return new Promise(function(resolve) {
-                    var img = new Image();
+                    const img = new Image();
                     img.onload = function() {
-                        var canvas = document.createElement('canvas');
+                        const canvas = document.createElement('canvas');
                         canvas.width = 8; canvas.height = 8;
-                        var ctx = canvas.getContext('2d');
+                        const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, 8, 8);
-                        var data = ctx.getImageData(0, 0, 8, 8).data;
-                        var gray = [];
-                        for (var i = 0; i < data.length; i += 4) {
+                        const data = ctx.getImageData(0, 0, 8, 8).data;
+                        const gray = [];
+                        for (let i = 0; i < data.length; i += 4) {
                             gray.push(data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
                         }
-                        var avg = gray.reduce(function(a,b) { return a+b; }, 0) / gray.length;
-                        var hash = gray.map(function(g) { return g > avg ? 1 : 0; }).join('');
+                        const avg = gray.reduce(function(a,b) { return a+b; }, 0) / gray.length;
+                        const hash = gray.map(function(g) { return g > avg ? 1 : 0; }).join('');
                         resolve(hash);
                     };
                     img.onerror = function() { resolve(null); };
@@ -1611,33 +1611,33 @@
 
             function hammingDistance(h1, h2) {
                 if (!h1 || !h2 || h1.length !== h2.length) return 999;
-                var dist = 0;
-                for (var i = 0; i < h1.length; i++) {
+                let dist = 0;
+                for (let i = 0; i < h1.length; i++) {
                     if (h1[i] !== h2[i]) dist++;
                 }
                 return dist;
             }
 
             async function findSimilarAssets() {
-                var imageAssets = assets.filter(function(a) { return a.type && a.type.startsWith('image') && a.dataURL; });
+                const imageAssets = assets.filter(function(a) { return a.type && a.type.startsWith('image') && a.dataURL; });
                 if (imageAssets.length < 2) { uiToast('至少需要 2 张图片素材才能检测相似度', 'warn'); return; }
 
                 btnFindSimilar.disabled = true;
                 btnFindSimilar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中...';
 
-                var hashes = [];
-                for (var i = 0; i < imageAssets.length; i++) {
-                    var h = await perceptualHash(imageAssets[i].dataURL);
+                const hashes = [];
+                for (let i = 0; i < imageAssets.length; i++) {
+                    const h = await perceptualHash(imageAssets[i].dataURL);
                     hashes.push({ asset: imageAssets[i], hash: h });
                 }
 
-                var groups = [];
-                var used = new Set();
-                for (var i = 0; i < hashes.length; i++) {
+                const groups = [];
+                const used = new Set();
+                for (let i = 0; i < hashes.length; i++) {
                     if (used.has(i) || !hashes[i].hash) continue;
-                    var group = [hashes[i]];
+                    const group = [hashes[i]];
                     used.add(i);
-                    for (var j = i + 1; j < hashes.length; j++) {
+                    for (let j = i + 1; j < hashes.length; j++) {
                         if (used.has(j) || !hashes[j].hash) continue;
                         if (hammingDistance(hashes[i].hash, hashes[j].hash) < 10) {
                             group.push(hashes[j]);
@@ -1655,31 +1655,31 @@
             }
 
             function showSimilarResults(groups) {
-                var dialog = document.createElement('div');
+                const dialog = document.createElement('div');
                 dialog.style.cssText = 'position:fixed;inset:0;background:rgba(2,8,20,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;';
-                var box = document.createElement('div');
+                const box = document.createElement('div');
                 box.style.cssText = 'width:min(900px,95vw);max-height:85vh;overflow:auto;background:linear-gradient(165deg,#121a2e 0%,#0c1220 100%);border:1px solid rgba(0,240,255,0.2);border-radius:16px;padding:24px;color:#e8ecf4;font-family:"Rajdhani","Segoe UI",sans-serif;';
-                var totalSimilar = groups.reduce(function(s,g) { return s + g.length; }, 0);
+                const totalSimilar = groups.reduce(function(s,g) { return s + g.length; }, 0);
                 box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h3 style="margin:0;font-family:Orbitron,sans-serif;color:#00f0ff;font-size:16px;letter-spacing:1px">发现 ' + groups.length + ' 组相似素材（共 ' + totalSimilar + ' 张）</h3><button class="close-similar" style="background:none;border:none;color:#b0b0c0;font-size:20px;cursor:pointer">×</button></div>';
-                var content = document.createElement('div');
+                const content = document.createElement('div');
                 groups.forEach(function(group, gi) {
-                    var groupDiv = document.createElement('div');
+                    const groupDiv = document.createElement('div');
                     groupDiv.style.cssText = 'margin-bottom:20px;padding:16px;background:rgba(0,240,255,0.03);border:1px solid rgba(0,240,255,0.1);border-radius:12px;';
-                    var titleDiv = document.createElement('div');
+                    const titleDiv = document.createElement('div');
                     titleDiv.style.cssText = 'font-size:13px;color:#00f0ff;margin-bottom:12px;font-weight:600;';
                     titleDiv.textContent = '第 ' + (gi+1) + ' 组（' + group.length + ' 张相似）';
                     groupDiv.appendChild(titleDiv);
-                    var grid = document.createElement('div');
+                    const grid = document.createElement('div');
                     grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;';
                     group.forEach(function(item) {
-                        var card = document.createElement('div');
+                        const card = document.createElement('div');
                         card.style.cssText = 'position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);';
-                        var img = document.createElement('img');
+                        const img = document.createElement('img');
                         img.src = item.asset.dataURL || '';
                         img.style.cssText = 'width:100%;height:100px;object-fit:cover;display:block';
                         img.alt = item.asset.name || '';
                         card.appendChild(img);
-                        var nameDiv = document.createElement('div');
+                        const nameDiv = document.createElement('div');
                         nameDiv.style.cssText = 'padding:6px;font-size:11px;color:#b0b0c0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
                         nameDiv.textContent = item.asset.name || '';
                         card.appendChild(nameDiv);

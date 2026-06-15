@@ -31,10 +31,10 @@ function checkpointWal() {
         } else {
             db.pragma('wal_checkpoint(TRUNCATE)');
         }
-    } catch (e) {
+    } catch (_e) {
         try {
             db.pragma('wal_checkpoint(TRUNCATE)');
-        } catch (e2) {
+        } catch (_e2) {
             /* ignore */
         }
     }
@@ -398,7 +398,7 @@ function getProject(projectId) {
 
 function getUserProjects(userId, limit, offset) {
     let projects;
-    if (limit != undefined && offset != undefined) {
+    if (limit !== undefined && offset !== undefined) {
         projects = db.prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?')
             .all(Number(userId), Number(limit), Number(offset));
     } else {
@@ -435,7 +435,7 @@ function updateProject(projectId, userId, updates) {
         'UPDATE projects SET name = ?, description = ?, type = ?, version = ?, updated_at = ? WHERE id = ?'
     ).run(
         updates.name || project.name,
-        updates.description != undefined ? updates.description : project.description,
+        updates.description !== undefined ? updates.description : project.description,
         updates.type || project.type,
         newVersion,
         now,
@@ -468,7 +468,7 @@ function deleteProjectAsset(assetId, userId) {
 // ─── 素材库 ───
 
 function getAssetLibrary(userId, limit, offset) {
-    if (limit != undefined && offset != undefined) {
+    if (limit !== undefined && offset !== undefined) {
         return db.prepare('SELECT * FROM asset_library WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?')
             .all(Number(userId), Number(limit), Number(offset));
     }
@@ -501,17 +501,17 @@ function addAssetLibraryItem(userId, item) {
 function updateAssetLibraryItem(userId, itemId, updates) {
     const existing = db.prepare('SELECT * FROM asset_library WHERE id = ? AND user_id = ?').get(Number(itemId), Number(userId));
     if (!existing) return null;
-    const tags = updates.tags != undefined
+    const tags = updates.tags !== undefined
         ? (typeof updates.tags === 'string' ? updates.tags : JSON.stringify(updates.tags))
         : existing.tags;
     db.prepare(
         'UPDATE asset_library SET name = ?, type = ?, content = ?, desc = ?, source = ?, tags = ? WHERE id = ? AND user_id = ?'
     ).run(
-        updates.name != undefined ? updates.name : existing.name,
-        updates.type != undefined ? updates.type : existing.type,
-        updates.content != undefined ? updates.content : existing.content,
-        updates.desc != undefined ? updates.desc : existing.desc,
-        updates.source != undefined ? updates.source : existing.source,
+        updates.name !== undefined ? updates.name : existing.name,
+        updates.type !== undefined ? updates.type : existing.type,
+        updates.content !== undefined ? updates.content : existing.content,
+        updates.desc !== undefined ? updates.desc : existing.desc,
+        updates.source !== undefined ? updates.source : existing.source,
         tags,
         Number(itemId),
         Number(userId)
@@ -574,7 +574,7 @@ function addActivity(userId, action, targetType, targetId, details) {
     db.prepare(
         `INSERT INTO activity_log (user_id, action, target_type, target_id, details, created_at)
          VALUES (?, ?, ?, ?, ?, ?)`
-    ).run(Number(userId), action, targetType || null, targetId != null ? String(targetId) : null, details || null, now);
+    ).run(Number(userId), action, targetType || null, targetId !== null ? String(targetId) : null, details || null, now);
 }
 
 function getActivityLog(userId, limit, offset) {
@@ -660,7 +660,7 @@ function close() {
         try {
             checkpointWal();
             db.close();
-        } catch (e) {
+        } catch (_e) {
             /* ignore close errors */
         }
         db = null;

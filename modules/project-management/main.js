@@ -1199,7 +1199,7 @@ window.initModule = initModule;
 (function () {
     "use strict";
 
-    var PROJECT_TEMPLATES = {
+    const PROJECT_TEMPLATES = {
         rpg: {
             name: "RPG 游戏",
             desc: "角色扮演游戏模板",
@@ -1226,10 +1226,10 @@ window.initModule = initModule;
         }
     };
 
-    var selectedTemplate = "blank";
+    const selectedTemplate = "blank";
 
     function initTemplateCards() {
-        var cards = document.querySelectorAll("#templateCards .template-card");
+        const cards = document.querySelectorAll("#templateCards .template-card");
         cards.forEach(function (card) {
             card.addEventListener("click", function () {
                 cards.forEach(function (c) {
@@ -1257,11 +1257,11 @@ window.initModule = initModule;
     }
 
     function applyTemplate(tplKey) {
-        var tpl = PROJECT_TEMPLATES[tplKey];
+        const tpl = PROJECT_TEMPLATES[tplKey];
         if (!tpl) return;
-        var nameInput = document.getElementById("project-name");
-        var descInput = document.getElementById("project-desc");
-        var typeInput = document.getElementById("project-type");
+        const nameInput = document.getElementById("project-name");
+        const descInput = document.getElementById("project-desc");
+        const typeInput = document.getElementById("project-type");
         if (nameInput && !nameInput.value.trim()) {
             nameInput.value = tpl.name;
         }
@@ -1283,7 +1283,7 @@ window.initModule = initModule;
     }
 
     // Inject into init flow
-    var origInit = window.init;
+    const origInit = window.init;
     if (typeof origInit === "function") {
         window.init = async function () {
             await origInit();
@@ -1301,23 +1301,23 @@ window.initModule = initModule;
     };
 
     // Override createProject to handle templates
-    var origCreateProject = window.createProject;
+    const origCreateProject = window.createProject;
     if (typeof origCreateProject === "function") {
         window.createProject = async function () {
-            var tplKey = getSelectedTemplate();
-            var tpl = getTemplateData(tplKey);
+            const tplKey = getSelectedTemplate();
+            const tpl = getTemplateData(tplKey);
 
             // Call original create
             await origCreateProject();
 
             // If template selected and project was created, add placeholder categories
             if (tpl && tpl.assets && tpl.assets.length > 0) {
-                var projectsRaw = localStorage.getItem(pmStorageKey("gameui-projects"));
+                const projectsRaw = localStorage.getItem(pmStorageKey("gameui-projects"));
                 if (projectsRaw) {
                     try {
-                        var projs = JSON.parse(projectsRaw);
+                        const projs = JSON.parse(projectsRaw);
                         if (projs.length > 0) {
-                            var latest = projs[0];
+                            const latest = projs[0];
                             if (!latest.templateApplied) {
                                 latest.templateApplied = tplKey;
                                 latest.templateAssets = tpl.assets;
@@ -1330,7 +1330,7 @@ window.initModule = initModule;
 
             // Reset template selection
             selectedTemplate = "blank";
-            var cards = document.querySelectorAll("#templateCards .template-card");
+            const cards = document.querySelectorAll("#templateCards .template-card");
             cards.forEach(function (c) {
                 c.style.background = c.dataset.tpl === "blank" ? "rgba(0,240,255,0.08)" : "rgba(255,255,255,0.03)";
                 c.style.borderColor = c.dataset.tpl === "blank" ? "rgba(0,240,255,0.35)" : "rgba(255,255,255,0.08)";

@@ -5,7 +5,7 @@
 'use strict';
             (function () {
                 function loadMain() {
-                    var s = document.createElement('script');
+                    const s = document.createElement('script');
                     s.src = './main.js';
                     document.body.appendChild(s);
                 }

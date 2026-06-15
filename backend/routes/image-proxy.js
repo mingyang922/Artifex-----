@@ -216,7 +216,7 @@ function createImageRouter(deps) {
                 // DNS 解析失败时阻止请求（防止绕过 SSRF 防护）
                 return res.status(502).json({ error: 'DNS 解析失败，无法验证目标地址安全性' });
             }
-        } catch (e) {
+        } catch (_e) {
             return res.status(400).json({ error: '无效的 URL' });
         }
 

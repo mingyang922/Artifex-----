@@ -4,9 +4,9 @@
  * 版本: 1.3.3 */
 'use strict';
 
-    var APP_VERSION = (typeof window !== 'undefined' && window.API_CONFIG && window.API_CONFIG.version) || '1.3.3';
+    const APP_VERSION = (typeof window !== 'undefined' && window.API_CONFIG && window.API_CONFIG.version) || '1.3.3';
 
-    var BOOT_LINES = [
+    const BOOT_LINES = [
         { text: '> ARTIFEX ENGINE v' + APP_VERSION, color: '#00f0ff' },
         { text: '> 加载资源管线...', color: 'rgba(0, 240, 255, 0.7)' },
         { text: '> 初始化 AI 模块...', color: 'rgba(0, 240, 255, 0.7)' },
@@ -16,35 +16,35 @@
     ];
 
     function createBootScreen() {
-        var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
         if (motionQuery.matches) return;
         if (sessionStorage.getItem('artifex-boot-seen')) return;
         sessionStorage.setItem('artifex-boot-seen', '1');
 
         // 加载字体
-        var fontLink = document.createElement('link');
+        const fontLink = document.createElement('link');
         fontLink.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@400;500;600&display=swap';
         fontLink.rel = 'stylesheet';
         document.head.appendChild(fontLink);
 
-        var overlay = document.createElement('div');
+        const overlay = document.createElement('div');
         overlay.id = 'boot-sequence';
         overlay.style.cssText =
             'position:fixed;inset:0;z-index:99999;background:#0a0e18;display:flex;align-items:center;justify-content:center;cursor:pointer;';
 
         // 背景渐变
-        var bg = document.createElement('div');
+        const bg = document.createElement('div');
         bg.style.cssText =
             'position:absolute;inset:0;opacity:0.4;' +
             'background:radial-gradient(ellipse 60% 50% at 30% 40%, rgba(0,240,255,0.12), transparent),' +
             'radial-gradient(ellipse 50% 60% at 70% 30%, rgba(139,92,246,0.1), transparent);';
         overlay.appendChild(bg);
 
-        var box = document.createElement('div');
+        const box = document.createElement('div');
         box.style.cssText = 'position:relative;max-width:480px;padding:40px;';
 
         // 品牌标题
-        var brand = document.createElement('div');
+        const brand = document.createElement('div');
         brand.style.cssText =
             'font-family:"Orbitron","Segoe UI",sans-serif;font-size:28px;font-weight:700;' +
             'color:#00f0ff;letter-spacing:6px;text-transform:uppercase;margin-bottom:8px;' +
@@ -53,7 +53,7 @@
         box.appendChild(brand);
 
         // 副标题
-        var sub = document.createElement('div');
+        const sub = document.createElement('div');
         sub.style.cssText =
             'font-family:"Rajdhani","Segoe UI",sans-serif;font-size:14px;font-weight:500;' +
             'color:rgba(139,92,246,0.8);letter-spacing:3px;margin-bottom:32px;';
@@ -61,17 +61,17 @@
         box.appendChild(sub);
 
         // 进度条
-        var bar = document.createElement('div');
+        const bar = document.createElement('div');
         bar.style.cssText =
             'width:100%;height:2px;background:rgba(0,240,255,0.08);border-radius:1px;margin-bottom:28px;overflow:hidden;';
-        var barFill = document.createElement('div');
+        const barFill = document.createElement('div');
         barFill.style.cssText =
             'height:100%;width:0%;background:linear-gradient(90deg,#00f0ff,#8b5cf6);border-radius:1px;transition:width 0.25s ease;';
         bar.appendChild(barFill);
         box.appendChild(bar);
 
         // 终端行容器
-        var terminal = document.createElement('div');
+        const terminal = document.createElement('div');
         terminal.style.cssText =
             'font-family:"Rajdhani","Segoe UI",sans-serif;font-size:14px;font-weight:500;line-height:2;letter-spacing:0.5px;';
         box.appendChild(terminal);
@@ -79,8 +79,8 @@
         overlay.appendChild(box);
         document.body.appendChild(overlay);
 
-        var lineIndex = 0;
-        var skip = false;
+        let lineIndex = 0;
+        let skip = false;
 
         function skipBoot() {
             if (skip) return;
@@ -102,7 +102,7 @@
             if (skip || lineIndex >= BOOT_LINES.length) {
                 barFill.style.width = '100%';
                 // 完成后显示就绪提示
-                var ready = document.createElement('div');
+                const ready = document.createElement('div');
                 ready.style.cssText =
                     'margin-top:16px;font-family:"Orbitron","Segoe UI",sans-serif;font-size:11px;' +
                     'color:rgba(0,240,255,0.5);letter-spacing:2px;opacity:0;transition:opacity 0.4s ease;';
@@ -112,8 +112,8 @@
                 setTimeout(skipBoot, 600);
                 return;
             }
-            var entry = BOOT_LINES[lineIndex];
-            var line = document.createElement('div');
+            const entry = BOOT_LINES[lineIndex];
+            const line = document.createElement('div');
             line.style.cssText =
                 'color:' + entry.color + ';opacity:0;transition:opacity 0.2s ease;white-space:pre;font-size:13px;';
             line.textContent = entry.text;

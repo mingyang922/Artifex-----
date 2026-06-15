@@ -278,7 +278,7 @@ class PasswordSecurityManager {
     async handlePasswordChange() {
         const currentPassword = document.getElementById('current-password').value;
         const newPassword = document.getElementById('new-password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
+        const _confirmPassword = document.getElementById('confirm-password').value;
 
         // 最终验证
         if (!this.validateForm()) {

@@ -4,7 +4,7 @@
  */
 'use strict';
 
-    var _cache = {};
+    const _cache = {};
 
     /**
      * 懒加载 JS 脚本
@@ -14,15 +14,15 @@
      * @returns {Promise<void>}
      */
     function loadScript(src, options) {
-        var opts = options || {};
-        var useCache = opts.cache !== false;
+        const opts = options || {};
+        const useCache = opts.cache !== false;
 
         if (useCache && _cache[src]) {
             return _cache[src];
         }
 
-        var promise = new Promise(function (resolve, reject) {
-            var script = document.createElement('script');
+        const promise = new Promise(function (resolve, reject) {
+            const script = document.createElement('script');
             script.src = src;
             script.defer = true;
             script.onload = function () { resolve(); };
@@ -55,7 +55,7 @@
         if (!document.querySelector(selector)) {
             return Promise.resolve();
         }
-        var arr = Array.isArray(srcs) ? srcs : [srcs];
+        const arr = Array.isArray(srcs) ? srcs : [srcs];
         return loadScripts(arr);
     }
 

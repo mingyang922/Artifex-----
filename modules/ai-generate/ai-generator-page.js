@@ -155,7 +155,7 @@ function aiStorageKey(base) {
     }
 }
 
-function readScopedJson(base, fallback) {
+function _readScopedJson(base, fallback) {
     try {
         const raw = localStorage.getItem(aiStorageKey(base));
         return raw ? JSON.parse(raw) : fallback;
@@ -164,7 +164,7 @@ function readScopedJson(base, fallback) {
     }
 }
 
-function writeScopedJson(base, value) {
+function _writeScopedJson(base, value) {
     localStorage.setItem(aiStorageKey(base), JSON.stringify(value));
 }
 
@@ -406,7 +406,7 @@ document.getElementById('saveAllFramesToLib').addEventListener('click', async fu
 
 // AIGenerator类 - 负责AI生成功能
 
-function compressDataUrlImage(dataUrl, maxSide, outMime, quality) {
+function _compressDataUrlImage(dataUrl, maxSide, outMime, quality) {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = 'anonymous';
@@ -455,7 +455,7 @@ function getStylePresetSnippetForPrompt() {
 }
 
 /** 将风格片段并入一条 Prompt（不重复追加） */
-function appendStyleRefToPrompt(basePrompt) {
+function _appendStyleRefToPrompt(basePrompt) {
     const sn = getStylePresetSnippetForPrompt();
     if (!sn) return String(basePrompt || '').trim();
     const p = String(basePrompt || '').trim();
@@ -797,7 +797,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 选项卡切换：三个独立"页面"视图 + 丝滑动画
     const tabButtons = document.querySelectorAll('.tab-button');
-    const generatorViews = document.querySelectorAll('.generator-view');
+    const _generatorViews = document.querySelectorAll('.generator-view');
 
     tabButtons.forEach((button) => {
         button.addEventListener('click', () => {

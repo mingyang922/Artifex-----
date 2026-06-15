@@ -5,17 +5,17 @@
 (function () {
     'use strict';
 
-    var _redirecting = false;
+    let _redirecting = false;
 
     // 拦截 fetch，检测 401 响应
-    var originalFetch = window.fetch;
+    const originalFetch = window.fetch;
     window.fetch = function () {
         return originalFetch.apply(this, arguments).then(function (response) {
             if (response.status === 401 && !_redirecting) {
                 _redirecting = true;
                 // 静默 401（如 /api/me 初始检查）不弹窗，只在用户操作时弹窗
-                var url = arguments[0];
-                var isSilent = typeof url === 'string' && url.includes('/api/me') && !arguments[1];
+                const url = arguments[0];
+                const isSilent = typeof url === 'string' && url.includes('/api/me') && !arguments[1];
                 if (!isSilent) {
                     if (window.TechUI && typeof window.TechUI.toast === 'function') {
                         window.TechUI.toast('会话已过期，请重新登录', 'warn');

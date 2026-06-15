@@ -41,7 +41,7 @@ function initTechSelects() {
         if (select.dataset.initialized) return;
         select.dataset.initialized = '1';
         const trigger = select.querySelector('.tech-select-trigger');
-        const menu = select.querySelector('.tech-select-menu');
+        const _menu = select.querySelector('.tech-select-menu');
         const options = select.querySelectorAll('.tech-select-option');
         const hiddenId = select.id.replace('Select', '');
         const hiddenInput = document.getElementById(hiddenId);
@@ -295,7 +295,7 @@ function addToAvatarHistory(avatarSrc) {
     let history = getAvatarHistoryFromStorage();
 
     // 检查是否已经存在于历史记录中（避免重复）
-    const exists = history.some((item) => item.src === avatarSrc);
+    const _exists = history.some((item) => item.src === avatarSrc);
 
     // 即使存在也要添加到历史记录中，因为用户可能想要多次使用同一张图片
     // 添加新头像到历史记录开头，包含时间戳
@@ -743,7 +743,7 @@ function loadTabSelection() {
 const avatarContainer = document.querySelector('.avatar-upload-overlay');
 const avatarInput = document.getElementById('avatar-input');
 const uploadAvatarBtn = document.getElementById('upload-avatar-btn');
-const currentAvatar = document.getElementById('current-avatar');
+const _currentAvatar = document.getElementById('current-avatar');
 
 if (avatarContainer) {
     avatarContainer.addEventListener('click', () => {
@@ -822,10 +822,10 @@ if (avatarInput) {
 
 // 表单提交事件
 const personalInfoForm = document.getElementById('personal-info-form');
-const changePasswordForm = document.getElementById('change-password-form');
-const savePermissionsBtn = document.getElementById('save-permissions');
-const cancelChangesBtn = document.getElementById('cancel-changes');
-const cancelPasswordChangeBtn = document.getElementById('cancel-password-change');
+const _changePasswordForm = document.getElementById('change-password-form');
+const _savePermissionsBtn = document.getElementById('save-permissions');
+const _cancelChangesBtn = document.getElementById('cancel-changes');
+const _cancelPasswordChangeBtn = document.getElementById('cancel-password-change');
 
 if (personalInfoForm) {
     personalInfoForm.addEventListener('submit', (e) => {
@@ -986,7 +986,7 @@ function initNotificationSystem() {
 }
 
 // 显示消息中心
-function showMessageCenter() {
+function _showMessageCenter() {
     // 创建消息中心模态框
     const messageCenterModal = document.createElement('div');
     messageCenterModal.className = 'message-center-modal';
@@ -1532,7 +1532,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 // 初始化语言选择器
 function initLanguageSelector() {
-    var langSelect = document.getElementById('language');
+    const langSelect = document.getElementById('language');
     if (!langSelect) return;
 
     // 设置当前语言

@@ -20,7 +20,7 @@
                     // 检查权限
                     const meRes = await fetch('/api/me', { credentials: 'include' });
                     if (meRes.status === 401) { window.location.href = loginHtmlPath(); return; }
-                    const me = await meRes.json();
+                    const _me = await meRes.json();
 
                     // 加载用户列表
                     const usersRes = await fetch('/api/admin/users', { credentials: 'include' });

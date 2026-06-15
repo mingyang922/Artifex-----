@@ -15,7 +15,7 @@ const HTML_ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;',
  * @returns {string} 转义后的安全字符串
  */
 export function escapeHtml(str) {
-    if (str == null) return '';
+    if (str === null) return '';
     return String(str).replace(/[&<>"']/g, function (ch) { return HTML_ESCAPE_MAP[ch]; });
 }
 

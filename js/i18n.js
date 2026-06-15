@@ -184,8 +184,8 @@
     function applyTranslations() {
         // Translate elements with data-i18n attribute
         document.querySelectorAll('[data-i18n]').forEach(function(el) {
-            var key = el.getAttribute('data-i18n');
-            var text = t(key);
+            const key = el.getAttribute('data-i18n');
+            const text = t(key);
             if (el.tagName === 'INPUT' && el.type !== 'submit' && el.type !== 'checkbox') {
                 el.placeholder = text;
             } else if (el.tagName === 'TEXTAREA') {

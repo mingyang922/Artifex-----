@@ -222,7 +222,7 @@ async function callFreeImageAPI(prompt, size) {
             const contentType = r.headers['content-type'] || 'image/jpeg';
             const b64 = Buffer.from(r.data).toString('base64');
             return `data:${contentType};base64,${b64}`;
-        } catch (e) {
+        } catch (_e) {
             const w = Math.max(256, parseInt(width, 10) || 512);
             const h = Math.max(256, parseInt(height, 10) || 512);
             const safePrompt = String(prompt || 'FREE').slice(0, 36);
@@ -331,7 +331,7 @@ function decryptText(encryptedText) {
         }
         // 未加密的旧数据
         return encryptedText;
-    } catch (e) {
+    } catch (_e) {
         // 解密失败（密钥轮换等）返回空字符串，避免使用错误数据
         console.warn('[utils] decryptText 解密失败，可能密钥已变更:', e.message);
         return '';

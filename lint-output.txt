@@ -1,0 +1,277 @@
+﻿
+> artifex-platform@1.3.3 lint
+> eslint --no-error-on-unmatched-pattern backend js modules scripts *.js
+
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽backend\db\users-db.js
+   34:14  warning  'e' is defined but never used                                                       no-unused-vars
+   37:18  warning  'e2' is defined but never used                                                      no-unused-vars
+  301:14  warning  '_' is defined but never used                                                       no-unused-vars
+  318:18  warning  '_' is defined but never used                                                       no-unused-vars
+  365:15  warning  'profile' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  365:72  warning  '_' is defined but never used                                                       no-unused-vars
+  401:15  warning  Expected '!==' and instead saw '!='                                                 eqeqeq
+  401:38  warning  Expected '!==' and instead saw '!='                                                 eqeqeq
+  438:29  warning  Expected '!==' and instead saw '!='                                                 eqeqeq
+  471:15  warning  Expected '!==' and instead saw '!='                                                 eqeqeq
+  471:38  warning  Expected '!==' and instead saw '!='                                                 eqeqeq
+  504:31  warning  Expected '!==' and instead saw '!='                                                 eqeqeq
+  510:22  warning  Expected '!==' and instead saw '!='                                                 eqeqeq
+  511:22  warning  Expected '!==' and instead saw '!='                                                 eqeqeq
+  512:25  warning  Expected '!==' and instead saw '!='                                                 eqeqeq
+  513:22  warning  Expected '!==' and instead saw '!='                                                 eqeqeq
+  514:24  warning  Expected '!==' and instead saw '!='                                                 eqeqeq
+  577:64  warning  Expected '!==' and instead saw '!='                                                 eqeqeq
+  663:18  warning  'e' is defined but never used                                                       no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽backend\lib\utils.js
+  225:18  warning  'e' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽backend\lib\ws-server.js
+  14:40  warning  'req' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  28:26  warning  '_' is defined but never used                                          no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽backend\providers\jimeng.js
+  220:25  warning  Expected '!==' and instead saw '!='  eqeqeq
+  220:76  warning  Expected '!==' and instead saw '!='  eqeqeq
+  224:35  warning  Expected '!==' and instead saw '!='  eqeqeq
+  234:25  warning  Expected '!==' and instead saw '!='  eqeqeq
+  239:43  warning  Expected '!==' and instead saw '!='  eqeqeq
+  261:22  warning  '_' is defined but never used        no-unused-vars
+  290:22  warning  'e' is defined but never used        no-unused-vars
+  333:34  warning  Expected '!==' and instead saw '!='  eqeqeq
+  439:38  warning  Expected '!==' and instead saw '!='  eqeqeq
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽backend\providers\tencent.js
+  16:47  warning  'runtimeConfig' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+  16:62  warning  'API_CONFIG' is defined but never used. Allowed unused args must match /^_/u     no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽backend\proxy.js
+  332:11  warning  'offset' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽backend\routes\admin.js
+  19:48  warning  'csrfProtection' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽backend\routes\asset-library.js
+  41:97  warning  '_' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽backend\routes\auth.js
+   87:89   warning  '_' is defined but never used  no-unused-vars
+  131:101  warning  '_' is defined but never used  no-unused-vars
+  193:119  warning  '_' is defined but never used  no-unused-vars
+  246:119  warning  '_' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽backend\routes\image-proxy.js
+  146:128  warning  '_' is defined but never used                                                          no-unused-vars
+  156:17   warning  'callStatus' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  215:22   warning  '_' is defined but never used                                                          no-unused-vars
+  219:18   warning  'e' is defined but never used                                                          no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽backend\routes\projects.js
+  37:109  warning  '_' is defined but never used  no-unused-vars
+  62:109  warning  '_' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽backend\sd-webui-helper.js
+   29:55  warning  Expected '!==' and instead saw '!='  eqeqeq
+   55:37  warning  Expected '!==' and instead saw '!='  eqeqeq
+   59:32  warning  Expected '!==' and instead saw '!='  eqeqeq
+   59:55  warning  Expected '!==' and instead saw '!='  eqeqeq
+   78:47  warning  Expected '!==' and instead saw '!='  eqeqeq
+   79:27  warning  Expected '!==' and instead saw '!='  eqeqeq
+   80:29  warning  Expected '!==' and instead saw '!='  eqeqeq
+   81:27  warning  Expected '!==' and instead saw '!='  eqeqeq
+   82:35  warning  Expected '!==' and instead saw '!='  eqeqeq
+   83:41  warning  Expected '!==' and instead saw '!='  eqeqeq
+   84:35  warning  Expected '!==' and instead saw '!='  eqeqeq
+   85:25  warning  Expected '!==' and instead saw '!='  eqeqeq
+   86:29  warning  Expected '!==' and instead saw '!='  eqeqeq
+   87:37  warning  Expected '!==' and instead saw '!='  eqeqeq
+  106:37  warning  Expected '!==' and instead saw '!='  eqeqeq
+  110:32  warning  Expected '!==' and instead saw '!='  eqeqeq
+  110:55  warning  Expected '!==' and instead saw '!='  eqeqeq
+  133:47  warning  Expected '!==' and instead saw '!='  eqeqeq
+  135:27  warning  Expected '!==' and instead saw '!='  eqeqeq
+  136:29  warning  Expected '!==' and instead saw '!='  eqeqeq
+  137:27  warning  Expected '!==' and instead saw '!='  eqeqeq
+  138:35  warning  Expected '!==' and instead saw '!='  eqeqeq
+  140:41  warning  Expected '!==' and instead saw '!='  eqeqeq
+  141:35  warning  Expected '!==' and instead saw '!='  eqeqeq
+  142:25  warning  Expected '!==' and instead saw '!='  eqeqeq
+  143:29  warning  Expected '!==' and instead saw '!='  eqeqeq
+  144:37  warning  Expected '!==' and instead saw '!='  eqeqeq
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽js\ai-page-utils.js
+  43:18  warning  '_' is defined but never used  no-unused-vars
+  49:22  warning  '_' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽js\api-utils.js
+  26:14  warning  'e' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽js\dashboard-init.js
+   18:22  warning  'getProjectTypeName' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+   75:26  warning  'e' is defined but never used                                                         no-unused-vars
+  130:62  warning  'e' is defined but never used. Allowed unused args must match /^_/u                   no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽js\data-portability.js
+  20:18  warning  'e' is defined but never used   no-unused-vars
+  26:18  warning  'e2' is defined but never used  no-unused-vars
+  58:18  warning  'e' is defined but never used   no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽js\html-utils.js
+  18:13  warning  Expected '===' and instead saw '=='  eqeqeq
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽js\login-page.js
+  128:26  warning  'e' is defined but never used    no-unused-vars
+  137:18  warning  'err' is defined but never used  no-unused-vars
+  173:26  warning  'e' is defined but never used    no-unused-vars
+  197:18  warning  'err' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽js\notification-component.js
+  47:18  warning  '_' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽js\notification-manager.js
+   84:22  warning  'e' is defined but never used                                        no-unused-vars
+  110:26  warning  'err' is defined but never used                                      no-unused-vars
+  119:57  warning  'e' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽js\ui-kit.js
+   85:30  warning  '_' is defined but never used  no-unused-vars
+  206:30  warning  '_' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽js\user-storage-scope.js
+  17:18  warning  'e' is defined but never used  no-unused-vars
+  35:22  warning  'e' is defined but never used  no-unused-vars
+  63:30  warning  'e' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽js\ws-client.js
+  25:18  warning  '_' is defined but never used  no-unused-vars
+  38:22  warning  '_' is defined but never used  no-unused-vars
+  45:46  warning  '_' is defined but never used  no-unused-vars
+  47:22  warning  '_' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\admin\admin-init.js
+  23:27  warning  'me' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\ai-generate\action-group.js
+  109:18  warning  '_' is defined but never used         no-unused-vars
+  139:14  warning  '_' is defined but never used         no-unused-vars
+  168:26  warning  '_' is defined but never used         no-unused-vars
+  231:22  warning  'e' is defined but never used         no-unused-vars
+  367:22  warning  'parseErr' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\ai-generate\ai-generator-page.js
+   28:14  warning  '_' is defined but never used                                                                           no-unused-vars
+   55:7   warning  'showApiError' is assigned a value but never used. Allowed unused vars must match /^_/u                 no-unused-vars
+   57:7   warning  'extractOriginalUrlFromProxy' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+   58:7   warning  'fetchImageAsBlob' is assigned a value but never used. Allowed unused vars must match /^_/u             no-unused-vars
+  153:14  warning  '_' is defined but never used                                                                           no-unused-vars
+  158:10  warning  'readScopedJson' is defined but never used. Allowed unused vars must match /^_/u                        no-unused-vars
+  162:14  warning  '_' is defined but never used                                                                           no-unused-vars
+  167:10  warning  'writeScopedJson' is defined but never used. Allowed unused vars must match /^_/u                       no-unused-vars
+  258:18  warning  '_' is defined but never used                                                                           no-unused-vars
+  409:10  warning  'compressDataUrlImage' is defined but never used. Allowed unused vars must match /^_/u                  no-unused-vars
+  428:22  warning  'e' is defined but never used                                                                           no-unused-vars
+  438:10  warning  'teardownTechSelectForSelect' is defined but never used. Allowed unused vars must match /^_/u           no-unused-vars
+  458:10  warning  'appendStyleRefToPrompt' is defined but never used. Allowed unused vars must match /^_/u                no-unused-vars
+  475:22  warning  '_' is defined but never used                                                                           no-unused-vars
+  730:18  warning  '_' is defined but never used                                                                           no-unused-vars
+  800:11  warning  'generatorViews' is assigned a value but never used. Allowed unused vars must match /^_/u               no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\ai-generate\asset-editor.js
+    66:34   warning  '_' is defined but never used                                                                 no-unused-vars
+    71:18   warning  '_' is defined but never used                                                                 no-unused-vars
+    77:22   warning  '_' is defined but never used                                                                 no-unused-vars
+    80:106  warning  '_' is defined but never used                                                                 no-unused-vars
+   332:17   warning  'e' is defined but never used. Allowed unused args must match /^_/u                           no-unused-vars
+   808:22   warning  '_' is defined but never used                                                                 no-unused-vars
+  1372:33   warning  'idx' is defined but never used. Allowed unused args must match /^_/u                         no-unused-vars
+  1429:7    warning  'AIGenerator' is assigned a value but never used. Allowed unused vars must match /^_/u        no-unused-vars
+  1431:7    warning  'STYLE_PRESETS_KEY' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\ai-generate\image-generator.js
+    26:18  warning  '_' is defined but never used                                                     no-unused-vars
+   343:18  warning  '_' is defined but never used                                                     no-unused-vars
+   404:18  warning  '_' is defined but never used                                                     no-unused-vars
+   428:18  warning  '_' is defined but never used                                                     no-unused-vars
+   612:22  warning  '_' is defined but never used                                                     no-unused-vars
+   980:26  warning  '_' is defined but never used                                                     no-unused-vars
+  1007:15  warning  'color' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  1169:18  warning  'e' is defined but never used                                                     no-unused-vars
+  1212:18  warning  'e' is defined but never used                                                     no-unused-vars
+  1397:22  warning  'fallbackErr' is defined but never used                                           no-unused-vars
+  1417:18  warning  'e' is defined but never used                                                     no-unused-vars
+  1567:5   warning  'aiGenerator' is defined but never used. Allowed unused vars must match /^_/u     no-unused-vars
+  1568:5   warning  'imageGenerator' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  1712:73  warning  '_' is defined but never used                                                     no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\asset-library\asset-library.js
+   232:26  warning  'e' is defined but never used                                                 no-unused-vars
+   586:46  warning  Expected '===' and instead saw '=='                                           eqeqeq
+   730:55  warning  'e' is defined but never used. Allowed unused args must match /^_/u           no-unused-vars
+   971:27  warning  'w' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+   972:27  warning  'h' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  1084:26  warning  '_' is defined but never used                                                 no-unused-vars
+  1121:30  warning  '_' is defined but never used                                                 no-unused-vars
+  1138:26  warning  '_' is defined but never used                                                 no-unused-vars
+  1152:26  warning  '_' is defined but never used                                                 no-unused-vars
+  1171:30  warning  '_' is defined but never used                                                 no-unused-vars
+  1226:22  warning  'init' is defined but never used. Allowed unused vars must match /^_/u        no-unused-vars
+  1318:34  warning  '_' is defined but never used                                                 no-unused-vars
+  1517:82  warning  '_' is defined but never used                                                 no-unused-vars
+  1553:27  warning  'e' is defined but never used                                                 no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\project-management\index-init.js
+  33:27  warning  'projectCards' is assigned a value but never used. Allowed unused vars must match /^_/u   no-unused-vars
+  34:27  warning  'actionButtons' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\project-management\main.js
+   296:14  warning  'e' is defined but never used                                                                no-unused-vars
+   973:10  warning  'getLocalStorageUsageBytes' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  1010:18  warning  '_' is defined but never used                                                                no-unused-vars
+  1327:30  warning  '_' is defined but never used                                                                no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\project-management\pm-shared.js
+  14:18  warning  '_' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\project-management\project-detail.js
+  766:10  warning  'getLocalStorageUsageBytes' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  804:18  warning  '_' is defined but never used                                                                no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\style-presets\style-presets.js
+  68:26  warning  '_' is defined but never used  no-unused-vars
+  82:26  warning  '_' is defined but never used  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\user-center\password-security.js
+  281:15  warning  'confirmPassword' is assigned a value but never used. Allowed unused vars must match /^_/u          no-unused-vars
+  306:18  warning  'err' is defined but never used                                                                     no-unused-vars
+  338:29  warning  'password' is defined but never used. Allowed unused args must match /^_/u                          no-unused-vars
+  692:5   warning  'passwordSecurityManager' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\user-center\user-center-init.js
+  117:26  warning  'index' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽modules\user-center\user-center-page.js
+    44:15  warning  'menu' is assigned a value but never used. Allowed unused vars must match /^_/u                     no-unused-vars
+   151:24  warning  'index' is defined but never used. Allowed unused args must match /^_/u                             no-unused-vars
+   287:18  warning  '_' is defined but never used                                                                       no-unused-vars
+   298:11  warning  'exists' is assigned a value but never used. Allowed unused vars must match /^_/u                   no-unused-vars
+   316:58  warning  '_' is defined but never used                                                                       no-unused-vars
+   337:62  warning  '_' is defined but never used                                                                       no-unused-vars
+   671:41  warning  'element' is defined but never used. Allowed unused args must match /^_/u                           no-unused-vars
+   746:7   warning  'currentAvatar' is assigned a value but never used. Allowed unused vars must match /^_/u            no-unused-vars
+   825:7   warning  'changePasswordForm' is assigned a value but never used. Allowed unused vars must match /^_/u       no-unused-vars
+   826:7   warning  'savePermissionsBtn' is assigned a value but never used. Allowed unused vars must match /^_/u       no-unused-vars
+   827:7   warning  'cancelChangesBtn' is assigned a value but never used. Allowed unused vars must match /^_/u         no-unused-vars
+   828:7   warning  'cancelPasswordChangeBtn' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+   873:61  warning  '_' is defined but never used                                                                       no-unused-vars
+   989:10  warning  'showMessageCenter' is defined but never used. Allowed unused vars must match /^_/u                 no-unused-vars
+  1277:18  warning  'e' is defined but never used                                                                       no-unused-vars
+  1417:14  warning  'e' is defined but never used                                                                       no-unused-vars
+  1530:14  warning  'e' is defined but never used                                                                       no-unused-vars
+  1782:14  warning  'e' is defined but never used                                                                       no-unused-vars
+
+C:\Users\yang\Desktop\Artifex娴嬭瘯鐗圽sw.js
+  35:14  warning  '_' is defined but never used  no-unused-vars
+
+鉁?194 problems (0 errors, 194 warnings)
+

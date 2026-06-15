@@ -15,7 +15,7 @@
                 return y + '-' + m + '-' + day;
             }
 
-            function getProjectTypeName(type) {
+            function _getProjectTypeName(type) {
                 const map = {
                     ui: 'UI设计',
                     game: '游戏界面',
@@ -127,7 +127,7 @@
                             'modules/project-management/project-detail.html?id=' + encodeURIComponent(project.id);
                     };
 
-                    card.addEventListener('click', function (e) {
+                    card.addEventListener('click', function () {
                         openDetail();
                     });
                     grid.appendChild(card);

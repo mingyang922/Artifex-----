@@ -217,11 +217,11 @@ async function callJimengImageAPIAxios(apiKey, prompt, extra, model, sizeParam, 
         ...def,
         model,
         prompt,
-        size: sizeParam != null && sizeParam !== '' ? sizeParam : def.size != null ? def.size : '2K',
+        size: sizeParam !== null && sizeParam !== '' ? sizeParam : def.size !== null ? def.size : '2K',
         response_format: extra.response_format || def.response_format || 'url',
         n: (() => {
             const fromExtra = parseInt(extra.n, 10);
-            const fromDef = def.n != null ? parseInt(String(def.n), 10) : NaN;
+            const fromDef = def.n !== null ? parseInt(String(def.n), 10) : NaN;
             const n0 =
                 !Number.isNaN(fromExtra) && fromExtra > 0
                     ? fromExtra
@@ -231,12 +231,12 @@ async function callJimengImageAPIAxios(apiKey, prompt, extra, model, sizeParam, 
             return Math.min(4, Math.max(1, n0));
         })(),
     };
-    if (extra.watermark != undefined) {
+    if (extra.watermark !== undefined) {
         body.watermark = extra.watermark === true;
     } else if (def.watermark === undefined) {
         body.watermark = process.env.JIMENG_WATERMARK === '1' || process.env.JIMENG_WATERMARK === 'true';
     }
-    if (extra.sequential_image_generation != null && extra.sequential_image_generation !== '') {
+    if (extra.sequential_image_generation !== null && extra.sequential_image_generation !== '') {
         body.sequential_image_generation = extra.sequential_image_generation;
     }
     if (extra.sequential_image_generation_options && typeof extra.sequential_image_generation_options === 'object') {
@@ -252,7 +252,7 @@ async function callJimengImageAPIAxios(apiKey, prompt, extra, model, sizeParam, 
             timeout: 180000,
             proxy: false,
         });
-    } catch (e) {
+    } catch (_e) {
         const st = e.response && e.response.status;
         const data = e.response && e.response.data;
         const detailStr = (() => {
@@ -287,7 +287,7 @@ async function callJimengImageAPIAxios(apiKey, prompt, extra, model, sizeParam, 
         const snippet = (() => {
             try {
                 return JSON.stringify(r.data).slice(0, 1200);
-            } catch (e) {
+            } catch (_e) {
                 return String(r.data);
             }
         })();
@@ -330,7 +330,7 @@ async function callJimengImageAPI(prompt, size, extra = {}, userConfig) {
         process.env.JIMENG_MODEL ||
         'doubao-seedream-4.0-250828';
     const strictPixelSize = !!(extra.require_exact_size || extra.strictPixelSize);
-    const sizeParam = extra.size != null ? extra.size : mapJimengSize(size, { strictPixelSize });
+    const sizeParam = extra.size !== null ? extra.size : mapJimengSize(size, { strictPixelSize });
     const effectiveRestCfg = {
         ...(restCfg || {}),
         endpoint: (userConfig && userConfig.endpoint) || (restCfg && restCfg.endpoint),
@@ -354,7 +354,7 @@ async function callJimengImage2ImageAPI(prompt, imageDataUrl, strength, size, ex
             const contentType = r.headers['content-type'] || 'image/png';
             const b64 = Buffer.from(r.data).toString('base64');
             normalizedImageInput = `data:${contentType};base64,${b64}`;
-        } catch (e) {
+        } catch (_e) {
             console.warn('[jimeng img2img] 三视图 URL 拉取失败，将回退原始 URL 透传:', e.message);
         }
     }
@@ -436,7 +436,7 @@ function handleJimengStatus(req, res, { getUserProviderConfig }) {
 }
 
 async function handleJimengLiveTest(req, res, { getUserProviderConfig }) {
-    if (process.env.JIMENG_LIVE_TEST != '1') {
+    if (process.env.JIMENG_LIVE_TEST !== '1') {
         return res.status(404).json({
             error: '未启用',
             message: '在 config/.env 设置 JIMENG_LIVE_TEST=1 并重启 proxy；用毕请删除或改为 0',
@@ -486,7 +486,7 @@ async function handleJimengLiveTest(req, res, { getUserProviderConfig }) {
                       ? '成功：REST 与网关可用。'
                       : undefined,
         });
-    } catch (e) {
+    } catch (_e) {
         return res.status(502).json({
             error: '请求异常',
             message: e.message,
@@ -516,7 +516,7 @@ function logJimengConfig() {
                 `[即梦] 密钥摘要: 长度=${k.length} 前缀=${k.slice(0, 4)} 尾缀=...${k.slice(-4)}`
             );
         }
-    } catch (e) {
+    } catch (_e) {
         console.warn('[即梦] 密钥摘要输出失败:', e.message);
     }
 }

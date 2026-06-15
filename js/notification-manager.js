@@ -4,7 +4,7 @@
  * 版本: 1.3.3 */
 'use strict';
 /** 转义 HTML 特殊字符，防止 XSS — 委托给 html-utils.js 全局函数 */
-var escapeManagerHtml = (typeof escapeHtml === 'function') ? escapeHtml : function(s) { return String(s); };
+const escapeManagerHtml = (typeof escapeHtml === 'function') ? escapeHtml : function(s) { return String(s); };
 
 /**
  * NotificationManager类 - 统一管理所有页面的消息通知显示和更新
@@ -116,7 +116,7 @@ class NotificationManager {
         });
 
         // 监听自定义通知更新事件
-        window.addEventListener('notificationUpdated', (e) => {
+        window.addEventListener('notificationUpdated', () => {
             this.updateAllBadges();
             this.updateAllDropdowns();
         });

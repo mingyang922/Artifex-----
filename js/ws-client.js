@@ -4,14 +4,14 @@
  */
 'use strict';
 
-    var _ws = null;
-    var _reconnectTimer = null;
-    var _reconnectDelay = 1000;
-    var _maxReconnectDelay = 30000;
-    var _listeners = [];
+    let _ws = null;
+    let _reconnectTimer = null;
+    let _reconnectDelay = 1000;
+    const _maxReconnectDelay = 30000;
+    const _listeners = [];
 
     function getWsUrl() {
-        var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
         return proto + '//' + location.host + '/ws';
     }
 
@@ -31,7 +31,7 @@
             _reconnectDelay = 1000; // 重置重连延迟
             // 发送认证消息
             try {
-                var userId = window.__artifexUserId;
+                const userId = window.__artifexUserId;
                 if (userId) {
                     _ws.send(JSON.stringify({ type: 'auth', userId: userId }));
                 }
@@ -40,7 +40,7 @@
 
         _ws.onmessage = function (event) {
             try {
-                var data = JSON.parse(event.data);
+                const data = JSON.parse(event.data);
                 _listeners.forEach(function (fn) {
                     try { fn(data); } catch (_) { /* ignore */ }
                 });

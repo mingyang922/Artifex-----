@@ -587,7 +587,7 @@ class ImageGenerator {
         let payloadImage = this._styleRefRawDataUrl;
         try {
             payloadImage = await compressDataUrlImage(this._styleRefRawDataUrl, 1280, 'image/webp', 0.82);
-        } catch (e) {
+        } catch (_e) {
             console.debug('[image-generator] 压缩参考图失败，使用原图', e);
         }
         try {
@@ -1004,7 +1004,7 @@ class ImageGenerator {
 
     generateMockImage(formData) {
         const colors = ['667eea', '764ba2', 'f093fb', 'f5576c', '4facfe', '00f2fe'];
-        const color = colors[Math.floor(Math.random() * colors.length)];
+        const _color = colors[Math.floor(Math.random() * colors.length)];
         const size = formData.imageSize.replace('x', 'x');
         const imageUrl = `https://picsum.photos/seed/${Date.now()}/${size.split('x')[0]}/${size.split('x')[1]}`;
 
@@ -1166,7 +1166,7 @@ class ImageGenerator {
         try {
             const raw = localStorage.getItem(aiStorageKey('currentProjectContext'));
             return raw ? JSON.parse(raw) : null;
-        } catch (e) {
+        } catch (_e) {
             return null;
         }
     }
@@ -1199,7 +1199,7 @@ class ImageGenerator {
                 upscaleFactor: document.getElementById('upscaleFactor')?.value || '2',
             };
             sessionStorage.setItem(this.getGeneratorUiStateKey(), JSON.stringify(state));
-        } catch (e) {
+        } catch (_e) {
             console.warn('保存 AI 生成器状态失败:', e);
         }
     }
@@ -1209,7 +1209,7 @@ class ImageGenerator {
         try {
             const raw = sessionStorage.getItem(this.getGeneratorUiStateKey());
             state = raw ? JSON.parse(raw) : null;
-        } catch (e) {
+        } catch (_e) {
             state = null;
         }
         if (!state) return;
@@ -1379,7 +1379,7 @@ class ImageGenerator {
                 throw new Error(err.error || '保存失败');
             }
             themedSuccess('图片已保存到素材库');
-        } catch (e) {
+        } catch (_e) {
             console.error('保存到素材库失败', e);
             // Fallback to localStorage
             try {
@@ -1394,7 +1394,7 @@ class ImageGenerator {
                 state.assets.unshift(this.buildAssetLibraryItemFromImage(image));
                 localStorage.setItem(aiStorageKey('assetLibrary_v1'), JSON.stringify(state));
                 themedSuccess('图片已保存到素材库（本地备份）');
-            } catch (fallbackErr) {
+            } catch (_fallbackErr) {
                 themedWarn('保存失败：' + (e.message || '请重试'));
             }
         }
@@ -1414,7 +1414,7 @@ class ImageGenerator {
         let projects = [];
         try {
             projects = JSON.parse(localStorage.getItem(aiStorageKey('gameui-projects'))) || [];
-        } catch (e) {
+        } catch (_e) {
             projects = [];
         }
         const idx = projects.findIndex((p) => p.id === context.id);
