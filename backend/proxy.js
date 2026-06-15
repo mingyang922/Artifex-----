@@ -200,7 +200,7 @@ app.get('/api/csrf-token', (req, res) => {
 // ── 全局 API 限流 ────────────────────────────────────────────────
 const apiLimiter = rateLimit({
     windowMs: 60 * 1000,
-    max: 120,
+    max: process.env.NODE_ENV === 'test' ? 10000 : 120,
     message: { error: '请求过于频繁，请稍后再试' },
     standardHeaders: true,
     legacyHeaders: false,

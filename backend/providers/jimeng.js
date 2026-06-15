@@ -21,7 +21,7 @@ const {
  */
 function mapJimengSize(sizeStr, options = {}) {
     const strictPixelSize = !!(options && options.strictPixelSize);
-    if (!sizeStr || typeof sizeStr != 'string') return '2K';
+    if (!sizeStr || typeof sizeStr !== 'string') return '2K';
     const preset = String(process.env.JIMENG_SIZE || '').trim();
     if (!strictPixelSize && (preset === '1K' || preset === '2K' || preset === '4K')) return preset;
     const s = String(sizeStr).toLowerCase().replace(/:/g, 'x');
@@ -217,7 +217,7 @@ async function callJimengImageAPIAxios(apiKey, prompt, extra, model, sizeParam, 
         ...def,
         model,
         prompt,
-        size: sizeParam != null && sizeParam != '' ? sizeParam : def.size != null ? def.size : '2K',
+        size: sizeParam != null && sizeParam !== '' ? sizeParam : def.size != null ? def.size : '2K',
         response_format: extra.response_format || def.response_format || 'url',
         n: (() => {
             const fromExtra = parseInt(extra.n, 10);
@@ -236,7 +236,7 @@ async function callJimengImageAPIAxios(apiKey, prompt, extra, model, sizeParam, 
     } else if (def.watermark === undefined) {
         body.watermark = process.env.JIMENG_WATERMARK === '1' || process.env.JIMENG_WATERMARK === 'true';
     }
-    if (extra.sequential_image_generation != null && extra.sequential_image_generation != '') {
+    if (extra.sequential_image_generation != null && extra.sequential_image_generation !== '') {
         body.sequential_image_generation = extra.sequential_image_generation;
     }
     if (extra.sequential_image_generation_options && typeof extra.sequential_image_generation_options === 'object') {
@@ -318,7 +318,7 @@ async function callJimengImageAPI(prompt, size, extra = {}, userConfig) {
             'API Key 不能填 IAM 的 Access Key ID（以 AKLT 开头）。请到「火山方舟 → API Key 管理」创建 sk- 密钥（见 docs/JIMENG_ARK_SETUP.md、https://www.volcengine.com/docs/82379/1541594）'
         );
     }
-    if (!/^sk-/i.test(apiKey) && process.env.JIMENG_BEARER_WITHOUT_SK_PREFIX != '1') {
+    if (!/^sk-/i.test(apiKey) && process.env.JIMENG_BEARER_WITHOUT_SK_PREFIX !== '1') {
         throw new Error(
             'API Key 须以 sk- 开头（来自火山方舟「API Key 管理」）。勿填 IAM AK/SK 或控制台示例里的非 sk- 片段。若方舟控制台发放的 Key 不含 sk- 前缀，可在 .env 设 JIMENG_BEARER_WITHOUT_SK_PREFIX=1'
         );
@@ -340,7 +340,7 @@ async function callJimengImageAPI(prompt, size, extra = {}, userConfig) {
 }
 
 async function callJimengImage2ImageAPI(prompt, imageDataUrl, strength, size, extra = {}, userConfig) {
-    if (!imageDataUrl || typeof imageDataUrl != 'string') {
+    if (!imageDataUrl || typeof imageDataUrl !== 'string') {
         throw new Error('即梦图生图缺少输入草图（image）');
     }
 
