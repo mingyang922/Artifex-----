@@ -36,7 +36,7 @@
         "express-session": "^1.19.0",
         "form-data": "^4.0.5",
         "helmet": "^8.2.0",
-        "tencentcloud-sdk-nodejs": "^4.1.237",
+        "tencentcloud-sdk-nodejs": "^4.1.249",
         "ws": "^8.21.0"
     },
     "devDependencies": {
