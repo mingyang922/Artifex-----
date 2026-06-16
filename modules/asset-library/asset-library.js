@@ -220,6 +220,17 @@
             const btnBatchDelete = document.getElementById('btnBatchDelete');
             // 导航元素引用已移除，因为现在使用与dashboard.html一致的导航结构
 
+            // 初始化上下文菜单模块（从 asset-library-context-menu.js 拆分）
+            if (window.AssetLibraryContextMenu && typeof window.AssetLibraryContextMenu.setDeps === 'function') {
+                window.AssetLibraryContextMenu.setDeps({
+                    getAllTags: getAllTags,
+                    fetchWithCsrf: fetchWithCsrf,
+                    uiToast: uiToast,
+                    escapeHtml: escapeHtml,
+                    getModalRoot: function() { return modalRoot; }
+                });
+            }
+
             // 运行初始化
             let categories = [];
             let assets = [];
@@ -1379,135 +1390,14 @@
                         moreBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
                         moreBtn.addEventListener('click', function(e) {
                             e.preventDefault(); e.stopPropagation();
-                            showCardContextMenu(a, moreBtn);
+                            if (window.AssetLibraryContextMenu) {
+                                window.AssetLibraryContextMenu.showCardContextMenu(a, moreBtn, { onTagsUpdated: renderAssets });
+                            }
                         });
                         actions.appendChild(moreBtn);
                     }
                 });
             };
-            // --- context menu ---
-            function showCardContextMenu(asset, anchorEl) {
-                document.querySelectorAll('.card-context-menu.is-open').forEach(function(m) { m.remove(); });
-                const menu = document.createElement('div');
-                menu.className = 'card-context-menu is-open';
-                const btnCopy = document.createElement('button');
-                btnCopy.innerHTML = '<i class="fas fa-copy"></i> 复制到项目';
-                btnCopy.addEventListener('click', function(e) { e.stopPropagation(); menu.remove(); showProjectSelector(asset); });
-                const btnTags = document.createElement('button');
-                btnTags.innerHTML = '<i class="fas fa-tags"></i> 编辑标签';
-                btnTags.addEventListener('click', function(e) { e.stopPropagation(); menu.remove(); showTagEditor(asset); });
-                menu.appendChild(btnCopy); menu.appendChild(btnTags);
-                document.body.appendChild(menu);
-                const rect = anchorEl.getBoundingClientRect();
-                menu.style.left = Math.min(rect.left, window.innerWidth - 180) + 'px';
-                menu.style.top = (rect.bottom + 4) + 'px';
-                setTimeout(function() {
-                    document.addEventListener('click', function closeMenu() { menu.remove(); document.removeEventListener('click', closeMenu); });
-                }, 10);
-            }
-            // --- cross-project copy ---
-            function showProjectSelector(asset) {
-                const dialog = document.createElement('div'); dialog.className = 'project-selector-dialog';
-                const box = document.createElement('div'); box.className = 'project-selector-box';
-                const title = document.createElement('h3'); title.textContent = '选择目标项目'; box.appendChild(title);
-                const listDiv = document.createElement('div'); listDiv.innerHTML = '<div class="project-selector-empty">加载中...</div>'; box.appendChild(listDiv);
-                const closeBtn = document.createElement('button'); closeBtn.className = 'project-selector-close'; closeBtn.textContent = '取消';
-                closeBtn.addEventListener('click', function() { dialog.remove(); });
-                box.appendChild(closeBtn); dialog.appendChild(box);
-                dialog.addEventListener('click', function(e) { if (e.target === dialog) dialog.remove(); });
-                document.body.appendChild(dialog);
-                fetch('/api/projects', { credentials: 'include' }).then(function(r) { return r.json(); })
-                .then(function(data) {
-                    listDiv.innerHTML = '';
-                    if (!data.ok || !Array.isArray(data.projects) || data.projects.length === 0) {
-                        listDiv.innerHTML = '<div class="project-selector-empty">暂无项目，请先创建项目</div>'; return;
-                    }
-                    data.projects.forEach(function(proj) {
-                        const item = document.createElement('div'); item.className = 'project-list-item';
-                        const nameSpan = document.createElement('span'); nameSpan.className = 'project-item-name'; nameSpan.textContent = proj.name;
-                        const typeSpan = document.createElement('span'); typeSpan.className = 'project-item-type'; typeSpan.textContent = proj.type || '';
-                        item.appendChild(nameSpan); item.appendChild(typeSpan);
-                        item.addEventListener('click', function() { copyAssetToProject(asset, proj, dialog); });
-                        listDiv.appendChild(item);
-                    });
-                }).catch(function() { listDiv.innerHTML = '<div class="project-selector-empty">加载失败</div>'; });
-            }
-            function copyAssetToProject(asset, project, dialog) {
-                const assetName = asset.name || asset.fileName || '未命名';
-                fetchWithCsrf('/api/projects/' + project.id + '/assets', {
-                    method: 'POST', body: JSON.stringify({ name: assetName, type: asset.type || 'image', content: asset.dataURL || '' }),
-                }).then(function(r) { return r.json(); })
-                .then(function(data) {
-                    if (data.ok) { uiToast('已复制到项目: ' + project.name, 'success'); if (dialog) dialog.remove(); }
-                    else { uiToast('复制失败: ' + (data.error || '未知错误'), 'warn'); }
-                }).catch(function(e) { uiToast('复制失败: ' + (e.message || '网络错误'), 'warn'); });
-            }
-            // --- tag editor ---
-            function showTagEditor(asset) {
-                modalRoot.innerHTML = '';
-                const modal = document.createElement('div'); modal.className = 'modal';
-                const box = document.createElement('div'); box.className = 'box'; box.style.width = '400px';
-                const title = document.createElement('div'); title.style.marginBottom = '12px';
-                title.innerHTML = '<strong>编辑标签 - ' + escapeHtml(asset.name || asset.fileName) + '</strong>';
-                box.appendChild(title);
-                const currentTags = Array.isArray(asset.tags) ? asset.tags.slice() : [];
-                const tagInputWrap = document.createElement('div'); tagInputWrap.className = 'tag-input-wrap'; tagInputWrap.style.position = 'relative';
-                const input = document.createElement('input'); input.type = 'text'; input.placeholder = '输入标签后按回车...';
-                const autocomplete = document.createElement('div'); autocomplete.className = 'tag-autocomplete';
-                function renderTagChips() {
-                    tagInputWrap.querySelectorAll('.tag-chip').forEach(function(c) { c.remove(); });
-                    currentTags.forEach(function(tag, tidx) {
-                        const chip = document.createElement('span'); chip.className = 'tag-chip'; chip.textContent = tag;
-                        const removeBtn = document.createElement('span'); removeBtn.className = 'tag-remove'; removeBtn.textContent = '\u00d7';
-                        removeBtn.addEventListener('click', function() { currentTags.splice(tidx, 1); renderTagChips(); });
-                        chip.appendChild(removeBtn); tagInputWrap.insertBefore(chip, input);
-                    });
-                }
-                function showAutocomplete(query) {
-                    const allTags = getAllTags().filter(function(t) { return currentTags.indexOf(t) === -1 && t.toLowerCase().indexOf(query.toLowerCase()) !== -1; });
-                    autocomplete.innerHTML = '';
-                    if (allTags.length === 0 || !query) { autocomplete.classList.remove('is-open'); return; }
-                    allTags.slice(0, 8).forEach(function(tag) {
-                        const btn = document.createElement('button'); btn.className = 'tag-autocomplete-item'; btn.textContent = tag;
-                        btn.addEventListener('click', function() {
-                            if (currentTags.indexOf(tag) === -1) currentTags.push(tag);
-                            input.value = ''; autocomplete.classList.remove('is-open'); renderTagChips();
-                        });
-                        autocomplete.appendChild(btn);
-                    });
-                    autocomplete.classList.add('is-open'); autocomplete.style.left = '0'; autocomplete.style.bottom = '100%';
-                }
-                input.addEventListener('input', function() { showAutocomplete(input.value); });
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' && input.value.trim()) {
-                        e.preventDefault(); const val = input.value.trim();
-                        if (currentTags.indexOf(val) === -1) currentTags.push(val);
-                        input.value = ''; autocomplete.classList.remove('is-open'); renderTagChips();
-                    }
-                });
-                tagInputWrap.appendChild(input); tagInputWrap.appendChild(autocomplete); renderTagChips();
-                box.appendChild(tagInputWrap);
-                const actionsDiv = document.createElement('div'); actionsDiv.style.marginTop = '16px'; actionsDiv.style.display = 'flex'; actionsDiv.style.gap = '8px'; actionsDiv.style.justifyContent = 'flex-end';
-                const saveBtn = document.createElement('button'); saveBtn.className = 'btn btn-primary'; saveBtn.textContent = '保存';
-                saveBtn.addEventListener('click', function() { saveAssetTags(asset, currentTags); modalRoot.style.display = 'none'; modalRoot.innerHTML = ''; });
-                const cancelBtn = document.createElement('button'); cancelBtn.className = 'btn'; cancelBtn.textContent = '取消';
-                cancelBtn.addEventListener('click', function() { modalRoot.style.display = 'none'; modalRoot.innerHTML = ''; });
-                actionsDiv.appendChild(cancelBtn); actionsDiv.appendChild(saveBtn); box.appendChild(actionsDiv);
-                modal.appendChild(box); modalRoot.appendChild(modal); modalRoot.style.display = 'block';
-                modal.addEventListener('click', function(e) { if (e.target === modal) { modalRoot.style.display = 'none'; modalRoot.innerHTML = ''; } });
-            }
-            function saveAssetTags(asset, newTags) {
-                let existingTags = {};
-                try { existingTags = JSON.parse(asset._rawTags || '{}'); } catch(_) {}
-                existingTags.customTags = newTags;
-                fetchWithCsrf('/api/asset-library/' + encodeURIComponent(asset.id), {
-                    method: 'PUT', body: JSON.stringify({ tags: JSON.stringify(existingTags) }),
-                }).then(function(r) { return r.json(); })
-                .then(function(data) {
-                    if (data.ok) { asset.tags = newTags; renderAssets(); uiToast('标签已保存', 'success'); }
-                    else { uiToast('保存失败', 'warn'); }
-                }).catch(function() { uiToast('保存失败', 'warn'); });
-            }
             // --- URL import ---
             const btnUrlImport = document.getElementById('btnUrlImport');
             if (btnUrlImport) { btnUrlImport.addEventListener('click', function() { showUrlImportDialog(); }); }

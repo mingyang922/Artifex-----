@@ -19,7 +19,7 @@
         "format:check": "prettier --check \"backend/**/*.{js,json}\" \"js/**/*.{js,json}\" \"modules/**/*.{js,css,html,json}\" \"scripts/**/*.{js,json}\" \"*.{html,css,js,json,md}\"",
         "install-deps": "npm install express axios dotenv",
         "setup": "npm run install-deps && echo \"请在 config/.env 中配置 API 密钥等变量（见 README）\"",
-        "test": "node --test tests/backend.test.js tests/routes.test.js",
+        "test": "node --test tests/backend.test.js tests/routes.test.js tests/utils.test.js",
         "test:e2e": "npx playwright test",
         "ci": "npm run lint && npm test",
         "precommit": "npm run lint"

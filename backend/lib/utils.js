@@ -333,7 +333,7 @@ function decryptText(encryptedText) {
         return encryptedText;
     } catch (_e) {
         // 解密失败（密钥轮换等）返回空字符串，避免使用错误数据
-        console.warn('[utils] decryptText 解密失败，可能密钥已变更:', e.message);
+        console.warn('[utils] decryptText 解密失败，可能密钥已变更:', _e.message);
         return '';
     }
 }
