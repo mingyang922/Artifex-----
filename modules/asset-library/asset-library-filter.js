@@ -14,12 +14,13 @@
     var activeTagFilter = null;
 
     // ── 筛选核心 ──
-    function filterAssets() {
-        var assets = state.assets;
-        var q = (els.assetSearchEl ? els.assetSearchEl.value : '').trim().toLowerCase();
-        var cat = els.categoryFilterEl ? els.categoryFilterEl.value : 'all';
-        var type = els.typeFilterEl ? els.typeFilterEl.value : 'all';
-        var sort = els.sortOrderEl ? els.sortOrderEl.value : 'newest';
+    function filterAssets(assetsOverride, elsOverride) {
+        var assets = assetsOverride || (state ? state.assets : []);
+        var e = elsOverride || els || {};
+        var q = (e.assetSearchEl ? e.assetSearchEl.value : '').trim().toLowerCase();
+        var cat = e.categoryFilterEl ? e.categoryFilterEl.value : 'all';
+        var type = e.typeFilterEl ? e.typeFilterEl.value : 'all';
+        var sort = e.sortOrderEl ? e.sortOrderEl.value : 'newest';
 
         var filtered = assets.filter(function (a) {
             if (cat !== 'all' && a.category !== cat) return false;

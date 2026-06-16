@@ -36,12 +36,6 @@
                     window.PageEffects.initPointerGlow();
                     window.PageEffects.initCardSpotlight('.top-bar, .project-management-module, .project-card');
                 }
-
-                // 调试：检查项目卡片操作按钮
-                setTimeout(() => {
-                    const projectCards = document.querySelectorAll('.project-card');
-                    const actionButtons = document.querySelectorAll('.icon-btn');
-                }, 1000);
             });
             document.addEventListener('DOMContentLoaded', function () {
                 window.__pmQuickAction = function (action) {

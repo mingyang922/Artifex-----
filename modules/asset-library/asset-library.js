@@ -285,34 +285,17 @@
             }
 
             function filterAssets() {
-                const q = (assetSearchEl ? assetSearchEl.value : '').trim().toLowerCase();
-                const cat = categoryFilterEl ? categoryFilterEl.value : 'all';
-                const type = typeFilterEl ? typeFilterEl.value : 'all';
-                const sort = sortOrderEl ? sortOrderEl.value : 'newest';
-
-                let filtered = assets.filter((a) => {
-                    if (cat !== 'all' && a.category !== cat) return false;
-                    if (type !== 'all') {
-                        const at = (a.type || '').toLowerCase();
-                        if (at !== type && !at.startsWith(type + '/')) return false;
-                    }
-                    if (q) {
-                        const nameMatch = (a.name || '').toLowerCase().includes(q);
-                        const descMatch = (a.fileName || '').toLowerCase().includes(q);
-                        if (!nameMatch && !descMatch) return false;
-                    }
-                    return true;
-                });
-
-                if (sort === 'newest') {
-                    filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                } else if (sort === 'oldest') {
-                    filtered.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-                } else if (sort === 'name') {
-                    filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                // 委托给 AssetLibraryFilter 模块
+                if (window.AssetLibraryFilter && typeof window.AssetLibraryFilter.filterAssets === 'function') {
+                    return window.AssetLibraryFilter.filterAssets(assets, {
+                        searchEl: assetSearchEl,
+                        categoryFilterEl: categoryFilterEl,
+                        typeFilterEl: typeFilterEl,
+                        sortOrderEl: sortOrderEl,
+                    });
                 }
-
-                return filtered;
+                // 回退：简单返回所有资产
+                return assets;
             }
 
             function renderAssets() {
