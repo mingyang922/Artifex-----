@@ -115,7 +115,7 @@ function createImageRouter(deps) {
 
             // 调用对应 provider
             const startTime = Date.now();
-            let callStatus = 'success';
+            let __callStatus = 'success';
             try {
                 const imageUrl = await dispatchImageGeneration({
                     provider: normalizedProvider,
@@ -153,7 +153,7 @@ function createImageRouter(deps) {
                     mode: isImg2Img ? 'img2img' : 'text2img',
                 });
             } catch (err) {
-                callStatus = 'error';
+                _callStatus = 'error';
                 // 记录失败
                 if (typeof logApiCall === 'function') {
                     logApiCall(req.currentUser.id, normalizedProvider, isImg2Img ? 'img2img' : 'text2img', 'error', Date.now() - startTime);
@@ -212,7 +212,7 @@ function createImageRouter(deps) {
                 if (resolved && blockedPatterns.some(pattern => pattern.test(resolved))) {
                     return res.status(403).json({ error: '禁止访问内网地址（DNS 解析）' });
                 }
-            } catch (__ {
+            } catch (_) {
                 // DNS 解析失败时阻止请求（防止绕过 SSRF 防护）
                 return res.status(502).json({ error: 'DNS 解析失败，无法验证目标地址安全性' });
             }

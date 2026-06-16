@@ -125,7 +125,7 @@ class PasswordSecurityManager {
         const confirmPwdEl = document.getElementById('confirm-password');
         if (!newPwdEl || !confirmPwdEl) return true;
         const newPassword = newPwdEl.value;
-        const confirmPassword = confirmPwdEl.value;
+        const _confirmPassword = confirmPwdEl.value;
 
         if (confirmPassword && newPassword !== confirmPassword) {
             this.showError('confirm-password-error', '两次输入的密码不一致');
@@ -303,7 +303,7 @@ class PasswordSecurityManager {
             this.showSuccessMessage();
             document.getElementById('change-password-form').reset();
             document.getElementById('submit-password-change').disabled = true;
-        } catch (err) {
+        } catch (_err) {
             this.showError('current-password-error', '网络错误，请稍后重试');
         }
     }
@@ -335,7 +335,7 @@ class PasswordSecurityManager {
     }
 
     // 验证当前密码
-    validateCurrentPassword(password) {
+    validateCurrentPassword(_password) {
         // 当前密码验证提示功能已删除
         return;
     }

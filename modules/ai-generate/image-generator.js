@@ -1567,8 +1567,8 @@ class ImageGenerator {
 }
 
 // 页面加载完成后初始化
-let aiGenerator;
-let imageGenerator;
+let _aiGenerator;
+let _imageGenerator;
 // ── Batch generation extension ──
 (function () {
     "use strict";

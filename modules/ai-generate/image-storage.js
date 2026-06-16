@@ -279,7 +279,7 @@
                 state.assets.unshift(buildAssetLibraryItemFromImage(image));
                 localStorage.setItem(aiStorageKey('assetLibrary_v1'), JSON.stringify(state));
                 themedSuccess('图片已保存到素材库（本地备份）');
-            } catch (fallbackErr) {
+            } catch (_fallbackErr) {
                 themedWarn('保存失败：' + (e.message || '请重试'));
             }
         }

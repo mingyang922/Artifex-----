@@ -233,9 +233,9 @@ class AssetEditor {
     bindCanvas() {
         this.wrap.addEventListener('mousedown', (e) => this.onPointerDown(e));
         this.wrap.addEventListener('mousemove', (e) => this.onPointerMove(e));
-        this.wrap.addEventListener('mouseup', (e) => this.onPointerUp(e));
+        this.wrap.addEventListener('mouseup', (e) => this.onPointerUp(_e));
         this.wrap.addEventListener('mouseleave', (e) => {
-            this.onPointerUp(e);
+            this.onPointerUp(_e);
             this.oCtx.clearRect(0, 0, this.overlay.width, this.overlay.height);
             if (this.selection) this.drawSelection();
             const coordEl = document.getElementById('aeCoordInfo');
@@ -329,7 +329,7 @@ class AssetEditor {
         this.lastPy = p.y;
     }
 
-    onPointerUp(e) {
+    onPointerUp(_e) {
         if (this.isDragging) {
             this.isDragging = false;
             this.wrap.style.cursor = this.getCursor();
@@ -1369,7 +1369,7 @@ class AssetEditor {
         const grid = document.createElement('div');
         grid.className = 'ae-palette-grid';
 
-        palette.forEach((color, idx) => {
+        palette.forEach((color, _idx) => {
             const swatch = document.createElement('div');
             swatch.className = 'ae-palette-swatch';
 

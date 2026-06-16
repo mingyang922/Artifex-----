@@ -361,7 +361,7 @@ function getUserApiCredentialStatus(userId) {
 function getAllUsers() {
     const rows = db.prepare('SELECT id, username, email, role, profile_json, created_at FROM users ORDER BY created_at DESC').all();
     return rows.map((row) => {
-        let profile = {};
+        let _profile = {};
         try { profile = JSON.parse(row.profile_json || '{}'); } catch (_) { /* profile_json 损坏时降级为空对象 */ }
         return {
             id: row.id,

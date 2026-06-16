@@ -23,7 +23,7 @@ async function getCsrfToken() {
         _csrfToken = data.csrfToken || '';
         _csrfTokenTime = now;
         return _csrfToken;
-    } catch (e) {
+    } catch (_e) {
         return '';
     }
 }

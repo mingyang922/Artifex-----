@@ -763,7 +763,7 @@ function getLibraryCategoryByAssetType(assetType) {
     return map[assetType] || '其他';
 }
 
-function getLocalStorageUsageBytes() {
+function _getLocalStorageUsageBytes() {
     let total = 0;
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);

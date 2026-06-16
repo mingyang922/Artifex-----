@@ -738,7 +738,7 @@
 
             if (btnChoose && fileInput) {
                 btnChoose.addEventListener('click', () => fileInput.click());
-                fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+                fileInput.addEventListener('change', (_e) => handleFiles(_e.target.files));
             }
 
             // 搜索与筛选（搜索框加 300ms 防抖，避免大量素材时输入卡顿）
@@ -1223,7 +1223,7 @@
             }
 
             // 加载并初始化
-            function init() {
+            function _init() {
                 loadState();
                 // 如果当前没有素材，则写入示例素材以便用户能快速看到效果
                 if (!assets || assets.length === 0) {

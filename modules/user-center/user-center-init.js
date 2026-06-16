@@ -114,7 +114,7 @@ function saveUserConfig() {
         // 权限设置
         permissions: Array.from(
             document.querySelectorAll('.permissions-grid input[type="checkbox"]')
-        ).map((checkbox, index) => checkbox.checked),
+        ).map((checkbox, _index) => checkbox.checked),
         // 当前头像
         currentAvatar: currentAvatar.querySelector('img')
             ? currentAvatar.querySelector('img').src

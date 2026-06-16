@@ -16,7 +16,7 @@ const { Router } = require('express');
  */
 function createAdminRouter(deps) {
     const router = Router();
-    const { usersDb, requireAuth, isAdminUser, csrfProtection } = deps;
+    const { usersDb, requireAuth, isAdminUser, csrfProtection: _csrfProtection } = deps;
 
     // 用户自己的用量
     router.get('/me/usage', requireAuth, (req, res) => {

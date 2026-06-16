@@ -293,7 +293,7 @@ async function saveProjectToServer(project, versionDesc) {
 function syncProjectsToLocalStorage() {
     try {
         localStorage.setItem(pmStorageKey('gameui-projects'), JSON.stringify(projects));
-    } catch (e) { /* ignore */ }
+    } catch (_e) { /* ignore */ }
 }
 
 // 批量保存项目到服务端

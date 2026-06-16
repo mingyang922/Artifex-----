@@ -148,7 +148,7 @@ function saveUserConfig() {
         },
         // 权限设置
         permissions: Array.from(document.querySelectorAll('.permissions-grid input[type="checkbox"]')).map(
-            (checkbox, index) => checkbox.checked
+            (checkbox, _index) => checkbox.checked
         ),
         // 当前头像
         currentAvatar: document.getElementById('current-avatar').querySelector('img')
@@ -668,7 +668,7 @@ const tooltipManager = {
 
     // 清理所有工具提示
     clearAll() {
-        this.tooltips.forEach((cleanup, element) => {
+        this.tooltips.forEach((cleanup, _element) => {
             cleanup();
         });
         this.tooltips.clear();

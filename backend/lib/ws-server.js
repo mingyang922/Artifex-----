@@ -11,7 +11,7 @@ class WsServer {
         this.wss = new WebSocket.Server({ server, path: '/ws' });
         this.clients = new Map(); // userId -> Set<WebSocket>
 
-        this.wss.on('connection', (ws, req) => {
+        this.wss.on('connection', (ws, _req) => {
             ws.isAlive = true;
             ws.on('pong', () => { ws.isAlive = true; });
 

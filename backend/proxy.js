@@ -323,7 +323,7 @@ app.use('/api', createAdminRouter({ usersDb, requireAuth, isAdminUser }));
 app.get('/api/activity-log', requireAuth, (req, res) => {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
-    const offset = (page - 1) * limit;
+    const _offset = (page - 1) * limit;
     const total = usersDb.getActivityLogCount(req.currentUser.id);
     const logs = usersDb.getActivityLog(req.currentUser.id, limit, offset);
     res.json({ ok: true, logs, total, page, limit });
@@ -336,7 +336,7 @@ app.get('/api/admin/activity-log', requireAuth, (req, res) => {
     }
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
-    const offset = (page - 1) * limit;
+    const _offset = (page - 1) * limit;
     const total = usersDb.getRecentActivityCount();
     const logs = usersDb.getRecentActivity(limit);
     res.json({ ok: true, logs, total, page, limit });

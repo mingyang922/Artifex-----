@@ -72,7 +72,7 @@
                         const raw = localStorage.getItem('gameui-projects');
                         if (raw) projects = JSON.parse(raw) || [];
                     }
-                } catch (e) { /* ignore */ }
+                } catch (_e) { /* ignore */ }
                 renderProjectCards(grid, projects);
             }
 
