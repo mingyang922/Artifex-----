@@ -167,7 +167,7 @@ async function createProject() {
     }
 
     // 调用 API 创建项目
-    const newProject;
+    let newProject;
     try {
         const csrfToken = await getCsrfToken();
         const res = await fetch('/api/projects', {
