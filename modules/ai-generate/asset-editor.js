@@ -233,9 +233,9 @@ class AssetEditor {
     bindCanvas() {
         this.wrap.addEventListener('mousedown', (e) => this.onPointerDown(e));
         this.wrap.addEventListener('mousemove', (e) => this.onPointerMove(e));
-        this.wrap.addEventListener('mouseup', (e) => this.onPointerUp(_e));
+        this.wrap.addEventListener('mouseup', (e) => this.onPointerUp(e));
         this.wrap.addEventListener('mouseleave', (e) => {
-            this.onPointerUp(_e);
+            this.onPointerUp(e);
             this.oCtx.clearRect(0, 0, this.overlay.width, this.overlay.height);
             if (this.selection) this.drawSelection();
             const coordEl = document.getElementById('aeCoordInfo');

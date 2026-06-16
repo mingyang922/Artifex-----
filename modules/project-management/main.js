@@ -10,15 +10,7 @@ const pmStorageKey = PMSharedLib.pmStorageKey || function (base) { return base; 
 
 // 全局变量定义
 const projects = []; // 项目列表
-const currentProjectId = null;
 const projectsCache = null; // 内存缓存
-
-function setActiveProjectCard(projectId) {
-    currentProjectId = projectId || null;
-    document.querySelectorAll('.project-card').forEach(function (card) {
-        card.classList.toggle('selected', !!projectId && card.dataset.id === projectId);
-    });
-}
 
 // DOM加载完成后执行初始化
 if (document.readyState === 'loading') {
@@ -143,10 +135,6 @@ const saveProjectsToStorage = debounce(function (versionDesc) {
 function showTechPrompt(options) {
     if (PMSharedLib.showTechPrompt) return PMSharedLib.showTechPrompt(options);
     return Promise.resolve(false);
-}
-
-function uiToast(message, type) {
-    if (PMSharedLib.uiToast) PMSharedLib.uiToast(message, type);
 }
 
 // 创建项目
@@ -408,16 +396,6 @@ function getLibraryCategoryByAssetType(assetType) {
         prop: '其他',
     };
     return map[assetType] || '其他';
-}
-
-function getLocalStorageUsageBytes() {
-    const total = 0;
-    for (var i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        const value = localStorage.getItem(key) || '';
-        total += (key.length + value.length) * 2;
-    }
-    return total;
 }
 
 async function syncProjectAssetToLibrary(project, asset) {

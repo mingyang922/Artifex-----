@@ -61,7 +61,7 @@
     }
 
     // ── 跨项目复制 ──
-    function showProjectSelector(asset, callbacks) {
+    function showProjectSelector(asset, _callbacks) {
         var dialog = document.createElement('div');
         dialog.className = 'project-selector-dialog';
         var box = document.createElement('div');

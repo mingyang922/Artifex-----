@@ -722,7 +722,7 @@
                 e.preventDefault();
                 uploadArea.classList.add('dragover');
             });
-            uploadArea.addEventListener('dragleave', (e) => {
+            uploadArea.addEventListener('dragleave', () => {
                 uploadArea.classList.remove('dragover');
             });
             uploadArea.addEventListener('drop', (e) => {

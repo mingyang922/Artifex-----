@@ -16,7 +16,6 @@ const compression = require('compression');
 
 // —— 本地模块 ——
 const logger = require('./lib/logger');
-const { sendError, ERR } = require('./lib/error-response');
 const { WsServer } = require('./lib/ws-server');
 const arkRestConfig = require('./ark-rest-config');
 const {
