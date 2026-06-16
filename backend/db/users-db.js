@@ -199,10 +199,10 @@ function init() {
     // 自动提升首个用户为 admin（仅当 ADMIN_USER_ID 未指定时）
     const adminUserId = process.env.ADMIN_USER_ID;
     if (adminUserId) {
-        db.prepare("UPDATE users SET role = 'admin' WHERE id = ? AND role !== 'admin'").run(Number(adminUserId));
+        db.prepare("UPDATE users SET role = 'admin' WHERE id = ? AND role != 'admin'").run(Number(adminUserId));
     } else {
         // 默认将 ID=1 设为管理员（向后兼容）
-        db.prepare("UPDATE users SET role = 'admin' WHERE id = 1 AND role !== 'admin'").run();
+        db.prepare("UPDATE users SET role = 'admin' WHERE id = 1 AND role != 'admin'").run();
     }
 
     migrateFromJsonIfEmpty();

@@ -4,14 +4,14 @@ on:
   push:
     branches: [main]
     tags: ['v*']
+  pull_request:
+    branches: [main]
     paths:
       - 'backend/**'
       - 'js/**'
       - 'modules/**'
       - 'package.json'
       - 'package-lock.json'
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
