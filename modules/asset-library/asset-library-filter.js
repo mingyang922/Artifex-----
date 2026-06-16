@@ -21,22 +21,22 @@
      * @returns {Array} 筛选后的素材
      */
     function filterAssets(assets, opts) {
-        var e = opts || {};
-        var q = (e.assetSearchEl ? e.assetSearchEl.value : '').trim().toLowerCase();
-        var cat = e.categoryFilterEl ? e.categoryFilterEl.value : 'all';
-        var type = e.typeFilterEl ? e.typeFilterEl.value : 'all';
-        var sort = e.sortOrderEl ? e.sortOrderEl.value : 'newest';
-        var tag = e.tagFilter || null;
+        const e = opts || {};
+        const q = (e.assetSearchEl ? e.assetSearchEl.value : '').trim().toLowerCase();
+        const cat = e.categoryFilterEl ? e.categoryFilterEl.value : 'all';
+        const type = e.typeFilterEl ? e.typeFilterEl.value : 'all';
+        const sort = e.sortOrderEl ? e.sortOrderEl.value : 'newest';
+        const tag = e.tagFilter || null;
 
-        var filtered = (assets || []).filter(function (a) {
+        const filtered = (assets || []).filter(function (a) {
             if (cat !== 'all' && a.category !== cat) return false;
             if (type !== 'all') {
-                var at = (a.type || '').toLowerCase();
+                const at = (a.type || '').toLowerCase();
                 if (at !== type && !at.startsWith(type + '/')) return false;
             }
             if (q) {
-                var nameMatch = (a.name || '').toLowerCase().indexOf(q) !== -1;
-                var descMatch = (a.fileName || '').toLowerCase().indexOf(q) !== -1;
+                const nameMatch = (a.name || '').toLowerCase().indexOf(q) !== -1;
+                const descMatch = (a.fileName || '').toLowerCase().indexOf(q) !== -1;
                 if (!nameMatch && !descMatch) return false;
             }
             return true;

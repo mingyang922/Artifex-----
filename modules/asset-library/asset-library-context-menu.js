@@ -10,11 +10,11 @@
     'use strict';
 
     // ── 依赖注入（由 asset-library.js init 时调用 setDeps 传入） ──
-    var _getAllTags = null;
-    var _fetchWithCsrf = null;
-    var _uiToast = null;
-    var _escapeHtml = null;
-    var _getModalRoot = null;
+    const _getAllTags = null;
+    const _fetchWithCsrf = null;
+    const _uiToast = null;
+    const _escapeHtml = null;
+    const _getModalRoot = null;
 
     function setDeps(deps) {
         _getAllTags = deps.getAllTags;
@@ -27,17 +27,17 @@
     // ── 右键上下文菜单 ──
     function showCardContextMenu(asset, anchorEl, callbacks) {
         document.querySelectorAll('.card-context-menu.is-open').forEach(function (m) { m.remove(); });
-        var menu = document.createElement('div');
+        const menu = document.createElement('div');
         menu.className = 'card-context-menu is-open';
 
-        var btnCopy = document.createElement('button');
+        const btnCopy = document.createElement('button');
         btnCopy.innerHTML = '<i class="fas fa-copy"></i> 复制到项目';
         btnCopy.addEventListener('click', function (e) {
             e.stopPropagation(); menu.remove();
             showProjectSelector(asset, callbacks);
         });
 
-        var btnTags = document.createElement('button');
+        const btnTags = document.createElement('button');
         btnTags.innerHTML = '<i class="fas fa-tags"></i> 编辑标签';
         btnTags.addEventListener('click', function (e) {
             e.stopPropagation(); menu.remove();
@@ -48,7 +48,7 @@
         menu.appendChild(btnTags);
         document.body.appendChild(menu);
 
-        var rect = anchorEl.getBoundingClientRect();
+        const rect = anchorEl.getBoundingClientRect();
         menu.style.left = Math.min(rect.left, window.innerWidth - 180) + 'px';
         menu.style.top = (rect.bottom + 4) + 'px';
 
@@ -62,19 +62,19 @@
 
     // ── 跨项目复制 ──
     function showProjectSelector(asset, _callbacks) {
-        var dialog = document.createElement('div');
+        const dialog = document.createElement('div');
         dialog.className = 'project-selector-dialog';
-        var box = document.createElement('div');
+        const box = document.createElement('div');
         box.className = 'project-selector-box';
-        var title = document.createElement('h3');
+        const title = document.createElement('h3');
         title.textContent = '选择目标项目';
         box.appendChild(title);
 
-        var listDiv = document.createElement('div');
+        const listDiv = document.createElement('div');
         listDiv.innerHTML = '<div class="project-selector-empty">加载中...</div>';
         box.appendChild(listDiv);
 
-        var closeBtn = document.createElement('button');
+        const closeBtn = document.createElement('button');
         closeBtn.className = 'project-selector-close';
         closeBtn.textContent = '取消';
         closeBtn.addEventListener('click', function () { dialog.remove(); });
@@ -92,12 +92,12 @@
                     return;
                 }
                 data.projects.forEach(function (proj) {
-                    var item = document.createElement('div');
+                    const item = document.createElement('div');
                     item.className = 'project-list-item';
-                    var nameSpan = document.createElement('span');
+                    const nameSpan = document.createElement('span');
                     nameSpan.className = 'project-item-name';
                     nameSpan.textContent = proj.name;
-                    var typeSpan = document.createElement('span');
+                    const typeSpan = document.createElement('span');
                     typeSpan.className = 'project-item-type';
                     typeSpan.textContent = proj.type || '';
                     item.appendChild(nameSpan);
@@ -110,7 +110,7 @@
     }
 
     function copyAssetToProject(asset, project, dialog) {
-        var assetName = asset.name || asset.fileName || '未命名';
+        const assetName = asset.name || asset.fileName || '未命名';
         _fetchWithCsrf('/api/projects/' + project.id + '/assets', {
             method: 'POST',
             body: JSON.stringify({ name: assetName, type: asset.type || 'image', content: asset.dataURL || '' }),
@@ -129,40 +129,40 @@
 
     // ── 标签编辑器 ──
     function showTagEditor(asset, callbacks) {
-        var modalRoot = _getModalRoot();
+        const modalRoot = _getModalRoot();
         if (!modalRoot) return;
         modalRoot.innerHTML = '';
 
-        var modal = document.createElement('div');
+        const modal = document.createElement('div');
         modal.className = 'modal';
-        var box = document.createElement('div');
+        const box = document.createElement('div');
         box.className = 'box';
         box.style.width = '400px';
 
-        var titleEl = document.createElement('div');
+        const titleEl = document.createElement('div');
         titleEl.style.marginBottom = '12px';
         titleEl.innerHTML = '<strong>编辑标签 - ' + _escapeHtml(asset.name || asset.fileName) + '</strong>';
         box.appendChild(titleEl);
 
-        var currentTags = Array.isArray(asset.tags) ? asset.tags.slice() : [];
-        var tagInputWrap = document.createElement('div');
+        const currentTags = Array.isArray(asset.tags) ? asset.tags.slice() : [];
+        const tagInputWrap = document.createElement('div');
         tagInputWrap.className = 'tag-input-wrap';
         tagInputWrap.style.position = 'relative';
 
-        var input = document.createElement('input');
+        const input = document.createElement('input');
         input.type = 'text';
         input.placeholder = '输入标签后按回车...';
 
-        var autocomplete = document.createElement('div');
+        const autocomplete = document.createElement('div');
         autocomplete.className = 'tag-autocomplete';
 
         function renderTagChips() {
             tagInputWrap.querySelectorAll('.tag-chip').forEach(function (c) { c.remove(); });
             currentTags.forEach(function (tag, tidx) {
-                var chip = document.createElement('span');
+                const chip = document.createElement('span');
                 chip.className = 'tag-chip';
                 chip.textContent = tag;
-                var removeBtn = document.createElement('span');
+                const removeBtn = document.createElement('span');
                 removeBtn.className = 'tag-remove';
                 removeBtn.textContent = '\u00d7';
                 removeBtn.addEventListener('click', function () {
@@ -175,13 +175,13 @@
         }
 
         function showAutocomplete(query) {
-            var allTags = _getAllTags().filter(function (t) {
+            const allTags = _getAllTags().filter(function (t) {
                 return currentTags.indexOf(t) === -1 && t.toLowerCase().indexOf(query.toLowerCase()) !== -1;
             });
             autocomplete.innerHTML = '';
             if (allTags.length === 0 || !query) { autocomplete.classList.remove('is-open'); return; }
             allTags.slice(0, 8).forEach(function (tag) {
-                var btn = document.createElement('button');
+                const btn = document.createElement('button');
                 btn.className = 'tag-autocomplete-item';
                 btn.textContent = tag;
                 btn.addEventListener('click', function () {
@@ -201,7 +201,7 @@
         input.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && input.value.trim()) {
                 e.preventDefault();
-                var val = input.value.trim();
+                const val = input.value.trim();
                 if (currentTags.indexOf(val) === -1) currentTags.push(val);
                 input.value = '';
                 autocomplete.classList.remove('is-open');
@@ -214,13 +214,13 @@
         renderTagChips();
         box.appendChild(tagInputWrap);
 
-        var actionsDiv = document.createElement('div');
+        const actionsDiv = document.createElement('div');
         actionsDiv.style.marginTop = '16px';
         actionsDiv.style.display = 'flex';
         actionsDiv.style.gap = '8px';
         actionsDiv.style.justifyContent = 'flex-end';
 
-        var saveBtn = document.createElement('button');
+        const saveBtn = document.createElement('button');
         saveBtn.className = 'btn btn-primary';
         saveBtn.textContent = '保存';
         saveBtn.addEventListener('click', function () {
@@ -229,7 +229,7 @@
             modalRoot.innerHTML = '';
         });
 
-        var cancelBtn = document.createElement('button');
+        const cancelBtn = document.createElement('button');
         cancelBtn.className = 'btn';
         cancelBtn.textContent = '取消';
         cancelBtn.addEventListener('click', function () {
@@ -253,7 +253,7 @@
     }
 
     function saveAssetTags(asset, newTags, callbacks) {
-        var existingTags = {};
+        const existingTags = {};
         try { existingTags = JSON.parse(asset._rawTags || '{}'); } catch (_) { /* ignore */ }
         existingTags.customTags = newTags;
 
