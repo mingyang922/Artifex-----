@@ -292,6 +292,7 @@
                         categoryFilterEl: categoryFilterEl,
                         typeFilterEl: typeFilterEl,
                         sortOrderEl: sortOrderEl,
+                        tagFilter: activeTagFilter,
                     });
                 }
                 // 回退：简单返回所有资产
