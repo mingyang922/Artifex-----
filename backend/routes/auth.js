@@ -6,6 +6,7 @@
 
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
+const { sendError, ERR } = require('../lib/error-response');
 
 /**
  * @param {object} deps
@@ -48,27 +49,27 @@ function createAuthRouter(deps) {
     router.post('/auth/register', csrfProtection, authLimiter, async (req, res) => {
         try {
             const { username, email, password } = req.body || {};
-            if (!username || !email || !password) return res.status(400).json({ error: '请填写用户名、邮箱和密码' });
-            if (String(password).length < 6) return res.status(400).json({ error: '密码至少 6 位' });
+            if (!username || !email || !password) return sendError(res, 400, ERR.VALIDATION, '请填写用户名、邮箱和密码');
+            if (String(password).length < 6) return sendError(res, 400, ERR.VALIDATION, '密码至少 6 位');
             // 用户名校验：只允许字母、数字、下划线、中文，2-32 字符
             const u = String(username).trim();
-            if (u.length < 2 || u.length > 32) return res.status(400).json({ error: '用户名长度应为 2-32 字符' });
-            if (!/^[\w一-鿿㐀-䶿]+$/.test(u)) return res.status(400).json({ error: '用户名只允许字母、数字、下划线和中文' });
+            if (u.length < 2 || u.length > 32) return sendError(res, 400, ERR.VALIDATION, '用户名长度应为 2-32 字符');
+            if (!/^[\w一-鿿㐀-䶿]+$/.test(u)) return sendError(res, 400, ERR.VALIDATION, '用户名只允许字母、数字、下划线和中文');
 
             const em = String(email).trim().toLowerCase();
-            if (usersDb.getUserByEmail(em)) return res.status(409).json({ error: '该邮箱已注册' });
-            if (usersDb.getUserByUsername(u)) return res.status(409).json({ error: '该用户名已被使用' });
+            if (usersDb.getUserByEmail(em)) return sendError(res, 409, ERR.CONFLICT, '该邮箱已注册');
+            if (usersDb.getUserByUsername(u)) return sendError(res, 409, ERR.CONFLICT, '该用户名已被使用');
 
             const hash = await bcrypt.hash(String(password), 10);
             const row = usersDb.createUser(u, em, hash);
             req.session.regenerate((err) => {
-                if (err) { console.error('session regenerate', err); return res.status(500).json({ error: '注册失败' }); }
+                if (err) { console.error('session regenerate', err); return sendError(res, 500, ERR.INTERNAL, '注册失败'); }
                 req.session.userId = row.id;
                 res.json({ ok: true, user: publicUser(row) });
             });
         } catch (e) {
             console.error('register', e);
-            res.status(500).json({ error: '注册失败' });
+            sendError(res, 500, ERR.INTERNAL, '注册失败');
         }
     });
 
@@ -79,17 +80,17 @@ function createAuthRouter(deps) {
             const em = String(email || '').trim().toLowerCase();
             const row = usersDb.getUserByEmail(em);
             if (!row || !(await bcrypt.compare(String(password || ''), row.password_hash))) {
-                return res.status(401).json({ error: '邮箱或密码错误' });
+                return sendError(res, 401, ERR.AUTH_REQUIRED, '邮箱或密码错误');
             }
             req.session.regenerate((err) => {
-                if (err) { console.error('session regenerate', err); return res.status(500).json({ error: '登录失败' }); }
+                if (err) { console.error('session regenerate', err); return sendError(res, 500, ERR.INTERNAL, '登录失败'); }
                 req.session.userId = row.id;
                 try { usersDb.addActivity(row.id, '用户登录', 'auth', null, null); } catch (_) { /* 活动日志非关键 */ }
                 res.json({ ok: true, user: publicUser(row) });
             });
         } catch (e) {
             console.error('login', e);
-            res.status(500).json({ error: '登录失败' });
+            sendError(res, 500, ERR.INTERNAL, '登录失败');
         }
     });
 
@@ -114,15 +115,15 @@ function createAuthRouter(deps) {
         try {
             const { currentPassword, newPassword } = req.body || {};
             if (!currentPassword || !newPassword) {
-                return res.status(400).json({ error: '请填写当前密码和新密码' });
+                return sendError(res, 400, ERR.VALIDATION, '请填写当前密码和新密码');
             }
             if (String(newPassword).length < 6) {
-                return res.status(400).json({ error: '新密码至少 6 位' });
+                return sendError(res, 400, ERR.VALIDATION, '新密码至少 6 位');
             }
             // 验证当前密码
             const user = usersDb.getUserById(req.currentUser.id);
             if (!user || !(await bcrypt.compare(String(currentPassword), user.password_hash))) {
-                return res.status(401).json({ error: '当前密码不正确' });
+                return sendError(res, 401, ERR.AUTH_REQUIRED, '当前密码不正确');
             }
             // 更新密码
             const hash = await bcrypt.hash(String(newPassword), 10);
@@ -132,7 +133,7 @@ function createAuthRouter(deps) {
             res.json({ ok: true, message: '密码修改成功' });
         } catch (e) {
             console.error('change-password', e);
-            res.status(500).json({ error: '密码修改失败' });
+            sendError(res, 500, ERR.INTERNAL, '密码修改失败');
         }
     });
 
@@ -142,11 +143,11 @@ function createAuthRouter(deps) {
     // ── 更新资料 ──
     router.put('/me/profile', requireAuth, csrfProtection, (req, res) => {
         const { profile } = req.body || {};
-        if (!profile || typeof profile !== 'object') return res.status(400).json({ error: '无效资料' });
+        if (!profile || typeof profile !== 'object') return sendError(res, 400, ERR.VALIDATION, '无效资料');
         // 限制 profile JSON 大小不超过 50KB
         const profileStr = JSON.stringify(profile);
         if (profileStr.length > 50 * 1024) {
-            return res.status(400).json({ error: '资料数据过大' });
+            return sendError(res, 400, ERR.VALIDATION, '资料数据过大');
         }
         // 字段白名单：只允许更新预期的字段
         const ALLOWED_FIELDS = ['nickname', 'gender', 'bio', 'country', 'language', 'avatar', 'settings'];
@@ -186,7 +187,7 @@ function createAuthRouter(deps) {
         const provider = String((req.body && req.body.provider) || '').trim().toLowerCase();
         const credentials = sanitizeApiSettingsPayload(provider, req.body && req.body.credentials);
         if (!provider || !credentials) {
-            return res.status(400).json({ error: '参数错误', message: 'provider 或 credentials 无效' });
+            return sendError(res, 400, ERR.VALIDATION, 'provider 或 credentials 无效');
         }
         usersDb.upsertUserApiCredentials(req.currentUser.id, provider, credentials);
         // 审计日志
@@ -199,7 +200,7 @@ function createAuthRouter(deps) {
         const provider = String((req.body && req.body.provider) || '').trim().toLowerCase();
         const credentials = sanitizeApiSettingsPayload(provider, req.body && req.body.credentials);
         if (!provider || !credentials) {
-            return res.status(400).json({ error: '参数错误', message: 'provider 或 credentials 无效' });
+            return sendError(res, 400, ERR.VALIDATION, 'provider 或 credentials 无效');
         }
 
         // 各 provider 的简单验证
@@ -229,7 +230,7 @@ function createAuthRouter(deps) {
                 valid = url.startsWith('http');
                 message = valid ? '地址格式正确' : '请输入有效的 URL';
             } else {
-                return res.status(400).json({ error: '不支持的服务商', message: `未知的 provider: ${provider}` });
+                return sendError(res, 400, ERR.VALIDATION, `不支持的服务商: ${provider}`);
             }
 
             res.json({ ok: true, valid, message, provider });

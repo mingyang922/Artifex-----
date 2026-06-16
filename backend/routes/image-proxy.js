@@ -8,6 +8,7 @@ const axios = require('axios');
 const dns = require('dns').promises;
 const { generateMockImage, callFreeImageAPI } = require('../lib/utils');
 const { imageGenerationLimiter } = require('../lib/rate-limiter');
+const { sendError, ERR } = require('../lib/error-response');
 const usersDbForActivity = require('../db/users-db');
 const tencentProvider = require('../providers/tencent');
 const alibabaProvider = require('../providers/alibaba');
@@ -77,12 +78,12 @@ function createImageRouter(deps) {
             if (normalizedProvider === 'jimeng') {
                 const sizeCheck = jimengProvider.validateJimengSize(size);
                 if (!sizeCheck.ok) {
-                    return res.status(400).json({ error: '参数错误', message: sizeCheck.message });
+                    return sendError(res, 400, ERR.VALIDATION, sizeCheck.message);
                 }
             }
 
             if (!prompt) {
-                return res.status(400).json({ error: '参数错误', message: 'prompt参数不能为空' });
+                return sendError(res, 400, ERR.VALIDATION, 'prompt参数不能为空');
             }
 
             // 检查配额
@@ -197,7 +198,7 @@ function createImageRouter(deps) {
     router.get('/proxy-image', requireAuth, async (req, res) => {
         const url = req.query.url;
         if (!url || typeof url !== 'string') {
-            return res.status(400).json({ error: '缺少 url 参数' });
+            return sendError(res, 400, ERR.VALIDATION, '缺少 url 参数');
         }
 
         // SSRF 防护：验证 URL + DNS 解析后二次校验
@@ -205,25 +206,25 @@ function createImageRouter(deps) {
             const parsed = new URL(url);
             // 只允许 http/https 协议
             if (!['http:', 'https:'].includes(parsed.protocol)) {
-                return res.status(400).json({ error: '只允许 http/https 协议' });
+                return sendError(res, 400, ERR.VALIDATION, '只允许 http/https 协议');
             }
             // 禁止访问内网地址（先检查 hostname 字面值）
             const hostname = parsed.hostname;
             if (isBlockedHostname(hostname)) {
-                return res.status(403).json({ error: '禁止访问内网地址' });
+                return sendError(res, 403, ERR.FORBIDDEN, '禁止访问内网地址');
             }
             // DNS 解析后二次校验（防止 DNS rebinding 绕过）
             try {
                 const { address: resolved } = await dns.lookup(hostname, { family: 0 });
                 if (resolved && isBlockedHostname(resolved)) {
-                    return res.status(403).json({ error: '禁止访问内网地址（DNS 解析）' });
+                    return sendError(res, 403, ERR.FORBIDDEN, '禁止访问内网地址（DNS 解析）');
                 }
             } catch (_) {
                 // DNS 解析失败时阻止请求（防止绕过 SSRF 防护）
-                return res.status(502).json({ error: 'DNS 解析失败，无法验证目标地址安全性' });
+                return sendError(res, 502, ERR.INTERNAL, 'DNS 解析失败，无法验证目标地址安全性');
             }
         } catch (_e) {
-            return res.status(400).json({ error: '无效的 URL' });
+            return sendError(res, 400, ERR.VALIDATION, '无效的 URL');
         }
 
         // 限制允许的 Content-Type
@@ -239,7 +240,7 @@ function createImageRouter(deps) {
             const contentType = (response.headers['content-type'] || 'image/png').split(';')[0].trim().toLowerCase();
             // 只允许图片类型，防止代理 HTML/JS 等内容（XSS 风险）
             if (!ALLOWED_CONTENT_TYPES.some(ct => contentType.startsWith(ct))) {
-                return res.status(403).json({ error: '不允许的内容类型', message: `不支持的内容类型: ${contentType}` });
+                return sendError(res, 403, ERR.FORBIDDEN, `不支持的内容类型: ${contentType}`);
             }
             res.set('Content-Type', contentType);
             // 缓存 1 小时，减少重复请求
@@ -247,7 +248,7 @@ function createImageRouter(deps) {
             res.send(response.data);
         } catch (error) {
             const upstreamStatus = error?.response?.status || 502;
-            res.status(upstreamStatus).json({ error: '图片拉取失败', message: error.message });
+            sendError(res, upstreamStatus, ERR.PROVIDER_ERROR, '图片拉取失败', error.message);
         }
     });
 

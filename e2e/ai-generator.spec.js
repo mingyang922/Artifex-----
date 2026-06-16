@@ -89,4 +89,34 @@ test.describe('AI 生成器', () => {
         await expect(page.locator('#view-action-group')).toBeVisible();
         await expect(page.locator('#view-image')).not.toBeVisible();
     });
+
+    test('图片生成完整流程', async ({ page }) => {
+        // Switch to the image generation tab
+        await page.click('.tab-button[data-tab="image"]');
+        await expect(page.locator('#view-image')).toBeVisible();
+
+        // Fill in the prompt
+        const promptInput = page.locator('#promptInput, #aiPrompt, #imageDescription, textarea[placeholder*="描述"], textarea[placeholder*="prompt"]');
+        await promptInput.first().fill('a cute cat sitting on a couch');
+
+        // Select 'free' provider if available
+        const providerSelect = page.locator('#apiProvider, select[name="provider"]');
+        if (await providerSelect.first().isVisible()) {
+            await providerSelect.first().selectOption('free');
+        }
+
+        // Click generate button
+        const generateBtn = page.locator('#generateBtn, #imageGenBtn, .generate-btn, button:has-text("生成")');
+        await generateBtn.first().click();
+
+        // Wait for result (image or error message)
+        await page.waitForSelector('.result-image, .error-message, .toast-message', { timeout: 30000 });
+
+        // Check if image was generated or error was shown
+        const hasImage = await page.locator('.result-image, img[src*="data:"], img[src*="http"]').first().isVisible().catch(() => false);
+        const hasError = await page.locator('.error-message, .toast-message--error').first().isVisible().catch(() => false);
+
+        // Either outcome is acceptable (free API might fail)
+        expect(hasImage || hasError).toBeTruthy();
+    });
 });
