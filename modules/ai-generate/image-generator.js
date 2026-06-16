@@ -52,13 +52,7 @@ class ImageGenerator {
     }
 
     pruneGeneratedImages() {
-        const before = Array.isArray(this.generatedImages) ? this.generatedImages.length : 0;
-        this.generatedImages = (Array.isArray(this.generatedImages) ? this.generatedImages : []).filter((image) => {
-            return image && image.id && image.name && this.isRenderableImageUrl(image.imageUrl);
-        });
-        if (this.generatedImages.length !== before) {
-            localStorage.setItem(aiStorageKey('generatedImages'), JSON.stringify(this.generatedImages));
-        }
+        return window.ImageStorage.pruneGeneratedImages();
     }
 
     bindEvents() {
@@ -336,60 +330,19 @@ class ImageGenerator {
     }
 
     getStylePresetsList() {
-        return readScopedJson(STYLE_PRESETS_KEY, []);
+        return window.ImageStylePresets.getStylePresetsList();
     }
 
     saveStylePresetsList(list) {
-        writeScopedJson(STYLE_PRESETS_KEY, list);
-        try {
-            window.dispatchEvent(new CustomEvent('stylePresetsChanged', { bubbles: true }));
-        } catch (_) {}
+        return window.ImageStylePresets.saveStylePresetsList(list);
     }
 
     refreshStylePresetSelect(keepSelectedId) {
-        const sel = document.getElementById('stylePresetSelect');
-        if (!sel) return;
-        const cur = keepSelectedId !== null ? String(keepSelectedId) : String(sel.value || '');
-        const list = this.getStylePresetsList();
-        teardownTechSelectForSelect(sel);
-        teardownTechSelectForSelect(document.getElementById('styleVlModelSelect'));
-        sel.innerHTML = '<option value="">— 不使用预设 —</option>';
-        list.forEach((p) => {
-            const opt = document.createElement('option');
-            opt.value = String(p.id);
-            const refMark = p.referenceThumb ? ' · 含参考图' : '';
-            opt.textContent = (p.name || '未命名') + refMark;
-            sel.appendChild(opt);
-        });
-        if (cur && list.some((x) => String(x.id) === cur)) {
-            sel.value = cur;
-        } else {
-            sel.value = '';
-        }
-        if (typeof initTechSelects === 'function') {
-            initTechSelects();
-        }
-        this.updateStylePresetStripStatus();
+        return window.ImageStylePresets.refreshStylePresetSelect(keepSelectedId);
     }
 
     updateStylePresetStripStatus() {
-        const statusEl = document.getElementById('stylePresetStripStatus');
-        if (!statusEl) return;
-        const sel = document.getElementById('stylePresetSelect');
-        const ta = document.getElementById('styleExtractTextarea');
-        const id = sel && sel.value ? String(sel.value) : '';
-        const sn = (ta && ta.value.trim()) || '';
-        if (id) {
-            const pr = this.getStylePresetsList().find((x) => String(x.id) === id);
-            const name = (pr && pr.name) || '未命名';
-            statusEl.textContent = sn ? `使用预设：${name}（片段可编辑）` : `使用预设：${name}`;
-            return;
-        }
-        if (sn) {
-            statusEl.textContent = '已填写风格片段（未绑定预设）';
-            return;
-        }
-        statusEl.textContent = '未使用风格预设';
+        return window.ImageStylePresets.updateStylePresetStripStatus();
     }
 
     async checkVisionExtractButton() {
@@ -457,105 +410,7 @@ class ImageGenerator {
     }
 
     bindStylePresetEvents() {
-        const fileInp = document.getElementById('styleRefFileInput');
-        const pickBtn = document.getElementById('styleRefPickBtn');
-        const extractBtn = document.getElementById('styleExtractBtn');
-        const saveBtn = document.getElementById('stylePresetSaveBtn');
-        const delBtn = document.getElementById('stylePresetDeleteBtn');
-        const sel = document.getElementById('stylePresetSelect');
-        const ta = document.getElementById('styleExtractTextarea');
-        const thumbWrap = document.getElementById('styleRefThumbWrap');
-        const thumbImg = document.getElementById('styleRefThumbImg');
-
-        this.refreshStylePresetSelect();
-
-        if (pickBtn && fileInp) {
-            pickBtn.addEventListener('click', () => fileInp.click());
-        }
-        if (fileInp) {
-            fileInp.addEventListener('change', (e) => {
-                const file = e.target.files && e.target.files[0];
-                this._styleRefRawDataUrl = null;
-                if (thumbWrap) thumbWrap.classList.remove('is-visible');
-                if (!file || !file.type.startsWith('image/')) return;
-                const reader = new FileReader();
-                reader.onload = () => {
-                    this._styleRefRawDataUrl = reader.result;
-                    if (thumbImg) thumbImg.src = this._styleRefRawDataUrl;
-                    if (thumbWrap) thumbWrap.classList.add('is-visible');
-                };
-                reader.readAsDataURL(file);
-                fileInp.value = '';
-            });
-        }
-
-        if (extractBtn) {
-            extractBtn.addEventListener('click', () => this.extractStyleFromReference());
-        }
-
-        if (sel && ta) {
-            sel.addEventListener('change', () => {
-                const id = sel.value;
-                if (!id) {
-                    this.updateStylePresetStripStatus();
-                    return;
-                }
-                const p = this.getStylePresetsList().find((x) => String(x.id) === String(id));
-                if (p && p.styleText) ta.value = p.styleText;
-                this.updateStylePresetStripStatus();
-            });
-            ta.addEventListener('input', () => this.updateStylePresetStripStatus());
-        }
-
-        if (saveBtn) {
-            saveBtn.addEventListener('click', async () => {
-                const nameInp = document.getElementById('stylePresetNameInput');
-                const saveRef = document.getElementById('stylePresetSaveRefCheck');
-                const styleText = (ta && ta.value.trim()) || '';
-                if (!styleText) {
-                    themedWarn('请先填写或提取「当前风格片段」');
-                    return;
-                }
-                let referenceThumb = null;
-                if (saveRef && saveRef.checked && this._styleRefRawDataUrl) {
-                    try {
-                        referenceThumb = await compressDataUrlImage(this._styleRefRawDataUrl, 512, 'image/webp', 0.72);
-                    } catch (err) {
-                        console.debug('[image-generator] 参考图压缩失败', err);
-                        themedWarn('参考图压缩失败，将使用原图');
-                    }
-                }
-                const name = (nameInp && nameInp.value.trim()) || '我的风格 ' + new Date().toLocaleString('zh-CN');
-                const list = this.getStylePresetsList();
-                list.push({
-                    id: Date.now().toString(),
-                    name,
-                    styleText,
-                    referenceThumb,
-                    createdAt: new Date().toISOString(),
-                });
-                this.saveStylePresetsList(list);
-                this.refreshStylePresetSelect(list[list.length - 1].id);
-                if (nameInp) nameInp.value = '';
-                themedSuccess('预设已保存');
-            });
-        }
-
-        if (delBtn && sel) {
-            delBtn.addEventListener('click', async () => {
-                const id = sel.value;
-                if (!id) {
-                    themedWarn('请先在列表中选择要删除的预设');
-                    return;
-                }
-                const ok = await window.TechUI.confirm('确定删除该风格预设？', '删除预设', '删除', '取消');
-                if (!ok) return;
-                const next = this.getStylePresetsList().filter((x) => String(x.id) !== String(id));
-                this.saveStylePresetsList(next);
-                this.refreshStylePresetSelect('');
-                if (ta) ta.value = '';
-            });
-        }
+        return window.ImageStylePresets.bindStylePresetEvents();
     }
 
     async handleSubmit(e) {
@@ -574,64 +429,7 @@ class ImageGenerator {
     }
 
     async extractStyleFromReference() {
-        const ta = document.getElementById('styleExtractTextarea');
-        const extractBtn = document.getElementById('styleExtractBtn');
-        if (extractBtn && extractBtn.disabled) {
-            return;
-        }
-        const styleVlModelSelect = document.getElementById('styleVlModelSelect');
-        const vlModel =
-            (styleVlModelSelect && styleVlModelSelect.value) ||
-            'qwen-vl-plus';
-        if (!this._styleRefRawDataUrl) {
-            themedWarn('请先选择参考图');
-            return;
-        }
-        let payloadImage = this._styleRefRawDataUrl;
-        try {
-            payloadImage = await compressDataUrlImage(this._styleRefRawDataUrl, 1280, 'image/webp', 0.82);
-        } catch (_e) {
-            console.debug('[image-generator] 压缩参考图失败，使用原图', e);
-        }
-        try {
-            if (extractBtn) {
-                extractBtn.disabled = true;
-                extractBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提取中…';
-            }
-            const response = await fetch(API_BASE + '/api/alibaba-vision-proxy', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': await getCsrfToken() },
-                credentials: 'include',
-                body: JSON.stringify({
-                    image_base64: payloadImage,
-                    model: vlModel,
-                    max_tokens: 512,
-                }),
-            });
-            const errText = await response.text();
-            let data;
-            try {
-                data = JSON.parse(errText);
-            } catch (_) {
-                data = null;
-            }
-            if (!response.ok) {
-                throw new Error((data && (data.message || data.error)) || errText || `HTTP ${response.status}`);
-            }
-            const text = (data && data.output && data.output.text && String(data.output.text).trim()) || '';
-            if (!text) throw new Error('返回为空');
-            if (ta) ta.value = text;
-            this.updateStylePresetStripStatus();
-            themedSuccess('画风提取完成，可编辑后保存为预设');
-        } catch (err) {
-            console.error(err);
-            themedError('提取失败：' + (err && err.message ? err.message : err));
-        } finally {
-            if (extractBtn) {
-                extractBtn.innerHTML = '<i class="fas fa-magic"></i> 提取画风';
-                this.checkVisionExtractButton().catch(() => {});
-            }
-        }
+        return window.ImageStylePresets.extractStyleFromReference();
     }
 
     async handleGeneratePrompt() {
@@ -1106,18 +904,7 @@ class ImageGenerator {
     }
 
     saveImage(image) {
-        if (!image || !this.isRenderableImageUrl(image.imageUrl)) {
-            console.debug('[image-generator] 跳过保存无效图片:', image);
-            return false;
-        }
-        this.generatedImages.unshift(image);
-        const maxImages = (window.ArtifexConstants && window.ArtifexConstants.GENERATED_IMAGES_MAX) || 15;
-        if (this.generatedImages.length > maxImages) {
-            this.generatedImages = this.generatedImages.slice(0, maxImages);
-        }
-        localStorage.setItem(aiStorageKey('generatedImages'), JSON.stringify(this.generatedImages));
-        this.renderImages();
-        return true;
+        return window.ImageStorage.saveImage(image);
     }
 
     renderImages() {
@@ -1166,305 +953,35 @@ class ImageGenerator {
     }
 
     getCurrentProjectContext() {
-        try {
-            const raw = localStorage.getItem(aiStorageKey('currentProjectContext'));
-            return raw ? JSON.parse(raw) : null;
-        } catch (_e) {
-            return null;
-        }
+        return window.ImageStorage.getCurrentProjectContext();
     }
 
     getGeneratorUiStateKey() {
-        return aiStorageKey('generator_ui_state_v1');
+        return window.ImageStorage.getGeneratorUiStateKey();
     }
 
     persistGeneratorUiState() {
-        try {
-            const state = {
-                imageType: document.getElementById('imageType')?.value || '',
-                style: document.getElementById('imageStyle')?.value || '',
-                colorScheme: document.getElementById('imageColorScheme')?.value || '',
-                imageSize: document.getElementById('imageSize')?.value || '',
-                apiProvider: document.getElementById('apiProvider')?.value || '',
-                description: document.getElementById('imageDescription')?.value || '',
-                imageMode: document.querySelector('input[name="imageMode"]:checked')?.value || 'text2img',
-                promptMode: document.querySelector('input[name="promptMode"]:checked')?.value || 'custom',
-                wanxModel: document.getElementById('wanxModelSelect')?.value || '',
-                qwenModel: document.getElementById('qwenModelSelect')?.value || '',
-                strength: document.getElementById('img2imgStrength')?.value || '',
-                proPrompt: document.getElementById('proPromptTextarea')?.value || '',
-                sketchBase64: this.sketchBase64 || '',
-                stStrength: document.getElementById('stStrength')?.value || '',
-                styleTransferContentBase64: this.styleTransferContentBase64 || '',
-                styleTransferRefBase64: this.styleTransferRefBase64 || '',
-                upscaleBase64: this.upscaleBase64 || '',
-                removeBgBase64: this.removeBgBase64 || '',
-                upscaleFactor: document.getElementById('upscaleFactor')?.value || '2',
-            };
-            sessionStorage.setItem(this.getGeneratorUiStateKey(), JSON.stringify(state));
-        } catch (_e) {
-            console.warn('保存 AI 生成器状态失败:', e);
-        }
+        return window.ImageStorage.persistGeneratorUiState();
     }
 
     restoreGeneratorUiState() {
-        let state = null;
-        try {
-            const raw = sessionStorage.getItem(this.getGeneratorUiStateKey());
-            state = raw ? JSON.parse(raw) : null;
-        } catch (_e) {
-            state = null;
-        }
-        if (!state) return;
-
-        const setValue = (id, value) => {
-            const el = document.getElementById(id);
-            if (el && value !== undefined && value !== null && value !== '') {
-                el.value = value;
-            }
-        };
-
-        setValue('imageType', state.imageType);
-        setValue('imageStyle', state.style);
-        setValue('imageColorScheme', state.colorScheme);
-        setValue('imageSize', state.imageSize);
-        setValue('apiProvider', state.apiProvider);
-        setValue('imageDescription', state.description);
-        setValue('wanxModelSelect', state.wanxModel);
-        setValue('qwenModelSelect', state.qwenModel);
-        setValue('img2imgStrength', state.strength);
-        setValue('proPromptTextarea', state.proPrompt);
-        setValue('stStrength', state.stStrength);
-
-        const imageModeEl = document.querySelector(`input[name="imageMode"][value="${state.imageMode || 'text2img'}"]`);
-        if (imageModeEl) imageModeEl.checked = true;
-        const promptModeEl = document.querySelector(
-            `input[name="promptMode"][value="${state.promptMode || 'custom'}"]`
-        );
-        if (promptModeEl) promptModeEl.checked = true;
-        const apiProviderEl = document.getElementById('apiProvider');
-        if (apiProviderEl && state.apiProvider) {
-            apiProviderEl.value = state.apiProvider;
-            apiProviderEl.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        if (promptModeEl) {
-            promptModeEl.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        if (imageModeEl) {
-            imageModeEl.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-
-        const img2imgZone = document.getElementById('img2imgZone');
-        if (img2imgZone) {
-            img2imgZone.style.display = (state.imageMode || 'text2img') === 'img2img' ? 'block' : 'none';
-        }
-        const stZone = document.getElementById('styleTransferZone');
-        if (stZone) {
-            stZone.style.display = (state.imageMode || 'text2img') === 'styleTransfer' ? 'block' : 'none';
-        }
-        const upZone = document.getElementById('upscaleZone');
-        if (upZone) {
-            upZone.style.display = (state.imageMode || 'text2img') === 'upscale' ? 'block' : 'none';
-        }
-        const rbZone = document.getElementById('removeBgZone');
-        if (rbZone) {
-            rbZone.style.display = (state.imageMode || 'text2img') === 'removeBg' ? 'block' : 'none';
-        }
-        setValue('upscaleFactor', state.upscaleFactor);
-
-        // 风格迁移图片预览恢复
-        if (state.styleTransferContentBase64) {
-            this.styleTransferContentBase64 = state.styleTransferContentBase64;
-            const preview = document.getElementById('stContentPreview');
-            if (preview) {
-                preview.innerHTML = '';
-                const _img = document.createElement('img');
-                _img.src = this.styleTransferContentBase64;
-                _img.alt = '内容图预览';
-                preview.appendChild(_img);
-            }
-        }
-        if (state.styleTransferRefBase64) {
-            this.styleTransferRefBase64 = state.styleTransferRefBase64;
-            const preview = document.getElementById('stRefPreview');
-            if (preview) {
-                preview.innerHTML = '';
-                const _img = document.createElement('img');
-                _img.src = this.styleTransferRefBase64;
-                _img.alt = '风格参考图预览';
-                preview.appendChild(_img);
-            }
-        }
-        if (state.upscaleBase64) {
-            this.upscaleBase64 = state.upscaleBase64;
-            const preview = document.getElementById('upscalePreview');
-            if (preview) {
-                preview.innerHTML = '';
-                const _img = document.createElement('img');
-                _img.src = this.upscaleBase64;
-                _img.alt = '放大源图预览';
-                preview.appendChild(_img);
-            }
-        }
-        if (state.removeBgBase64) {
-            this.removeBgBase64 = state.removeBgBase64;
-            const preview = document.getElementById('removeBgPreview');
-            if (preview) {
-                preview.innerHTML = '';
-                const _img = document.createElement('img');
-                _img.src = this.removeBgBase64;
-                _img.alt = '背景去除源图预览';
-                preview.appendChild(_img);
-            }
-        }
-
-        const qwenModelEl = document.getElementById('qwenModelSelect');
-        if (qwenModelEl) {
-            const wrapper = qwenModelEl.nextElementSibling;
-            if (wrapper && wrapper.classList.contains('tech-select')) {
-                wrapper.style.display = (state.promptMode || 'custom') === 'professional' ? '' : 'none';
-            }
-        }
-
-        const wanxModelEl = document.getElementById('wanxModelSelect');
-        if (wanxModelEl) {
-            const wrapper = wanxModelEl.nextElementSibling;
-            if (wrapper && wrapper.classList.contains('tech-select')) {
-                wrapper.style.display = (state.apiProvider || '') === 'alibaba' ? '' : 'none';
-            }
-        }
-
-        if (state.sketchBase64) {
-            this.sketchBase64 = state.sketchBase64;
-            const preview = document.getElementById('sketchPreview');
-            if (preview) {
-                preview.innerHTML = ''; const _img = document.createElement('img'); _img.src = this.sketchBase64; _img.alt = '线稿预览'; preview.appendChild(_img);
-            }
-        }
+        return window.ImageStorage.restoreGeneratorUiState();
     }
 
     buildAssetLibraryItemFromImage(image) {
-        return {
-            id: 'ai_img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
-            name: image.name || 'AI图片',
-            fileName: `${(image.name || 'ai-image').replace(/[\\/:*?"<>|]/g, '_')}.png`,
-            category: 'AI生成',
-            type: 'image/png',
-            dataURL: image.imageUrl,
-            favorite: false,
-            createdAt: Date.now(),
-            source: 'ai-generate',
-        };
+        return window.ImageStorage.buildAssetLibraryItemFromImage(image);
     }
 
     async saveToAssetLibrary(imageId) {
-        const image = this.generatedImages.find((i) => i.id === imageId);
-        if (!image) {
-            themedWarn('未找到要保存的图片');
-            return;
-        }
-        try {
-            const fileName = `${(image.name || 'ai-image').replace(/[\\/:*?"<>|]/g, '_')}.png`;
-            const body = {
-                name: image.name || 'AI图片',
-                type: 'image/png',
-                content: image.imageUrl || '',
-                desc: fileName,
-                source: 'ai-generate',
-                tags: JSON.stringify({ category: 'AI生成', fileName: fileName }),
-            };
-            const resp = await fetchWithCsrf('/api/asset-library', {
-                method: 'POST',
-                body: JSON.stringify(body),
-            });
-            if (!resp.ok) {
-                const err = await resp.json().catch(() => ({}));
-                throw new Error(err.error || '保存失败');
-            }
-            themedSuccess('图片已保存到素材库');
-        } catch (_e) {
-            console.error('保存到素材库失败', e);
-            // Fallback to localStorage
-            try {
-                let state = { categories: [], assets: [] };
-                const raw = localStorage.getItem(aiStorageKey('assetLibrary_v1'));
-                state = raw ? JSON.parse(raw) : state;
-                state.categories = Array.isArray(state.categories) ? state.categories : [];
-                state.assets = Array.isArray(state.assets) ? state.assets : [];
-                if (!state.categories.includes('AI生成')) {
-                    state.categories.unshift('AI生成');
-                }
-                state.assets.unshift(this.buildAssetLibraryItemFromImage(image));
-                localStorage.setItem(aiStorageKey('assetLibrary_v1'), JSON.stringify(state));
-                themedSuccess('图片已保存到素材库（本地备份）');
-            } catch (_fallbackErr) {
-                themedWarn('保存失败：' + (e.message || '请重试'));
-            }
-        }
+        return window.ImageStorage.saveToAssetLibrary(imageId);
     }
 
-    saveToCurrentProject(imageOrId, options = {}) {
-        const image = typeof imageOrId === 'string' ? this.generatedImages.find((i) => i.id === imageOrId) : imageOrId;
-        if (!image) {
-            themedWarn('未找到要加入项目的图片');
-            return;
-        }
-        const context = this.getCurrentProjectContext();
-        if (!context || !context.id) {
-            themedWarn('未检测到当前项目，请从项目详情页进入 AI 生成');
-            return;
-        }
-        let projects = [];
-        try {
-            projects = JSON.parse(localStorage.getItem(aiStorageKey('gameui-projects'))) || [];
-        } catch (_e) {
-            projects = [];
-        }
-        const idx = projects.findIndex((p) => p.id === context.id);
-        if (idx === -1) {
-            themedWarn('当前项目不存在，可能已被删除');
-            return;
-        }
-        const project = projects[idx];
-        if (!Array.isArray(project.assets)) {
-            project.assets = [];
-        }
-        const assetPayload = {
-            id: Date.now().toString(),
-            name: image.name || 'AI生成图片',
-            type: 'image',
-            content: image.imageUrl,
-            desc: image.description || 'AI生成图片',
-            createTime: new Date().toISOString(),
-            isAIGenerated: true,
-            sourceAssetId: image.id,
-        };
-        const existingIndex = project.assets.findIndex((asset) => asset && asset.sourceAssetId === image.id);
-        if (existingIndex >= 0) {
-            project.assets[existingIndex] = assetPayload;
-        } else {
-            project.assets.push(assetPayload);
-        }
-        project.version = (project.version || 1) + 0.1;
-        if (!Array.isArray(project.versionHistory)) {
-            project.versionHistory = [];
-        }
-        project.versionHistory.push({
-            time: new Date().toISOString(),
-            desc: `从AI生成加入图片素材：${image.name || 'AI图片'}`,
-        });
-        projects[idx] = project;
-        localStorage.setItem(aiStorageKey('gameui-projects'), JSON.stringify(projects));
-        if (!options.silent) {
-            themedSuccess('图片已加入当前项目');
-        }
-        return true;
+    saveToCurrentProject(imageOrId, options) {
+        return window.ImageStorage.saveToCurrentProject(imageOrId, options);
     }
 
     autoSaveGeneratedImageToCurrentProject(image) {
-        const context = this.getCurrentProjectContext();
-        if (!context || !context.id) return false;
-        return this.saveToCurrentProject(image, { silent: true });
+        return window.ImageStorage.autoSaveGeneratedImageToCurrentProject(image);
     }
 
     downloadImage(imageId) {
@@ -1524,13 +1041,7 @@ class ImageGenerator {
     }
 
     deleteImage(imageId) {
-        (async () => {
-            const ok = await window.TechUI.confirm('确定要删除这张图片吗？', '删除图片', '删除', '取消');
-            if (!ok) return;
-            this.generatedImages = this.generatedImages.filter((i) => i.id !== imageId);
-            localStorage.setItem(aiStorageKey('generatedImages'), JSON.stringify(this.generatedImages));
-            this.renderImages();
-        })();
+        return window.ImageStorage.deleteImage(imageId);
     }
 
     handleError(error) {

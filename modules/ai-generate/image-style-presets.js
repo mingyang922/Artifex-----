@@ -6,7 +6,7 @@
 (function () {
     'use strict';
 
-    const _gen = null;
+    let _gen = null;
 
     function init(gen) {
         _gen = gen;
@@ -17,7 +17,11 @@
     }
 
     function saveStylePresetsList(list) {
-        writeScopedJson(STYLE_PRESETS_KEY, list);
+        if (window.ImageStorage && window.ImageStorage.writeScopedJson) {
+            window.ImageStorage.writeScopedJson(STYLE_PRESETS_KEY, list);
+        } else {
+            try { localStorage.setItem(aiStorageKey(STYLE_PRESETS_KEY), JSON.stringify(list)); } catch (_) {}
+        }
         try {
             window.dispatchEvent(new CustomEvent('stylePresetsChanged', { bubbles: true }));
         } catch (_) {}
@@ -129,7 +133,7 @@
                     themedWarn('请先填写或提取「当前风格片段」');
                     return;
                 }
-                const referenceThumb = null;
+                let referenceThumb = null;
                 if (saveRef && saveRef.checked && _gen._styleRefRawDataUrl) {
                     try {
                         referenceThumb = await compressDataUrlImage(_gen._styleRefRawDataUrl, 512, 'image/webp', 0.72);
@@ -185,7 +189,7 @@
             themedWarn('请先选择参考图');
             return;
         }
-        const payloadImage = _gen._styleRefRawDataUrl;
+        let payloadImage = _gen._styleRefRawDataUrl;
         try {
             payloadImage = await compressDataUrlImage(_gen._styleRefRawDataUrl, 1280, 'image/webp', 0.82);
         } catch (_e) {

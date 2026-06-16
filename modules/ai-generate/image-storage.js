@@ -6,7 +6,7 @@
 (function () {
     'use strict';
 
-    const _gen = null;
+    let _gen = null;
 
     function init(gen) {
         _gen = gen;
@@ -56,7 +56,7 @@
     }
 
     function restoreGeneratorUiState() {
-        const state = null;
+        let state = null;
         try {
             const raw = sessionStorage.getItem(getGeneratorUiStateKey());
             state = raw ? JSON.parse(raw) : null;
@@ -268,7 +268,7 @@
             console.error('保存到素材库失败', e);
             // Fallback to localStorage
             try {
-                const state = { categories: [], assets: [] };
+                let state = { categories: [], assets: [] };
                 const raw = localStorage.getItem(aiStorageKey('assetLibrary_v1'));
                 state = raw ? JSON.parse(raw) : state;
                 state.categories = Array.isArray(state.categories) ? state.categories : [];
@@ -297,7 +297,7 @@
             themedWarn('未检测到当前项目，请从项目详情页进入 AI 生成');
             return;
         }
-        const projects = [];
+        let projects = [];
         try {
             projects = JSON.parse(localStorage.getItem(aiStorageKey('gameui-projects'))) || [];
         } catch (_e) {

@@ -4,10 +4,19 @@
  * 版本: 1.3.3 */
 'use strict';
             (function () {
+                function loadScript(src) {
+                    return new Promise(function (resolve) {
+                        var s = document.createElement('script');
+                        s.src = src;
+                        s.onload = resolve;
+                        s.onerror = resolve;
+                        document.body.appendChild(s);
+                    });
+                }
                 function loadMain() {
-                    const s = document.createElement('script');
-                    s.src = './main.js';
-                    document.body.appendChild(s);
+                    loadScript('./pm-ui.js')
+                        .then(function () { return loadScript('./pm-templates.js'); })
+                        .then(function () { return loadScript('./main.js'); });
                 }
                 function boot() {
                     GameUiUserScope.ensure().finally(function () {
