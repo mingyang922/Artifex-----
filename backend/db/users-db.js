@@ -18,7 +18,7 @@ let _checkpointTimer = null;
 
 // 预编译语句缓存（init() 中初始化）
 let stmtGetUserById, stmtGetUserByEmail, stmtGetUserByUsername, stmtLogApiCall;
-let stmtCheckQuotaDaily, stmtCheckQuotaMonthly;
+let stmtCheckQuota;
 
 /**
  * 把 WAL 里的已提交页合并进主库文件，便于用 DB Browser 等外部工具立刻看到最新行。
@@ -214,10 +214,7 @@ function init() {
     stmtLogApiCall = db.prepare(
         'INSERT INTO usage_logs (user_id, provider, operation, status, duration_ms, created_at) VALUES (?, ?, ?, ?, ?, ?)'
     );
-    stmtCheckQuotaDaily = db.prepare(
-        'SELECT COUNT(*) AS c FROM usage_logs WHERE user_id = ? AND provider = ? AND created_at >= ?'
-    );
-    stmtCheckQuotaMonthly = db.prepare(
+    stmtCheckQuota = db.prepare(
         'SELECT COUNT(*) AS c FROM usage_logs WHERE user_id = ? AND provider = ? AND created_at >= ?'
     );
 
@@ -361,13 +358,15 @@ function getUserApiCredentialStatus(userId) {
 function getAllUsers() {
     const rows = db.prepare('SELECT id, username, email, role, profile_json, created_at FROM users ORDER BY created_at DESC').all();
     return rows.map((row) => {
-        let _profile = {};
+        let profile = {};
         try { profile = JSON.parse(row.profile_json || '{}'); } catch (_) { /* profile_json 损坏时降级为空对象 */ }
         return {
             id: row.id,
             username: row.username,
             email: row.email,
             role: row.role || 'user',
+            nickname: profile.nickname || '',
+            avatar: profile.avatar || '',
             created_at: row.created_at,
         };
     });
@@ -635,7 +634,7 @@ function checkQuota(userId, provider) {
 
     // 检查今日用量
     const today = new Date().toISOString().split('T')[0];
-    const todayCount = stmtCheckQuotaDaily.get(Number(userId), p, today + 'T00:00:00.000Z');
+    const todayCount = stmtCheckQuota.get(Number(userId), p, today + 'T00:00:00.000Z');
 
     if (todayCount.c >= dailyLimit) {
         return { ok: false, reason: 'daily', limit: dailyLimit, used: todayCount.c };
@@ -643,7 +642,7 @@ function checkQuota(userId, provider) {
 
     // 检查本月用量
     const monthStart = today.substring(0, 7) + '-01';
-    const monthCount = stmtCheckQuotaMonthly.get(Number(userId), p, monthStart + 'T00:00:00.000Z');
+    const monthCount = stmtCheckQuota.get(Number(userId), p, monthStart + 'T00:00:00.000Z');
 
     if (monthCount.c >= monthlyLimit) {
         return { ok: false, reason: 'monthly', limit: monthlyLimit, used: monthCount.c };
