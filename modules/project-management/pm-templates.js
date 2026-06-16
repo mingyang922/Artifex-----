@@ -35,7 +35,7 @@
     let selectedTemplate = "blank";
 
     function initCards() {
-        var cards = document.querySelectorAll("#templateCards .template-card");
+        const cards = document.querySelectorAll("#templateCards .template-card");
         cards.forEach(function (card) {
             card.addEventListener("click", function () {
                 cards.forEach(function (c) {
@@ -63,11 +63,11 @@
     }
 
     function applyTemplate(tplKey) {
-        var tpl = PROJECT_TEMPLATES[tplKey];
+        const tpl = PROJECT_TEMPLATES[tplKey];
         if (!tpl) return;
-        var nameInput = document.getElementById("project-name");
-        var descInput = document.getElementById("project-desc");
-        var typeInput = document.getElementById("project-type");
+        const nameInput = document.getElementById("project-name");
+        const descInput = document.getElementById("project-desc");
+        const typeInput = document.getElementById("project-type");
         if (nameInput && !nameInput.value.trim()) {
             nameInput.value = tpl.name;
         }
@@ -90,7 +90,7 @@
 
     function resetSelection() {
         selectedTemplate = "blank";
-        var cards = document.querySelectorAll("#templateCards .template-card");
+        const cards = document.querySelectorAll("#templateCards .template-card");
         cards.forEach(function (c) {
             c.style.background = c.dataset.tpl === "blank" ? "rgba(0,240,255,0.08)" : "rgba(255,255,255,0.03)";
             c.style.borderColor = c.dataset.tpl === "blank" ? "rgba(0,240,255,0.35)" : "rgba(255,255,255,0.08)";

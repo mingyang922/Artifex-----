@@ -5,7 +5,7 @@
 (function () {
     'use strict';
 
-    var PMSharedLib = window.PMShared || {};
+    const PMSharedLib = window.PMShared || {};
 
     // ── Custom select component ──
 
@@ -14,8 +14,8 @@
             window.__pmTechSelectGlobalBound = true;
             document.addEventListener('click', function (e) {
                 document.querySelectorAll('.pm-tech-select.is-open').forEach(function (wrap) {
-                    var portalMenu = wrap.__portalMenu;
-                    var clickedInside = wrap.contains(e.target) || (portalMenu && portalMenu.contains(e.target));
+                    const portalMenu = wrap.__portalMenu;
+                    const clickedInside = wrap.contains(e.target) || (portalMenu && portalMenu.contains(e.target));
                     if (!clickedInside) {
                         if (typeof wrap.__closePmTechSelect === 'function') {
                             wrap.__closePmTechSelect();
@@ -38,10 +38,10 @@
             });
         }
 
-        var selector =
+        const selector =
             '#edit-project-modal select, #project-assets-modal select, #sketch-to-asset-modal select, #desc-to-asset-modal select, #unify-style-modal select';
         document.querySelectorAll(selector).forEach(function (select) {
-            var oldWrap =
+            const oldWrap =
                 select.nextElementSibling && select.nextElementSibling.classList.contains('pm-tech-select')
                     ? select.nextElementSibling
                     : null;
@@ -52,9 +52,9 @@
 
             select.classList.add('pm-tech-select-native');
 
-            var wrapper = document.createElement('div');
+            const wrapper = document.createElement('div');
             wrapper.className = 'pm-tech-select';
-            var computed = window.getComputedStyle(select);
+            const computed = window.getComputedStyle(select);
             if (computed.display === 'inline-flex' || computed.display === 'flex' || computed.flexGrow !== '0') {
                 wrapper.style.flex =
                     computed.flexGrow && computed.flexGrow !== '0'
@@ -64,23 +64,23 @@
             }
             if (select.style.width) wrapper.style.width = select.style.width;
 
-            var trigger = document.createElement('button');
+            const trigger = document.createElement('button');
             trigger.type = 'button';
             trigger.className = 'pm-tech-select-trigger';
             trigger.setAttribute('aria-haspopup', 'listbox');
             trigger.setAttribute('aria-expanded', 'false');
 
-            var value = document.createElement('span');
+            const value = document.createElement('span');
             value.className = 'pm-tech-select-value';
             trigger.appendChild(value);
 
-            var menu = document.createElement('div');
+            const menu = document.createElement('div');
             menu.className = 'pm-tech-select-menu';
             menu.setAttribute('role', 'listbox');
             wrapper.__portalMenu = menu;
 
             Array.from(select.options).forEach(function (opt) {
-                var item = document.createElement('button');
+                const item = document.createElement('button');
                 item.type = 'button';
                 item.className = 'pm-tech-select-option';
                 item.textContent = opt.textContent;
@@ -94,8 +94,8 @@
             wrapper.appendChild(trigger);
             wrapper.appendChild(menu);
 
-            var syncUI = function () {
-                var current = select.options[select.selectedIndex];
+            const syncUI = function () {
+                const current = select.options[select.selectedIndex];
                 value.textContent = current ? current.textContent : '请选择';
                 value.classList.toggle('is-placeholder', !select.value || select.value === 'all');
                 menu.querySelectorAll('.pm-tech-select-option').forEach(function (item) {
@@ -103,17 +103,17 @@
                 });
             };
 
-            var positionPortalMenu = function () {
+            const positionPortalMenu = function () {
                 if (!wrapper.classList.contains('is-open')) return;
-                var rect = trigger.getBoundingClientRect();
-                var viewportW = window.innerWidth;
-                var viewportH = window.innerHeight;
-                var safeLeft = Math.max(8, Math.min(rect.left, viewportW - rect.width - 8));
-                var spaceBelow = viewportH - rect.bottom - 10;
-                var spaceAbove = rect.top - 10;
-                var openDown = spaceBelow >= 180 || spaceBelow >= spaceAbove;
-                var maxHeight = Math.max(120, Math.min(280, openDown ? spaceBelow : spaceAbove));
-                var top = openDown ? rect.bottom + 6 : rect.top - maxHeight - 6;
+                const rect = trigger.getBoundingClientRect();
+                const viewportW = window.innerWidth;
+                const viewportH = window.innerHeight;
+                const safeLeft = Math.max(8, Math.min(rect.left, viewportW - rect.width - 8));
+                const spaceBelow = viewportH - rect.bottom - 10;
+                const spaceAbove = rect.top - 10;
+                const openDown = spaceBelow >= 180 || spaceBelow >= spaceAbove;
+                const maxHeight = Math.max(120, Math.min(280, openDown ? spaceBelow : spaceAbove));
+                const top = openDown ? rect.bottom + 6 : rect.top - maxHeight - 6;
                 top = Math.max(8, Math.min(top, viewportH - maxHeight - 8));
                 menu.style.left = safeLeft + 'px';
                 menu.style.top = top + 'px';
@@ -121,11 +121,11 @@
                 menu.style.maxHeight = maxHeight + 'px';
             };
 
-            var handleViewportChange = function () {
+            const handleViewportChange = function () {
                 if (wrapper.classList.contains('is-open')) positionPortalMenu();
             };
 
-            var closeMenu = function () {
+            const closeMenu = function () {
                 wrapper.classList.remove('is-open');
                 trigger.setAttribute('aria-expanded', 'false');
                 window.removeEventListener('resize', handleViewportChange);
@@ -140,7 +140,7 @@
             wrapper.__closePmTechSelect = closeMenu;
 
             trigger.addEventListener('click', function () {
-                var willOpen = !wrapper.classList.contains('is-open');
+                const willOpen = !wrapper.classList.contains('is-open');
                 document.querySelectorAll('.pm-tech-select.is-open').forEach(function (el) {
                     if (typeof el.__closePmTechSelect === 'function') el.__closePmTechSelect();
                     else el.classList.remove('is-open');
@@ -159,9 +159,9 @@
             });
 
             menu.addEventListener('click', function (e) {
-                var item = e.target.closest('.pm-tech-select-option');
+                const item = e.target.closest('.pm-tech-select-option');
                 if (!item || item.disabled) return;
-                var nextValue = item.dataset.value || '';
+                const nextValue = item.dataset.value || '';
                 if (select.value !== nextValue) {
                     select.value = nextValue;
                     select.dispatchEvent(new Event('input', { bubbles: true }));
@@ -179,8 +179,8 @@
     // ── Project list rendering ──
 
     function renderProjectList() {
-        var projectListEl = document.getElementById('project-list');
-        var emptyStateEl = document.getElementById('project-empty-state');
+        const projectListEl = document.getElementById('project-list');
+        const emptyStateEl = document.getElementById('project-empty-state');
 
         if (projects.length === 0) {
             projectListEl.innerHTML = '';
@@ -190,17 +190,17 @@
 
         emptyStateEl.classList.add('hidden');
 
-        var fragment = document.createDocumentFragment();
+        const fragment = document.createDocumentFragment();
 
         projects.forEach(function (project) {
-            var card = document.createElement('div');
+            const card = document.createElement('div');
             card.className = 'project-card';
             card.dataset.id = project.id;
 
-            var isInDashboard = window.location.pathname.includes('dashboard.html');
-            var detailPagePath = isInDashboard ? 'modules/project-management/project-detail.html' : 'project-detail.html';
+            const isInDashboard = window.location.pathname.includes('dashboard.html');
+            const detailPagePath = isInDashboard ? 'modules/project-management/project-detail.html' : 'project-detail.html';
 
-            var esc = PMSharedLib.escapeHtml;
+            const esc = PMSharedLib.escapeHtml;
             card.innerHTML =
                 '<h4>' + esc(project.name) + '</h4>' +
                 '<span class="project-type">' + esc(PMSharedLib.getProjectTypeName(project.type)) + '</span>' +
@@ -239,23 +239,23 @@
     // ── Event binding ──
 
     function bindEventListeners() {
-        var openCreateProjectForm = function () {
-            var form = document.getElementById('create-project-form');
+        const openCreateProjectForm = function () {
+            const form = document.getElementById('create-project-form');
             if (form) {
                 form.classList.remove('hidden');
-                var nameInput = document.getElementById('project-name');
+                const nameInput = document.getElementById('project-name');
                 if (nameInput) {
                     nameInput.focus();
                 }
             }
         };
 
-        var createBtn = document.getElementById('create-project-btn');
+        const createBtn = document.getElementById('create-project-btn');
         if (createBtn) {
             createBtn.addEventListener('click', openCreateProjectForm);
         }
 
-        var emptyStateEl = document.getElementById('project-empty-state');
+        const emptyStateEl = document.getElementById('project-empty-state');
         if (emptyStateEl) {
             emptyStateEl.style.cursor = 'pointer';
             emptyStateEl.addEventListener('click', openCreateProjectForm);
@@ -267,7 +267,7 @@
             });
         }
 
-        var cancelBtn = document.getElementById('cancel-create-btn');
+        const cancelBtn = document.getElementById('cancel-create-btn');
         if (cancelBtn) {
             cancelBtn.addEventListener('click', function () {
                 document.getElementById('create-project-form').classList.add('hidden');
@@ -275,32 +275,32 @@
             });
         }
 
-        var submitBtn = document.getElementById('submit-project-btn');
+        const submitBtn = document.getElementById('submit-project-btn');
         if (submitBtn) {
             submitBtn.addEventListener('click', createProject);
         }
 
-        var sketchToAssetBtn = document.getElementById('sketch-to-asset-btn');
+        const sketchToAssetBtn = document.getElementById('sketch-to-asset-btn');
         if (sketchToAssetBtn) {
             sketchToAssetBtn.addEventListener('click', function () {
                 document.getElementById('sketch-to-asset-modal').classList.remove('hidden');
             });
         }
 
-        var descToAssetBtn = document.getElementById('desc-to-asset-btn');
+        const descToAssetBtn = document.getElementById('desc-to-asset-btn');
         if (descToAssetBtn) {
             descToAssetBtn.addEventListener('click', function () {
                 document.getElementById('desc-to-asset-modal').classList.remove('hidden');
             });
         }
 
-        var confirmSketchBtn = document.getElementById('confirm-sketch-btn');
+        const confirmSketchBtn = document.getElementById('confirm-sketch-btn');
         if (confirmSketchBtn) {
             confirmSketchBtn.addEventListener('click', async function () {
-                var sketchUrlInput = document.getElementById('sketch-url');
-                var sketchStyleInput = document.getElementById('sketch-style');
-                var sketchOutputTypeInput = document.getElementById('sketch-output-type');
-                var sketchUrl = (sketchUrlInput && sketchUrlInput.value ? sketchUrlInput.value : '').trim();
+                const sketchUrlInput = document.getElementById('sketch-url');
+                const sketchStyleInput = document.getElementById('sketch-style');
+                const sketchOutputTypeInput = document.getElementById('sketch-output-type');
+                const sketchUrl = (sketchUrlInput && sketchUrlInput.value ? sketchUrlInput.value : '').trim();
                 if (!sketchUrl) {
                     await PMSharedLib.showTechPrompt({
                         title: '输入有误',
@@ -309,20 +309,20 @@
                     });
                     return;
                 }
-                var style = sketchStyleInput ? sketchStyleInput.value : '';
-                var outputType = sketchOutputTypeInput ? sketchOutputTypeInput.value : '';
-                var aiPagePath = getAIGeneratePath();
+                const style = sketchStyleInput ? sketchStyleInput.value : '';
+                const outputType = sketchOutputTypeInput ? sketchOutputTypeInput.value : '';
+                const aiPagePath = getAIGeneratePath();
                 window.location.href = aiPagePath + '?from=project-management&mode=sketch&sourceUrl=' + encodeURIComponent(sketchUrl) + '&style=' + encodeURIComponent(style) + '&outputType=' + encodeURIComponent(outputType);
             });
         }
 
-        var confirmDescBtn = document.getElementById('confirm-desc-btn');
+        const confirmDescBtn = document.getElementById('confirm-desc-btn');
         if (confirmDescBtn) {
             confirmDescBtn.addEventListener('click', async function () {
-                var descriptionInput = document.getElementById('asset-description');
-                var descStyleInput = document.getElementById('desc-style');
-                var descOutputTypeInput = document.getElementById('desc-output-type');
-                var description = (descriptionInput && descriptionInput.value ? descriptionInput.value : '').trim();
+                const descriptionInput = document.getElementById('asset-description');
+                const descStyleInput = document.getElementById('desc-style');
+                const descOutputTypeInput = document.getElementById('desc-output-type');
+                const description = (descriptionInput && descriptionInput.value ? descriptionInput.value : '').trim();
                 if (!description) {
                     await PMSharedLib.showTechPrompt({
                         title: '输入有误',
@@ -331,9 +331,9 @@
                     });
                     return;
                 }
-                var style = descStyleInput ? descStyleInput.value : '';
-                var outputType = descOutputTypeInput ? descOutputTypeInput.value : '';
-                var aiPagePath = getAIGeneratePath();
+                const style = descStyleInput ? descStyleInput.value : '';
+                const outputType = descOutputTypeInput ? descOutputTypeInput.value : '';
+                const aiPagePath = getAIGeneratePath();
                 window.location.href = aiPagePath + '?from=project-management&mode=description&prompt=' + encodeURIComponent(description) + '&style=' + encodeURIComponent(style) + '&outputType=' + encodeURIComponent(outputType);
             });
         }
@@ -346,33 +346,33 @@
             });
         });
 
-        var saveEditBtn = document.getElementById('save-edit-btn');
+        const saveEditBtn = document.getElementById('save-edit-btn');
         if (saveEditBtn) {
             saveEditBtn.addEventListener('click', saveEditProject);
         }
 
-        var copyLinkBtn = document.getElementById('copy-link-btn');
+        const copyLinkBtn = document.getElementById('copy-link-btn');
         if (copyLinkBtn) {
             copyLinkBtn.addEventListener('click', function () {
-                var linkInput = document.getElementById('share-link');
+                const linkInput = document.getElementById('share-link');
                 linkInput.select();
                 document.execCommand('copy');
                 PMSharedLib.uiToast('分享链接已复制！', 'success');
             });
         }
 
-        var addAssetBtn = document.getElementById('add-asset-btn');
+        const addAssetBtn = document.getElementById('add-asset-btn');
         if (addAssetBtn) {
             addAssetBtn.addEventListener('click', addProjectAsset);
         }
 
-        var assetFileInput = document.getElementById('asset-file');
-        var assetFileName = document.getElementById('asset-file-name');
+        const assetFileInput = document.getElementById('asset-file');
+        const assetFileName = document.getElementById('asset-file-name');
         if (assetFileInput && assetFileName) {
             assetFileInput.addEventListener('change', function () {
-                var file = assetFileInput.files && assetFileInput.files[0];
+                const file = assetFileInput.files && assetFileInput.files[0];
                 assetFileName.textContent = file ? file.name : '未选择本地文件';
-                var assetNameInput = document.getElementById('asset-name');
+                const assetNameInput = document.getElementById('asset-name');
                 if (file && assetNameInput && !assetNameInput.value.trim()) {
                     assetNameInput.value = file.name.replace(/\.[^/.]+$/, '');
                 }
@@ -386,7 +386,7 @@
         document.querySelectorAll('.edit-project').forEach(function (btn) {
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                var projectId = e.target.closest('.project-card').dataset.id;
+                const projectId = e.target.closest('.project-card').dataset.id;
                 setActiveProjectCard(projectId);
                 openEditModal(projectId);
             });
@@ -395,9 +395,9 @@
         document.querySelectorAll('.delete-project').forEach(function (btn) {
             btn.addEventListener('click', async function (e) {
                 e.stopPropagation();
-                var projectId = e.target.closest('.project-card').dataset.id;
+                const projectId = e.target.closest('.project-card').dataset.id;
                 setActiveProjectCard(projectId);
-                var ok = await PMSharedLib.showTechPrompt({
+                const ok = await PMSharedLib.showTechPrompt({
                     title: '删除项目',
                     message: '确定删除该项目？此操作不可恢复！',
                     confirmText: '删除',
@@ -413,7 +413,7 @@
         document.querySelectorAll('.version-history').forEach(function (btn) {
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                var projectId = e.target.closest('.project-card').dataset.id;
+                const projectId = e.target.closest('.project-card').dataset.id;
                 setActiveProjectCard(projectId);
                 openVersionHistoryModal(projectId);
             });
@@ -422,7 +422,7 @@
         document.querySelectorAll('.share-project').forEach(function (btn) {
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                var projectId = e.target.closest('.project-card').dataset.id;
+                const projectId = e.target.closest('.project-card').dataset.id;
                 setActiveProjectCard(projectId);
                 openShareModal(projectId);
             });
@@ -431,7 +431,7 @@
         document.querySelectorAll('.manage-assets').forEach(function (btn) {
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                var projectId = e.target.closest('.project-card').dataset.id;
+                const projectId = e.target.closest('.project-card').dataset.id;
                 setActiveProjectCard(projectId);
                 openAssetsModal(projectId);
             });
@@ -443,10 +443,10 @@
     function bindAssetEvents() {
         document.querySelectorAll('.delete-asset').forEach(function (btn) {
             btn.addEventListener('click', async function (e) {
-                var index = parseInt(e.target.closest('.delete-asset').dataset.index);
-                var projectId = e.target.closest('.delete-asset').dataset.projectId;
+                const index = parseInt(e.target.closest('.delete-asset').dataset.index);
+                const projectId = e.target.closest('.delete-asset').dataset.projectId;
 
-                var ok = await PMSharedLib.showTechPrompt({
+                const ok = await PMSharedLib.showTechPrompt({
                     title: '删除素材',
                     message: '确定删除此素材？',
                     confirmText: '删除',
@@ -455,7 +455,7 @@
                 });
                 if (!ok) return;
 
-                var project = projects.find(function (p) { return p.id === projectId; });
+                const project = projects.find(function (p) { return p.id === projectId; });
                 if (project && project.assets && project.assets[index]) {
                     project.assets.splice(index, 1);
                     saveProjectsToStorage();
@@ -468,7 +468,7 @@
     // ── Modal management ──
 
     function openEditModal(projectId) {
-        var project = projects.find(function (p) { return p.id === projectId; });
+        const project = projects.find(function (p) { return p.id === projectId; });
         if (!project) return;
 
         currentProjectId = projectId;
@@ -483,22 +483,22 @@
     }
 
     function openVersionHistoryModal(projectId) {
-        var project = projects.find(function (p) { return p.id === projectId; });
+        const project = projects.find(function (p) { return p.id === projectId; });
         if (!project) return;
 
         document.getElementById('history-project-id').value = projectId;
-        var versionListEl = document.getElementById('version-list');
+        const versionListEl = document.getElementById('version-list');
 
         if (!project.versionHistory || project.versionHistory.length === 0) {
             versionListEl.innerHTML = '<p class="no-versions">暂无版本历史记录</p>';
         } else {
-            var fragment = document.createDocumentFragment();
-            var sortedHistory = project.versionHistory.slice().sort(function (a, b) {
+            const fragment = document.createDocumentFragment();
+            const sortedHistory = project.versionHistory.slice().sort(function (a, b) {
                 return new Date(b.time) - new Date(a.time);
             });
 
             sortedHistory.forEach(function (version, index) {
-                var versionItem = document.createElement('div');
+                const versionItem = document.createElement('div');
                 versionItem.className = 'version-item';
                 versionItem.innerHTML =
                     '<div class="version-header">' +
@@ -518,15 +518,15 @@
     }
 
     function openShareModal(projectId) {
-        var project = projects.find(function (p) { return p.id === projectId; });
+        const project = projects.find(function (p) { return p.id === projectId; });
         if (!project) return;
 
         document.getElementById('share-project-id').value = projectId;
 
-        var isInDashboard = window.location.pathname.includes('dashboard.html');
-        var detailPagePath = isInDashboard ? 'modules/project-management/project-detail.html' : 'project-detail.html';
+        const isInDashboard = window.location.pathname.includes('dashboard.html');
+        const detailPagePath = isInDashboard ? 'modules/project-management/project-detail.html' : 'project-detail.html';
 
-        var shareLink = window.location.origin + window.location.pathname.replace(/[^/]+$/, detailPagePath) + '?id=' + projectId;
+        const shareLink = window.location.origin + window.location.pathname.replace(/[^/]+$/, detailPagePath) + '?id=' + projectId;
         document.getElementById('share-link').value = shareLink;
 
         initModalTechSelects();
@@ -534,20 +534,20 @@
     }
 
     function openAssetsModal(projectId) {
-        var project = projects.find(function (p) { return p.id === projectId; });
+        const project = projects.find(function (p) { return p.id === projectId; });
         if (!project) return;
 
-        var assetsListEl = document.getElementById('assets-list');
+        const assetsListEl = document.getElementById('assets-list');
 
         if (!project.assets || project.assets.length === 0) {
             assetsListEl.innerHTML =
                 '<div class="empty-state"><i class="fas fa-image"></i><p>暂无素材，点击添加素材按钮开始添加</p></div>';
         } else {
-            var fragment = document.createDocumentFragment();
-            var esc = PMSharedLib.escapeHtml;
+            const fragment = document.createDocumentFragment();
+            const esc = PMSharedLib.escapeHtml;
 
             project.assets.forEach(function (asset, index) {
-                var assetItem = document.createElement('div');
+                const assetItem = document.createElement('div');
                 assetItem.className = 'asset-item';
                 assetItem.innerHTML =
                     '<div class="asset-info">' +
@@ -580,7 +580,7 @@
             document.getElementById('project-name').value = '';
             document.getElementById('project-desc').value = '';
             document.getElementById('project-type').value = 'ui';
-            var openAiInput = document.getElementById('open-ai-after-create');
+            const openAiInput = document.getElementById('open-ai-after-create');
             if (openAiInput) {
                 openAiInput.checked = true;
             }

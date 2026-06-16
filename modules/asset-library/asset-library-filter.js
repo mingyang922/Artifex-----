@@ -9,28 +9,28 @@
     'use strict';
 
     // ── 模块内部状态 ──
-    var state = null;       // 引用 AssetLibraryState
-    var els = {};           // DOM 元素引用
-    var activeTagFilter = null;
+    const state = null;       // 引用 AssetLibraryState
+    const els = {};           // DOM 元素引用
+    const activeTagFilter = null;
 
     // ── 筛选核心 ──
     function filterAssets(assetsOverride, elsOverride) {
-        var assets = assetsOverride || (state ? state.assets : []);
-        var e = elsOverride || els || {};
-        var q = (e.assetSearchEl ? e.assetSearchEl.value : '').trim().toLowerCase();
-        var cat = e.categoryFilterEl ? e.categoryFilterEl.value : 'all';
-        var type = e.typeFilterEl ? e.typeFilterEl.value : 'all';
-        var sort = e.sortOrderEl ? e.sortOrderEl.value : 'newest';
+        const assets = assetsOverride || (state ? state.assets : []);
+        const e = elsOverride || els || {};
+        const q = (e.assetSearchEl ? e.assetSearchEl.value : '').trim().toLowerCase();
+        const cat = e.categoryFilterEl ? e.categoryFilterEl.value : 'all';
+        const type = e.typeFilterEl ? e.typeFilterEl.value : 'all';
+        const sort = e.sortOrderEl ? e.sortOrderEl.value : 'newest';
 
-        var filtered = assets.filter(function (a) {
+        const filtered = assets.filter(function (a) {
             if (cat !== 'all' && a.category !== cat) return false;
             if (type !== 'all') {
-                var at = (a.type || '').toLowerCase();
+                const at = (a.type || '').toLowerCase();
                 if (at !== type && !at.startsWith(type + '/')) return false;
             }
             if (q) {
-                var nameMatch = (a.name || '').toLowerCase().includes(q);
-                var descMatch = (a.fileName || '').toLowerCase().includes(q);
+                const nameMatch = (a.name || '').toLowerCase().includes(q);
+                const descMatch = (a.fileName || '').toLowerCase().includes(q);
                 if (!nameMatch && !descMatch) return false;
             }
             return true;
@@ -56,7 +56,7 @@
 
     // ── 标签系统 ──
     function getAllTags() {
-        var tagSet = new Set();
+        const tagSet = new Set();
         state.assets.forEach(function (a) {
             if (Array.isArray(a.tags)) {
                 a.tags.forEach(function (t) { if (t) tagSet.add(t); });
@@ -66,15 +66,15 @@
     }
 
     function renderTagFilterBar() {
-        var bar = document.getElementById('tagFilterBar');
-        var chips = document.getElementById('tagFilterChips');
+        const bar = document.getElementById('tagFilterBar');
+        const chips = document.getElementById('tagFilterChips');
         if (!bar || !chips) return;
-        var allTags = getAllTags();
+        const allTags = getAllTags();
         if (allTags.length === 0) { bar.style.display = 'none'; return; }
         bar.style.display = 'flex';
         chips.innerHTML = '';
         allTags.forEach(function (tag) {
-            var chip = document.createElement('span');
+            const chip = document.createElement('span');
             chip.className = 'tag-filter-chip' + (activeTagFilter === tag ? ' is-active' : '');
             chip.textContent = tag;
             chip.addEventListener('click', function () {
@@ -89,28 +89,28 @@
     // 为渲染后的卡片追加标签芯片与"更多"按钮
     function enhanceRenderedCards() {
         renderTagFilterBar();
-        var assetGrid = document.getElementById('assetGrid');
+        const assetGrid = document.getElementById('assetGrid');
         if (!assetGrid) return;
-        var cards = assetGrid.querySelectorAll('.asset-card');
-        var filtered = filterAssets();
+        const cards = assetGrid.querySelectorAll('.asset-card');
+        const filtered = filterAssets();
         cards.forEach(function (card, idx) {
-            var a = filtered[idx];
+            const a = filtered[idx];
             if (!a) return;
             if (Array.isArray(a.tags) && a.tags.length > 0) {
-                var tagsDiv = document.createElement('div');
+                const tagsDiv = document.createElement('div');
                 tagsDiv.className = 'asset-tags';
                 a.tags.forEach(function (tag) {
-                    var chip = document.createElement('span');
+                    const chip = document.createElement('span');
                     chip.className = 'tag-chip';
                     chip.textContent = tag;
                     tagsDiv.appendChild(chip);
                 });
-                var meta = card.querySelector('.meta');
+                const meta = card.querySelector('.meta');
                 if (meta) meta.insertAdjacentElement('afterend', tagsDiv);
             }
-            var actions = card.querySelector('.card-actions');
+            const actions = card.querySelector('.card-actions');
             if (actions) {
-                var moreBtn = document.createElement('button');
+                const moreBtn = document.createElement('button');
                 moreBtn.className = 'btn btn-small card-more-btn';
                 moreBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
                 moreBtn.addEventListener('click', function (e) {
@@ -126,18 +126,18 @@
     // ── 右键上下文菜单 ──
     function showCardContextMenu(asset, anchorEl) {
         document.querySelectorAll('.card-context-menu.is-open').forEach(function (m) { m.remove(); });
-        var menu = document.createElement('div');
+        const menu = document.createElement('div');
         menu.className = 'card-context-menu is-open';
-        var btnCopy = document.createElement('button');
+        const btnCopy = document.createElement('button');
         btnCopy.innerHTML = '<i class="fas fa-copy"></i> 复制到项目';
         btnCopy.addEventListener('click', function (e) { e.stopPropagation(); menu.remove(); showProjectSelector(asset); });
-        var btnTags = document.createElement('button');
+        const btnTags = document.createElement('button');
         btnTags.innerHTML = '<i class="fas fa-tags"></i> 编辑标签';
         btnTags.addEventListener('click', function (e) { e.stopPropagation(); menu.remove(); showTagEditor(asset); });
         menu.appendChild(btnCopy);
         menu.appendChild(btnTags);
         document.body.appendChild(menu);
-        var rect = anchorEl.getBoundingClientRect();
+        const rect = anchorEl.getBoundingClientRect();
         menu.style.left = Math.min(rect.left, window.innerWidth - 180) + 'px';
         menu.style.top = (rect.bottom + 4) + 'px';
         setTimeout(function () {
@@ -147,11 +147,11 @@
 
     // ── 跨项目复制 ──
     function showProjectSelector(asset) {
-        var dialog = document.createElement('div'); dialog.className = 'project-selector-dialog';
-        var box = document.createElement('div'); box.className = 'project-selector-box';
-        var title = document.createElement('h3'); title.textContent = '选择目标项目'; box.appendChild(title);
-        var listDiv = document.createElement('div'); listDiv.innerHTML = '<div class="project-selector-empty">加载中...</div>'; box.appendChild(listDiv);
-        var closeBtn = document.createElement('button'); closeBtn.className = 'project-selector-close'; closeBtn.textContent = '取消';
+        const dialog = document.createElement('div'); dialog.className = 'project-selector-dialog';
+        const box = document.createElement('div'); box.className = 'project-selector-box';
+        const title = document.createElement('h3'); title.textContent = '选择目标项目'; box.appendChild(title);
+        const listDiv = document.createElement('div'); listDiv.innerHTML = '<div class="project-selector-empty">加载中...</div>'; box.appendChild(listDiv);
+        const closeBtn = document.createElement('button'); closeBtn.className = 'project-selector-close'; closeBtn.textContent = '取消';
         closeBtn.addEventListener('click', function () { dialog.remove(); });
         box.appendChild(closeBtn); dialog.appendChild(box);
         dialog.addEventListener('click', function (e) { if (e.target === dialog) dialog.remove(); });
@@ -163,9 +163,9 @@
                     listDiv.innerHTML = '<div class="project-selector-empty">暂无项目，请先创建项目</div>'; return;
                 }
                 data.projects.forEach(function (proj) {
-                    var item = document.createElement('div'); item.className = 'project-list-item';
-                    var nameSpan = document.createElement('span'); nameSpan.className = 'project-item-name'; nameSpan.textContent = proj.name;
-                    var typeSpan = document.createElement('span'); typeSpan.className = 'project-item-type'; typeSpan.textContent = proj.type || '';
+                    const item = document.createElement('div'); item.className = 'project-list-item';
+                    const nameSpan = document.createElement('span'); nameSpan.className = 'project-item-name'; nameSpan.textContent = proj.name;
+                    const typeSpan = document.createElement('span'); typeSpan.className = 'project-item-type'; typeSpan.textContent = proj.type || '';
                     item.appendChild(nameSpan); item.appendChild(typeSpan);
                     item.addEventListener('click', function () { copyAssetToProject(asset, proj, dialog); });
                     listDiv.appendChild(item);
@@ -174,7 +174,7 @@
     }
 
     function copyAssetToProject(asset, project, dialog) {
-        var assetName = asset.name || asset.fileName || '未命名';
+        const assetName = asset.name || asset.fileName || '未命名';
         fetchWithCsrf('/api/projects/' + project.id + '/assets', {
             method: 'POST', body: JSON.stringify({ name: assetName, type: asset.type || 'image', content: asset.dataURL || '' }),
         }).then(function (r) { return r.json(); })
@@ -186,32 +186,32 @@
 
     // ── 标签编辑器 ──
     function showTagEditor(asset) {
-        var modalRoot = document.getElementById('modalRoot');
+        const modalRoot = document.getElementById('modalRoot');
         modalRoot.innerHTML = '';
-        var modal = document.createElement('div'); modal.className = 'modal';
-        var box = document.createElement('div'); box.className = 'box'; box.style.width = '400px';
-        var title = document.createElement('div'); title.style.marginBottom = '12px';
+        const modal = document.createElement('div'); modal.className = 'modal';
+        const box = document.createElement('div'); box.className = 'box'; box.style.width = '400px';
+        const title = document.createElement('div'); title.style.marginBottom = '12px';
         title.innerHTML = '<strong>编辑标签 - ' + escapeHtml(asset.name || asset.fileName) + '</strong>';
         box.appendChild(title);
-        var currentTags = Array.isArray(asset.tags) ? asset.tags.slice() : [];
-        var tagInputWrap = document.createElement('div'); tagInputWrap.className = 'tag-input-wrap'; tagInputWrap.style.position = 'relative';
-        var input = document.createElement('input'); input.type = 'text'; input.placeholder = '输入标签后按回车...';
-        var autocomplete = document.createElement('div'); autocomplete.className = 'tag-autocomplete';
+        const currentTags = Array.isArray(asset.tags) ? asset.tags.slice() : [];
+        const tagInputWrap = document.createElement('div'); tagInputWrap.className = 'tag-input-wrap'; tagInputWrap.style.position = 'relative';
+        const input = document.createElement('input'); input.type = 'text'; input.placeholder = '输入标签后按回车...';
+        const autocomplete = document.createElement('div'); autocomplete.className = 'tag-autocomplete';
         function renderTagChips() {
             tagInputWrap.querySelectorAll('.tag-chip').forEach(function (c) { c.remove(); });
             currentTags.forEach(function (tag, tidx) {
-                var chip = document.createElement('span'); chip.className = 'tag-chip'; chip.textContent = tag;
-                var removeBtn = document.createElement('span'); removeBtn.className = 'tag-remove'; removeBtn.textContent = '×';
+                const chip = document.createElement('span'); chip.className = 'tag-chip'; chip.textContent = tag;
+                const removeBtn = document.createElement('span'); removeBtn.className = 'tag-remove'; removeBtn.textContent = '×';
                 removeBtn.addEventListener('click', function () { currentTags.splice(tidx, 1); renderTagChips(); });
                 chip.appendChild(removeBtn); tagInputWrap.insertBefore(chip, input);
             });
         }
         function showAutocomplete(query) {
-            var allTags = getAllTags().filter(function (t) { return currentTags.indexOf(t) === -1 && t.toLowerCase().indexOf(query.toLowerCase()) !== -1; });
+            const allTags = getAllTags().filter(function (t) { return currentTags.indexOf(t) === -1 && t.toLowerCase().indexOf(query.toLowerCase()) !== -1; });
             autocomplete.innerHTML = '';
             if (allTags.length === 0 || !query) { autocomplete.classList.remove('is-open'); return; }
             allTags.slice(0, 8).forEach(function (tag) {
-                var btn = document.createElement('button'); btn.className = 'tag-autocomplete-item'; btn.textContent = tag;
+                const btn = document.createElement('button'); btn.className = 'tag-autocomplete-item'; btn.textContent = tag;
                 btn.addEventListener('click', function () {
                     if (currentTags.indexOf(tag) === -1) currentTags.push(tag);
                     input.value = ''; autocomplete.classList.remove('is-open'); renderTagChips();
@@ -230,10 +230,10 @@
         });
         tagInputWrap.appendChild(input); tagInputWrap.appendChild(autocomplete); renderTagChips();
         box.appendChild(tagInputWrap);
-        var actionsDiv = document.createElement('div'); actionsDiv.style.marginTop = '16px'; actionsDiv.style.display = 'flex'; actionsDiv.style.gap = '8px'; actionsDiv.style.justifyContent = 'flex-end';
-        var saveBtn = document.createElement('button'); saveBtn.className = 'btn btn-primary'; saveBtn.textContent = '保存';
+        const actionsDiv = document.createElement('div'); actionsDiv.style.marginTop = '16px'; actionsDiv.style.display = 'flex'; actionsDiv.style.gap = '8px'; actionsDiv.style.justifyContent = 'flex-end';
+        const saveBtn = document.createElement('button'); saveBtn.className = 'btn btn-primary'; saveBtn.textContent = '保存';
         saveBtn.addEventListener('click', function () { saveAssetTags(asset, currentTags); modalRoot.style.display = 'none'; modalRoot.innerHTML = ''; });
-        var cancelBtn = document.createElement('button'); cancelBtn.className = 'btn'; cancelBtn.textContent = '取消';
+        const cancelBtn = document.createElement('button'); cancelBtn.className = 'btn'; cancelBtn.textContent = '取消';
         cancelBtn.addEventListener('click', function () { modalRoot.style.display = 'none'; modalRoot.innerHTML = ''; });
         actionsDiv.appendChild(cancelBtn); actionsDiv.appendChild(saveBtn); box.appendChild(actionsDiv);
         modal.appendChild(box); modalRoot.appendChild(modal); modalRoot.style.display = 'block';
@@ -241,7 +241,7 @@
     }
 
     function saveAssetTags(asset, newTags) {
-        var existingTags = {};
+        const existingTags = {};
         try { existingTags = JSON.parse(asset._rawTags || '{}'); } catch (_) {}
         existingTags.customTags = newTags;
         fetchWithCsrf('/api/asset-library/' + encodeURIComponent(asset.id), {
@@ -268,8 +268,8 @@
         state.filterAssets = filterAssets;
 
         // 搜索与筛选（搜索框加 300ms 防抖）
-        var _searchTimer = null;
-        var debouncedRender = function () { clearTimeout(_searchTimer); _searchTimer = setTimeout(state.renderAssets, 300); };
+        const _searchTimer = null;
+        const debouncedRender = function () { clearTimeout(_searchTimer); _searchTimer = setTimeout(state.renderAssets, 300); };
         if (els.searchEl) els.searchEl.addEventListener('input', debouncedRender);
         if (els.categoryFilterEl) els.categoryFilterEl.addEventListener('change', function () { state.renderAssets(); });
         if (els.assetSearchEl) els.assetSearchEl.addEventListener('input', debouncedRender);

@@ -3,15 +3,15 @@
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.3.3 */
 'use strict';
-var PMSharedLib = window.PMShared || {};
-var PMUI = window.PMUI || {};
-var PMTemplates = window.PMTemplates || {};
-var pmStorageKey = PMSharedLib.pmStorageKey || function (base) { return base; };
+const PMSharedLib = window.PMShared || {};
+const PMUI = window.PMUI || {};
+const PMTemplates = window.PMTemplates || {};
+const pmStorageKey = PMSharedLib.pmStorageKey || function (base) { return base; };
 
 // 全局变量定义
-var projects = []; // 项目列表
-var currentProjectId = null;
-var projectsCache = null; // 内存缓存
+const projects = []; // 项目列表
+const currentProjectId = null;
+const projectsCache = null; // 内存缓存
 
 function setActiveProjectCard(projectId) {
     currentProjectId = projectId || null;
@@ -47,12 +47,12 @@ async function loadProjects() {
     }
 
     try {
-        var res = await fetch('/api/projects', { credentials: 'include' });
+        const res = await fetch('/api/projects', { credentials: 'include' });
         if (res.status === 401) {
             window.location.href = loginHtmlPath();
             return;
         }
-        var data = await res.json();
+        const data = await res.json();
         if (data.ok) {
             // 转换服务端数据格式为前端格式
             projects = (data.projects || []).map(function (p) {
@@ -95,9 +95,9 @@ function debounce(func, wait) {
 // 保存项目到服务端（单个项目更新）
 async function saveProjectToServer(project, versionDesc) {
     try {
-        var csrfToken = await getCsrfToken();
+        const csrfToken = await getCsrfToken();
         if (project.id && !project.id.startsWith('new_')) {
-            var res = await fetch('/api/projects/' + project.id, {
+            const res = await fetch('/api/projects/' + project.id, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': csrfToken },
@@ -111,7 +111,7 @@ async function saveProjectToServer(project, versionDesc) {
             if (!res.ok) {
                 throw new Error('保存项目失败');
             }
-            var data = await res.json();
+            const data = await res.json();
             if (data.ok && data.project) {
                 project.version = data.project.version;
                 project.versionHistory = (data.project.versionHistory || []).map(function (v) {
@@ -133,7 +133,7 @@ function syncProjectsToLocalStorage() {
 }
 
 // 批量保存项目到服务端
-var saveProjectsToStorage = debounce(function (versionDesc) {
+const saveProjectsToStorage = debounce(function (versionDesc) {
     projects.forEach(function (p) { saveProjectToServer(p, versionDesc); });
     projectsCache = projects;
 }, 300);
@@ -151,10 +151,10 @@ function uiToast(message, type) {
 
 // 创建项目
 async function createProject() {
-    var nameInput = document.getElementById('project-name');
-    var descInput = document.getElementById('project-desc');
-    var typeInput = document.getElementById('project-type');
-    var openAiInput = document.getElementById('open-ai-after-create');
+    const nameInput = document.getElementById('project-name');
+    const descInput = document.getElementById('project-desc');
+    const typeInput = document.getElementById('project-type');
+    const openAiInput = document.getElementById('open-ai-after-create');
 
     // 表单验证
     if (!nameInput.value.trim()) {
@@ -167,10 +167,10 @@ async function createProject() {
     }
 
     // 调用 API 创建项目
-    var newProject;
+    const newProject;
     try {
-        var csrfToken = await getCsrfToken();
-        var res = await fetch('/api/projects', {
+        const csrfToken = await getCsrfToken();
+        const res = await fetch('/api/projects', {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': csrfToken },
@@ -180,7 +180,7 @@ async function createProject() {
                 type: typeInput.value,
             }),
         });
-        var data = await res.json();
+        const data = await res.json();
         if (!data.ok) {
             PMSharedLib.uiToast(data.error || '创建失败', 'error');
             return;
@@ -208,15 +208,15 @@ async function createProject() {
 
     // Handle template selection
     if (PMTemplates.getSelected) {
-        var tplKey = PMTemplates.getSelected();
-        var tpl = PMTemplates.getData(tplKey);
+        const tplKey = PMTemplates.getSelected();
+        const tpl = PMTemplates.getData(tplKey);
         if (tpl && tpl.assets && tpl.assets.length > 0) {
             try {
-                var projectsRaw = localStorage.getItem(pmStorageKey('gameui-projects'));
+                const projectsRaw = localStorage.getItem(pmStorageKey('gameui-projects'));
                 if (projectsRaw) {
-                    var projs = JSON.parse(projectsRaw);
+                    const projs = JSON.parse(projectsRaw);
                     if (projs.length > 0) {
-                        var latest = projs[0];
+                        const latest = projs[0];
                         if (!latest.templateApplied) {
                             latest.templateApplied = tplKey;
                             latest.templateAssets = tpl.assets;
@@ -248,7 +248,7 @@ async function createProject() {
         console.warn('写入 currentProjectContext 失败：', e);
     }
 
-    var shouldOpenAi = !!(openAiInput && openAiInput.checked);
+    const shouldOpenAi = !!(openAiInput && openAiInput.checked);
     if (shouldOpenAi) {
         try {
             localStorage.setItem(pmStorageKey('gameui-projects'), JSON.stringify(projects));
@@ -256,7 +256,7 @@ async function createProject() {
         } catch (e) {
             console.error('同步保存项目数据失败:', e);
         }
-        var aiPagePath = getAIGeneratePath();
+        const aiPagePath = getAIGeneratePath();
         window.location.href = aiPagePath + '?projectId=' + encodeURIComponent(newProject.id);
         return;
     }
@@ -267,8 +267,8 @@ async function createProject() {
 }
 
 function getAIGeneratePath() {
-    var path = window.location.pathname || '';
-    var isInModulePage =
+    const path = window.location.pathname || '';
+    const isInModulePage =
         path.includes('/modules/project-management/') || path.includes('\\modules\\project-management\\');
     if (isInModulePage) {
         return '../ai-generate/ai-generator-new.html';
@@ -278,10 +278,10 @@ function getAIGeneratePath() {
 
 // 保存编辑项目
 async function saveEditProject() {
-    var projectId = document.getElementById('edit-project-id').value;
-    var nameInput = document.getElementById('edit-project-name');
-    var descInput = document.getElementById('edit-project-desc');
-    var typeInput = document.getElementById('edit-project-type');
+    const projectId = document.getElementById('edit-project-id').value;
+    const nameInput = document.getElementById('edit-project-name');
+    const descInput = document.getElementById('edit-project-desc');
+    const typeInput = document.getElementById('edit-project-type');
 
     if (!nameInput.value.trim()) {
         await showTechPrompt({
@@ -292,7 +292,7 @@ async function saveEditProject() {
         return;
     }
 
-    var projectIndex = projects.findIndex(function (p) { return p.id === projectId; });
+    const projectIndex = projects.findIndex(function (p) { return p.id === projectId; });
     if (projectIndex === -1) return;
 
     projects[projectIndex].name = nameInput.value.trim();
@@ -309,8 +309,8 @@ async function saveEditProject() {
 // 删除项目
 async function deleteProject(projectId) {
     try {
-        var csrfToken = await getCsrfToken();
-        var res = await fetch('/api/projects/' + projectId, {
+        const csrfToken = await getCsrfToken();
+        const res = await fetch('/api/projects/' + projectId, {
             method: 'DELETE',
             credentials: 'include',
             headers: { 'X-XSRF-Token': csrfToken },
@@ -332,7 +332,7 @@ async function deleteProject(projectId) {
 
 function readFileAsDataURL(file) {
     return new Promise(function (resolve, reject) {
-        var reader = new FileReader();
+        const reader = new FileReader();
         reader.onload = function (e) { resolve(e.target && e.target.result ? e.target.result : ''); };
         reader.onerror = reject;
         reader.readAsDataURL(file);
@@ -341,33 +341,33 @@ function readFileAsDataURL(file) {
 
 async function compressImageFile(file, options) {
     options = options || {};
-    var maxWidth = options.maxWidth || 1600;
-    var maxHeight = options.maxHeight || 1600;
-    var targetMaxLength = options.targetMaxLength || 700000;
-    var minQuality = options.minQuality || 0.45;
+    const maxWidth = options.maxWidth || 1600;
+    const maxHeight = options.maxHeight || 1600;
+    const targetMaxLength = options.targetMaxLength || 700000;
+    const minQuality = options.minQuality || 0.45;
 
-    var originalDataUrl = await readFileAsDataURL(file);
-    var img = new Image();
+    const originalDataUrl = await readFileAsDataURL(file);
+    const img = new Image();
     await new Promise(function (resolve, reject) {
         img.onload = resolve;
         img.onerror = reject;
         img.src = originalDataUrl;
     });
 
-    var width = img.naturalWidth || img.width;
-    var height = img.naturalHeight || img.height;
-    var ratio = Math.min(maxWidth / width, maxHeight / height, 1);
+    const width = img.naturalWidth || img.width;
+    const height = img.naturalHeight || img.height;
+    const ratio = Math.min(maxWidth / width, maxHeight / height, 1);
     width = Math.max(1, Math.round(width * ratio));
     height = Math.max(1, Math.round(height * ratio));
 
-    var canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
-    var ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0, width, height);
 
-    var quality = 0.85;
-    var result = canvas.toDataURL('image/jpeg', quality);
+    const quality = 0.85;
+    const result = canvas.toDataURL('image/jpeg', quality);
     while (result.length > targetMaxLength && quality > minQuality) {
         quality -= 0.1;
         result = canvas.toDataURL('image/jpeg', quality);
@@ -398,7 +398,7 @@ async function optimizeFileForStorage(file) {
 // ── Asset library sync ──
 
 function getLibraryCategoryByAssetType(assetType) {
-    var map = {
+    const map = {
         image: '图片',
         icon: '图标',
         button: '其他',
@@ -411,10 +411,10 @@ function getLibraryCategoryByAssetType(assetType) {
 }
 
 function getLocalStorageUsageBytes() {
-    var total = 0;
+    const total = 0;
     for (var i = 0; i < localStorage.length; i++) {
-        var key = localStorage.key(i);
-        var value = localStorage.getItem(key) || '';
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key) || '';
         total += (key.length + value.length) * 2;
     }
     return total;
@@ -422,25 +422,25 @@ function getLocalStorageUsageBytes() {
 
 async function syncProjectAssetToLibrary(project, asset) {
     try {
-        var category = getLibraryCategoryByAssetType(asset.type);
-        var content = asset.content || '';
-        var mime = 'image/png';
+        const category = getLibraryCategoryByAssetType(asset.type);
+        const content = asset.content || '';
+        const mime = 'image/png';
         if (typeof content === 'string' && content.startsWith('data:')) {
-            var m = content.match(/^data:([^;]+);/);
+            const m = content.match(/^data:([^;]+);/);
             if (m && m[1]) mime = m[1];
         }
-        var fileExt = mime.includes('jpeg') ? 'jpg' : (mime.split('/')[1] || 'png');
-        var safeName = (asset.name || 'asset').replace(/[\\/:*?"<>|]/g, '_');
-        var sourceId = 'project_' + project.id + '_' + asset.id;
+        const fileExt = mime.includes('jpeg') ? 'jpg' : (mime.split('/')[1] || 'png');
+        const safeName = (asset.name || 'asset').replace(/[\\/:*?"<>|]/g, '_');
+        const sourceId = 'project_' + project.id + '_' + asset.id;
 
         // Check for existing asset with same source to deduplicate
-        var wasDeduped = false;
+        const wasDeduped = false;
         try {
-            var listResp = await fetch('/api/asset-library', { credentials: 'include' });
+            const listResp = await fetch('/api/asset-library', { credentials: 'include' });
             if (listResp.ok) {
-                var listData = await listResp.json();
+                const listData = await listResp.json();
                 if (listData.ok && Array.isArray(listData.items)) {
-                    var existing = listData.items.find(function (item) { return item.source === sourceId; });
+                    const existing = listData.items.find(function (item) { return item.source === sourceId; });
                     if (existing) {
                         await fetchWithCsrf('/api/asset-library/' + encodeURIComponent(existing.id), { method: 'DELETE' });
                         wasDeduped = true;
@@ -449,7 +449,7 @@ async function syncProjectAssetToLibrary(project, asset) {
             }
         } catch (_) {}
 
-        var body = {
+        const body = {
             name: asset.name || '未命名素材',
             type: mime,
             content: content,
@@ -457,12 +457,12 @@ async function syncProjectAssetToLibrary(project, asset) {
             source: sourceId,
             tags: JSON.stringify({ category: category, fileName: safeName + '.' + fileExt }),
         };
-        var resp = await fetchWithCsrf('/api/asset-library', {
+        const resp = await fetchWithCsrf('/api/asset-library', {
             method: 'POST',
             body: JSON.stringify(body),
         });
         if (!resp.ok) {
-            var err = await resp.json().catch(function () { return {}; });
+            const err = await resp.json().catch(function () { return {}; });
             throw new Error(err.error || '同步失败');
         }
         return { ok: true, deduped: wasDeduped, nearLimit: false };
@@ -474,12 +474,12 @@ async function syncProjectAssetToLibrary(project, asset) {
 
 // 添加项目素材（支持 URL / 文本 / 本地文件）
 async function addProjectAsset() {
-    var projectId = document.getElementById('assets-project-id').value;
-    var assetName = document.getElementById('asset-name').value.trim();
-    var assetType = document.getElementById('asset-type').value;
-    var assetContent = document.getElementById('asset-url').value.trim();
-    var assetFileInput = document.getElementById('asset-file');
-    var selectedFile = assetFileInput && assetFileInput.files ? assetFileInput.files[0] : null;
+    const projectId = document.getElementById('assets-project-id').value;
+    const assetName = document.getElementById('asset-name').value.trim();
+    const assetType = document.getElementById('asset-type').value;
+    const assetContent = document.getElementById('asset-url').value.trim();
+    const assetFileInput = document.getElementById('asset-file');
+    const selectedFile = assetFileInput && assetFileInput.files ? assetFileInput.files[0] : null;
 
     if (!assetName) {
         await showTechPrompt({
@@ -498,14 +498,14 @@ async function addProjectAsset() {
         return;
     }
 
-    var project = projects.find(function (p) { return p.id === projectId; });
+    const project = projects.find(function (p) { return p.id === projectId; });
     if (!project) return;
 
     if (!project.assets) {
         project.assets = [];
     }
 
-    var finalContent = assetContent;
+    const finalContent = assetContent;
     if (selectedFile) {
         try {
             finalContent = await optimizeFileForStorage(selectedFile);
@@ -520,7 +520,7 @@ async function addProjectAsset() {
         }
     }
 
-    var newAsset = {
+    const newAsset = {
         id: Date.now().toString(),
         name: assetName,
         type: assetType,
@@ -529,7 +529,7 @@ async function addProjectAsset() {
     };
 
     project.assets.push(newAsset);
-    var syncResult = await syncProjectAssetToLibrary(project, newAsset);
+    const syncResult = await syncProjectAssetToLibrary(project, newAsset);
 
     saveProjectsToStorage();
     PMUI.openAssetsModal(projectId);
@@ -540,12 +540,12 @@ async function addProjectAsset() {
     if (assetFileInput) {
         assetFileInput.value = '';
     }
-    var assetFileName = document.getElementById('asset-file-name');
+    const assetFileName = document.getElementById('asset-file-name');
     if (assetFileName) {
         assetFileName.textContent = '未选择本地文件';
     }
 
-    var tip = '素材添加成功！';
+    const tip = '素材添加成功！';
     if (syncResult && syncResult.ok) {
         tip += syncResult.deduped ? '\n素材库中已有同源素材，已更新并置顶。' : '\n已同步到素材库。';
         if (syncResult.nearLimit) {
@@ -555,7 +555,7 @@ async function addProjectAsset() {
         tip += '\n但同步到素材库失败，请稍后重试。';
     }
 
-    var goToLibrary = await showTechPrompt({
+    const goToLibrary = await showTechPrompt({
         title: '素材同步完成',
         message: tip + '\n\n是否前往素材库查看？',
         confirmText: '前往素材库',

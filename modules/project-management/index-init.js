@@ -6,7 +6,7 @@
             (function () {
                 function loadScript(src) {
                     return new Promise(function (resolve) {
-                        var s = document.createElement('script');
+                        const s = document.createElement('script');
                         s.src = src;
                         s.onload = resolve;
                         s.onerror = resolve;
