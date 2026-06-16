@@ -115,7 +115,7 @@ function createImageRouter(deps) {
 
             // 调用对应 provider
             const startTime = Date.now();
-            let __callStatus = 'success';
+            let _callStatus = 'success';
             try {
                 const imageUrl = await dispatchImageGeneration({
                     provider: normalizedProvider,
