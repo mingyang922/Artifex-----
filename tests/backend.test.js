@@ -353,4 +353,243 @@ describe('encryption', () => {
         const decrypted = decryptText(encrypted);
         assert.equal(decrypted, '');
     });
+
+    it('decryptText with invalid GCM-format ciphertext returns empty string', () => {
+        const { decryptText } = require('../backend/lib/utils');
+        // 3-part format triggers GCM decryption; invalid hex will fail and return ''
+        assert.equal(decryptText('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz:zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz:zz'), '');
+    });
+
+    it('decryptText with plain-text (no colons) returns as-is (legacy behavior)', () => {
+        const { decryptText } = require('../backend/lib/utils');
+        // Strings without colons are treated as unencrypted legacy data
+        assert.equal(decryptText('not-valid-encrypted-data'), 'not-valid-encrypted-data');
+    });
+
+    it('decryptText with tampered auth tag returns empty string', () => {
+        const { encryptText, decryptText } = require('../backend/lib/utils');
+        const encrypted = encryptText('secret-data');
+        const parts = encrypted.split(':');
+        // Tamper with the auth tag
+        parts[1] = '0'.repeat(32);
+        const tampered = parts.join(':');
+        assert.equal(decryptText(tampered), '');
+    });
+
+    it('decryptText with null/undefined returns empty string', () => {
+        const { decryptText } = require('../backend/lib/utils');
+        assert.equal(decryptText(null), '');
+        assert.equal(decryptText(undefined), '');
+    });
+
+    it('should follow AES-256-GCM format (IV:AuthTag:Ciphertext)', () => {
+        const { encryptText } = require('../backend/lib/utils');
+        const encrypted = encryptText('test-data-123');
+        const parts = encrypted.split(':');
+        assert.equal(parts.length, 3, 'should have exactly 3 colon-separated parts');
+        // IV: 16 bytes = 32 hex chars
+        assert.equal(parts[0].length, 32, 'IV should be 32 hex chars');
+        // AuthTag: 16 bytes = 32 hex chars
+        assert.equal(parts[1].length, 32, 'AuthTag should be 32 hex chars');
+        // Ciphertext: non-empty hex
+        assert.ok(parts[2].length > 0, 'Ciphertext should not be empty');
+        assert.ok(/^[0-9a-f]+$/.test(parts[0]), 'IV should be hex');
+        assert.ok(/^[0-9a-f]+$/.test(parts[1]), 'AuthTag should be hex');
+        assert.ok(/^[0-9a-f]+$/.test(parts[2]), 'Ciphertext should be hex');
+    });
+
+    it('encryptSensitiveFields encrypts apiKey, secretKey, secretId', () => {
+        const { encryptSensitiveFields } = require('../backend/lib/utils');
+        const obj = { apiKey: 'my-key', secretKey: 'my-secret', secretId: 'my-id', other: 'plain' };
+        const encrypted = encryptSensitiveFields(obj);
+        assert.notEqual(encrypted.apiKey, obj.apiKey);
+        assert.notEqual(encrypted.secretKey, obj.secretKey);
+        assert.notEqual(encrypted.secretId, obj.secretId);
+        assert.equal(encrypted.other, 'plain');
+    });
+
+    it('decryptSensitiveFields restores original values', () => {
+        const { encryptSensitiveFields, decryptSensitiveFields } = require('../backend/lib/utils');
+        const original = { apiKey: 'key-123', secretKey: 'secret-456', secretId: 'id-789', other: 'plain' };
+        const encrypted = encryptSensitiveFields(original);
+        const decrypted = decryptSensitiveFields(encrypted);
+        assert.equal(decrypted.apiKey, original.apiKey);
+        assert.equal(decrypted.secretKey, original.secretKey);
+        assert.equal(decrypted.secretId, original.secretId);
+        assert.equal(decrypted.other, 'plain');
+    });
+
+    it('encryptSensitiveFields with null/undefined returns as-is', () => {
+        const { encryptSensitiveFields } = require('../backend/lib/utils');
+        assert.equal(encryptSensitiveFields(null), null);
+        assert.equal(encryptSensitiveFields(undefined), undefined);
+    });
+});
+
+describe('checkQuota', () => {
+    let quotaUserId;
+
+    before(() => {
+        const row = usersDb.createUser('quotauser', 'quota@test.com', 'hashed');
+        quotaUserId = row.id;
+    });
+
+    it('should return ok when under limit', () => {
+        const result = usersDb.checkQuota(quotaUserId, 'tencent');
+        assert.equal(result.ok, true);
+    });
+
+    it('should return daily limit exceeded', () => {
+        // Set a very low daily limit
+        usersDb.setUserQuota(quotaUserId, 'jimeng', 2, 1000);
+        // Log enough calls to exceed daily limit
+        usersDb.logApiCall(quotaUserId, 'jimeng', 'text2img', 'success', 100);
+        usersDb.logApiCall(quotaUserId, 'jimeng', 'text2img', 'success', 100);
+        const result = usersDb.checkQuota(quotaUserId, 'jimeng');
+        assert.equal(result.ok, false);
+        assert.equal(result.reason, 'daily');
+        assert.equal(result.limit, 2);
+    });
+
+    it('should return monthly limit exceeded', () => {
+        // Create a separate user for this test to avoid interference
+        const row = usersDb.createUser('monthlyuser', 'monthly@test.com', 'hashed');
+        usersDb.setUserQuota(row.id, 'alibaba', 1000, 2);
+        usersDb.logApiCall(row.id, 'alibaba', 'text2img', 'success', 100);
+        usersDb.logApiCall(row.id, 'alibaba', 'text2img', 'success', 100);
+        const result = usersDb.checkQuota(row.id, 'alibaba');
+        assert.equal(result.ok, false);
+        assert.equal(result.reason, 'monthly');
+        assert.equal(result.limit, 2);
+    });
+
+    it('should return ok for empty provider', () => {
+        const result = usersDb.checkQuota(quotaUserId, '');
+        assert.equal(result.ok, true);
+    });
+});
+
+describe('provider-routing', () => {
+    const { dispatchImageGeneration } = require('../backend/routes/image-proxy');
+
+    const baseCtx = {
+        prompt: 'test prompt',
+        size: '512x512',
+        mode: 'text2img',
+        imageDataUrl: null,
+        strength: 0.7,
+        imageModel: null,
+        body: {},
+        userId: 1,
+        getUserProviderConfig: () => null,
+        req: {},
+        setOnJimengFrameSuccess: () => {},
+    };
+
+    it('dispatchImageGeneration with mock provider returns URL', async () => {
+        const result = await dispatchImageGeneration({ ...baseCtx, provider: 'mock' });
+        assert.ok(typeof result === 'string');
+        assert.ok(result.length > 0);
+        assert.ok(result.includes('placeholder.com'), 'mock should return a placeholder URL');
+    });
+
+    it('dispatchImageGeneration with free provider returns URL or data URI', async () => {
+        const result = await dispatchImageGeneration({ ...baseCtx, provider: 'free' });
+        assert.ok(typeof result === 'string');
+        assert.ok(result.length > 0);
+        // free provider returns either an https URL or a data: URI (SVG fallback)
+        assert.ok(
+            result.startsWith('https://') || result.startsWith('data:'),
+            'free provider should return https URL or data URI'
+        );
+    });
+
+    it('dispatchImageGeneration with unknown text2img provider throws error', async () => {
+        await assert.rejects(
+            () => dispatchImageGeneration({ ...baseCtx, provider: 'unknown-provider' }),
+            (err) => {
+                assert.ok(err.message.includes('不支持的图片生成服务'));
+                return true;
+            }
+        );
+    });
+
+    it('dispatchImageGeneration with unknown img2img provider throws error', async () => {
+        await assert.rejects(
+            () => dispatchImageGeneration({
+                ...baseCtx,
+                provider: 'unknown-provider',
+                mode: 'img2img',
+                imageDataUrl: 'data:image/png;base64,abc',
+            }),
+            (err) => {
+                assert.ok(err.message.includes('不支持的图生图服务'));
+                return true;
+            }
+        );
+    });
+});
+
+describe('ssrf-protection', () => {
+    const { isBlockedHostname } = require('../backend/routes/image-proxy');
+
+    it('should block localhost', () => {
+        assert.equal(isBlockedHostname('localhost'), true);
+        assert.equal(isBlockedHostname('LOCALHOST'), true);
+    });
+
+    it('should block 127.x.x.x loopback', () => {
+        assert.equal(isBlockedHostname('127.0.0.1'), true);
+        assert.equal(isBlockedHostname('127.255.255.255'), true);
+    });
+
+    it('should block 10.x.x.x private range', () => {
+        assert.equal(isBlockedHostname('10.0.0.1'), true);
+        assert.equal(isBlockedHostname('10.255.255.255'), true);
+    });
+
+    it('should block 172.16-31.x.x private range', () => {
+        assert.equal(isBlockedHostname('172.16.0.1'), true);
+        assert.equal(isBlockedHostname('172.31.255.255'), true);
+    });
+
+    it('should block 192.168.x.x private range', () => {
+        assert.equal(isBlockedHostname('192.168.1.1'), true);
+        assert.equal(isBlockedHostname('192.168.0.1'), true);
+    });
+
+    it('should block 169.254.x.x link-local', () => {
+        assert.equal(isBlockedHostname('169.254.169.254'), true);
+    });
+
+    it('should block 0.0.0.0', () => {
+        assert.equal(isBlockedHostname('0.0.0.0'), true);
+    });
+
+    it('should block IPv6 localhost ::1', () => {
+        assert.equal(isBlockedHostname('::1'), true);
+    });
+
+    it('should block IPv6 private addresses', () => {
+        assert.equal(isBlockedHostname('fc00::1'), true);
+        assert.equal(isBlockedHostname('fd00::1'), true);
+        assert.equal(isBlockedHostname('fe80::1'), true);
+        assert.equal(isBlockedHostname('::'), true);
+    });
+
+    it('should allow public hostnames', () => {
+        assert.equal(isBlockedHostname('example.com'), false);
+        assert.equal(isBlockedHostname('google.com'), false);
+        assert.equal(isBlockedHostname('8.8.8.8'), false);
+        assert.equal(isBlockedHostname('1.1.1.1'), false);
+    });
+
+    it('should allow addresses outside private ranges', () => {
+        // 172.32.x.x is not in the 172.16-31 private range
+        assert.equal(isBlockedHostname('172.32.0.1'), false);
+        // 172.15.x.x is not in the 172.16-31 private range
+        assert.equal(isBlockedHostname('172.15.0.1'), false);
+        // 11.x.x.x is not in the 10.x.x.x range
+        assert.equal(isBlockedHostname('11.0.0.1'), false);
+    });
 });

@@ -14,6 +14,32 @@ const alibabaProvider = require('../providers/alibaba');
 const jimengProvider = require('../providers/jimeng');
 const sdWebUiProvider = require('../providers/sd-webui');
 
+/** SSRF 防护：内网/保留地址匹配模式 */
+const BLOCKED_HOSTNAME_PATTERNS = [
+    /^127\./,           // 127.x.x.x
+    /^10\./,            // 10.x.x.x
+    /^172\.(1[6-9]|2\d|3[01])\./,  // 172.16-31.x.x
+    /^192\.168\./,      // 192.168.x.x
+    /^169\.254\./,      // 169.254.x.x (云元数据)
+    /^0\./,             // 0.x.x.x
+    /^0\.0\.0\.0$/,     // 0.0.0.0
+    /^localhost$/i,     // localhost
+    /^::1$/,            // IPv6 localhost（URL.hostname 不含括号）
+    /^fc00:/i,          // IPv6 私有地址
+    /^fd00:/i,          // IPv6 私有地址
+    /^fe80:/i,          // IPv6 链路本地地址
+    /^::$/,             // IPv6 未指定地址
+];
+
+/**
+ * 检查主机名是否为内网/保留地址（SSRF 防护）
+ * @param {string} hostname
+ * @returns {boolean}
+ */
+function isBlockedHostname(hostname) {
+    return BLOCKED_HOSTNAME_PATTERNS.some(pattern => pattern.test(hostname));
+}
+
 /**
  * 创建图片相关路由
  * @param {object} deps
@@ -51,7 +77,7 @@ function createImageRouter(deps) {
             if (normalizedProvider === 'jimeng') {
                 const sizeCheck = jimengProvider.validateJimengSize(size);
                 if (!sizeCheck.ok) {
-                    return res.status(400).json({ error: '参数错误', message: sizeCheck.message, provider: 'jimeng' });
+                    return res.status(400).json({ error: '参数错误', message: sizeCheck.message });
                 }
             }
 
@@ -66,8 +92,6 @@ function createImageRouter(deps) {
                     return res.status(429).json({
                         error: '调用次数超限',
                         message: `已达到${quota.reason === 'daily' ? '每日' : '每月'}调用上限（${quota.limit}次）`,
-                        provider: normalizedProvider,
-                        quota,
                     });
                 }
             }
@@ -80,8 +104,6 @@ function createImageRouter(deps) {
                     return res.status(403).json({
                         error: '未配置个人密钥',
                         message: '请先在「用户中心」配置你自己的腾讯云 SecretId / SecretKey，再使用腾讯云图片生成。',
-                        code: 'no_personal_credentials',
-                        provider: 'tencent',
                     });
                 }
             }
@@ -165,9 +187,8 @@ function createImageRouter(deps) {
             const mode = req.body?.mode === 'img2img' ? '(图生图)' : '';
             console.error(`${provider}${mode} API调用失败:`, apiError.message || apiError);
             res.status(502).json({
-                error: `${provider} 图片生成失败`,
-                message: apiError.message || 'API调用失败',
-                provider,
+                error: '图片生成失败',
+                message: `${provider}: ${apiError.message || 'API调用失败'}`,
             });
         }
     });
@@ -188,28 +209,13 @@ function createImageRouter(deps) {
             }
             // 禁止访问内网地址（先检查 hostname 字面值）
             const hostname = parsed.hostname;
-            const blockedPatterns = [
-                /^127\./,           // 127.x.x.x
-                /^10\./,            // 10.x.x.x
-                /^172\.(1[6-9]|2\d|3[01])\./,  // 172.16-31.x.x
-                /^192\.168\./,      // 192.168.x.x
-                /^169\.254\./,      // 169.254.x.x (云元数据)
-                /^0\./,             // 0.x.x.x
-                /^0\.0\.0\.0$/,     // 0.0.0.0
-                /^localhost$/i,     // localhost
-                /^::1$/,            // IPv6 localhost（URL.hostname 不含括号）
-                /^fc00:/i,          // IPv6 私有地址
-                /^fd00:/i,          // IPv6 私有地址
-                /^fe80:/i,          // IPv6 链路本地地址
-                /^::$/,             // IPv6 未指定地址
-            ];
-            if (blockedPatterns.some(pattern => pattern.test(hostname))) {
+            if (isBlockedHostname(hostname)) {
                 return res.status(403).json({ error: '禁止访问内网地址' });
             }
             // DNS 解析后二次校验（防止 DNS rebinding 绕过）
             try {
                 const { address: resolved } = await dns.lookup(hostname, { family: 0 });
-                if (resolved && blockedPatterns.some(pattern => pattern.test(resolved))) {
+                if (resolved && isBlockedHostname(resolved)) {
                     return res.status(403).json({ error: '禁止访问内网地址（DNS 解析）' });
                 }
             } catch (_) {
@@ -233,7 +239,7 @@ function createImageRouter(deps) {
             const contentType = (response.headers['content-type'] || 'image/png').split(';')[0].trim().toLowerCase();
             // 只允许图片类型，防止代理 HTML/JS 等内容（XSS 风险）
             if (!ALLOWED_CONTENT_TYPES.some(ct => contentType.startsWith(ct))) {
-                return res.status(403).json({ error: '不允许的内容类型', contentType });
+                return res.status(403).json({ error: '不允许的内容类型', message: `不支持的内容类型: ${contentType}` });
             }
             res.set('Content-Type', contentType);
             // 缓存 1 小时，减少重复请求
@@ -241,7 +247,7 @@ function createImageRouter(deps) {
             res.send(response.data);
         } catch (error) {
             const upstreamStatus = error?.response?.status || 502;
-            res.status(upstreamStatus).json({ error: '图片拉取失败', message: error.message, upstreamStatus });
+            res.status(upstreamStatus).json({ error: '图片拉取失败', message: error.message });
         }
     });
 
@@ -297,4 +303,4 @@ async function dispatchImageGeneration(ctx) {
     }
 }
 
-module.exports = { createImageRouter };
+module.exports = { createImageRouter, dispatchImageGeneration, isBlockedHostname };
