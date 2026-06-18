@@ -3,7 +3,7 @@
  * 提供静态资源缓存和离线支持
  */
 
-const CACHE_NAME = 'artifex-v1.3.3';
+const CACHE_NAME = 'artifex-v1.3.4';
 const MAX_CACHE_SIZE = 200; // 最大缓存条目数
 let fetchCount = 0; // 用于限制 trimCache 调用频率
 const STATIC_ASSETS = [
@@ -86,6 +86,11 @@ self.addEventListener('fetch', (event) => {
 
     // 跳过 API 请求（需要实时数据）
     if (url.pathname.startsWith('/api/')) {
+        return;
+    }
+
+    // 跳过根路径（只是重定向到 login.html）
+    if (url.pathname === '/') {
         return;
     }
 
