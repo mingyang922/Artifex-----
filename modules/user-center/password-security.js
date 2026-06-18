@@ -700,7 +700,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const _personalInfoForm = typeof personalInfoForm !== 'undefined' ? personalInfoForm : null;
 
     if (_changePasswordForm) {
-        passwordSecurityManager = new PasswordSecurityManager();
+        _passwordSecurityManager = new PasswordSecurityManager();
     }
 
     if (_savePermissionsBtn) {

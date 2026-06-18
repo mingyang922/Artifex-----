@@ -104,12 +104,12 @@ function saveUserConfig() {
         userId: usernameInput ? usernameInput.value : '',
         // 个人信息
         personalInfo: {
-            email: document.getElementById('email').value,
-            phone: document.getElementById('phone').value,
-            nickname: document.getElementById('nickname').value,
-            bio: document.getElementById('bio').value,
-            country: document.getElementById('country').value,
-            language: document.getElementById('language').value,
+            email: (document.getElementById('email') || {}).value || '',
+            phone: (document.getElementById('phone') || {}).value || '',
+            nickname: (document.getElementById('nickname') || {}).value || '',
+            bio: (document.getElementById('bio') || {}).value || '',
+            country: (document.getElementById('country') || {}).value || '',
+            language: (document.getElementById('language') || {}).value || '',
         },
         // 权限设置
         permissions: Array.from(
@@ -143,12 +143,13 @@ function loadUserConfig() {
     if (config.personalInfo) {
         const { email, phone, nickname, bio, country, language } =
             config.personalInfo;
-        document.getElementById('email').value = email;
-        document.getElementById('phone').value = phone;
-        document.getElementById('nickname').value = nickname;
-        document.getElementById('bio').value = bio;
-        document.getElementById('country').value = country;
-        document.getElementById('language').value = language;
+        const el = (id) => document.getElementById(id);
+        if (el('email')) el('email').value = email || '';
+        if (el('phone')) el('phone').value = phone || '';
+        if (el('nickname')) el('nickname').value = nickname || '';
+        if (el('bio')) el('bio').value = bio || '';
+        if (el('country')) el('country').value = country || '';
+        if (el('language')) el('language').value = language || '';
     }
 
     // 加载权限设置
