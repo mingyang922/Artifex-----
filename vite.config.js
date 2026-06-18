@@ -26,8 +26,10 @@ export default defineConfig({
                 chunkFileNames: 'assets/[name]-[hash].js',
                 assetFileNames: 'assets/[name]-[hash].[ext]',
                 // 代码分割
-                manualChunks: {
-                    'vendor-utils': ['js/api-utils.js', 'js/html-utils.js', 'js/constants.js'],
+                manualChunks(id) {
+                    if (id.includes('js/api-utils') || id.includes('js/html-utils') || id.includes('js/constants')) {
+                        return 'vendor-utils';
+                    }
                 },
             },
         },
