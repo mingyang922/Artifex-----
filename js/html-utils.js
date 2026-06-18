@@ -14,7 +14,7 @@ const HTML_ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;',
  * @param {*} str - 要转义的值（会先转为字符串）
  * @returns {string} 转义后的安全字符串
  */
-export function escapeHtml(str) {
+function escapeHtml(str) {
     if (str == null) return '';
     return String(str).replace(/[&<>"']/g, function (ch) { return HTML_ESCAPE_MAP[ch]; });
 }
@@ -24,7 +24,7 @@ export function escapeHtml(str) {
  * @param {string} str - 要转义的字符串
  * @returns {string} 转义后的安全字符串
  */
-export function escapeJsStr(str) {
+function escapeJsStr(str) {
     if (typeof str !== 'string') return '';
     return str
         .replace(/\\/g, '\\\\')
@@ -33,14 +33,14 @@ export function escapeJsStr(str) {
         .replace(/\n/g, '\\n')
         .replace(/\r/g, '\\r')
         .replace(/\0/g, '\\0')
-        .replace(/[\u2028]/g, '\\u2028')
-        .replace(/[\u2029]/g, '\\u2029')
+        .replace(/[ ]/g, '\\u2028')
+        .replace(/[ ]/g, '\\u2029')
         .replace(/</g, '\\x3c')
         .replace(/>/g, '\\x3e');
 }
 
 // 汇总对象
-export const HtmlUtils = { escapeHtml, escapeJsStr };
+var HtmlUtils = { escapeHtml: escapeHtml, escapeJsStr: escapeJsStr };
 
 // 向后兼容全局变量
 if (typeof window !== 'undefined') {
