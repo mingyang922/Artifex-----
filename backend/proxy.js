@@ -167,13 +167,15 @@ usersDb.init();
 const { requireAuth, isAdminUser } = createAuthPolicy(usersDb);
 const { sanitizeApiSettingsPayload, getUserProviderConfig } = createUserApiSettingsHelpers(usersDb);
 
+const sessionStore = new SQLiteStore({
+    db: 'sessions.sqlite',
+    dir: path.join(__dirname, 'data'),
+    ttl: 24 * 60 * 60, // 24 小时
+    cleanupInterval: 30 * 60 * 1000, // 30 分钟清理过期会话
+});
+
 app.use(session({
-    store: new SQLiteStore({
-        db: 'sessions.sqlite',
-        dir: path.join(__dirname, 'data'),
-        ttl: 24 * 60 * 60, // 24 小时
-        cleanupInterval: 30 * 60 * 1000, // 30 分钟清理过期会话
-    }),
+    store: sessionStore,
     secret: resolvedSessionSecret,
     resave: false,
     saveUninitialized: false,
@@ -323,7 +325,7 @@ app.use('/api', createAdminRouter({ usersDb, requireAuth, isAdminUser }));
 app.get('/api/activity-log', requireAuth, (req, res) => {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
-    const _offset = (page - 1) * limit;
+    const offset = (page - 1) * limit;
     const total = usersDb.getActivityLogCount(req.currentUser.id);
     const logs = usersDb.getActivityLog(req.currentUser.id, limit, offset);
     res.json({ ok: true, logs, total, page, limit });
@@ -336,9 +338,9 @@ app.get('/api/admin/activity-log', requireAuth, (req, res) => {
     }
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
-    const _offset = (page - 1) * limit;
+    const offset = (page - 1) * limit;
     const total = usersDb.getRecentActivityCount();
-    const logs = usersDb.getRecentActivity(limit);
+    const logs = usersDb.getRecentActivity(limit, offset);
     res.json({ ok: true, logs, total, page, limit });
 });
 
@@ -418,14 +420,16 @@ app.get('/api/health/detail', requireAuth, (req, res) => {
 
 // ── API 文档 ─────────────────────────────────────────────────────
 const openapiPath = path.join(__dirname, '..', 'docs', 'openapi.json');
+let _openapiCache = null;
 if (fs.existsSync(openapiPath)) {
-    app.get('/api/docs', (req, res) => {
-        try {
-            res.json(JSON.parse(fs.readFileSync(openapiPath, 'utf-8')));
-        } catch (e) {
-            logger.error('[openapi] 读取文档失败:', e.message);
-            res.status(500).json({ error: 'API 文档加载失败' });
-        }
+    try {
+        _openapiCache = JSON.parse(fs.readFileSync(openapiPath, 'utf-8'));
+    } catch (e) {
+        logger.warn('[openapi] 预加载文档失败:', e.message);
+    }
+    app.get('/api/docs', (_req, res) => {
+        if (!_openapiCache) return res.status(500).json({ error: 'API 文档加载失败' });
+        res.json(_openapiCache);
     });
 }
 
@@ -439,7 +443,10 @@ const server = app.listen(PORT, () => {
 });
 
 // ── WebSocket 实时通知 ──────────────────────────────────────────
-const wsServer = new WsServer(server);
+const wsServer = new WsServer(server, {
+    sessionStore,
+    sessionSecret: resolvedSessionSecret,
+});
 // 暴露给路由使用
 app.set('wsServer', wsServer);
 

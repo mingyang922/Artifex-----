@@ -125,7 +125,7 @@ class PasswordSecurityManager {
         const confirmPwdEl = document.getElementById('confirm-password');
         if (!newPwdEl || !confirmPwdEl) return true;
         const newPassword = newPwdEl.value;
-        const _confirmPassword = confirmPwdEl.value;
+        const confirmPassword = confirmPwdEl.value;
 
         if (confirmPassword && newPassword !== confirmPassword) {
             this.showError('confirm-password-error', '两次输入的密码不一致');

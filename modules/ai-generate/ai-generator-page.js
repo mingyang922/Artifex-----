@@ -793,6 +793,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const observer = new MutationObserver(() => scan());
         observer.observe(document.body, { childList: true, subtree: true });
+        window.addEventListener('beforeunload', () => observer.disconnect());
     })();
 
     // 选项卡切换：三个独立"页面"视图 + 丝滑动画

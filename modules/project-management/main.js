@@ -9,8 +9,8 @@ const PMTemplates = window.PMTemplates || {};
 const pmStorageKey = PMSharedLib.pmStorageKey || function (base) { return base; };
 
 // 全局变量定义
-const projects = []; // 项目列表
-const projectsCache = null; // 内存缓存
+let projects = []; // 项目列表
+let projectsCache = null; // 内存缓存
 
 // DOM加载完成后执行初始化
 if (document.readyState === 'loading') {
@@ -342,8 +342,8 @@ async function compressImageFile(file, options) {
         img.src = originalDataUrl;
     });
 
-    const width = img.naturalWidth || img.width;
-    const height = img.naturalHeight || img.height;
+    let width = img.naturalWidth || img.width;
+    let height = img.naturalHeight || img.height;
     const ratio = Math.min(maxWidth / width, maxHeight / height, 1);
     width = Math.max(1, Math.round(width * ratio));
     height = Math.max(1, Math.round(height * ratio));
@@ -354,8 +354,8 @@ async function compressImageFile(file, options) {
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0, width, height);
 
-    const quality = 0.85;
-    const result = canvas.toDataURL('image/jpeg', quality);
+    let quality = 0.85;
+    let result = canvas.toDataURL('image/jpeg', quality);
     while (result.length > targetMaxLength && quality > minQuality) {
         quality -= 0.1;
         result = canvas.toDataURL('image/jpeg', quality);
@@ -402,7 +402,7 @@ async function syncProjectAssetToLibrary(project, asset) {
     try {
         const category = getLibraryCategoryByAssetType(asset.type);
         const content = asset.content || '';
-        const mime = 'image/png';
+        let mime = 'image/png';
         if (typeof content === 'string' && content.startsWith('data:')) {
             const m = content.match(/^data:([^;]+);/);
             if (m && m[1]) mime = m[1];
@@ -412,7 +412,7 @@ async function syncProjectAssetToLibrary(project, asset) {
         const sourceId = 'project_' + project.id + '_' + asset.id;
 
         // Check for existing asset with same source to deduplicate
-        const wasDeduped = false;
+        let wasDeduped = false;
         try {
             const listResp = await fetch('/api/asset-library', { credentials: 'include' });
             if (listResp.ok) {
@@ -483,7 +483,7 @@ async function addProjectAsset() {
         project.assets = [];
     }
 
-    const finalContent = assetContent;
+    let finalContent = assetContent;
     if (selectedFile) {
         try {
             finalContent = await optimizeFileForStorage(selectedFile);
@@ -523,7 +523,7 @@ async function addProjectAsset() {
         assetFileName.textContent = '未选择本地文件';
     }
 
-    const tip = '素材添加成功！';
+    let tip = '素材添加成功！';
     if (syncResult && syncResult.ok) {
         tip += syncResult.deduped ? '\n素材库中已有同源素材，已更新并置顶。' : '\n已同步到素材库。';
         if (syncResult.nearLimit) {

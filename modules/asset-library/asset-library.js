@@ -289,7 +289,7 @@
                             });
                         }
                     }
-                } catch (_e) {
+                } catch (e) {
                     console.warn('读取 currentProjectContext 失败：', e);
                 }
             }
@@ -298,7 +298,7 @@
                 // Save categories to localStorage (lightweight user preference)
                 try {
                     localStorage.setItem(STORAGE_KEY + '_categories', JSON.stringify(categories));
-                } catch (_e) {
+                } catch (e) {
                     console.debug('[asset-library] 保存分类失败', e);
                 }
                 return true;
@@ -333,7 +333,7 @@
                     assets.unshift(serverItem);
                     renderAssets();
                     return true;
-                } catch (_e) {
+                } catch (e) {
                     console.error('保存素材到服务器失败', e);
                     uiToast('保存失败：' + (e.message || '请重试'), 'warn');
                     return false;
@@ -426,7 +426,7 @@
                         assets.length = 0;
                         data.items.forEach(function(item) { assets.push(dbItemToFrontend(item)); });
                     }
-                } catch (_e) {
+                } catch (e) {
                     console.error('从服务器加载素材失败', e);
                     uiToast('加载素材库失败，将使用本地备份', 'warn');
                     // Fallback to localStorage backup
@@ -597,7 +597,7 @@
                         scopedKey,
                         JSON.stringify({ categories: scopedCategories, assets: scopedAssets })
                     );
-                } catch (_e) {
+                } catch (e) {
                     console.warn('迁移旧素材库数据失败：', e);
                 }
             }
@@ -605,7 +605,7 @@
             async function bootAssetLibrary() {
                 try {
                     await GameUiUserScope.ensure();
-                } catch (_e) {
+                } catch (e) {
                     console.warn('用户态校验失败，继续初始化素材库：', e);
                 }
                 if (typeof GameUiUserScope !== 'undefined' && typeof GameUiUserScope.key === 'function') {

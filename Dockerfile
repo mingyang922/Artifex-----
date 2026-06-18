@@ -57,9 +57,11 @@ COPY config/ ./config/
 COPY scripts/ ./scripts/
 
 # Create data directory for SQLite databases
-RUN mkdir -p backend/data
+RUN mkdir -p backend/data && chown -R node:node /app
 
 ENV NODE_ENV=production
+
+USER node
 
 EXPOSE 3000
 

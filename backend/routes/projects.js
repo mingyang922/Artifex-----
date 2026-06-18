@@ -65,6 +65,12 @@ function createProjectRouter(deps) {
 
     // 添加项目素材
     router.post('/projects/:id/assets', requireAuth, csrfProtection, (req, res) => {
+        const projectId = Number(req.params.id);
+        if (!projectId || isNaN(projectId)) return res.status(400).json({ error: '无效的项目 ID' });
+        const project = usersDb.getProject(projectId);
+        if (!project || project.user_id !== req.currentUser.id) {
+            return res.status(404).json({ error: '项目不存在' });
+        }
         const { name, type, content } = req.body || {};
         if (!name || !content) {
             return res.status(400).json({ error: '素材名称和内容不能为空' });
@@ -105,7 +111,7 @@ function createProjectRouter(deps) {
             }
         }
 
-        const asset = usersDb.addProjectAsset(req.params.id, req.currentUser.id, name, type, content);
+        const asset = usersDb.addProjectAsset(projectId, req.currentUser.id, name, type, content);
         res.json({ ok: true, asset });
     });
 

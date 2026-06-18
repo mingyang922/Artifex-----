@@ -30,9 +30,12 @@ function createAdminRouter(deps) {
         if (!isAdminUser(req.currentUser)) {
             return res.status(403).json({ error: '权限不足' });
         }
+        const limit = parseInt(req.query.limit, 10) || 200;
+        const offset = parseInt(req.query.offset, 10) || 0;
         const summary = usersDb.getGlobalUsageSummary();
-        const details = usersDb.getGlobalUsageStats();
-        res.json({ ok: true, summary, details });
+        const details = usersDb.getGlobalUsageStats(limit, offset);
+        const total = usersDb.getGlobalUsageStatsCount();
+        res.json({ ok: true, summary, details, total, limit, offset });
     });
 
     // 管理员：用户列表
@@ -40,8 +43,11 @@ function createAdminRouter(deps) {
         if (!isAdminUser(req.currentUser)) {
             return res.status(403).json({ error: '权限不足' });
         }
-        const users = usersDb.getAllUsers();
-        res.json({ ok: true, users });
+        const limit = parseInt(req.query.limit, 10) || 100;
+        const offset = parseInt(req.query.offset, 10) || 0;
+        const users = usersDb.getAllUsers(limit, offset);
+        const total = usersDb.getAllUsersCount();
+        res.json({ ok: true, users, total, limit, offset });
     });
 
     return router;

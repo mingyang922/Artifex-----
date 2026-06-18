@@ -10,6 +10,7 @@ const path = require('path');
 
 const distDir = path.join(__dirname, '..', 'dist');
 const manifestPath = path.join(distDir, 'sw-manifest.json');
+const pkg = require('../package.json');
 
 /**
  * 递归扫描目录，收集所有可缓存的静态资源
@@ -29,7 +30,7 @@ function scanDir(dir, base = '') {
 
         if (stat.isDirectory()) {
             entries.push(...scanDir(fullPath, relPath));
-        } else if (/\.(js|css|png|jpg|jpeg|gif|svg|woff2?|ttf|eot|webp|avif|ico)$/.test(item)) {
+        } else if (/\.(js|css|png|jpg|jpeg|gif|svg|woff2?|ttf|eot|webp|avif|ico)$/.test(item) && !/\.map$/.test(item)) {
             entries.push('/' + relPath);
         }
     }
@@ -41,7 +42,7 @@ const assets = scanDir(distDir);
 const manifest = {
     assets,
     generatedAt: new Date().toISOString(),
-    version: new Date().toISOString(),
+    version: pkg.version,
 };
 
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));

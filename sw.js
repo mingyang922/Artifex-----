@@ -5,6 +5,7 @@
 
 const CACHE_NAME = 'artifex-v1.3.3';
 const MAX_CACHE_SIZE = 200; // 最大缓存条目数
+let fetchCount = 0; // 用于限制 trimCache 调用频率
 const STATIC_ASSETS = [
     '/',
     '/login.html',
@@ -103,7 +104,7 @@ self.addEventListener('fetch', (event) => {
                             const responseClone = networkResponse.clone();
                             caches.open(CACHE_NAME).then((cache) => {
                                 cache.put(request, responseClone);
-                                trimCache(CACHE_NAME, MAX_CACHE_SIZE);
+                                if (++fetchCount % 50 === 0) trimCache(CACHE_NAME, MAX_CACHE_SIZE);
                             });
                         }
                     })
@@ -119,7 +120,7 @@ self.addEventListener('fetch', (event) => {
                         const responseClone = networkResponse.clone();
                         caches.open(CACHE_NAME).then((cache) => {
                             cache.put(request, responseClone);
-                            trimCache(CACHE_NAME, MAX_CACHE_SIZE);
+                            if (++fetchCount % 50 === 0) trimCache(CACHE_NAME, MAX_CACHE_SIZE);
                         });
                     }
                     return networkResponse;

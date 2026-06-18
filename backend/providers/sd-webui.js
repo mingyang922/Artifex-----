@@ -70,7 +70,6 @@ async function handleSdWebUiTxt2Img(req, res, { getUserProviderConfig }) {
         res.status(status).json({
             error: 'sd-webui txt2img 失败',
             message: (d && (d.detail || d.error || d.message)) || e.message,
-            detail: d,
         });
     }
 }

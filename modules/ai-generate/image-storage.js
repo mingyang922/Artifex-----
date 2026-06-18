@@ -84,10 +84,10 @@
         setValue('proPromptTextarea', state.proPrompt);
         setValue('stStrength', state.stStrength);
 
-        const imageModeEl = document.querySelector('input[name="imageMode"][value="' + (state.imageMode || 'text2img') + '"]');
+        const imageModeEl = document.querySelector('input[name="imageMode"][value="' + CSS.escape(state.imageMode || 'text2img') + '"]');
         if (imageModeEl) imageModeEl.checked = true;
         const promptModeEl = document.querySelector(
-            'input[name="promptMode"][value="' + (state.promptMode || 'custom') + '"]'
+            'input[name="promptMode"][value="' + CSS.escape(state.promptMode || 'custom') + '"]'
         );
         if (promptModeEl) promptModeEl.checked = true;
         const apiProviderEl = document.getElementById('apiProvider');

@@ -1,4 +1,5 @@
 {
+    "id": "artifex",
     "name": "Artifex - 二维游戏美术协作平台",
     "short_name": "Artifex",
     "description": "2D游戏美术协作与AI资产生成平台",
@@ -10,7 +11,7 @@
     "icons": [
         {
             "src": "vendor/images/app-icon.svg",
-            "sizes": "192x192 512x512",
+            "sizes": "any",
             "type": "image/svg+xml",
             "purpose": "any maskable"
         },

@@ -252,7 +252,7 @@ async function callJimengImageAPIAxios(apiKey, prompt, extra, model, sizeParam, 
             timeout: 180000,
             proxy: false,
         });
-    } catch (_e) {
+    } catch (e) {
         const st = e.response && e.response.status;
         const data = e.response && e.response.data;
         const detailStr = (() => {
@@ -354,7 +354,7 @@ async function callJimengImage2ImageAPI(prompt, imageDataUrl, strength, size, ex
             const contentType = r.headers['content-type'] || 'image/png';
             const b64 = Buffer.from(r.data).toString('base64');
             normalizedImageInput = `data:${contentType};base64,${b64}`;
-        } catch (_e) {
+        } catch (e) {
             console.warn('[jimeng img2img] 三视图 URL 拉取失败，将回退原始 URL 透传:', e.message);
         }
     }
@@ -486,7 +486,7 @@ async function handleJimengLiveTest(req, res, { getUserProviderConfig }) {
                       ? '成功：REST 与网关可用。'
                       : undefined,
         });
-    } catch (_e) {
+    } catch (e) {
         return res.status(502).json({
             error: '请求异常',
             message: e.message,
@@ -513,10 +513,10 @@ function logJimengConfig() {
         const k = normalizeJimengApiKey(rawKey);
         if (k) {
             logger.info(
-                `[即梦] 密钥摘要: 长度=${k.length} 前缀=${k.slice(0, 4)} 尾缀=...${k.slice(-4)}`
+                `[即梦] 密钥摘要: 长度=${k.length} 前缀=${k.slice(0, 4)}...`
             );
         }
-    } catch (_e) {
+    } catch (e) {
         console.warn('[即梦] 密钥摘要输出失败:', e.message);
     }
 }

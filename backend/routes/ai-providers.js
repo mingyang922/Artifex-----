@@ -26,34 +26,46 @@ function createAiProviderRouter(deps) {
         tencentProvider, alibabaProvider, jimengProvider, sdWebUiProvider,
     } = deps;
 
+    // 包装 async 路由，防止未捕获的 promise rejection 导致进程崩溃
+    function wrapAsync(fn) {
+        return (req, res, next) => {
+            Promise.resolve(fn(req, res, next)).catch((err) => {
+                console.error('[ai-providers] 未捕获的异步错误:', err.message || err);
+                if (!res.headersSent) {
+                    res.status(500).json({ error: '服务器内部错误', message: '请求处理失败，请稍后重试' });
+                }
+            });
+        };
+    }
+
     // 腾讯混元
     const _tencentDeps = { runtimeConfig, API_CONFIG, getUserProviderConfig, isAdminUser };
-    router.post('/hunyuan-proxy', requireAuth, csrfProtection, (req, res) => tencentProvider.handleHunyuanProxy(req, res, _tencentDeps));
+    router.post('/hunyuan-proxy', requireAuth, csrfProtection, wrapAsync((req, res) => tencentProvider.handleHunyuanProxy(req, res, _tencentDeps)));
 
     // SD WebUI 状态
-    router.get('/sd-webui/status', requireAuth, (req, res) => sdWebUiProvider.handleSdWebUiStatus(req, res, { getUserProviderConfig }));
+    router.get('/sd-webui/status', requireAuth, wrapAsync((req, res) => sdWebUiProvider.handleSdWebUiStatus(req, res, { getUserProviderConfig })));
 
     // 即梦状态
-    router.get('/jimeng/status', requireAuth, (req, res) => jimengProvider.handleJimengStatus(req, res, { getUserProviderConfig }));
+    router.get('/jimeng/status', requireAuth, wrapAsync((req, res) => jimengProvider.handleJimengStatus(req, res, { getUserProviderConfig })));
 
     // 即梦在线测试（POST，因为有副作用：消耗 API 配额）
-    router.post('/jimeng/live-test', requireAuth, csrfProtection, (req, res) => jimengProvider.handleJimengLiveTest(req, res, { getUserProviderConfig }));
+    router.post('/jimeng/live-test', requireAuth, csrfProtection, wrapAsync((req, res) => jimengProvider.handleJimengLiveTest(req, res, { getUserProviderConfig })));
 
     // SD WebUI 文生图
-    router.post('/sd-webui/txt2img', requireAuth, csrfProtection, (req, res) => sdWebUiProvider.handleSdWebUiTxt2Img(req, res, { getUserProviderConfig }));
+    router.post('/sd-webui/txt2img', requireAuth, csrfProtection, wrapAsync((req, res) => sdWebUiProvider.handleSdWebUiTxt2Img(req, res, { getUserProviderConfig })));
 
     // 阿里云文生图
-    router.post('/alibaba-proxy', requireAuth, csrfProtection, (req, res) =>
+    router.post('/alibaba-proxy', requireAuth, csrfProtection, wrapAsync((req, res) =>
         alibabaProvider.handleAlibabaProxy(req, res, { runtimeConfig, API_CONFIG, getUserProviderConfig })
-    );
+    ));
 
     // 阿里云视觉
-    router.post('/alibaba-vision-proxy', requireAuth, csrfProtection, (req, res) =>
+    router.post('/alibaba-vision-proxy', requireAuth, csrfProtection, wrapAsync((req, res) =>
         alibabaProvider.handleAlibabaVisionProxy(req, res, { runtimeConfig, API_CONFIG, getUserProviderConfig })
-    );
+    ));
 
     // 腾讯云状态
-    router.get('/tencent/status', requireAuth, (req, res) => tencentProvider.handleTencentStatus(req, res, { getUserProviderConfig, isAdminUser }));
+    router.get('/tencent/status', requireAuth, wrapAsync((req, res) => tencentProvider.handleTencentStatus(req, res, { getUserProviderConfig, isAdminUser })));
 
     return router;
 }

@@ -9,16 +9,16 @@ export default defineConfig({
         minify: 'esbuild',
         rollupOptions: {
             input: {
-                main: resolve(__dirname, 'login.html'),
-                dashboard: resolve(__dirname, 'dashboard.html'),
-                'ai-generator': resolve(__dirname, 'modules/ai-generate/ai-generator-new.html'),
-                'asset-library': resolve(__dirname, 'modules/asset-library/asset-library.html'),
-                'project-management': resolve(__dirname, 'modules/project-management/index.html'),
-                'project-detail': resolve(__dirname, 'modules/project-management/project-detail.html'),
-                'user-center': resolve(__dirname, 'modules/user-center/userCenter.html'),
-                admin: resolve(__dirname, 'modules/admin/admin.html'),
-                'style-presets': resolve(__dirname, 'modules/style-presets/style-presets.html'),
-                'message-center': resolve(__dirname, 'modules/messageCenter.html'),
+                main: resolve(import.meta.dirname, 'login.html'),
+                dashboard: resolve(import.meta.dirname, 'dashboard.html'),
+                'ai-generator': resolve(import.meta.dirname, 'modules/ai-generate/ai-generator-new.html'),
+                'asset-library': resolve(import.meta.dirname, 'modules/asset-library/asset-library.html'),
+                'project-management': resolve(import.meta.dirname, 'modules/project-management/index.html'),
+                'project-detail': resolve(import.meta.dirname, 'modules/project-management/project-detail.html'),
+                'user-center': resolve(import.meta.dirname, 'modules/user-center/userCenter.html'),
+                admin: resolve(import.meta.dirname, 'modules/admin/admin.html'),
+                'style-presets': resolve(import.meta.dirname, 'modules/style-presets/style-presets.html'),
+                'message-center': resolve(import.meta.dirname, 'modules/messageCenter.html'),
             },
             output: {
                 // 文件哈希用于长期缓存

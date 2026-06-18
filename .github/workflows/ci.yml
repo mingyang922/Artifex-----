@@ -16,8 +16,8 @@ on:
 
 jobs:
   lint-and-test:
-    # 只有打 tag 才跑完整流程（lint + test）
-    if: startsWith(github.ref, 'refs/tags/')
+    # tag 和 PR 都跑完整流程（lint + test + build）
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -35,6 +35,8 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm test
+      - name: Build
+        run: npm run build
 
   lint-only:
     # 日常 push / PR 只跑 lint，省额度

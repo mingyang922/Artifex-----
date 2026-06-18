@@ -225,7 +225,12 @@ async function callFreeImageAPI(prompt, size) {
         } catch (_e) {
             const w = Math.max(256, parseInt(width, 10) || 512);
             const h = Math.max(256, parseInt(height, 10) || 512);
-            const safePrompt = String(prompt || 'FREE').slice(0, 36);
+            const safePrompt = String(prompt || 'FREE').slice(0, 36)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
             const svg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
   <defs>

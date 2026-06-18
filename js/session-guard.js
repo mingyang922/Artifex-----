@@ -5,7 +5,7 @@
 (function () {
     'use strict';
 
-    const _redirecting = false;
+    let _redirecting = false;
 
     // 静默路径：这些接口返回 401 是正常逻辑，不弹窗
     const SILENT_PATHS = [

@@ -355,8 +355,13 @@
         if (copyLinkBtn) {
             copyLinkBtn.addEventListener('click', function () {
                 const linkInput = document.getElementById('share-link');
-                linkInput.select();
-                document.execCommand('copy');
+                const textToCopy = linkInput.value;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(textToCopy);
+                } else {
+                    linkInput.select();
+                    document.execCommand('copy');
+                }
                 PMSharedLib.uiToast('分享链接已复制！', 'success');
             });
         }

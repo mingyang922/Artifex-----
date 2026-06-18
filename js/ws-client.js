@@ -1,6 +1,7 @@
 /**
  * Artifex - WebSocket 实时通知客户端
  * 替代轮询，接收服务端推送的通知
+ * 认证方式：通过 session cookie 自动完成，无需手动发送 auth 消息
  */
 'use strict';
 
@@ -8,7 +9,7 @@
     let _reconnectTimer = null;
     let _reconnectDelay = 1000;
     const _maxReconnectDelay = 30000;
-    const _listeners = [];
+    let _listeners = [];
 
     function getWsUrl() {
         const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -28,26 +29,28 @@
         }
 
         _ws.onopen = function () {
+            if (_reconnectTimer) {
+                clearTimeout(_reconnectTimer);
+                _reconnectTimer = null;
+            }
             _reconnectDelay = 1000; // 重置重连延迟
-            // 发送认证消息
-            try {
-                const userId = window.__artifexUserId;
-                if (userId) {
-                    _ws.send(JSON.stringify({ type: 'auth', userId: userId }));
-                }
-            } catch (_) { /* ignore */ }
         };
 
         _ws.onmessage = function (event) {
             try {
                 const data = JSON.parse(event.data);
                 _listeners.forEach(function (fn) {
-                    try { fn(data); } catch (_) { /* ignore */ }
+                    try { fn(data); } catch (e) { console.warn('[WsClient] 监听器异常:', e); }
                 });
-            } catch (_) { /* ignore invalid messages */ }
+            } catch (e) { console.warn('[WsClient] 消息解析失败:', e); }
         };
 
-        _ws.onclose = function () {
+        _ws.onclose = function (event) {
+            // 认证失败（4001）时不重连，避免无效重试
+            if (event.code === 4001) {
+                console.warn('[WsClient] 认证失败，不重连:', event.reason);
+                return;
+            }
             scheduleReconnect();
         };
 
@@ -84,12 +87,11 @@
     }
 
     /**
-     * 手动连接（需先设置 window.__artifexUserId）
+     * 初始化并连接 WebSocket
+     * 认证通过 session cookie 自动完成
      */
     function init() {
-        if (window.__artifexUserId) {
-            connect();
-        }
+        connect();
     }
 
     /**

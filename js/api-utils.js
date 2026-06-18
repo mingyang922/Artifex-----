@@ -23,7 +23,8 @@ async function getCsrfToken() {
         _csrfToken = data.csrfToken || '';
         _csrfTokenTime = now;
         return _csrfToken;
-    } catch (_e) {
+    } catch (e) {
+        console.warn('[Artifex] 获取 CSRF Token 失败:', e);
         return '';
     }
 }
@@ -37,10 +38,12 @@ async function getCsrfToken() {
 async function fetchWithCsrf(url, options = {}) {
     const csrfToken = await getCsrfToken();
     const headers = {
-        'Content-Type': 'application/json',
         'X-XSRF-Token': csrfToken,
         ...(options.headers || {}),
     };
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
     return fetch(url, {
         ...options,
         credentials: 'include',

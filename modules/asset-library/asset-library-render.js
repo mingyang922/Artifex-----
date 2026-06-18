@@ -277,7 +277,7 @@
             }
             assets = assets.filter((x) => x.id !== id);
             renderAssetsBase();
-        } catch (_e) {
+        } catch (e) {
             console.error('删除素材失败', e);
             uiToast('删除失败：' + (e.message || '请重试'), 'warn');
         }
@@ -311,7 +311,7 @@
                     assets = assets.filter((x) => x.id !== id);
                     deleted++;
                 }
-            } catch (_e) {
+            } catch (e) {
                 console.error('批量删除素材失败', id, e);
             }
         }
@@ -406,7 +406,7 @@
             } else if (format === 'spritesheet') {
                 await exportGenericSpriteSheet(imageAssets);
             }
-        } catch (_e) {
+        } catch (e) {
             console.error('导出失败:', e);
             uiToast('导出失败: ' + (e.message || '未知错误'), 'warn');
         }

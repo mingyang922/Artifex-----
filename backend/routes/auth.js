@@ -7,6 +7,7 @@
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const { sendError, ERR } = require('../lib/error-response');
+const logger = require('../lib/logger');
 
 /**
  * @param {object} deps
@@ -63,12 +64,12 @@ function createAuthRouter(deps) {
             const hash = await bcrypt.hash(String(password), 10);
             const row = usersDb.createUser(u, em, hash);
             req.session.regenerate((err) => {
-                if (err) { console.error('session regenerate', err); return sendError(res, 500, ERR.INTERNAL, '注册失败'); }
+                if (err) { logger.error('session regenerate', err); return sendError(res, 500, ERR.INTERNAL, '注册失败'); }
                 req.session.userId = row.id;
                 res.json({ ok: true, user: publicUser(row) });
             });
         } catch (e) {
-            console.error('register', e);
+            logger.error('register', e);
             sendError(res, 500, ERR.INTERNAL, '注册失败');
         }
     });
@@ -83,13 +84,13 @@ function createAuthRouter(deps) {
                 return sendError(res, 401, ERR.AUTH_REQUIRED, '邮箱或密码错误');
             }
             req.session.regenerate((err) => {
-                if (err) { console.error('session regenerate', err); return sendError(res, 500, ERR.INTERNAL, '登录失败'); }
+                if (err) { logger.error('session regenerate', err); return sendError(res, 500, ERR.INTERNAL, '登录失败'); }
                 req.session.userId = row.id;
                 try { usersDb.addActivity(row.id, '用户登录', 'auth', null, null); } catch (_) { /* 活动日志非关键 */ }
                 res.json({ ok: true, user: publicUser(row) });
             });
         } catch (e) {
-            console.error('login', e);
+            logger.error('login', e);
             sendError(res, 500, ERR.INTERNAL, '登录失败');
         }
     });
@@ -132,7 +133,7 @@ function createAuthRouter(deps) {
             try { usersDb.addActivity(req.currentUser.id, '修改密码', 'security', null, null); } catch (_) {}
             res.json({ ok: true, message: '密码修改成功' });
         } catch (e) {
-            console.error('change-password', e);
+            logger.error('change-password', e);
             sendError(res, 500, ERR.INTERNAL, '密码修改失败');
         }
     });

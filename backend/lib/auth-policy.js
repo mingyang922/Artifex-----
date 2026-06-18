@@ -8,6 +8,14 @@ function createAuthPolicy(usersDb) {
     const USER_CACHE_TTL = 5000; // 5 秒
     const userCache = new Map();
 
+    // 定期清理过期缓存条目，防止内存泄漏
+    setInterval(() => {
+        const now = Date.now();
+        for (const [key, entry] of userCache.entries()) {
+            if (!entry || now >= entry.expireAt) userCache.delete(key);
+        }
+    }, 60000).unref();
+
     function getCachedUser(userId) {
         const entry = userCache.get(userId);
         if (entry && Date.now() < entry.expireAt) {

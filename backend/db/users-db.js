@@ -355,8 +355,10 @@ function getUserApiCredentialStatus(userId) {
 
 // ─── 管理员功能 ───
 
-function getAllUsers() {
-    const rows = db.prepare('SELECT id, username, email, role, profile_json, created_at FROM users ORDER BY created_at DESC').all();
+function getAllUsers(limit, offset) {
+    const lim = Math.min(500, Math.max(1, Number(limit) || 100));
+    const off = Math.max(0, Number(offset) || 0);
+    const rows = db.prepare('SELECT id, username, email, role, profile_json, created_at FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?').all(lim, off);
     return rows.map((row) => {
         let profile = {};
         try { profile = JSON.parse(row.profile_json || '{}'); } catch (_) { /* profile_json 损坏时降级为空对象 */ }
@@ -370,6 +372,11 @@ function getAllUsers() {
             created_at: row.created_at,
         };
     });
+}
+
+function getAllUsersCount() {
+    const row = db.prepare('SELECT COUNT(*) AS count FROM users').get();
+    return row ? row.count : 0;
 }
 
 // ─── 项目管理 ───
@@ -546,14 +553,24 @@ function getUserUsageToday(userId) {
     ).all(Number(userId), today + 'T00:00:00.000Z');
 }
 
-function getGlobalUsageStats() {
+function getGlobalUsageStats(limit, offset) {
+    const lim = Math.min(1000, Math.max(1, Number(limit) || 200));
+    const off = Math.max(0, Number(offset) || 0);
     return db.prepare(
         `SELECT u.username, ul.provider, ul.operation, ul.status, COUNT(*) AS count
          FROM usage_logs ul
          JOIN users u ON u.id = ul.user_id
          GROUP BY ul.user_id, ul.provider, ul.operation, ul.status
-         ORDER BY count DESC`
-    ).all();
+         ORDER BY count DESC
+         LIMIT ? OFFSET ?`
+    ).all(lim, off);
+}
+
+function getGlobalUsageStatsCount() {
+    const row = db.prepare(
+        'SELECT COUNT(DISTINCT user_id || provider || operation || status) AS count FROM usage_logs'
+    ).get();
+    return row ? row.count : 0;
 }
 
 function getGlobalUsageSummary() {
@@ -657,6 +674,7 @@ function checkQuota(userId, provider) {
 function close() {
     if (db) {
         try {
+            if (_checkpointTimer) { clearInterval(_checkpointTimer); _checkpointTimer = null; }
             checkpointWal();
             db.close();
         } catch (_e) {
@@ -683,10 +701,12 @@ module.exports = {
     deleteUserApiCredentials,
     getUserApiCredentialStatus,
     getAllUsers,
+    getAllUsersCount,
     logApiCall,
     getUserUsageStats,
     getUserUsageToday,
     getGlobalUsageStats,
+    getGlobalUsageStatsCount,
     getGlobalUsageSummary,
     getUserQuota,
     setUserQuota,

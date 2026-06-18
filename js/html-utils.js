@@ -15,7 +15,7 @@ const HTML_ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;',
  * @returns {string} 转义后的安全字符串
  */
 export function escapeHtml(str) {
-    if (str === null) return '';
+    if (str == null) return '';
     return String(str).replace(/[&<>"']/g, function (ch) { return HTML_ESCAPE_MAP[ch]; });
 }
 
@@ -26,7 +26,17 @@ export function escapeHtml(str) {
  */
 export function escapeJsStr(str) {
     if (typeof str !== 'string') return '';
-    return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/</g, '\\x3c').replace(/>/g, '\\x3e');
+    return str
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/\0/g, '\\0')
+        .replace(/[\u2028]/g, '\\u2028')
+        .replace(/[\u2029]/g, '\\u2029')
+        .replace(/</g, '\\x3c')
+        .replace(/>/g, '\\x3e');
 }
 
 // 汇总对象

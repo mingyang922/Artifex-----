@@ -54,7 +54,7 @@ async function handleHunyuanProxy(req, res, { _runtimeConfig, _API_CONFIG, getUs
         const result = await client.ChatCompletions(requestData);
         res.json({ Response: result });
     } catch (error) {
-        console.error('API代理错误:', error);
+        console.error('API代理错误:', error.message || error);
 
         if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
             res.status(408).json({
@@ -151,7 +151,7 @@ async function callTencentImageAPI(prompt, size, userConfig) {
             throw new Error('腾讯云API返回格式错误，未找到图片数据');
         }
     } catch (error) {
-        console.error('腾讯云API调用失败:', error);
+        console.error('腾讯云API调用失败:', error.message || error);
 
         if (error.message.includes('ResourceUnavailable.NotExist')) {
             throw new Error('混元生图服务未开通，请在腾讯云控制台开通服务');
@@ -180,7 +180,7 @@ async function handleTencentStatus(req, res, { getUserProviderConfig, isAdminUse
         usesPlatformKeys: validation.ok && !hasOwnKeys,
         isAdmin,
         validation,
-        secretIdPrefix: secretId ? secretId.slice(0, 8) + '…' : null,
+        secretIdPrefix: secretId ? '***' + secretId.slice(-4) : null,
         hint: hasOwnKeys
             ? '使用你自配的腾讯云密钥'
             : isAdmin

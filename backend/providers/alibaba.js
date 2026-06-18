@@ -44,15 +44,13 @@ async function handleAlibabaProxy(req, res, { runtimeConfig, API_CONFIG, getUser
 
         res.json(response.data);
     } catch (error) {
-        console.error('阿里云API代理错误:', error);
+        console.error('阿里云API代理错误:', error.message || error);
 
         if (error.response) {
             res.status(error.response.status).json({
                 error: '阿里云API错误',
                 message:
-                    typeof error.response.data === 'string'
-                        ? error.response.data
-                        : (error.response.data && error.response.data.message) || JSON.stringify(error.response.data),
+                    (error.response.data && error.response.data.message) || '阿里云 API 请求失败',
                 provider: 'alibaba',
                 code: error.response.status,
             });

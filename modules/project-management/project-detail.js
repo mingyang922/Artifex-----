@@ -104,6 +104,7 @@ function bindCardGlowEffects() {
         document.querySelectorAll(selector).forEach(bind);
     });
     observer.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener('beforeunload', () => observer.disconnect());
 }
 
 async function loadProjects() {
@@ -935,8 +936,13 @@ function openShareModal() {
 
 function copyShareLink() {
     const shareLinkInput = document.getElementById('share-link');
-    shareLinkInput.select();
-    document.execCommand('copy');
+    const textToCopy = shareLinkInput.value;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textToCopy);
+    } else {
+        shareLinkInput.select();
+        document.execCommand('copy');
+    }
 
     uiToast('链接已复制到剪贴板！', 'success');
 }

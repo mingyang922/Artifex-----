@@ -215,9 +215,11 @@ function createImageRouter(deps) {
             }
             // DNS 解析后二次校验（防止 DNS rebinding 绕过）
             try {
-                const { address: resolved } = await dns.lookup(hostname, { family: 0 });
-                if (resolved && isBlockedHostname(resolved)) {
-                    return sendError(res, 403, ERR.FORBIDDEN, '禁止访问内网地址（DNS 解析）');
+                const addresses = await dns.lookup(hostname, { all: true });
+                for (const entry of addresses) {
+                    if (entry.address && isBlockedHostname(entry.address)) {
+                        return sendError(res, 403, ERR.FORBIDDEN, '禁止访问内网地址（DNS 解析）');
+                    }
                 }
             } catch (_) {
                 // DNS 解析失败时阻止请求（防止绕过 SSRF 防护）
@@ -248,7 +250,7 @@ function createImageRouter(deps) {
             res.send(response.data);
         } catch (error) {
             const upstreamStatus = error?.response?.status || 502;
-            sendError(res, upstreamStatus, ERR.PROVIDER_ERROR, '图片拉取失败', error.message);
+            sendError(res, upstreamStatus, ERR.PROVIDER_ERROR, '图片拉取失败');
         }
     });
 

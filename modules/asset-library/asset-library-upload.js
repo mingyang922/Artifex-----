@@ -92,7 +92,7 @@
                     quality: 0.82,
                 });
                 outType = 'image/webp';
-            } catch (_e) {
+            } catch (e) {
                 console.warn('预压缩失败，回退原图：', e);
             }
         }
@@ -135,7 +135,7 @@
             try {
                 await addAssetFromFile(f, defaultNameVal || f.name, cat);
                 success++;
-            } catch (_e) {
+            } catch (e) {
                 failed++;
                 const msg = e && e.message ? e.message : '读取文件失败';
                 failMessages.push(`${f.name}: ${msg}`);

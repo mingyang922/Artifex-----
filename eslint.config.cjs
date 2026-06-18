@@ -1,8 +1,10 @@
 const globals = require('globals');
+const js = require('@eslint/js');
 
 const noUnusedVarsRule = ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }];
 
 module.exports = [
+    js.configs.recommended,
     {
         files: ['**/*.js'],
         ignores: ['node_modules/**', 'logs/**', 'backend/data/**', 'js/constants.js', 'js/html-utils.js'],
@@ -17,7 +19,6 @@ module.exports = [
         rules: {
             eqeqeq: ['warn', 'always'],
             'no-unused-vars': noUnusedVarsRule,
-            'no-undef': 'off',
         },
     },
     {
@@ -32,7 +33,6 @@ module.exports = [
         rules: {
             eqeqeq: ['warn', 'always'],
             'no-unused-vars': noUnusedVarsRule,
-            'no-undef': 'off',
         },
     },
 ];
