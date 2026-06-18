@@ -81,7 +81,13 @@ app.use(helmet({
             upgradeInsecureRequests: null,
         },
     },
+    // 移除已废弃的 x-xss-protection（现代浏览器已弃用，且可能被利用）
+    xssFilter: false,
+    // 移除已废弃的 Pragma 头
+    noSniff: true,
     crossOriginEmbedderPolicy: false,
+    // 不发送不必要的 X-Download-Options（仅 IE8 需要）
+    ieNoOpen: false,
 }));
 
 // Gzip 压缩（跳过已压缩的图片格式）
