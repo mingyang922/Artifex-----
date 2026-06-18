@@ -7,21 +7,21 @@
  * 依赖 GameUiUserScope（与 user-storage-scope.js 一致键名规则）。
  */
 'use strict';
-const global = typeof window !== 'undefined' ? window : this;
+var _root = typeof window !== 'undefined' ? window : typeof globalThis !== 'undefined' ? globalThis : this;
 
     const EXPORT_VERSION = 1;
     const BASE_KEYS = ['gameui-projects', 'assetLibrary_v1', 'style_presets_v1', 'generatedImages'];
 
     function scopedKey(base) {
         try {
-            if (global.GameUiUserScope && typeof global.GameUiUserScope.key === 'function') {
-                return global.GameUiUserScope.key(base);
+            if (_root.GameUiUserScope && typeof _root.GameUiUserScope.key === 'function') {
+                return _root.GameUiUserScope.key(base);
             }
         } catch (_e) {
             /* ignore */
         }
         try {
-            const id = global.localStorage.getItem('gameui-session-user-id');
+            const id = _root.localStorage.getItem('gameui-session-user-id');
             return id ? base + ':u' + id : base;
         } catch (_e2) {
             return base;
@@ -33,7 +33,7 @@ const global = typeof window !== 'undefined' ? window : this;
         BASE_KEYS.forEach(function (base) {
             const k = scopedKey(base);
             try {
-                const v = global.localStorage.getItem(k);
+                const v = _root.localStorage.getItem(k);
                 if (v !== null && v !== '') {
                     out.keys[k] = v;
                     out.meta[k] = { bytes: v.length };
@@ -49,10 +49,10 @@ const global = typeof window !== 'undefined' ? window : this;
     function estimateUsedBytes() {
         let total = 0;
         try {
-            for (let i = 0; i < global.localStorage.length; i++) {
-                const key = global.localStorage.key(i);
+            for (let i = 0; i < _root.localStorage.length; i++) {
+                const key = _root.localStorage.key(i);
                 if (!key) continue;
-                const val = global.localStorage.getItem(key) || '';
+                const val = _root.localStorage.getItem(key) || '';
                 total += key.length + val.length;
             }
         } catch (_e) {
@@ -108,7 +108,7 @@ const global = typeof window !== 'undefined' ? window : this;
             }
             if (mode === 'replace' || mode === 'merge') {
                 try {
-                    global.localStorage.setItem(k, val);
+                    _root.localStorage.setItem(k, val);
                 } catch (e) {
                     throw new Error('写入失败: ' + k + ' — ' + (e && e.message));
                 }
@@ -139,12 +139,12 @@ const global = typeof window !== 'undefined' ? window : this;
             btnExport.addEventListener('click', function () {
                 try {
                     exportAll();
-                    if (global.TechUI && typeof global.TechUI.toast === 'function') {
-                        global.TechUI.toast('已导出 JSON 备份文件', 'success', 2600);
+                    if (_root.TechUI && typeof _root.TechUI.toast === 'function') {
+                        _root.TechUI.toast('已导出 JSON 备份文件', 'success', 2600);
                     }
                 } catch (e) {
-                    if (global.TechUI && typeof global.TechUI.toast === 'function') {
-                        global.TechUI.toast('导出失败：' + (e && e.message), 'error', 4000);
+                    if (_root.TechUI && typeof _root.TechUI.toast === 'function') {
+                        _root.TechUI.toast('导出失败：' + (e && e.message), 'error', 4000);
                     }
                 }
             });
@@ -165,12 +165,12 @@ const global = typeof window !== 'undefined' ? window : this;
                         const run = function (mode) {
                             applyImport(payload, mode);
                             refreshUsage();
-                            if (global.TechUI && typeof global.TechUI.toast === 'function') {
-                                global.TechUI.toast('导入完成，建议刷新页面以加载新数据', 'success', 3200);
+                            if (_root.TechUI && typeof _root.TechUI.toast === 'function') {
+                                _root.TechUI.toast('导入完成，建议刷新页面以加载新数据', 'success', 3200);
                             }
                         };
-                        if (global.TechUI && typeof global.TechUI.confirm === 'function') {
-                            global.TechUI.confirm(
+                        if (_root.TechUI && typeof _root.TechUI.confirm === 'function') {
+                            _root.TechUI.confirm(
                                 '导入将覆盖当前账号下同名 localStorage 键中的项目 / 素材库 / 风格预设等数据。是否继续？',
                                 '导入本地备份',
                                 '覆盖并导入',
@@ -178,12 +178,12 @@ const global = typeof window !== 'undefined' ? window : this;
                             ).then(function (ok) {
                                 if (ok) run('replace');
                             });
-                        } else if (global.confirm('确定导入？将覆盖本地同名键数据')) {
+                        } else if (_root.confirm('确定导入？将覆盖本地同名键数据')) {
                             run('replace');
                         }
                     } catch (e) {
-                        if (global.TechUI && typeof global.TechUI.toast === 'function') {
-                            global.TechUI.toast('导入失败：' + (e && e.message), 'error', 4000);
+                        if (_root.TechUI && typeof _root.TechUI.toast === 'function') {
+                            _root.TechUI.toast('导入失败：' + (e && e.message), 'error', 4000);
                         }
                     }
                 };
@@ -192,7 +192,7 @@ const global = typeof window !== 'undefined' ? window : this;
         }
     }
 
-    global.ArtifexDataPortability = {
+    _root.ArtifexDataPortability = {
         collectPayload: collectPayload,
         exportAll: exportAll,
         estimateUsedBytes: estimateUsedBytes,

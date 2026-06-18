@@ -7,7 +7,7 @@
  * 提供统一的 HTML 转义等工具函数，避免多文件重复定义
  */
 
-const HTML_ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+var HTML_ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
 /**
  * 转义 HTML 特殊字符，防止 XSS
@@ -33,8 +33,8 @@ function escapeJsStr(str) {
         .replace(/\n/g, '\\n')
         .replace(/\r/g, '\\r')
         .replace(/\0/g, '\\0')
-        .replace(/[ ]/g, '\\u2028')
-        .replace(/[ ]/g, '\\u2029')
+        .replace(/ /g, '\\u2028')
+        .replace(/ /g, '\\u2029')
         .replace(/</g, '\\x3c')
         .replace(/>/g, '\\x3e');
 }
