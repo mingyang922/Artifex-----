@@ -94,6 +94,11 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // 跳过非 http(s) 请求（如 chrome-extension、data 等）
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        return;
+    }
+
     event.respondWith(
         caches.match(request).then((cachedResponse) => {
             if (cachedResponse) {
