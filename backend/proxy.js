@@ -231,7 +231,11 @@ app.use('/api', createAuthRouter({
 }));
 
 // ── 静态文件 ─────────────────────────────────────────────────────
-app.use(express.static(path.join(__dirname, '..'), {
+// Docker 生产镜像只包含 Vite 的 dist 产物；开发环境仍直接服务源码目录。
+const staticRoot = isProd
+    ? path.join(__dirname, '..', 'dist')
+    : path.join(__dirname, '..');
+app.use(express.static(staticRoot, {
     maxAge: isProd ? '7d' : 0,
     etag: true,
     setHeaders: (res, filePath) => {
@@ -415,7 +419,7 @@ app.get('/api/health/detail', requireAuth, (req, res) => {
             tencent_image: tencentValidation.ok ? 'configured' : tencentValidation.code || 'not_configured',
             alibaba: runtimeConfig.alibaba.apiKey !== 'YOUR_ALIBABA_API_KEY' ? 'configured' : 'not_configured',
             image: runtimeConfig.image.apiKey !== 'YOUR_IMAGE_API_KEY' ? 'configured' : 'not_configured',
-            jimeng: !!jimengKey ? 'configured' : 'not_configured',
+            jimeng: jimengKey ? 'configured' : 'not_configured',
         },
         tencent_hint: tencentValidation.ok ? undefined : tencentValidation.message,
         providers: {
@@ -428,7 +432,7 @@ app.get('/api/health/detail', requireAuth, (req, res) => {
 });
 
 // ── API 文档 ─────────────────────────────────────────────────────
-const openapiPath = path.join(__dirname, '..', 'docs', 'openapi.json');
+const openapiPath = path.join(staticRoot, 'docs', 'openapi.json');
 let _openapiCache = null;
 if (fs.existsSync(openapiPath)) {
     try {

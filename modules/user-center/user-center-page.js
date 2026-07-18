@@ -27,7 +27,8 @@ tabs.forEach((tab) => {
 
         // 显示对应内容
         const tabId = tab.getAttribute('data-tab');
-        document.getElementById(tabId).style.display = 'block';
+        const tabContent = document.getElementById(tabId);
+        if (tabContent) tabContent.style.display = 'block';
 
         // 保存当前选中的选项卡
         saveTabSelection(tabId);
@@ -45,6 +46,8 @@ function initTechSelects() {
         const options = select.querySelectorAll('.tech-select-option');
         const hiddenId = select.id.replace('Select', '');
         const hiddenInput = document.getElementById(hiddenId);
+
+        if (!trigger) return; // 结构不完整，跳过
 
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -66,6 +69,14 @@ function initTechSelects() {
             });
         });
     });
+
+    // 点击外部关闭所有下拉（只绑定一次）
+    if (!document._techSelectOutsideBound) {
+        document._techSelectOutsideBound = true;
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.tech-select.is-open').forEach((s) => s.classList.remove('is-open'));
+        });
+    }
 
     // 将带 tech-select-native 类的原生 select 转为自定义下拉
     document.querySelectorAll('select.tech-select-native').forEach((nativeSelect) => {
@@ -113,12 +124,11 @@ function initTechSelects() {
         wrapper.appendChild(menu);
         nativeSelect.parentNode.insertBefore(wrapper, nativeSelect.nextSibling);
     });
-
-    // 点击外部关闭所有下拉
-    document.addEventListener('click', () => {
-        document.querySelectorAll('.tech-select.is-open').forEach((s) => s.classList.remove('is-open'));
-    });
 }
+
+// 保存配置到localStorage（服务端同步防抖）
+let _saveUserConfigTimer = null;
+let _saveUserConfigPending = false;
 
 // 保存配置到localStorage
 // 修改saveUserConfig函数以包含性别字段
@@ -129,9 +139,9 @@ function saveUserConfig() {
     const genderSelect = document.getElementById('gender');
 
     // 处理国家/地区值
-    let countryValue = countrySelect.value;
+    let countryValue = countrySelect ? countrySelect.value : '';
     if (countryValue === 'other') {
-        countryValue = countryOtherInput.value.trim() || '其他';
+        countryValue = countryOtherInput ? (countryOtherInput.value.trim() || '其他') : '其他';
     }
 
     const config = {
@@ -139,50 +149,62 @@ function saveUserConfig() {
         userId: usernameInput ? usernameInput.value : '',
         // 个人信息
         personalInfo: {
-            email: document.getElementById('email').value,
-            nickname: document.getElementById('nickname').value,
-            gender: genderSelect.value,
-            bio: document.getElementById('bio').value,
+            email: (document.getElementById('email') || {}).value || '',
+            nickname: (document.getElementById('nickname') || {}).value || '',
+            gender: genderSelect ? genderSelect.value : '',
+            bio: (document.getElementById('bio') || {}).value || '',
             country: countryValue, // 使用处理后的国家值
-            language: document.getElementById('language').value,
+            language: (document.getElementById('language') || {}).value || '',
         },
         // 权限设置
         permissions: Array.from(document.querySelectorAll('.permissions-grid input[type="checkbox"]')).map(
             (checkbox, _index) => checkbox.checked
         ),
         // 当前头像
-        currentAvatar: document.getElementById('current-avatar').querySelector('img')
-            ? document.getElementById('current-avatar').querySelector('img').src
-            : null,
+        currentAvatar: (function () {
+            var el = document.getElementById('current-avatar');
+            var img = el ? el.querySelector('img') : null;
+            return img ? img.src : null;
+        })(),
         // 头像历史记录
         avatarHistory: getAvatarHistoryFromStorage(),
     };
 
     localStorage.setItem('userConfig', JSON.stringify(config));
+
+    // 防抖：300ms 内多次调用只同步最后一次到服务端
     const serverProfile = {
         personalInfo: config.personalInfo,
         permissions: config.permissions,
         currentAvatar: config.currentAvatar,
         avatarHistory: config.avatarHistory,
     };
-    getCsrfToken()
-        .then((csrfToken) =>
-            fetch('/api/me/profile', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': csrfToken },
-                credentials: 'include',
-                body: JSON.stringify({ profile: serverProfile }),
+    if (typeof getCsrfToken !== 'function') return;
+    if (_saveUserConfigTimer) clearTimeout(_saveUserConfigTimer);
+    _saveUserConfigTimer = setTimeout(function () {
+        _saveUserConfigTimer = null;
+        if (_saveUserConfigPending) return; // 上一次请求还未完成，跳过
+        _saveUserConfigPending = true;
+        getCsrfToken()
+            .then((csrfToken) =>
+                fetch('/api/me/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-XSRF-Token': csrfToken },
+                    credentials: 'include',
+                    body: JSON.stringify({ profile: serverProfile }),
+                })
+            )
+            .then((res) => {
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.json();
             })
-        )
-        .then((res) => {
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            return res.json();
-        })
-        .then((data) => {
-            if (!data.ok) throw new Error(data.error || '保存失败');
-            window.TechUI.toast('个人资料已保存', 'success');
-        })
-        .catch(() => { window.TechUI.toast('保存个人资料失败', 'error'); });
+            .then((data) => {
+                if (!data.ok) throw new Error(data.error || '保存失败');
+                if (window.TechUI && typeof window.TechUI.toast === 'function') window.TechUI.toast('个人资料已保存', 'success');
+            })
+            .catch(() => { if (window.TechUI && typeof window.TechUI.toast === 'function') window.TechUI.toast('保存个人资料失败', 'error'); })
+            .finally(() => { _saveUserConfigPending = false; });
+    }, 300);
 }
 
 // 修改loadUserConfig函数以加载性别字段
@@ -223,7 +245,8 @@ function loadUserConfig() {
         if (genderSelect) {
             const genderOpt = genderSelect.querySelector(`.tech-select-option[data-value="${gender || ''}"]`);
             if (genderOpt) {
-                genderSelect.querySelector('.tech-select-trigger').textContent = genderOpt.textContent;
+                const genderTrigger = genderSelect.querySelector('.tech-select-trigger');
+                if (genderTrigger) genderTrigger.textContent = genderOpt.textContent;
                 genderSelect.dataset.value = gender || '';
                 genderSelect.querySelectorAll('.tech-select-option').forEach((o) => o.classList.remove('is-selected'));
                 genderOpt.classList.add('is-selected');
@@ -234,14 +257,16 @@ function loadUserConfig() {
         const countrySelect = document.getElementById('country');
         const countryOtherInput = document.getElementById('country-other');
 
-        // 查找国家是否在标准列表中
-        const countryOption = countrySelect.querySelector(`option[value="${country}"]`);
-        if (countryOption) {
-            countrySelect.value = country;
-        } else {
-            // 如果不在标准列表中，设置为"其他"并填充自定义值
-            countrySelect.value = 'other';
-            countryOtherInput.value = country;
+        if (countrySelect) {
+            // 查找国家是否在标准列表中
+            const countryOption = countrySelect.querySelector(`option[value="${country}"]`);
+            if (countryOption) {
+                countrySelect.value = country;
+            } else if (countryOtherInput) {
+                // 如果不在标准列表中，设置为"其他"并填充自定义值
+                countrySelect.value = 'other';
+                countryOtherInput.value = country;
+            }
         }
 
         // 同步国家/语言自定义下拉框
@@ -250,7 +275,8 @@ function loadUserConfig() {
             if (wrapper && wrapper.classList.contains('tech-select')) {
                 const selectedOpt = nativeSelect.options[nativeSelect.selectedIndex];
                 if (selectedOpt) {
-                    wrapper.querySelector('.tech-select-trigger').textContent = selectedOpt.text;
+                    const trigger = wrapper.querySelector('.tech-select-trigger');
+                    if (trigger) trigger.textContent = selectedOpt.text;
                     wrapper.dataset.value = nativeSelect.value;
                 }
             }
@@ -294,10 +320,6 @@ function addToAvatarHistory(avatarSrc) {
     // 获取现有的头像历史
     let history = getAvatarHistoryFromStorage();
 
-    // 检查是否已经存在于历史记录中（避免重复）
-    const _exists = history.some((item) => item.src === avatarSrc);
-
-    // 即使存在也要添加到历史记录中，因为用户可能想要多次使用同一张图片
     // 添加新头像到历史记录开头，包含时间戳
     history.unshift({
         src: avatarSrc,
@@ -786,6 +808,7 @@ if (avatarInput) {
                     // 压缩图片到指定尺寸（200x200）
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
+                    if (!ctx) return;
 
                     // 设置画布尺寸为200x200
                     canvas.width = 200;
@@ -832,9 +855,9 @@ if (personalInfoForm) {
         e.preventDefault();
 
         // 验证表单数据
-        const email = document.getElementById('email').value;
-        const nickname = document.getElementById('nickname').value;
-        const bio = document.getElementById('bio').value;
+        const email = (document.getElementById('email') || {}).value || '';
+        const nickname = (document.getElementById('nickname') || {}).value || '';
+        const bio = (document.getElementById('bio') || {}).value || '';
 
         // 验证邮箱格式
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -867,6 +890,7 @@ if (personalInfoForm) {
 function loadRegistrationTime() {
     const registrationData = localStorage.getItem('userRegistrationData');
     const registrationTimeElement = document.getElementById('registration-time');
+    if (!registrationTimeElement) return;
 
     if (registrationData) {
         let data;
@@ -893,6 +917,8 @@ function initNotificationSystem() {
     const notificationItems = document.querySelectorAll('.notification-item');
     const notificationBadge = document.querySelector('.notification-badge');
 
+    if (!notificationBtn || !notificationDropdown) return;
+
     // 切换通知下拉框
     notificationBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -913,7 +939,8 @@ function initNotificationSystem() {
             }
 
             // 根据通知类型跳转到相应界面
-            const title = item.querySelector('.notification-title').textContent;
+            const titleEl = item.querySelector('.notification-title');
+            const title = titleEl ? titleEl.textContent : '';
 
             if (title === '新用户注册') {
                 // 跳转到用户管理界面
@@ -938,30 +965,34 @@ function initNotificationSystem() {
     });
 
     // 全部已读
-    markAllReadBtn.addEventListener('click', () => {
-        if (window.notificationManager) {
-            window.notificationManager.markAllAsRead();
-        } else {
-            // 回退到原有逻辑
-            notificationItems.forEach((item) => {
-                item.classList.remove('unread');
-            });
-            updateNotificationBadge();
-        }
-    });
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', () => {
+            if (window.notificationManager) {
+                window.notificationManager.markAllAsRead();
+            } else {
+                // 回退到原有逻辑
+                notificationItems.forEach((item) => {
+                    item.classList.remove('unread');
+                });
+                updateNotificationBadge();
+            }
+        });
+    }
 
     // 查看所有通知 —— 消息中心已集成在本页面，直接滚动到消息中心区域
     const viewAllNotifications = document.getElementById('viewAllNotifications');
-    viewAllNotifications.addEventListener('click', (e) => {
-        e.preventDefault();
-        // 关闭通知下拉框
-        notificationDropdown.classList.remove('show');
-        // 滚动到页面内嵌的消息中心面板
-        const messageCenter = document.querySelector('.message-center-panel') || document.querySelector('.message-center');
-        if (messageCenter) {
-            messageCenter.scrollIntoView({ behavior: 'smooth' });
-        }
-    });
+    if (viewAllNotifications) {
+        viewAllNotifications.addEventListener('click', (e) => {
+            e.preventDefault();
+            // 关闭通知下拉框
+            notificationDropdown.classList.remove('show');
+            // 滚动到页面内嵌的消息中心面板
+            const messageCenter = document.querySelector('.message-center-panel') || document.querySelector('.message-center');
+            if (messageCenter) {
+                messageCenter.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
 
     // 更新通知徽章
     function updateNotificationBadge() {
@@ -1298,11 +1329,13 @@ async function syncSessionAndProfile() {
         const roleEl = document.getElementById('userRole');
         if (roleEl) {
             const isAdmin = data.role === 'admin';
-            roleEl.querySelector('span').textContent = isAdmin ? '管理员' : '普通用户';
+            const roleSpan = roleEl.querySelector('span');
+            const roleIcon = roleEl.querySelector('i');
+            if (roleSpan) roleSpan.textContent = isAdmin ? '管理员' : '普通用户';
             roleEl.style.borderColor = isAdmin ? 'rgba(139, 92, 246, 0.4)' : 'rgba(0, 240, 255, 0.2)';
             roleEl.style.color = isAdmin ? '#8b5cf6' : '#00f0ff';
             roleEl.style.background = isAdmin ? 'rgba(139, 92, 246, 0.08)' : 'rgba(0, 240, 255, 0.06)';
-            roleEl.querySelector('i').className = isAdmin ? 'fas fa-crown' : 'fas fa-shield-alt';
+            if (roleIcon) roleIcon.className = isAdmin ? 'fas fa-crown' : 'fas fa-shield-alt';
         }
         const created = new Date(data.created_at);
         localStorage.setItem(
@@ -1351,6 +1384,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     // 初始化语言选择器（i18n）
     initLanguageSelector();
 
+    // 初始化主题风格选择器
+    initThemeSelector();
+
     // 检查管理员权限，显示管理面板入口
     try {
         const res = await fetch('/api/me/api-settings/status', { credentials: 'include' });
@@ -1382,6 +1418,28 @@ function initLanguageSelector() {
     // 监听语言变更事件，同步 select 值
     window.addEventListener('languageChanged', function (e) {
         langSelect.value = e.detail.lang;
+    });
+}
+
+// 初始化主题风格选择器
+function initThemeSelector() {
+    const themeSelect = document.getElementById('region-theme-select');
+    if (!themeSelect) return;
+    if (!window.RegionThemes) return; // region-themes.js 尚未加载
+
+    // 设置当前模式
+    themeSelect.value = window.RegionThemes.getMode();
+
+    // 监听主题切换
+    themeSelect.addEventListener('change', function () {
+        if (window.RegionThemes) {
+            window.RegionThemes.setMode(this.value);
+        }
+    });
+
+    // 监听主题变化（由 region-themes.js 派发，避免重复 storage 监听）
+    window.addEventListener('regionThemeChanged', function (e) {
+        themeSelect.value = e.detail.mode || 'off';
     });
 }
 
@@ -1417,17 +1475,15 @@ function initEditInfoFunctionality() {
                 originalValues[input.id] = input.value;
             });
 
-            // 启用编辑模式
+            // 启用编辑模式（排除用户名和主题选择器）
             inputs.forEach((input) => {
-                if (input.id !== 'username') {
-                    if (input.tagName === 'SELECT') {
-                        input.removeAttribute('disabled');
-                    } else {
-                        input.removeAttribute('readonly');
-                    }
-                } else {
+                if (input.id === 'username' || input.id === 'region-theme-select') {
                     input.setAttribute('disabled', 'disabled');
                     input.setAttribute('readonly', 'readonly');
+                } else if (input.tagName === 'SELECT') {
+                    input.removeAttribute('disabled');
+                } else {
+                    input.removeAttribute('readonly');
                 }
             });
 
@@ -1453,19 +1509,15 @@ function initEditInfoFunctionality() {
             // 保存配置
             saveUserConfig();
 
-            // 恢复只读状态
+            // 恢复只读状态（排除用户名和主题选择器）
             const inputs = personalInfoForm.querySelectorAll('input, textarea, select');
             inputs.forEach((input) => {
-                if (input.id !== 'username') {
-                    // 用户名不允许修改
-                    if (input.tagName === 'SELECT') {
-                        input.setAttribute('disabled', 'disabled');
-                    } else {
-                        input.setAttribute('readonly', 'readonly');
-                    }
-                } else {
-                    // 确保用户ID输入框始终保持禁用状态
+                if (input.id === 'username' || input.id === 'region-theme-select') {
                     input.setAttribute('disabled', 'disabled');
+                    input.setAttribute('readonly', 'readonly');
+                } else if (input.tagName === 'SELECT') {
+                    input.setAttribute('disabled', 'disabled');
+                } else {
                     input.setAttribute('readonly', 'readonly');
                 }
             });
@@ -1477,7 +1529,7 @@ function initEditInfoFunctionality() {
             // 显示修改信息按钮
             editInfoBtn.style.display = 'inline-block';
 
-            window.TechUI.toast('个人信息已保存', 'success');
+            if (window.TechUI && typeof window.TechUI.toast === 'function') window.TechUI.toast('个人信息已保存', 'success');
         });
     }
 
@@ -1492,16 +1544,14 @@ function initEditInfoFunctionality() {
                 }
             });
 
-            // 恢复只读状态
+            // 恢复只读状态（排除用户名和主题选择器）
             inputs.forEach((input) => {
-                if (input.id !== 'username') {
-                    if (input.tagName === 'SELECT') {
-                        input.setAttribute('disabled', 'disabled');
-                    } else {
-                        input.setAttribute('readonly', 'readonly');
-                    }
-                } else {
+                if (input.id === 'username' || input.id === 'region-theme-select') {
                     input.setAttribute('disabled', 'disabled');
+                    input.setAttribute('readonly', 'readonly');
+                } else if (input.tagName === 'SELECT') {
+                    input.setAttribute('disabled', 'disabled');
+                } else {
                     input.setAttribute('readonly', 'readonly');
                 }
             });
@@ -1518,7 +1568,7 @@ function initEditInfoFunctionality() {
             // 显示修改信息按钮
             editInfoBtn.style.display = 'inline-block';
 
-            window.TechUI.toast('已取消修改', 'info');
+            if (window.TechUI && typeof window.TechUI.toast === 'function') window.TechUI.toast('已取消修改', 'info');
         });
     }
 }

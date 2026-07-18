@@ -28,7 +28,7 @@
         const sort = e.sortOrderEl ? e.sortOrderEl.value : 'newest';
         const tag = e.tagFilter || null;
 
-        const filtered = (assets || []).filter(function (a) {
+        let filtered = (assets || []).filter(function (a) {
             if (cat !== 'all' && a.category !== cat) return false;
             if (type !== 'all') {
                 const at = (a.type || '').toLowerCase();

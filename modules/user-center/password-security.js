@@ -26,8 +26,11 @@ class PasswordSecurityManager {
         toggles.forEach((toggle) => {
             toggle.addEventListener('click', (e) => {
                 e.preventDefault();
-                const input = toggle.parentElement.querySelector('input');
+                const parent = toggle.parentElement;
+                if (!parent) return;
+                const input = parent.querySelector('input');
                 const icon = toggle.querySelector('i');
+                if (!input || !icon) return;
 
                 if (input.type === 'password') {
                     input.type = 'text';
@@ -205,6 +208,11 @@ class PasswordSecurityManager {
     showPasswordStrengthWarning() {
         const warningDiv = document.getElementById('password-strength-warning');
         if (!warningDiv) {
+            const newPasswordEl = document.getElementById('new-password');
+            if (!newPasswordEl) return;
+            const newPasswordGroup = newPasswordEl.closest('.form-group');
+            if (!newPasswordGroup) return;
+
             const warning = document.createElement('div');
             warning.id = 'password-strength-warning';
             warning.style.cssText = `
@@ -219,7 +227,6 @@ class PasswordSecurityManager {
             warning.innerHTML =
                 '<i class="fas fa-exclamation-triangle" style="margin-right: 5px;"></i>建议使用更强的密码以提高安全性';
 
-            const newPasswordGroup = document.getElementById('new-password').closest('.form-group');
             newPasswordGroup.appendChild(warning);
         }
     }
@@ -235,6 +242,7 @@ class PasswordSecurityManager {
     // 显示弱密码警告
     showWeakPasswordWarning() {
         const submitBtn = document.getElementById('submit-password-change');
+        if (!submitBtn) return;
         submitBtn.style.background = '#ffb404';
         submitBtn.title = '密码强度较弱，建议使用更强的密码';
     }
@@ -242,6 +250,7 @@ class PasswordSecurityManager {
     // 隐藏弱密码警告
     hideWeakPasswordWarning() {
         const submitBtn = document.getElementById('submit-password-change');
+        if (!submitBtn) return;
         submitBtn.style.background = '';
         submitBtn.title = '';
     }
@@ -276,9 +285,13 @@ class PasswordSecurityManager {
 
     // 处理密码修改
     async handlePasswordChange() {
-        const currentPassword = document.getElementById('current-password').value;
-        const newPassword = document.getElementById('new-password').value;
-        const _confirmPassword = document.getElementById('confirm-password').value;
+        const currentPwdEl = document.getElementById('current-password');
+        const newPwdEl = document.getElementById('new-password');
+        const confirmPwdEl = document.getElementById('confirm-password');
+        if (!currentPwdEl || !newPwdEl || !confirmPwdEl) return;
+
+        const currentPassword = currentPwdEl.value;
+        const newPassword = newPwdEl.value;
 
         // 最终验证
         if (!this.validateForm()) {
@@ -301,8 +314,10 @@ class PasswordSecurityManager {
             }
             // 修改成功
             this.showSuccessMessage();
-            document.getElementById('change-password-form').reset();
-            document.getElementById('submit-password-change').disabled = true;
+            const form = document.getElementById('change-password-form');
+            const submitBtn = document.getElementById('submit-password-change');
+            if (form) form.reset();
+            if (submitBtn) submitBtn.disabled = true;
         } catch (_err) {
             this.showError('current-password-error', '网络错误，请稍后重试');
         }
@@ -326,24 +341,6 @@ class PasswordSecurityManager {
         successDiv.innerHTML = '<i class="fas fa-check-circle"></i>密码修改成功！';
         document.body.appendChild(successDiv);
         setTimeout(() => successDiv.remove(), 3000);
-    }
-
-    // 设置当前密码验证
-    setupCurrentPasswordValidation() {
-        // 当前密码验证提示功能已删除
-        return;
-    }
-
-    // 验证当前密码
-    validateCurrentPassword(_password) {
-        // 当前密码验证提示功能已删除
-        return;
-    }
-
-    // 隐藏当前密码提示
-    hideCurrentPasswordHint() {
-        // 当前密码验证提示功能已删除
-        return;
     }
 
     // 设置忘记密码功能
@@ -423,6 +420,7 @@ class PasswordSecurityManager {
         const closeBtn = document.getElementById('close-forgot-modal');
         const cancelBtn = document.getElementById('cancel-reset-request');
         const submitBtn = document.getElementById('submit-reset-request');
+        if (!modal) return;
 
         // 关闭模态框
         const closeModal = () => {
@@ -432,8 +430,8 @@ class PasswordSecurityManager {
             }, 300);
         };
 
-        closeBtn.addEventListener('click', closeModal);
-        cancelBtn.addEventListener('click', closeModal);
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
         // 点击背景关闭
         modal.addEventListener('click', (e) => {
@@ -443,9 +441,11 @@ class PasswordSecurityManager {
         });
 
         // 提交重置请求
-        submitBtn.addEventListener('click', () => {
-            this.handlePasswordResetRequest();
-        });
+        if (submitBtn) {
+            submitBtn.addEventListener('click', () => {
+                this.handlePasswordResetRequest();
+            });
+        }
 
         // 添加实时验证
         this.setupRealTimeValidation();
@@ -453,8 +453,10 @@ class PasswordSecurityManager {
 
     // 处理密码重置请求（演示功能：仅做前端校验，实际密码重置需管理员处理）
     handlePasswordResetRequest() {
-        const email = document.getElementById('reset-email').value.trim();
-        const phone = document.getElementById('reset-phone').value.trim();
+        const emailEl = document.getElementById('reset-email');
+        const phoneEl = document.getElementById('reset-phone');
+        const email = emailEl ? emailEl.value.trim() : '';
+        const phone = phoneEl ? phoneEl.value.trim() : '';
 
         // 清除之前的错误提示
         this.hideError('reset-email-error');
@@ -496,7 +498,7 @@ class PasswordSecurityManager {
 
         // 关闭模态框
         const modal = document.getElementById('forgot-password-modal');
-        modal.remove();
+        if (modal) modal.remove();
     }
 
     // 验证邮箱格式（详细版本）

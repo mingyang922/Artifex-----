@@ -54,7 +54,11 @@ modules/
   style-presets/              风格预设
   user-center/               用户中心
 js/                          前端共享脚本
+  region-themes.js           地区文化主题引擎（tsParticles + GSAP）
 styles/                      共享样式
+  region-themes.css          主题样式（华夏丹青/韩流霓虹/英伦油画/華夏雅韻）
+  theme-japan.css            日本专属主题（和風物語）
+vendor/js/                   第三方库（tsparticles、gsap、aos、glightbox 等）
 docs/                        部署与接入文档
 .github/                     CI/CD 与 Issue 模板
 ```

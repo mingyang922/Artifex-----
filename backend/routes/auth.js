@@ -130,7 +130,7 @@ function createAuthRouter(deps) {
             const hash = await bcrypt.hash(String(newPassword), 10);
             usersDb.updatePassword(req.currentUser.id, hash);
             // 审计日志
-            try { usersDb.addActivity(req.currentUser.id, '修改密码', 'security', null, null); } catch (_) {}
+            try { usersDb.addActivity(req.currentUser.id, '修改密码', 'security', null, null); } catch (_) { /* 活动日志非关键 */ }
             res.json({ ok: true, message: '密码修改成功' });
         } catch (e) {
             logger.error('change-password', e);
@@ -192,7 +192,7 @@ function createAuthRouter(deps) {
         }
         usersDb.upsertUserApiCredentials(req.currentUser.id, provider, credentials);
         // 审计日志
-        try { usersDb.addActivity(req.currentUser.id, '更新 API 密钥: ' + provider, 'security', null, provider); } catch (_) {}
+        try { usersDb.addActivity(req.currentUser.id, '更新 API 密钥: ' + provider, 'security', null, provider); } catch (_) { /* 活动日志非关键 */ }
         res.json({ ok: true, provider, configured: true });
     });
 
@@ -245,7 +245,7 @@ function createAuthRouter(deps) {
         const provider = String(req.params.provider || '').trim().toLowerCase();
         usersDb.deleteUserApiCredentials(req.currentUser.id, provider);
         // 审计日志
-        try { usersDb.addActivity(req.currentUser.id, '删除 API 密钥: ' + provider, 'security', null, provider); } catch (_) {}
+        try { usersDb.addActivity(req.currentUser.id, '删除 API 密钥: ' + provider, 'security', null, provider); } catch (_) { /* 活动日志非关键 */ }
         res.json({ ok: true, provider, configured: false });
     });
 

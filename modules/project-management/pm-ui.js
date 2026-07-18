@@ -113,7 +113,7 @@
                 const spaceAbove = rect.top - 10;
                 const openDown = spaceBelow >= 180 || spaceBelow >= spaceAbove;
                 const maxHeight = Math.max(120, Math.min(280, openDown ? spaceBelow : spaceAbove));
-                const top = openDown ? rect.bottom + 6 : rect.top - maxHeight - 6;
+                let top = openDown ? rect.bottom + 6 : rect.top - maxHeight - 6;
                 top = Math.max(8, Math.min(top, viewportH - maxHeight - 8));
                 menu.style.left = safeLeft + 'px';
                 menu.style.top = top + 'px';

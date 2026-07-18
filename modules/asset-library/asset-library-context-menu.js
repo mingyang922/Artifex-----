@@ -10,11 +10,11 @@
     'use strict';
 
     // ── 依赖注入（由 asset-library.js init 时调用 setDeps 传入） ──
-    const _getAllTags = null;
-    const _fetchWithCsrf = null;
-    const _uiToast = null;
-    const _escapeHtml = null;
-    const _getModalRoot = null;
+    let _getAllTags = null;
+    let _fetchWithCsrf = null;
+    let _uiToast = null;
+    let _escapeHtml = null;
+    let _getModalRoot = null;
 
     function setDeps(deps) {
         _getAllTags = deps.getAllTags;
@@ -253,7 +253,7 @@
     }
 
     function saveAssetTags(asset, newTags, callbacks) {
-        const existingTags = {};
+        let existingTags = {};
         try { existingTags = JSON.parse(asset._rawTags || '{}'); } catch (_) { /* ignore */ }
         existingTags.customTags = newTags;
 

@@ -102,7 +102,7 @@ var _root = typeof window !== 'undefined' ? window : typeof globalThis !== 'unde
                 throw new Error('备份文件过大（超过 10MB 限制）');
             }
             // 键名安全检查：只允许字母、数字、连字符、下划线、点号
-            if (!/^[\w.\-]+$/.test(k)) {
+            if (!/^[\w.-]+$/.test(k)) {
                 console.warn('[data-portability] 跳过不安全的键名:', k);
                 return;
             }

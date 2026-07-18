@@ -26,10 +26,13 @@ RUN npm ci
 
 # Copy source files needed for the Vite build
 COPY vite.config.js ./
+COPY scripts/prepare-dist.js ./scripts/prepare-dist.js
 COPY js/ ./js/
 COPY styles/ ./styles/
 COPY modules/ ./modules/
+COPY docs/ ./docs/
 COPY *.html ./
+COPY sw.js manifest.json ./
 COPY vendor/ ./vendor/
 
 # Build frontend assets -> dist/

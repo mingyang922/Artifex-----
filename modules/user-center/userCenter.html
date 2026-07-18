@@ -7,6 +7,8 @@
         <link rel="manifest" href="../../manifest.json">
         <meta name="theme-color" content="#00f0ff">
         <link rel="stylesheet" href="../../styles/app-shell.css" />
+        <link rel="stylesheet" href="../../styles/region-themes.css" />
+        <link rel="stylesheet" href="../../styles/theme-japan.css" />
         <link
             href="../../vendor/css/google-fonts.css"
             rel="stylesheet"
@@ -454,6 +456,21 @@
                                             <option value="ja">日本語</option>
                                             <option value="ko">한국어</option>
                                         </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="region-theme-select" data-i18n="uc.themeSetting">主题风格</label>
+                                        <select class="form-select tech-select-native" id="region-theme-select">
+                                            <option value="off" selected data-i18n="uc.themeOff">赛博朋克</option>
+                                            <option value="auto" data-i18n="uc.themeAuto">跟随语言地区</option>
+                                            <option value="china" data-i18n="uc.themeChina">华夏丹青</option>
+                                            <option value="japan" data-i18n="uc.themeJapan">和風物語</option>
+                                            <option value="korea" data-i18n="uc.themeKorea">韩流霓虹</option>
+                                            <option value="uk" data-i18n="uc.themeUk">英伦油画</option>
+                                            <option value="tc" data-i18n="uc.themeTc">華夏雅韻</option>
+                                        </select>
+                                        <p class="form-hint" style="color: #8888a0; font-size: 13px; margin-top: 6px" data-i18n="uc.themeDesc">
+                                            开启后页面风格将根据您的语言和地区自动变化，也可手动选择
+                                        </p>
                                     </div>
                                     <div style="display: flex; gap: 10px; margin-top: 20px">
                                         <button type="button" class="btn btn-primary" id="edit-info-btn" data-i18n="uc.editInfo">
@@ -1095,6 +1112,9 @@
 
         <script defer src="../../js/keyboard-shortcuts.js"></script>
         <script src="../../js/i18n.js"></script>
+        <script src="../../vendor/js/tsparticles.bundle.min.js"></script>
+        <script src="../../vendor/js/gsap.min.js"></script>
+        <script src="../../js/region-themes.js"></script>
         <script src="../../js/session-guard.js"></script>
         <script defer src="../../js/user-storage-scope.js"></script>
         <script defer src="../../js/ui-kit.js"></script>

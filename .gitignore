@@ -47,5 +47,18 @@ Desktop.ini
 *.backup
 dist/
 
+# 本地报告、预览与临时输出（不属于 Artifex 应用源码）
+output/
+report/
+tmp/
+
+# 本地 Codex/Agent 技能配置
+.agents/
+
+# 一次性课程报告生成脚本
+scripts/finalize_security_report_docx.py
+scripts/generate_final_report_pdf.py
+scripts/generate_security_course_report.py
+
 # 素材库测试图片
 modules/asset-library/素材库图片/

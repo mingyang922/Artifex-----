@@ -153,6 +153,17 @@
         'misc.poweredBy': { zh: '由 AI 驱动', zht: '由 AI 驅動', en: 'Powered by AI', ja: 'AI搭載', ko: 'AI 기반' },
         'misc.menu': { zh: '菜单', zht: '選單', en: 'Menu', ja: 'メニュー', ko: '메뉴' },
         'misc.notifications': { zh: '通知', zht: '通知', en: 'Notifications', ja: '通知', ko: '알림' },
+
+        // Theme Settings
+        'uc.themeSetting': { zh: '主题风格', zht: '主題風格', en: 'Theme Style', ja: 'テーマスタイル', ko: '테마 스타일' },
+        'uc.themeOff': { zh: '赛博朋克', zht: '賽博朋克', en: 'Cyberpunk', ja: 'サイバーパンク', ko: '사이버펑크' },
+        'uc.themeAuto': { zh: '跟随语言地区', zht: '跟隨語言地區', en: 'Follow Language & Region', ja: '言語・地域に合わせる', ko: '언어 및 지역 따르기' },
+        'uc.themeDesc': { zh: '开启后页面风格将根据您的语言和地区自动变化，也可手动选择', zht: '開啟後頁面風格將根據您的語言和地區自動變化，也可手動選擇', en: 'When enabled, page style adapts to your language & region. You can also choose manually.', ja: '有効にすると、言語・地域に合わせてページスタイルが変わります。手動選択も可能です。', ko: '활성화하면 언어 및 지역에 따라 페이지 스타일이 변경됩니다. 수동 선택도 가능합니다.' },
+        'uc.themeChina': { zh: '华夏丹青', zht: '華夏丹青', en: 'Ink Wash', ja: '水墨画', ko: '수묵화' },
+        'uc.themeJapan': { zh: '和風物語', zht: '和風物語', en: 'Ukiyo-e', ja: '和風物語', ko: '우키요에' },
+        'uc.themeKorea': { zh: '韩流霓虹', zht: '韓流霓虹', en: 'K-Neon', ja: 'K-ネオン', ko: 'K-네온' },
+        'uc.themeUk': { zh: '英伦油画', zht: '英倫油畫', en: 'Oil Painting', ja: '油絵', ko: '유화' },
+        'uc.themeTc': { zh: '華夏雅韻', zht: '華夏雅韻', en: 'Classical CN', ja: '古典中華', ko: '고전중화' },
     };
 
     let currentLang = localStorage.getItem('artifex-lang') || 'zh';
@@ -166,7 +177,7 @@
     function setLanguage(lang) {
         if (!LANGUAGES[lang]) return;
         currentLang = lang;
-        localStorage.setItem('artifex-lang', lang);
+        try { localStorage.setItem('artifex-lang', lang); } catch (e) { /* Safari private */ }
         applyTranslations();
         document.documentElement.lang = lang;
         // Dispatch event for other components to react

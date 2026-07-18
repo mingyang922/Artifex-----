@@ -1,0 +1,450 @@
+/**
+ * 和風物語 — 日本专属主题
+ * 日系治愈动漫风 + 黄昏富士山插画背景 + 磨砂玻璃UI
+ *
+ * 视觉层级（从下到上）：
+ *   Layer 1: 全屏富士山樱花插画背景
+ *   Layer 2: 樱花粒子（UI下方）
+ *   Layer 3: 半透明磨砂玻璃UI组件
+ *   Layer 4: 文字图标
+ */
+
+/* ═══════════════════════════════════════
+   CSS 变量
+   ═══════════════════════════════════════ */
+html.theme-japan {
+    --font-display: "Shippori Mincho", "Noto Serif JP", "Yu Mincho", serif;
+    --font-ui: "Noto Sans JP", "Noto Sans SC", "Hiragino Sans", sans-serif;
+    --shell-bg: transparent;
+    --shell-text: #ffffff;
+    --shell-muted: rgba(255,255,255,0.6);
+    --shell-accent: #00d4ff;
+    --shell-accent-2: #e8607a;
+    --shell-accent-3: #9b8ec4;
+    --shell-accent-soft: rgba(0,212,255,0.1);
+    --shell-bg2: rgba(30,20,35,0.25);
+    --tech-cyan: #00d4ff;
+    --tech-violet: #e8607a;
+    --ui-accent: #00d4ff;
+    --ui-border: rgba(255,255,255,0.08);
+    --ui-border-strong: rgba(255,255,255,0.15);
+    --ui-bg-deep: rgba(20,15,25,0.3);
+    --ui-bg-panel: linear-gradient(165deg, rgba(30,20,35,0.25) 0%, rgba(20,15,25,0.35) 100%);
+    --login-cyan: #00d4ff;
+    --login-violet: #e8607a;
+    --login-bg: #1a1020;
+}
+
+
+/* ═══════════════════════════════════════
+   Layer 1: 全屏背景插画
+   CSS渐变模拟日系动漫黄昏富士山场景
+   ═══════════════════════════════════════ */
+/* 天空渐变直接设在 body 上，避免 ::before 的 filter 污染 ::after */
+html.theme-japan body,
+html.theme-japan body.app-shell {
+    background:
+        linear-gradient(180deg,
+            #e8a0b0 0%,
+            #f0b8a0 15%,
+            #f8c8a0 25%,
+            #f0d0b0 35%,
+            #e8b8a8 45%,
+            #c8a0c0 60%,
+            #8878a8 75%,
+            #5a4878 90%,
+            #3a2850 100%
+        ) !important;
+    color: #ffffff !important;
+}
+
+/* 太阳光晕（轻量 ::before，无 blur） */
+html.theme-japan body::before,
+html.theme-japan body.app-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 40% 30% at 65% 25%, rgba(255,200,150,0.3) 0%, transparent 55%),
+        radial-gradient(ellipse 25% 20% at 65% 25%, rgba(255,230,200,0.2) 0%, transparent 40%);
+}
+
+/* 地景层：富士山 + 樱花林 + 建筑 */
+html.theme-japan body::after,
+html.theme-japan body.app-shell::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        /* 富士山主体 */
+        radial-gradient(ellipse 35% 45% at 55% 55%, #6a5a7a 0%, #5a4a6a 40%, transparent 70%),
+        /* 富士山雪顶 */
+        radial-gradient(ellipse 12% 8% at 55% 35%, rgba(255,255,255,0.6) 0%, rgba(255,220,200,0.3) 50%, transparent 80%),
+        /* 富士山暖光 */
+        radial-gradient(ellipse 20% 25% at 58% 50%, rgba(240,180,140,0.25) 0%, transparent 60%),
+        /* 左侧樱花树冠 */
+        radial-gradient(ellipse 25% 35% at 8% 40%, rgba(232,96,122,0.35) 0%, rgba(232,96,122,0.15) 40%, transparent 70%),
+        radial-gradient(ellipse 18% 25% at 5% 35%, rgba(240,128,144,0.3) 0%, rgba(232,96,122,0.1) 50%, transparent 75%),
+        /* 右侧樱花树冠 */
+        radial-gradient(ellipse 22% 30% at 92% 45%, rgba(232,96,122,0.3) 0%, rgba(232,96,122,0.12) 40%, transparent 70%),
+        radial-gradient(ellipse 15% 20% at 95% 38%, rgba(240,128,144,0.25) 0%, rgba(232,96,122,0.08) 50%, transparent 75%),
+        /* 底部樱花林（远景） */
+        radial-gradient(ellipse 80% 15% at 50% 85%, rgba(200,80,100,0.2) 0%, rgba(180,60,80,0.1) 40%, transparent 70%),
+        /* 底部建筑轮廓 */
+        linear-gradient(0deg, rgba(40,20,50,0.8) 0%, rgba(40,20,50,0.4) 8%, transparent 18%),
+        /* 地面暖光 */
+        radial-gradient(ellipse 100% 20% at 50% 95%, rgba(240,160,100,0.15) 0%, transparent 60%);
+}
+
+/* SVG背景插画覆盖层 */
+html.theme-japan .japan-bg-illustration {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+
+/* ═══════════════════════════════════════
+   Layer 2: 樱花粒子层
+   ═══════════════════════════════════════ */
+html.theme-japan #theme-particle-canvas,
+html.theme-japan .tsparticles-canvas-el {
+    z-index: 1 !important;
+    pointer-events: none !important;
+    opacity: 0.7;
+}
+
+
+/* ═══════════════════════════════════════
+   Layer 3: 半透明磨砂玻璃UI组件
+   ═══════════════════════════════════════ */
+
+/* ── 左侧导航栏：暖米白半透明40% ── */
+html.theme-japan .sidebar {
+    background: rgba(250,245,238,0.40) !important;
+    backdrop-filter: blur(24px) saturate(1.3);
+    -webkit-backdrop-filter: blur(24px) saturate(1.3);
+    box-shadow: 4px 0 32px rgba(0,0,0,0.12) !important;
+    border-right: 1px solid rgba(255,255,255,0.1) !important;
+    z-index: 100 !important;
+    position: relative;
+}
+
+/* 导航栏菜单项 */
+html.theme-japan .sidebar .nav-item {
+    color: #4a4040 !important;
+    border-radius: 10px !important;
+    margin: 2px 10px;
+    padding: 10px 14px;
+    transition: all 0.25s ease;
+}
+
+html.theme-japan .sidebar .nav-item:hover {
+    background: rgba(0,212,255,0.08) !important;
+    color: #2a2020 !important;
+}
+
+html.theme-japan .sidebar .nav-item.active {
+    background: rgba(0,212,255,0.15) !important;
+    color: #00d4ff !important;
+    border-left-color: transparent !important;
+}
+
+html.theme-japan .sidebar .nav-item.active .nav-icon,
+html.theme-japan .sidebar .nav-item.active .nav-text {
+    color: #00d4ff !important;
+}
+
+/* 侧边栏边缘光线 */
+html.theme-japan .sidebar::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg,
+        transparent 0%,
+        rgba(0,212,255,0.15) 30%,
+        rgba(232,96,122,0.1) 60%,
+        transparent 100%) !important;
+    animation: japanSidebarGlow 4s ease-in-out infinite;
+}
+
+@keyframes japanSidebarGlow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* 侧边栏Logo区域 */
+html.theme-japan .sidebar .sidebar-logo {
+    border-bottom-color: rgba(255,255,255,0.08) !important;
+}
+html.theme-japan .sidebar .sidebar-logo h1 {
+    color: #3a2828 !important;
+}
+
+
+/* ── 顶部搜索栏：深灰黑半透明30% ── */
+html.theme-japan .top-bar,
+html.theme-japan header {
+    background: rgba(30,20,35,0.30) !important;
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.1) !important;
+    z-index: 99 !important;
+}
+
+html.theme-japan .search-input,
+html.theme-japan input[type="search"],
+html.theme-japan .top-bar input,
+html.theme-japan .search-bar input {
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 20px !important;
+    color: #ffffff !important;
+    padding: 10px 18px 10px 42px !important;
+}
+
+html.theme-japan .search-input::placeholder,
+html.theme-japan input[type="search"]::placeholder {
+    color: rgba(255,255,255,0.35) !important;
+}
+
+html.theme-japan .search-input:focus,
+html.theme-japan input[type="search"]:focus {
+    background: rgba(255,255,255,0.12) !important;
+    border-color: rgba(0,212,255,0.25) !important;
+    box-shadow: 0 0 0 2px rgba(0,212,255,0.08) !important;
+    outline: none !important;
+}
+
+
+/* ── 功能卡片：深灰黑半透明30% + 大圆角 ── */
+html.theme-japan .info-card,
+html.theme-japan .nested-card,
+html.theme-japan .card,
+html.theme-japan .quick-action-card,
+html.theme-japan .stat-card {
+    background: rgba(30,20,35,0.30) !important;
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 16px !important;
+    box-shadow:
+        0 4px 20px rgba(0,0,0,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.05) !important;
+    transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+html.theme-japan .info-card:hover,
+html.theme-japan .nested-card:hover,
+html.theme-japan .card:hover,
+html.theme-japan .quick-action-card:hover,
+html.theme-japan .stat-card:hover {
+    transform: translateY(-4px) !important;
+    background: rgba(30,20,35,0.40) !important;
+    box-shadow:
+        0 8px 32px rgba(0,0,0,0.2),
+        0 0 20px rgba(0,212,255,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.08) !important;
+    border-color: rgba(0,212,255,0.15) !important;
+}
+
+/* 卡片角落樱花装饰 */
+html.theme-japan .info-card::after,
+html.theme-japan .card::after {
+    content: "🌸";
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 11px;
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+
+/* ── 按钮 ── */
+html.theme-japan .btn.btn-primary,
+html.theme-japan .btn-primary {
+    background: linear-gradient(135deg, rgba(0,212,255,0.3) 0%, rgba(232,96,122,0.3) 100%) !important;
+    backdrop-filter: blur(8px);
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15) !important;
+    transition: all 0.25s ease !important;
+}
+
+html.theme-japan .btn.btn-primary:hover,
+html.theme-japan .btn-primary:hover {
+    background: linear-gradient(135deg, rgba(0,212,255,0.45) 0%, rgba(232,96,122,0.45) 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(0,212,255,0.15) !important;
+}
+
+
+/* ═══════════════════════════════════════
+   Layer 4: 文字图标
+   ═══════════════════════════════════════ */
+
+/* 标题 */
+html.theme-japan h1, html.theme-japan h2, html.theme-japan h3 {
+    color: #ffffff !important;
+    font-family: var(--font-display) !important;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.3);
+}
+
+/* 正文 */
+html.theme-japan p, html.theme-japan span, html.theme-japan label {
+    color: rgba(255,255,255,0.85) !important;
+}
+
+html.theme-japan .text-muted,
+html.theme-japan .muted {
+    color: rgba(255,255,255,0.45) !important;
+}
+
+/* 链接 */
+html.theme-japan a {
+    color: #00d4ff !important;
+}
+html.theme-japan a:hover {
+    color: #66e0ff !important;
+}
+
+/* 图标霓虹青蓝发光 */
+html.theme-japan .info-card i,
+html.theme-japan .card i,
+html.theme-japan .quick-action-card i,
+html.theme-japan .stat-card i {
+    color: #00d4ff !important;
+    text-shadow: 0 0 8px rgba(0,212,255,0.4);
+}
+
+/* 卡片内文字（链接保持高亮色） */
+html.theme-japan .info-card *,
+html.theme-japan .nested-card *,
+html.theme-japan .card * {
+    color: #ffffff !important;
+}
+html.theme-japan .info-card a,
+html.theme-japan .nested-card a,
+html.theme-japan .card a {
+    color: #00d4ff !important;
+}
+html.theme-japan .info-card a:hover,
+html.theme-japan .nested-card a:hover,
+html.theme-japan .card a:hover {
+    color: #66e0ff !important;
+}
+
+
+/* ═══════════════════════════════════════
+   表单元素
+   ═══════════════════════════════════════ */
+html.theme-japan .form-input,
+html.theme-japan input[type="text"],
+html.theme-japan input[type="email"],
+html.theme-japan textarea,
+html.theme-japan .form-select,
+html.theme-japan select {
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 10px !important;
+    color: #ffffff !important;
+}
+
+html.theme-japan .form-input:focus,
+html.theme-japan input:focus,
+html.theme-japan textarea:focus,
+html.theme-japan select:focus {
+    border-color: rgba(0,212,255,0.25) !important;
+    box-shadow: 0 0 0 2px rgba(0,212,255,0.08) !important;
+    outline: none !important;
+}
+
+
+/* ═══════════════════════════════════════
+   进度条
+   ═══════════════════════════════════════ */
+html.theme-japan .progress-bar,
+html.theme-japan .progress-track {
+    background: rgba(255,255,255,0.08) !important;
+    border-radius: 8px;
+}
+html.theme-japan .progress-fill,
+html.theme-japan .progress-bar-fill {
+    background: linear-gradient(90deg, #00d4ff, #e8607a) !important;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,212,255,0.3);
+}
+
+
+/* ═══════════════════════════════════════
+   滚动条
+   ═══════════════════════════════════════ */
+html.theme-japan ::-webkit-scrollbar { width: 6px; }
+html.theme-japan ::-webkit-scrollbar-track { background: transparent; }
+html.theme-japan ::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.12) !important;
+    border-radius: 3px;
+}
+html.theme-japan ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.2) !important;
+}
+
+html.theme-japan ::selection {
+    background: rgba(0,212,255,0.25) !important;
+    color: #ffffff !important;
+}
+
+
+/* ═══════════════════════════════════════
+   提示/Toast/模态框
+   ═══════════════════════════════════════ */
+html.theme-japan .toast,
+html.theme-japan .notification {
+    background: rgba(30,20,35,0.7) !important;
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 12px !important;
+    color: #ffffff !important;
+}
+
+html.theme-japan .modal,
+html.theme-japan .dialog {
+    background: rgba(30,20,35,0.85) !important;
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 8px 48px rgba(0,0,0,0.3) !important;
+}
+
+
+/* ═══════════════════════════════════════
+   表格
+   ═══════════════════════════════════════ */
+html.theme-japan table { border-color: rgba(255,255,255,0.05) !important; }
+html.theme-japan th {
+    background: rgba(255,255,255,0.05) !important;
+    color: #ffffff !important;
+}
+html.theme-japan td {
+    border-color: rgba(255,255,255,0.04) !important;
+    color: rgba(255,255,255,0.8) !important;
+}
+html.theme-japan tr:hover td {
+    background: rgba(255,255,255,0.03) !important;
+}
+
+
+/* 装饰层（SVG）在 body::after 地景之上 */
+html.theme-japan .theme-decor-layer {
+    z-index: 1 !important;
+}
