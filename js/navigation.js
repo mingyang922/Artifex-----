@@ -64,45 +64,43 @@ class NavigationManager {
      * 初始化导航事件监听器
      */
     init() {
-        setTimeout(() => {
-            const navLinks = document.querySelectorAll('.nav-link[data-module]');
-            navLinks.forEach((link) => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const module = link.getAttribute('data-module');
-                    this.navigateTo(module);
-                });
+        const navLinks = document.querySelectorAll('.nav-link[data-module]');
+        navLinks.forEach((link) => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const module = link.getAttribute('data-module');
+                this.navigateTo(module);
             });
+        });
 
-            const userAvatars = document.querySelectorAll('.user-avatar');
-            userAvatars.forEach((avatar) => {
-                avatar.style.cursor = 'pointer';
-                avatar.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.navigateTo('user-center');
-                });
+        const userAvatars = document.querySelectorAll('.user-avatar');
+        userAvatars.forEach((avatar) => {
+            avatar.style.cursor = 'pointer';
+            avatar.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.navigateTo('user-center');
             });
+        });
 
-            const toolCards = document.querySelectorAll('.tool-card[data-target]');
-            toolCards.forEach((card) => {
-                const target = card.getAttribute('data-target');
-                card.style.cursor = 'pointer';
-                card.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (target) this.navigateTo(target);
-                });
+        const toolCards = document.querySelectorAll('.tool-card[data-target]');
+        toolCards.forEach((card) => {
+            const target = card.getAttribute('data-target');
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (target) this.navigateTo(target);
             });
+        });
 
-            const targetLinks = document.querySelectorAll('[data-target].view-all');
-            targetLinks.forEach((link) => {
-                const target = link.getAttribute('data-target');
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (target) this.navigateTo(target);
-                });
+        const targetLinks = document.querySelectorAll('[data-target].view-all');
+        targetLinks.forEach((link) => {
+            const target = link.getAttribute('data-target');
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (target) this.navigateTo(target);
             });
-        }, 100);
+        });
     }
 
     /**

@@ -45,6 +45,33 @@ describe('image-proxy route module', () => {
         });
         assert.equal(typeof router, 'function'); // express router is a function
     });
+
+    it('should reject a redirect from a public URL to a private host', async () => {
+        const { fetchPublicImage } = require('../backend/routes/image-proxy');
+        const lookup = async () => [{ address: '93.184.216.34', family: 4 }];
+        const request = async () => ({
+            status: 302,
+            headers: { location: 'http://127.0.0.1/admin' },
+        });
+
+        await assert.rejects(
+            fetchPublicImage('https://example.com/image.png', request, lookup),
+            /禁止访问内网地址/
+        );
+    });
+
+    it('should disable automatic redirects when fetching proxied images', async () => {
+        const { fetchPublicImage } = require('../backend/routes/image-proxy');
+        const lookup = async () => [{ address: '93.184.216.34', family: 4 }];
+        let requestOptions;
+        const request = async (_url, options) => {
+            requestOptions = options;
+            return { status: 200, headers: { 'content-type': 'image/png' }, data: Buffer.from('png') };
+        };
+
+        await fetchPublicImage('https://example.com/image.png', request, lookup);
+        assert.equal(requestOptions.maxRedirects, 0);
+    });
 });
 
 describe('auth route module', () => {

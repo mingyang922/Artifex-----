@@ -3,21 +3,31 @@
  * 提供静态资源缓存和离线支持
  */
 
-const CACHE_NAME = 'artifex-v1.3.5';
+const CACHE_NAME = 'artifex-v1.3.3-r2';
 const MAX_CACHE_SIZE = 200; // 最大缓存条目数
 let fetchCount = 0; // 用于限制 trimCache 调用频率
 const STATIC_ASSETS = [
-    '/',
     '/login.html',
     '/dashboard.html',
     '/styles/ui-kit.css',
     '/styles/dashboard.css',
     '/styles/app-shell.css',
+    '/styles/region-themes.css',
+    '/styles/theme-china.css',
+    '/styles/theme-japan.css',
+    '/styles/theme-korea.css',
+    '/styles/theme-uk.css',
+    '/js/theme-bootstrap.js',
+    '/js/region-themes.js',
     '/vendor/css/font-awesome.min.css',
     '/vendor/css/google-fonts.css',
     '/vendor/jszip.min.js',
     '/manifest.json',
     '/vendor/images/app-icon.svg',
+    '/vendor/images/themes/china-ink-landscape.webp',
+    '/vendor/images/themes/japan-sakura-fuji.webp',
+    '/vendor/images/themes/korea-kpop-neon.webp',
+    '/vendor/images/themes/uk-london-oil-painting.webp',
 ];
 
 /**
@@ -30,13 +40,13 @@ async function loadPrecacheList() {
         const resp = await fetch('/sw-manifest.json', { cache: 'no-store' });
         if (resp.ok) {
             const manifest = await resp.json();
-            console.log('[SW] Loaded manifest with', manifest.assets.length, 'assets');
+            // [SW] Loaded manifest with N assets
             return manifest.assets;
         }
     } catch (_) {
         // manifest 文件不存在或网络异常，使用静态列表
     }
-    console.log('[SW] Using hardcoded STATIC_ASSETS fallback');
+    // [SW] Using hardcoded STATIC_ASSETS fallback
     return STATIC_ASSETS;
 }
 
@@ -56,11 +66,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames
-                    .filter((name) => name !== CACHE_NAME)
-                    .map((name) => caches.delete(name))
-            );
+            return Promise.all(cacheNames.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name)));
         })
     );
     self.clients.claim();
@@ -139,8 +145,7 @@ self.addEventListener('fetch', (event) => {
                     // 网络失败且无缓存，返回离线页面
                     if (request.destination === 'document') {
                         // 优先返回 dashboard（已认证用户更可能在 dashboard），其次 login
-                        return caches.match('/dashboard.html')
-                            .then((resp) => resp || caches.match('/login.html'));
+                        return caches.match('/dashboard.html').then((resp) => resp || caches.match('/login.html'));
                     }
                     return new Response('Offline', { status: 503 });
                 });

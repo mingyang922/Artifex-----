@@ -4,91 +4,76 @@
  * 版本: 1.3.3 */
 'use strict';
 
-    document.addEventListener('keydown', function (e) {
-        const isCtrl = e.ctrlKey || e.metaKey;
-        const target = e.target;
-        const isInput =
-            target.tagName === 'INPUT' ||
-            target.tagName === 'TEXTAREA' ||
-            target.isContentEditable;
+document.addEventListener('keydown', function (e) {
+    const isCtrl = e.ctrlKey || e.metaKey;
+    const target = e.target;
+    const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
 
-        // 非修饰键场景下，输入框内不拦截
-        if (isInput && !isCtrl) return;
+    // 非修饰键场景下，输入框内不拦截
+    if (isInput && !isCtrl) return;
 
-        // Ctrl+S / Cmd+S — 保存（仅当存在保存按钮时才阻止默认行为）
-        if (isCtrl && e.key === 's') {
-            const saveBtn = document.querySelector(
-                '#save-changes-btn, #save-project-btn, #save-edit-btn, .save-btn'
-            );
-            if (saveBtn) {
-                e.preventDefault();
-                saveBtn.click();
-            }
-            return;
-        }
-
-        // Ctrl+Z / Cmd+Z — 撤销（资产编辑器）
-        if (isCtrl && !e.shiftKey && e.key === 'z') {
-            // 如果在输入框内，让浏览器原生撤销生效
-            if (isInput) return;
+    // Ctrl+S / Cmd+S — 保存（仅当存在保存按钮时才阻止默认行为）
+    if (isCtrl && e.key === 's') {
+        const saveBtn = document.querySelector('#save-changes-btn, #save-project-btn, #save-edit-btn, .save-btn');
+        if (saveBtn) {
             e.preventDefault();
-            const undoBtn = document.querySelector(
-                '#aeUndoBtn, .ae-action-btn[data-action="undo"]'
-            );
-            if (undoBtn) undoBtn.click();
-            return;
+            saveBtn.click();
         }
+        return;
+    }
 
-        // Ctrl+Shift+Z / Cmd+Shift+Z — 重做（资产编辑器）
-        if (isCtrl && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
-            if (isInput) return;
+    // Ctrl+Z / Cmd+Z — 撤销（资产编辑器）
+    if (isCtrl && !e.shiftKey && e.key === 'z') {
+        // 如果在输入框内，让浏览器原生撤销生效
+        if (isInput) return;
+        e.preventDefault();
+        const undoBtn = document.querySelector('#aeUndoBtn, .ae-action-btn[data-action="undo"]');
+        if (undoBtn) undoBtn.click();
+        return;
+    }
+
+    // Ctrl+Shift+Z / Cmd+Shift+Z — 重做（资产编辑器）
+    if (isCtrl && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+        if (isInput) return;
+        e.preventDefault();
+        const redoBtn = document.querySelector('#aeRedoBtn, .ae-action-btn[data-action="redo"]');
+        if (redoBtn) redoBtn.click();
+        return;
+    }
+
+    // Space — 切换预览（图片生成器，仅非输入状态且预览按钮存在时）
+    if (e.key === ' ' && !isCtrl && !isInput) {
+        const previewBtn = document.querySelector('#togglePreviewBtn, #previewToggle');
+        if (previewBtn) {
             e.preventDefault();
-            const redoBtn = document.querySelector(
-                '#aeRedoBtn, .ae-action-btn[data-action="redo"]'
-            );
-            if (redoBtn) redoBtn.click();
-            return;
+            previewBtn.click();
         }
+        return;
+    }
 
-        // Space — 切换预览（图片生成器，仅非输入状态且预览按钮存在时）
-        if (e.key === ' ' && !isCtrl && !isInput) {
-            const previewBtn = document.querySelector(
-                '#togglePreviewBtn, #previewToggle'
-            );
-            if (previewBtn) {
-                e.preventDefault();
-                previewBtn.click();
-            }
-            return;
-        }
+    // Escape — 关闭模态框 / 下拉菜单
+    if (e.key === 'Escape') {
+        // 关闭 tech-select 下拉
+        document.querySelectorAll('.tech-select.is-open, .pm-tech-select.is-open').forEach(function (wrap) {
+            if (typeof wrap.__closeTechSelect === 'function') wrap.__closeTechSelect();
+            else if (typeof wrap.__closePmTechSelect === 'function') wrap.__closePmTechSelect();
+            else wrap.classList.remove('is-open');
+        });
+        // 关闭可见 modal
+        const closeBtn = document.querySelector(
+            '.modal:not(.hidden) .close-modal, .modal.show .close-modal, .overlay.show .close-btn'
+        );
+        if (closeBtn) closeBtn.click();
+        return;
+    }
 
-        // Escape — 关闭模态框 / 下拉菜单
-        if (e.key === 'Escape') {
-            // 关闭 tech-select 下拉
-            document
-                .querySelectorAll('.tech-select.is-open, .pm-tech-select.is-open')
-                .forEach(function (wrap) {
-                    if (typeof wrap.__closeTechSelect === 'function')
-                        wrap.__closeTechSelect();
-                    else if (typeof wrap.__closePmTechSelect === 'function')
-                        wrap.__closePmTechSelect();
-                    else wrap.classList.remove('is-open');
-                });
-            // 关闭可见 modal
-            const closeBtn = document.querySelector(
-                '.modal:not(.hidden) .close-modal, .modal.show .close-modal, .overlay.show .close-btn'
-            );
-            if (closeBtn) closeBtn.click();
-            return;
-        }
-
-        // Ctrl+Enter / Cmd+Enter — 提交 / 生成
-        if (isCtrl && e.key === 'Enter') {
-            e.preventDefault();
-            const generateBtn = document.querySelector(
-                '#generateBtn, #actionGroupGenerateBtn, .generate-btn:not([disabled])'
-            );
-            if (generateBtn) generateBtn.click();
-            return;
-        }
-    });
+    // Ctrl+Enter / Cmd+Enter — 提交 / 生成
+    if (isCtrl && e.key === 'Enter') {
+        e.preventDefault();
+        const generateBtn = document.querySelector(
+            '#generateBtn, #actionGroupGenerateBtn, .generate-btn:not([disabled])'
+        );
+        if (generateBtn) generateBtn.click();
+        return;
+    }
+});

@@ -37,7 +37,8 @@
         if (action.includes('项目')) return { icon: 'fa-folder', cls: 'project' };
         if (action.includes('素材')) return { icon: 'fa-image', cls: 'asset' };
         if (action.includes('AI') || action.includes('生成')) return { icon: 'fa-magic', cls: 'image' };
-        if (action.includes('登录') || action.includes('注册') || action.includes('认证')) return { icon: 'fa-user', cls: 'auth' };
+        if (action.includes('登录') || action.includes('注册') || action.includes('认证'))
+            return { icon: 'fa-user', cls: 'auth' };
         return { icon: 'fa-circle', cls: 'auth' };
     }
 
@@ -69,23 +70,31 @@
         _activityLogState.loading = true;
         const listEl = document.getElementById('activity-log-list');
         const loadMoreWrap = document.getElementById('activity-load-more-wrap');
-        if (!listEl) { _activityLogState.loading = false; return; }
+        if (!listEl) {
+            _activityLogState.loading = false;
+            return;
+        }
 
         if (page === 1) {
-            listEl.innerHTML = '<div class="activity-loading"><i class="fas fa-spinner fa-spin" style="color:#00f0ff;font-size:24px"></i><span style="color:#b0b0c0;margin-left:10px">加载中...</span></div>';
+            listEl.innerHTML =
+                '<div class="activity-loading"><i class="fas fa-spinner fa-spin" style="color:#00f0ff;font-size:24px"></i><span style="color:#b0b0c0;margin-left:10px">加载中...</span></div>';
             _activityLogState.hasMore = true;
         }
 
         try {
             const r = await fetch(`/api/activity-log?page=${page}&limit=20`, { credentials: 'include' });
-            if (r.status === 401) { window.location.href = loginHtmlPath(); return; }
+            if (r.status === 401) {
+                window.location.href = loginHtmlPath();
+                return;
+            }
             const data = await r.json();
             const logs = data.logs || [];
 
             if (page === 1) listEl.innerHTML = '';
 
             if (logs.length === 0 && page === 1) {
-                listEl.innerHTML = '<div class="activity-empty"><i class="fas fa-inbox"></i><span>暂无活动记录</span></div>';
+                listEl.innerHTML =
+                    '<div class="activity-empty"><i class="fas fa-inbox"></i><span>暂无活动记录</span></div>';
                 if (loadMoreWrap) loadMoreWrap.style.display = 'none';
                 _activityLogState.hasMore = false;
             } else {
@@ -102,7 +111,8 @@
             }
         } catch (_e) {
             if (page === 1) {
-                listEl.innerHTML = '<div class="activity-empty"><i class="fas fa-exclamation-triangle"></i><span>加载失败，请稍后重试</span></div>';
+                listEl.innerHTML =
+                    '<div class="activity-empty"><i class="fas fa-exclamation-triangle"></i><span>加载失败，请稍后重试</span></div>';
             }
         }
 

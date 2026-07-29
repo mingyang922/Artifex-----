@@ -5,8 +5,10 @@
 var HTML_ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
 function escapeHtml(str) {
-    if (str == null) return '';
-    return String(str).replace(/[&<>"']/g, function (ch) { return HTML_ESCAPE_MAP[ch]; });
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/[&<>"']/g, function (ch) {
+        return HTML_ESCAPE_MAP[ch];
+    });
 }
 
 var _reLineSep = new RegExp(String.fromCharCode(0x2028), 'g');

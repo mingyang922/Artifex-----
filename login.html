@@ -4,13 +4,12 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Artifex - 登录注册</title>
-        <link rel="manifest" href="manifest.json">
-        <meta name="theme-color" content="#00f0ff">
+        <link rel="manifest" href="manifest.json" />
+        <meta name="theme-color" content="#00f0ff" />
+        <script src="js/theme-bootstrap.js"></script>
         <link href="vendor/css/font-awesome.min.css" rel="stylesheet" />
         <link href="vendor/css/google-fonts.css" rel="stylesheet" />
         <link rel="stylesheet" href="styles/app-shell.css" />
-        <link rel="stylesheet" href="styles/region-themes.css" />
-        <link rel="stylesheet" href="styles/theme-japan.css" />
         <style>
             /* ═══ 赛博朋克登录页 ═══ */
             :root {
@@ -51,10 +50,18 @@
             }
 
             @keyframes loginFlowBg {
-                0% { transform: translate(0, 0) scale(1); }
-                33% { transform: translate(2%, -1%) scale(1.03); }
-                66% { transform: translate(-1%, 2%) scale(0.98); }
-                100% { transform: translate(1%, -2%) scale(1.02); }
+                0% {
+                    transform: translate(0, 0) scale(1);
+                }
+                33% {
+                    transform: translate(2%, -1%) scale(1.03);
+                }
+                66% {
+                    transform: translate(-1%, 2%) scale(0.98);
+                }
+                100% {
+                    transform: translate(1%, -2%) scale(1.02);
+                }
             }
 
             /* ── 网格叠加 ── */
@@ -107,8 +114,12 @@
             }
 
             @keyframes cardShine {
-                0% { left: -100%; }
-                100% { left: 100%; }
+                0% {
+                    left: -100%;
+                }
+                100% {
+                    left: 100%;
+                }
             }
 
             .platform-logo {
@@ -286,6 +297,27 @@
                 text-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
             }
 
+            .link-button {
+                padding: 0;
+                border: 0;
+                background: transparent;
+                color: var(--login-cyan);
+                font: inherit;
+                cursor: pointer;
+            }
+
+            .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+
             .btn {
                 width: 100%;
                 padding: 12px;
@@ -332,8 +364,12 @@
             }
 
             @keyframes btnShimmer {
-                0% { left: -100%; }
-                100% { left: 150%; }
+                0% {
+                    left: -100%;
+                }
+                100% {
+                    left: 150%;
+                }
             }
 
             .btn.loading {
@@ -481,9 +517,15 @@
 
             /* ── 减少动画支持 ── */
             @media (prefers-reduced-motion: reduce) {
-                body::before { animation: none !important; }
-                .form-container::before { animation: none !important; }
-                .btn-primary::before { display: none !important; }
+                body::before {
+                    animation: none !important;
+                }
+                .form-container::before {
+                    animation: none !important;
+                }
+                .btn-primary::before {
+                    display: none !important;
+                }
             }
 
             /* ── 响应式设计 ── */
@@ -497,6 +539,7 @@
                 }
             }
         </style>
+        <link rel="stylesheet" href="styles/region-themes.css" />
     </head>
     <body>
         <div class="container">
@@ -516,28 +559,57 @@
                     <form id="login">
                         <div class="input-group">
                             <i class="fas fa-user-circle"></i>
-                            <input type="email" id="loginEmail" placeholder="邮箱地址" data-i18n="login.email" required aria-label="邮箱地址" />
+                            <label class="sr-only" for="loginEmail">邮箱地址</label>
+                            <input
+                                type="email"
+                                id="loginEmail"
+                                name="email"
+                                autocomplete="email"
+                                placeholder="邮箱地址"
+                                data-i18n="login.email"
+                                required
+                                aria-label="邮箱地址"
+                            />
                         </div>
                         <div class="input-group">
                             <i class="fas fa-lock"></i>
                             <div class="password-input-container">
-                                <input type="password" id="loginPassword" placeholder="密码" data-i18n="login.password" required aria-label="密码" />
-                                <button type="button" class="password-toggle" id="toggle-login-password" data-i18n-aria="login.showPassword" aria-label="显示密码">
+                                <label class="sr-only" for="loginPassword">密码</label>
+                                <input
+                                    type="password"
+                                    id="loginPassword"
+                                    name="password"
+                                    autocomplete="current-password"
+                                    placeholder="密码"
+                                    data-i18n="login.password"
+                                    required
+                                    aria-label="密码"
+                                />
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    id="toggle-login-password"
+                                    data-i18n-aria="login.showPassword"
+                                    aria-label="显示密码"
+                                >
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
                         </div>
                         <div class="form-options">
                             <label class="remember-me">
-                                <input type="checkbox" id="rememberMe" />
+                                <input type="checkbox" id="rememberMe" name="remember" />
                                 <span class="checkmark"></span>
                                 <span data-i18n="login.remember">记住我</span>
                             </label>
-                            <a href="#" class="forgot-password" data-i18n="login.forgot">忘记密码？</a>
+                            <button type="button" class="forgot-password link-button" data-i18n="login.forgot">忘记密码？</button>
                         </div>
                         <button type="submit" class="btn btn-primary" data-i18n="login.submit">登录账户</button>
                         <div class="form-footer">
-                            <p><span data-i18n="login.noAccount">还没有账户？</span> <a href="#" data-switch-form="registerForm" data-i18n="login.register">立即注册</a></p>
+                            <p>
+                                <span data-i18n="login.noAccount">还没有账户？</span>
+                                <button type="button" class="link-button" data-switch-form="registerForm" data-i18n="login.register">立即注册</button>
+                            </p>
                         </div>
                     </form>
                 </div>
@@ -551,17 +623,53 @@
                     <form id="register">
                         <div class="input-group">
                             <i class="fas fa-user"></i>
-                            <input type="text" id="registerUsername" placeholder="用户名" data-i18n="login.username" required aria-label="用户名" />
+                            <label class="sr-only" for="registerUsername">用户名</label>
+                            <input
+                                type="text"
+                                id="registerUsername"
+                                name="username"
+                                autocomplete="username"
+                                placeholder="用户名"
+                                data-i18n="login.username"
+                                required
+                                aria-label="用户名"
+                            />
                         </div>
                         <div class="input-group">
                             <i class="fas fa-envelope"></i>
-                            <input type="email" id="registerEmail" placeholder="邮箱地址" data-i18n="login.email" required aria-label="邮箱地址" />
+                            <label class="sr-only" for="registerEmail">邮箱地址</label>
+                            <input
+                                type="email"
+                                id="registerEmail"
+                                name="email"
+                                autocomplete="email"
+                                placeholder="邮箱地址"
+                                data-i18n="login.email"
+                                required
+                                aria-label="邮箱地址"
+                            />
                         </div>
                         <div class="input-group">
                             <i class="fas fa-lock"></i>
                             <div class="password-input-container">
-                                <input type="password" id="registerPassword" placeholder="设置密码" data-i18n="login.setPassword" required aria-label="设置密码" />
-                                <button type="button" class="password-toggle" id="toggle-register-password" data-i18n-aria="login.showPassword" aria-label="显示密码">
+                                <label class="sr-only" for="registerPassword">设置密码</label>
+                                <input
+                                    type="password"
+                                    id="registerPassword"
+                                    name="password"
+                                    autocomplete="new-password"
+                                    placeholder="设置密码"
+                                    data-i18n="login.setPassword"
+                                    required
+                                    aria-label="设置密码"
+                                />
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    id="toggle-register-password"
+                                    data-i18n-aria="login.showPassword"
+                                    aria-label="显示密码"
+                                >
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
@@ -577,14 +685,19 @@
 
                         <div class="form-options">
                             <label class="terms-agreement">
-                                <input type="checkbox" id="agreeTerms" required />
+                                <input type="checkbox" id="agreeTerms" name="agreeTerms" required />
                                 <span class="checkmark"></span>
-                                <span data-i18n="login.agreeTerms">我同意</span><a href="#" class="terms-link" data-i18n="login.terms">服务条款</a><span>和</span><a href="#" class="terms-link" data-i18n="login.privacy">隐私政策</a>
+                                <span data-i18n="login.agreeTerms">我同意</span
+                                ><a href="docs/terms.html" class="terms-link" data-i18n="login.terms">服务条款</a><span>和</span
+                                ><a href="docs/privacy.html" class="terms-link" data-i18n="login.privacy">隐私政策</a>
                             </label>
                         </div>
                         <button type="submit" class="btn btn-primary" data-i18n="login.registerTitle">创建账户</button>
                         <div class="form-footer">
-                            <p><span data-i18n="login.hasAccount">已有账户？</span> <a href="#" data-switch-form="loginForm" data-i18n="login.loginNow">立即登录</a></p>
+                            <p>
+                                <span data-i18n="login.hasAccount">已有账户？</span>
+                                <button type="button" class="link-button" data-switch-form="loginForm" data-i18n="login.loginNow">立即登录</button>
+                            </p>
                         </div>
                     </form>
                 </div>
@@ -597,15 +710,13 @@
         <!-- 备案信息 -->
         <footer class="beian-footer">
             <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
-                <img src="vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+                <img src="vendor/images/beian-icon.png" alt="公安备案" class="beian-icon" />京公网安备11010802048813号
             </a>
             <span class="beian-separator">|</span>
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
         </footer>
 
         <script src="js/i18n.js"></script>
-        <script src="vendor/js/tsparticles.bundle.min.js"></script>
-        <script src="vendor/js/gsap.min.js"></script>
         <script src="js/region-themes.js"></script>
         <script src="js/session-guard.js"></script>
         <script defer src="js/login-init.js"></script>

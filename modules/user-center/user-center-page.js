@@ -126,6 +126,20 @@ function initTechSelects() {
     });
 }
 
+function syncNativeTechSelect(nativeSelect) {
+    if (!nativeSelect) return;
+    const wrapper = nativeSelect.nextElementSibling;
+    if (!wrapper || !wrapper.classList.contains('tech-select')) return;
+
+    const selectedOption = nativeSelect.options[nativeSelect.selectedIndex];
+    const trigger = wrapper.querySelector('.tech-select-trigger');
+    if (trigger && selectedOption) trigger.textContent = selectedOption.text;
+    wrapper.dataset.value = nativeSelect.value;
+    wrapper.querySelectorAll('.tech-select-option').forEach((option) => {
+        option.classList.toggle('is-selected', option.dataset.value === nativeSelect.value);
+    });
+}
+
 // 保存配置到localStorage（服务端同步防抖）
 let _saveUserConfigTimer = null;
 let _saveUserConfigPending = false;
@@ -141,7 +155,7 @@ function saveUserConfig() {
     // 处理国家/地区值
     let countryValue = countrySelect ? countrySelect.value : '';
     if (countryValue === 'other') {
-        countryValue = countryOtherInput ? (countryOtherInput.value.trim() || '其他') : '其他';
+        countryValue = countryOtherInput ? countryOtherInput.value.trim() || '其他' : '其他';
     }
 
     const config = {
@@ -200,10 +214,16 @@ function saveUserConfig() {
             })
             .then((data) => {
                 if (!data.ok) throw new Error(data.error || '保存失败');
-                if (window.TechUI && typeof window.TechUI.toast === 'function') window.TechUI.toast('个人资料已保存', 'success');
+                if (window.TechUI && typeof window.TechUI.toast === 'function')
+                    window.TechUI.toast('个人资料已保存', 'success');
             })
-            .catch(() => { if (window.TechUI && typeof window.TechUI.toast === 'function') window.TechUI.toast('保存个人资料失败', 'error'); })
-            .finally(() => { _saveUserConfigPending = false; });
+            .catch(() => {
+                if (window.TechUI && typeof window.TechUI.toast === 'function')
+                    window.TechUI.toast('保存个人资料失败', 'error');
+            })
+            .finally(() => {
+                _saveUserConfigPending = false;
+            });
     }, 300);
 }
 
@@ -270,17 +290,7 @@ function loadUserConfig() {
         }
 
         // 同步国家/语言自定义下拉框
-        document.querySelectorAll('select.tech-select-native').forEach((nativeSelect) => {
-            const wrapper = nativeSelect.nextElementSibling;
-            if (wrapper && wrapper.classList.contains('tech-select')) {
-                const selectedOpt = nativeSelect.options[nativeSelect.selectedIndex];
-                if (selectedOpt) {
-                    const trigger = wrapper.querySelector('.tech-select-trigger');
-                    if (trigger) trigger.textContent = selectedOpt.text;
-                    wrapper.dataset.value = nativeSelect.value;
-                }
-            }
-        });
+        document.querySelectorAll('select.tech-select-native').forEach(syncNativeTechSelect);
     }
 
     // 加载权限设置
@@ -310,7 +320,9 @@ function getAvatarHistoryFromStorage() {
         try {
             const config = JSON.parse(savedConfig);
             return config.avatarHistory || [];
-        } catch (_) { /* ignore parse errors */ }
+        } catch (_) {
+            /* ignore parse errors */
+        }
     }
     return [];
 }
@@ -335,7 +347,11 @@ function addToAvatarHistory(avatarSrc) {
     const savedConfig = localStorage.getItem('userConfig');
     let config = {};
     if (savedConfig) {
-        try { config = JSON.parse(savedConfig); } catch (_) { /* ignore */ }
+        try {
+            config = JSON.parse(savedConfig);
+        } catch (_) {
+            /* ignore */
+        }
     }
     config.avatarHistory = history;
     localStorage.setItem('userConfig', JSON.stringify(config));
@@ -356,7 +372,11 @@ function removeAvatarFromHistory(index) {
         const savedConfig = localStorage.getItem('userConfig');
         let config = {};
         if (savedConfig) {
-            try { config = JSON.parse(savedConfig); } catch (_) { /* ignore */ }
+            try {
+                config = JSON.parse(savedConfig);
+            } catch (_) {
+                /* ignore */
+            }
         }
         config.avatarHistory = history;
         localStorage.setItem('userConfig', JSON.stringify(config));
@@ -894,7 +914,11 @@ function loadRegistrationTime() {
 
     if (registrationData) {
         let data;
-        try { data = JSON.parse(registrationData); } catch (_) { return; }
+        try {
+            data = JSON.parse(registrationData);
+        } catch (_) {
+            return;
+        }
         if (data.registrationDateFormatted) {
             registrationTimeElement.textContent = data.registrationDateFormatted;
         } else {
@@ -987,7 +1011,8 @@ function initNotificationSystem() {
             // 关闭通知下拉框
             notificationDropdown.classList.remove('show');
             // 滚动到页面内嵌的消息中心面板
-            const messageCenter = document.querySelector('.message-center-panel') || document.querySelector('.message-center');
+            const messageCenter =
+                document.querySelector('.message-center-panel') || document.querySelector('.message-center');
             if (messageCenter) {
                 messageCenter.scrollIntoView({ behavior: 'smooth' });
             }
@@ -1395,7 +1420,9 @@ window.addEventListener('DOMContentLoaded', async () => {
             const adminItem = document.getElementById('admin-nav-item');
             if (adminItem) adminItem.style.display = '';
         }
-    } catch (_e) { /* ignore */ }
+    } catch (_e) {
+        /* ignore */
+    }
 });
 
 // 初始化语言选择器
@@ -1429,17 +1456,20 @@ function initThemeSelector() {
 
     // 设置当前模式
     themeSelect.value = window.RegionThemes.getMode();
+    syncNativeTechSelect(themeSelect);
 
     // 监听主题切换
     themeSelect.addEventListener('change', function () {
         if (window.RegionThemes) {
             window.RegionThemes.setMode(this.value);
+            syncNativeTechSelect(this);
         }
     });
 
     // 监听主题变化（由 region-themes.js 派发，避免重复 storage 监听）
     window.addEventListener('regionThemeChanged', function (e) {
         themeSelect.value = e.detail.mode || 'off';
+        syncNativeTechSelect(themeSelect);
     });
 }
 
@@ -1529,7 +1559,8 @@ function initEditInfoFunctionality() {
             // 显示修改信息按钮
             editInfoBtn.style.display = 'inline-block';
 
-            if (window.TechUI && typeof window.TechUI.toast === 'function') window.TechUI.toast('个人信息已保存', 'success');
+            if (window.TechUI && typeof window.TechUI.toast === 'function')
+                window.TechUI.toast('个人信息已保存', 'success');
         });
     }
 

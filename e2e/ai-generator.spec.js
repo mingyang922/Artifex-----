@@ -7,6 +7,7 @@ async function loginAndGoToAiGenerator(page) {
     const password = 'test123456';
 
     await page.goto('/login.html');
+    await page.evaluate(() => localStorage.setItem('artifex-onboarding-v2', 'done'));
     await page.click('[data-switch-form="registerForm"]');
     const username = `e2eai${Date.now()}`;
     await page.fill('#registerUsername', username);
@@ -32,6 +33,7 @@ test.describe('AI 生成器', () => {
         await expect(page).toHaveTitle(/AI生成器/);
         await expect(page.locator('.sidebar')).toBeVisible();
         await expect(page.locator('.main-content')).toBeVisible();
+        await expect(page.locator('.ux-workflow-toolbar')).toBeVisible();
     });
 
     test('图片生成表单元素存在', async ({ page }) => {
@@ -95,19 +97,17 @@ test.describe('AI 生成器', () => {
         await page.click('.tab-button[data-tab="image"]');
         await expect(page.locator('#view-image')).toBeVisible();
 
-        // Fill in the prompt
-        const promptInput = page.locator('#promptInput, #aiPrompt, #imageDescription, textarea[placeholder*="描述"], textarea[placeholder*="prompt"]');
-        await promptInput.first().fill('a cute cat sitting on a couch');
+        // Fill every required field. Native selects remain the form's source of
+        // truth even though the page renders custom select controls.
+        await page.selectOption('#imageType', { index: 1 });
+        await page.selectOption('#imageStyle', { index: 1 });
+        await page.selectOption('#imageColorScheme', { index: 1 });
+        await page.selectOption('#imageSize', '256x256');
+        await page.selectOption('#apiProvider', 'mock');
+        await page.fill('#imageDescription', 'a cute cat sitting on a couch');
 
-        // Select 'free' provider if available
-        const providerSelect = page.locator('#apiProvider, select[name="provider"]');
-        if (await providerSelect.first().isVisible()) {
-            await providerSelect.first().selectOption('free');
-        }
-
-        // Click generate button
-        const generateBtn = page.locator('#generateBtn, #imageGenBtn, .generate-btn, button:has-text("生成")');
-        await generateBtn.first().click();
+        // Other tabs also contain generate actions, so target this form exactly.
+        await page.click('#imageGenBtn');
 
         // Wait for result (image or error message)
         await page.waitForSelector('.result-image, .error-message, .toast-message', { timeout: 30000 });
@@ -116,7 +116,7 @@ test.describe('AI 生成器', () => {
         const hasImage = await page.locator('.result-image, img[src*="data:"], img[src*="http"]').first().isVisible().catch(() => false);
         const hasError = await page.locator('.error-message, .toast-message--error').first().isVisible().catch(() => false);
 
-        // Either outcome is acceptable (free API might fail)
+        // Keep the error path visible if backend validation regresses.
         expect(hasImage || hasError).toBeTruthy();
     });
 });

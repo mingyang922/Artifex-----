@@ -64,7 +64,14 @@ class AssetEditor {
                             if (tagsObj.category) category = tagsObj.category;
                             if (tagsObj.fileName) fileName = tagsObj.fileName;
                         } catch (_) {}
-                        return { id: item.id, name: item.name || '', dataURL: item.content || '', type: item.type || 'image', category, fileName };
+                        return {
+                            id: item.id,
+                            name: item.name || '',
+                            dataURL: item.content || '',
+                            type: item.type || 'image',
+                            category,
+                            fileName,
+                        };
                     });
                 }
             }
@@ -77,7 +84,11 @@ class AssetEditor {
             } catch (_) {}
         }
         let imgs = [];
-        try { imgs = JSON.parse(localStorage.getItem(aiStorageKey('generatedImages')) || '[]'); } catch (_) { imgs = []; }
+        try {
+            imgs = JSON.parse(localStorage.getItem(aiStorageKey('generatedImages')) || '[]');
+        } catch (_) {
+            imgs = [];
+        }
         imgs.forEach((img) => {
             if (img.imageUrl && !assets.find((a) => a.dataURL === img.imageUrl)) {
                 assets.push({ id: img.id, name: img.name || 'AI图片', dataURL: img.imageUrl, type: 'image' });
@@ -1322,7 +1333,16 @@ class AssetEditor {
      * RGB 转 hex 字符串
      */
     rgbToHex(r, g, b) {
-        return '#' + [r, g, b].map((c) => Math.max(0, Math.min(255, Math.round(c))).toString(16).padStart(2, '0')).join('');
+        return (
+            '#' +
+            [r, g, b]
+                .map((c) =>
+                    Math.max(0, Math.min(255, Math.round(c)))
+                        .toString(16)
+                        .padStart(2, '0')
+                )
+                .join('')
+        );
     }
 
     /**
@@ -1416,7 +1436,10 @@ class AssetEditor {
         panel.appendChild(grid);
 
         // 将面板插入到编辑器面板区域
-        const target = document.querySelector('.ae-right-panel') || document.querySelector('.ae-side-panel') || this.wrap.parentElement;
+        const target =
+            document.querySelector('.ae-right-panel') ||
+            document.querySelector('.ae-side-panel') ||
+            this.wrap.parentElement;
         if (target) {
             target.appendChild(panel);
         } else {

@@ -1,0 +1,406 @@
+/**
+ * 韩流霓虹 — modern K-pop glass, soft fog and iridescent light.
+ * Deliberately avoids historical architecture and hard cyberpunk motifs.
+ */
+html.theme-korea {
+    --font-display: "Noto Sans KR", "Pretendard", "Malgun Gothic", sans-serif;
+    --font-ui: "Noto Sans KR", "Pretendard", "Malgun Gothic", sans-serif;
+    --shell-bg: transparent;
+    --shell-bg2: rgba(14, 11, 22, 0.68);
+    --shell-text: #fff8f1;
+    --shell-muted: #b9abc8;
+    --shell-accent: #b088f9;
+    --shell-accent-2: #ff79c6;
+    --tech-cyan: #8be9fd;
+    --tech-violet: #ff79c6;
+    --ui-accent: #b088f9;
+    --ui-border: rgba(176, 136, 249, 0.25);
+    --ui-border-strong: rgba(176, 136, 249, 0.46);
+    --ui-bg-deep: rgba(10, 8, 18, 0.78);
+    --ui-bg-panel: rgba(21, 16, 36, 0.63);
+    --login-cyan: #8be9fd;
+    --login-violet: #ff79c6;
+    --login-bg: #0e0b16;
+}
+
+html.theme-korea body,
+html.theme-korea body.app-shell {
+    background-color: #0e0b16 !important;
+    background-image:
+        linear-gradient(90deg, rgba(10, 7, 18, 0.42) 0%, rgba(10, 7, 18, 0.1) 35%, rgba(10, 7, 18, 0.14) 70%, rgba(10, 7, 18, 0.34) 100%),
+        linear-gradient(180deg, rgba(14, 11, 22, 0.18), rgba(14, 11, 22, 0.08) 55%, rgba(10, 7, 18, 0.34)),
+        url("../vendor/images/themes/korea-kpop-neon.webp") !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    background-attachment: fixed !important;
+    color: #fff8f1 !important;
+}
+
+html.theme-korea body::before,
+html.theme-korea body.app-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 38% 28% at 78% 12%, rgba(255, 121, 198, 0.1), transparent 72%),
+        radial-gradient(ellipse 34% 28% at 18% 18%, rgba(139, 233, 253, 0.08), transparent 72%),
+        linear-gradient(180deg, rgba(14, 11, 22, 0.05), rgba(14, 11, 22, 0.16));
+}
+
+html.theme-korea body.app-shell .dashboard-container,
+html.theme-korea body.app-shell .main-content {
+    background-color: transparent !important;
+}
+
+html.theme-korea body.app-shell .main-content {
+    background-image: linear-gradient(180deg, rgba(14, 11, 22, 0.02), rgba(14, 11, 22, 0.12)) !important;
+    background-size: 100% 100% !important;
+}
+
+html.theme-korea body.app-shell .main-content::after {
+    display: none !important;
+}
+
+html.theme-korea #theme-particle-canvas,
+html.theme-korea .tsparticles-canvas-el,
+html.theme-korea .theme-decor-layer {
+    z-index: 1 !important;
+    pointer-events: none !important;
+}
+
+html.theme-korea #theme-particle-canvas,
+html.theme-korea .tsparticles-canvas-el {
+    opacity: 0.68;
+}
+
+html.theme-korea .sidebar {
+    position: relative;
+    z-index: 100 !important;
+    color: #fff8f1 !important;
+    background: linear-gradient(160deg, rgba(40, 28, 61, 0.52), rgba(12, 9, 22, 0.68)) !important;
+    border-right: 1px solid rgba(176, 136, 249, 0.22) !important;
+    box-shadow: 10px 0 40px rgba(8, 5, 18, 0.24), inset -1px 0 rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(28px) saturate(1.35);
+    -webkit-backdrop-filter: blur(28px) saturate(1.35);
+}
+
+html.theme-korea .sidebar::after {
+    background: linear-gradient(180deg, transparent, rgba(139, 233, 253, 0.38) 28%, rgba(255, 121, 198, 0.45) 62%, transparent) !important;
+    box-shadow: 0 0 16px rgba(176, 136, 249, 0.2);
+}
+
+html.theme-korea .sidebar .nav-item {
+    margin: 3px 10px;
+    padding: 10px 14px;
+    border-radius: 16px !important;
+    color: rgba(255, 248, 241, 0.74) !important;
+    transition: background 220ms ease, box-shadow 220ms ease, color 220ms ease, transform 220ms ease;
+}
+
+html.theme-korea .sidebar .nav-item:hover {
+    color: #fff !important;
+    background: rgba(176, 136, 249, 0.12) !important;
+    transform: translateX(2px);
+}
+
+html.theme-korea .sidebar .nav-item.active {
+    background: linear-gradient(105deg, rgba(255, 121, 198, 0.24), rgba(176, 136, 249, 0.16)) !important;
+    border: 1px solid rgba(255, 121, 198, 0.36) !important;
+    border-left-color: rgba(255, 121, 198, 0.5) !important;
+    box-shadow: 0 0 22px rgba(255, 121, 198, 0.2), inset 0 1px rgba(255, 255, 255, 0.09) !important;
+}
+
+html.theme-korea .sidebar .nav-item.active,
+html.theme-korea .sidebar .nav-item.active .nav-icon,
+html.theme-korea .sidebar .nav-item.active .nav-text {
+    color: #fff6fc !important;
+    text-shadow: 0 0 12px rgba(255, 121, 198, 0.5);
+}
+
+html.theme-korea .top-bar,
+html.theme-korea header {
+    z-index: 99 !important;
+    background: rgba(18, 13, 31, 0.43) !important;
+    border-bottom: 1px solid rgba(176, 136, 249, 0.18) !important;
+    box-shadow: 0 8px 32px rgba(8, 5, 18, 0.16) !important;
+    backdrop-filter: blur(24px) saturate(1.3);
+    -webkit-backdrop-filter: blur(24px) saturate(1.3);
+}
+
+html.theme-korea .search-bar,
+html.theme-korea .search-input,
+html.theme-korea input[type="search"],
+html.theme-korea .top-bar input {
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.075) !important;
+    border: 1px solid rgba(176, 136, 249, 0.34) !important;
+    border-radius: 24px !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+html.theme-korea input::placeholder,
+html.theme-korea textarea::placeholder {
+    color: rgba(255, 248, 241, 0.46) !important;
+}
+
+html.theme-korea input:focus,
+html.theme-korea textarea:focus,
+html.theme-korea select:focus {
+    border-color: rgba(176, 136, 249, 0.72) !important;
+    box-shadow: 0 0 0 3px rgba(176, 136, 249, 0.25), 0 0 24px rgba(255, 121, 198, 0.18) !important;
+    outline: none !important;
+}
+
+html.theme-korea .info-card,
+html.theme-korea .nested-card,
+html.theme-korea .card,
+html.theme-korea .quick-action-card,
+html.theme-korea .stat-card {
+    position: relative;
+    overflow: hidden;
+    color: #fff8f1 !important;
+    background: linear-gradient(145deg, rgba(47, 32, 70, 0.48), rgba(15, 10, 27, 0.56)) !important;
+    border: 1px solid rgba(176, 136, 249, 0.25) !important;
+    border-radius: 22px !important;
+    box-shadow: 0 12px 36px rgba(7, 4, 18, 0.24), 0 0 30px rgba(176, 136, 249, 0.055), inset 0 1px rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(24px) saturate(1.32);
+    -webkit-backdrop-filter: blur(24px) saturate(1.32);
+    transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1), border-color 300ms ease, box-shadow 300ms ease !important;
+}
+
+html.theme-korea .info-card:hover,
+html.theme-korea .nested-card:hover,
+html.theme-korea .card:hover,
+html.theme-korea .quick-action-card:hover,
+html.theme-korea .stat-card:hover {
+    transform: translateY(-5px) !important;
+    border-color: rgba(255, 121, 198, 0.4) !important;
+    box-shadow: 0 18px 46px rgba(7, 4, 18, 0.3), 0 0 34px rgba(176, 136, 249, 0.16), 0 0 18px rgba(139, 233, 253, 0.08) !important;
+}
+
+html.theme-korea .info-card::after,
+html.theme-korea .card::after,
+html.theme-korea .quick-action-card::after {
+    content: "";
+    position: absolute;
+    top: 13px;
+    right: 16px;
+    width: 30px;
+    height: 24px;
+    pointer-events: none;
+    opacity: 0.42;
+    background:
+        radial-gradient(circle at 18% 70%, #8be9fd 0 1px, transparent 2px),
+        radial-gradient(circle at 52% 18%, #fff 0 1.5px, transparent 2.5px),
+        radial-gradient(circle at 84% 62%, #ff79c6 0 1px, transparent 2px);
+    filter: drop-shadow(0 0 4px rgba(176, 136, 249, 0.8));
+}
+
+html.theme-korea .info-card:hover::after,
+html.theme-korea .card:hover::after,
+html.theme-korea .quick-action-card:hover::after {
+    animation: koreaCardTwinkle 1.25s ease-in-out both;
+}
+
+@keyframes koreaCardTwinkle {
+    0%, 100% { opacity: 0.38; transform: scale(0.92) rotate(0); }
+    45% { opacity: 0.95; transform: scale(1.18) rotate(8deg); }
+}
+
+html.theme-korea h1,
+html.theme-korea h2,
+html.theme-korea h3 {
+    color: #fff !important;
+    font-family: var(--font-display) !important;
+    letter-spacing: -0.015em;
+    text-shadow: 0 0 16px rgba(176, 136, 249, 0.24);
+}
+
+html.theme-korea p,
+html.theme-korea span,
+html.theme-korea label,
+html.theme-korea td {
+    color: rgba(255, 248, 241, 0.86) !important;
+}
+
+html.theme-korea .text-muted,
+html.theme-korea .muted {
+    color: rgba(236, 225, 241, 0.57) !important;
+}
+
+html.theme-korea a {
+    color: #bba0ff !important;
+}
+
+html.theme-korea .btn.btn-primary,
+html.theme-korea .btn-primary {
+    color: #fff !important;
+    background: linear-gradient(125deg, #9b72ee, #e85bad 55%, #74cfe5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 7px 22px rgba(176, 136, 249, 0.24), inset 0 1px rgba(255, 255, 255, 0.18) !important;
+}
+
+html.theme-korea .btn.btn-primary:hover,
+html.theme-korea .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(255, 121, 198, 0.3), 0 0 18px rgba(139, 233, 253, 0.14) !important;
+}
+
+html.theme-korea .form-input,
+html.theme-korea input[type="text"],
+html.theme-korea input[type="email"],
+html.theme-korea input[type="password"],
+html.theme-korea textarea,
+html.theme-korea select {
+    color: #fff8f1 !important;
+    background: rgba(20, 14, 34, 0.62) !important;
+    border: 1px solid rgba(176, 136, 249, 0.24) !important;
+    border-radius: 16px !important;
+}
+
+html.theme-korea .toast,
+html.theme-korea .notification,
+html.theme-korea .modal,
+html.theme-korea .dialog {
+    color: #fff8f1 !important;
+    background: rgba(18, 12, 31, 0.84) !important;
+    border: 1px solid rgba(176, 136, 249, 0.27) !important;
+    border-radius: 20px !important;
+    backdrop-filter: blur(26px) saturate(1.25);
+    -webkit-backdrop-filter: blur(26px) saturate(1.25);
+}
+
+html.theme-korea table,
+html.theme-korea th,
+html.theme-korea td {
+    border-color: rgba(176, 136, 249, 0.14) !important;
+}
+
+html.theme-korea th {
+    color: #fff !important;
+    background: rgba(176, 136, 249, 0.1) !important;
+}
+
+html.theme-korea tr:hover td {
+    background: rgba(255, 121, 198, 0.06) !important;
+}
+
+html.theme-korea ::selection {
+    color: #fff !important;
+    background: #9b62df !important;
+}
+
+/* Module surfaces: override feature-local cyberpunk skins. */
+html.theme-korea .asset-wrap,
+html.theme-korea .project-management-module,
+html.theme-korea .project-detail-module,
+html.theme-korea .style-presets-module,
+html.theme-korea .user-center-container,
+html.theme-korea .tab-content {
+    background: rgba(14, 11, 22, 0.48) !important;
+    border-color: rgba(176, 136, 249, 0.2) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 12px 36px rgba(7, 4, 18, 0.2), 0 0 24px rgba(176, 136, 249, 0.04), inset 0 1px rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(24px) saturate(1.3);
+    -webkit-backdrop-filter: blur(24px) saturate(1.3);
+}
+
+html.theme-korea .asset-wrap::before,
+html.theme-korea .asset-wrap::after,
+html.theme-korea .project-management-module::before,
+html.theme-korea .project-management-module::after,
+html.theme-korea .style-presets-module::before,
+html.theme-korea .style-presets-module::after {
+    display: none !important;
+}
+
+html.theme-korea .asset-search-bar,
+html.theme-korea .upload-area,
+html.theme-korea .empty-state,
+html.theme-korea .batch-bar,
+html.theme-korea .input-group,
+html.theme-korea .tech-select-trigger,
+html.theme-korea .tech-select-menu {
+    color: #fff8f1 !important;
+    background: rgba(20, 14, 34, 0.48) !important;
+    border-color: rgba(176, 136, 249, 0.22) !important;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+}
+
+html.theme-korea .upload-area {
+    border-style: dashed !important;
+    border-color: rgba(176, 136, 249, 0.28) !important;
+}
+
+html.theme-korea .upload-area.dragover {
+    background: rgba(176, 136, 249, 0.1) !important;
+    border-color: rgba(176, 136, 249, 0.58) !important;
+}
+
+html.theme-korea .tech-select-option:hover,
+html.theme-korea .tech-select-option.is-selected {
+    color: #fff8f1 !important;
+    background: rgba(176, 136, 249, 0.16) !important;
+}
+
+html.theme-korea .btn:not(.btn-primary),
+html.theme-korea #btnDetectSimilar,
+html.theme-korea [data-back-to-project] {
+    color: rgba(255, 248, 241, 0.88) !important;
+    background: rgba(176, 136, 249, 0.1) !important;
+    border-color: rgba(176, 136, 249, 0.22) !important;
+    box-shadow: none !important;
+}
+
+html.theme-korea .btn:not(.btn-primary):hover,
+html.theme-korea #btnDetectSimilar:hover,
+html.theme-korea [data-back-to-project]:hover {
+    color: #fff8f1 !important;
+    background: rgba(255, 121, 198, 0.14) !important;
+    border-color: rgba(255, 121, 198, 0.36) !important;
+}
+
+html.theme-korea .progress-bar,
+html.theme-korea .progress-track {
+    background: rgba(176, 136, 249, 0.12) !important;
+    border-radius: 8px;
+}
+
+html.theme-korea .progress-fill,
+html.theme-korea .progress-bar-fill {
+    background: linear-gradient(90deg, #8be9fd, #ff79c6) !important;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(176, 136, 249, 0.3);
+}
+
+html.theme-korea ::-webkit-scrollbar { width: 6px; }
+html.theme-korea ::-webkit-scrollbar-track { background: transparent; }
+html.theme-korea ::-webkit-scrollbar-thumb {
+    background: rgba(176, 136, 249, 0.35) !important;
+    border-radius: 3px;
+}
+html.theme-korea ::-webkit-scrollbar-thumb:hover {
+    background: rgba(176, 136, 249, 0.55) !important;
+}
+
+@media (max-width: 768px) {
+    html.theme-korea body,
+    html.theme-korea body.app-shell {
+        background-position: 54% center !important;
+        background-attachment: scroll !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.theme-korea .info-card:hover::after,
+    html.theme-korea .card:hover::after,
+    html.theme-korea .quick-action-card:hover::after {
+        animation: none !important;
+    }
+}

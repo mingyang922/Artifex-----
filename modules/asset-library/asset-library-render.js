@@ -20,8 +20,6 @@
     let uiToast = null;
     let uiConfirm = null;
     let fetchWithCsrf = null;
-    let saveState = null;
-    let dbItemToFrontend = null;
     let initTechSelects = null;
 
     function setDeps(deps) {
@@ -35,8 +33,6 @@
         uiToast = deps.uiToast;
         uiConfirm = deps.uiConfirm;
         fetchWithCsrf = deps.fetchWithCsrf;
-        saveState = deps.saveState;
-        dbItemToFrontend = deps.dbItemToFrontend;
         initTechSelects = deps.initTechSelects;
     }
 
@@ -77,9 +73,12 @@
             thumb.className = 'thumb';
             if (a.type && a.type.startsWith('image/') && a.dataURL) {
                 const img = document.createElement('img');
-                img.src = a.dataURL;
+                img.src = a.thumbnailURL || a.dataURL;
                 img.alt = a.name || a.fileName;
                 img.className = 'thumb-img';
+                img.loading = 'lazy';
+                img.decoding = 'async';
+                img.fetchPriority = 'low';
                 img.style.width = '100%';
                 img.style.height = '100%';
                 img.style.objectFit = 'cover';
@@ -235,8 +234,11 @@
                 body.appendChild(p);
                 const btn = doc.createElement('button');
                 btn.textContent = '关闭';
-                btn.style.cssText = 'padding:10px 20px; background:#00f0ff; color:#1a1a2e; border:none; border-radius:5px; cursor:pointer;';
-                btn.addEventListener('click', function() { newWindow.close(); });
+                btn.style.cssText =
+                    'padding:10px 20px; background:#00f0ff; color:#1a1a2e; border:none; border-radius:5px; cursor:pointer;';
+                btn.addEventListener('click', function () {
+                    newWindow.close();
+                });
                 body.appendChild(btn);
                 return;
             }
@@ -414,11 +416,8 @@
 
     // ── Unity SpriteSheet 导出 ──
     async function exportUnity(imageAssets) {
-        if (typeof JSZip === 'undefined') {
-            uiToast('JSZip 未加载，请刷新页面后重试', 'warn');
-            return;
-        }
-        const zip = new JSZip();
+        const JSZipCtor = await window.ArtifexVendors.ensureJSZip();
+        const zip = new JSZipCtor();
         const frames = {};
         let offsetX = 0;
         let maxH = 0;
@@ -455,7 +454,10 @@
 
         const json = JSON.stringify({ frames: frames, meta: meta }, null, 2);
         zip.file('spritesheet.json', json);
-        zip.file('README.txt', 'Artifex Unity SpriteSheet Export\nFormat: JSON Hash\nGenerated: ' + new Date().toISOString());
+        zip.file(
+            'README.txt',
+            'Artifex Unity SpriteSheet Export\nFormat: JSON Hash\nGenerated: ' + new Date().toISOString()
+        );
 
         const blob = await zip.generateAsync({ type: 'blob' });
         downloadBlob(blob, 'artifex_unity_spritesheet.zip');
@@ -464,11 +466,8 @@
 
     // ── Godot Atlas 导出 ──
     async function exportGodot(imageAssets) {
-        if (typeof JSZip === 'undefined') {
-            uiToast('JSZip 未加载，请刷新页面后重试', 'warn');
-            return;
-        }
-        const zip = new JSZip();
+        const JSZipCtor = await window.ArtifexVendors.ensureJSZip();
+        const zip = new JSZipCtor();
         let tresContent = '[gd_resource type="AtlasTexture" load_steps=' + (imageAssets.length + 1) + ' format=3]\n\n';
         let resourceIndex = 1;
 
@@ -484,7 +483,8 @@
             zip.file('textures/' + pngName, base64, { base64: true });
 
             // 生成 AtlasTexture 资源
-            tresContent += '[ext_resource type="Texture2D" path="res://textures/' + pngName + '" id="' + resourceIndex + '"]\n';
+            tresContent +=
+                '[ext_resource type="Texture2D" path="res://textures/' + pngName + '" id="' + resourceIndex + '"]\n';
             resourceIndex++;
         }
 
@@ -494,12 +494,16 @@
             const img = await loadImageFromDataURL(a.dataURL);
             const w = img.naturalWidth;
             const h = img.naturalHeight;
-            tresContent += '[resource]\natlas = ExtResource("' + atlasIndex + '")\nregion = Rect2(0, 0, ' + w + ', ' + h + ')\n\n';
+            tresContent +=
+                '[resource]\natlas = ExtResource("' + atlasIndex + '")\nregion = Rect2(0, 0, ' + w + ', ' + h + ')\n\n';
             atlasIndex++;
         }
 
         zip.file('atlas.tres', tresContent);
-        zip.file('README.txt', 'Artifex Godot Atlas Export\nFormat: Godot .tres AtlasTexture\nGenerated: ' + new Date().toISOString());
+        zip.file(
+            'README.txt',
+            'Artifex Godot Atlas Export\nFormat: Godot .tres AtlasTexture\nGenerated: ' + new Date().toISOString()
+        );
 
         const blob = await zip.generateAsync({ type: 'blob' });
         downloadBlob(blob, 'artifex_godot_atlas.zip');
@@ -557,15 +561,16 @@
         const json = JSON.stringify({ frames: frameData, meta: meta }, null, 2);
 
         // 导出为 zip
-        if (typeof JSZip !== 'undefined') {
-            const zip = new JSZip();
+        try {
+            const JSZipCtor = await window.ArtifexVendors.ensureJSZip();
+            const zip = new JSZipCtor();
             const pngDataUrl = canvas.toDataURL('image/png');
             const base64 = pngDataUrl.split(',')[1] || '';
             zip.file('spritesheet.png', base64, { base64: true });
             zip.file('spritesheet.json', json);
             const blob = await zip.generateAsync({ type: 'blob' });
             downloadBlob(blob, 'artifex_spritesheet.zip');
-        } else {
+        } catch (_error) {
             // 无 JSZip 时直接下载 png 和 json
             const a1 = document.createElement('a');
             a1.href = canvas.toDataURL('image/png');

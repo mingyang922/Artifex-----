@@ -7,6 +7,7 @@ async function loginAndGoToStylePresets(page) {
     const password = 'test123456';
 
     await page.goto('/login.html');
+    await page.evaluate(() => localStorage.setItem('artifex-onboarding-v2', 'done'));
     await page.click('[data-switch-form="registerForm"]');
     const username = `e2esp${Date.now()}`;
     await page.fill('#registerUsername', username);

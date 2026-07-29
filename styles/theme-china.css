@@ -1,0 +1,404 @@
+/**
+ * 华夏丹青 — dark xuan-paper and mineral-pigment theme.
+ * Loaded after region-themes.css so the shared region engine keeps ownership
+ * of theme selection, decoration and particles.
+ */
+html.theme-china {
+    --font-display: "ZCOOL XiaoWei", "Noto Serif SC", "STKaiti", serif;
+    --font-ui: "Noto Serif SC", "Songti SC", "SimSun", serif;
+    --shell-bg: transparent;
+    --shell-bg2: rgba(12, 10, 20, 0.76);
+    --shell-text: #f2ead8;
+    --shell-muted: #aaa399;
+    --shell-accent: #c82e3b;
+    --shell-accent-2: #2e5e8a;
+    --tech-cyan: #2e5e8a;
+    --tech-violet: #c82e3b;
+    --ui-accent: #c82e3b;
+    --ui-border: rgba(86, 127, 154, 0.25);
+    --ui-border-strong: rgba(86, 127, 154, 0.42);
+    --ui-bg-deep: rgba(8, 7, 13, 0.82);
+    --ui-bg-panel: rgba(18, 16, 24, 0.76);
+    --login-cyan: #2e5e8a;
+    --login-violet: #c82e3b;
+    --login-bg: #0c0a14;
+}
+
+html.theme-china body,
+html.theme-china body.app-shell {
+    background-color: #0c0a14 !important;
+    background-image:
+        linear-gradient(90deg, rgba(8, 7, 13, 0.84) 0%, rgba(8, 7, 13, 0.7) 22%, rgba(8, 7, 13, 0.66) 68%, rgba(8, 7, 13, 0.78) 100%),
+        linear-gradient(180deg, rgba(12, 10, 20, 0.7) 0%, rgba(12, 10, 20, 0.55) 50%, rgba(8, 7, 13, 0.82) 100%),
+        url("../vendor/images/themes/china-ink-landscape.webp") !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    background-attachment: fixed !important;
+    color: #f2ead8 !important;
+}
+
+html.theme-china body::before,
+html.theme-china body.app-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(3deg, transparent 0 5px, rgba(240, 232, 213, 0.012) 5px 6px),
+        repeating-linear-gradient(87deg, transparent 0 7px, rgba(240, 232, 213, 0.009) 7px 8px),
+        radial-gradient(ellipse 45% 22% at 80% 88%, rgba(58, 125, 104, 0.09), transparent 72%),
+        radial-gradient(ellipse 35% 20% at 16% 84%, rgba(46, 94, 138, 0.1), transparent 74%);
+    mix-blend-mode: screen;
+}
+
+html.theme-china body.app-shell .dashboard-container,
+html.theme-china body.app-shell .main-content {
+    background-color: transparent !important;
+}
+
+html.theme-china body.app-shell .main-content {
+    background-image: linear-gradient(180deg, rgba(12, 10, 20, 0.08), rgba(12, 10, 20, 0.2)) !important;
+    background-size: 100% 100% !important;
+}
+
+html.theme-china body.app-shell .main-content::after {
+    display: none !important;
+}
+
+html.theme-china #theme-particle-canvas,
+html.theme-china .tsparticles-canvas-el,
+html.theme-china .theme-decor-layer {
+    z-index: 1 !important;
+    pointer-events: none !important;
+}
+
+html.theme-china #theme-particle-canvas,
+html.theme-china .tsparticles-canvas-el {
+    opacity: 0.46;
+}
+
+html.theme-china .sidebar {
+    position: relative;
+    z-index: 100 !important;
+    color: #eee6d5 !important;
+    background:
+        repeating-linear-gradient(4deg, transparent 0 5px, rgba(242, 234, 216, 0.014) 5px 6px),
+        linear-gradient(180deg, rgba(15, 13, 21, 0.9), rgba(8, 7, 13, 0.86)) !important;
+    border-right: 1px solid rgba(46, 94, 138, 0.25) !important;
+    box-shadow: 6px 0 30px rgba(0, 0, 0, 0.36) !important;
+    backdrop-filter: blur(22px) saturate(0.85);
+    -webkit-backdrop-filter: blur(22px) saturate(0.85);
+}
+
+html.theme-china .sidebar::after {
+    background: linear-gradient(180deg, transparent, rgba(46, 94, 138, 0.45) 32%, rgba(200, 46, 59, 0.34) 70%, transparent) !important;
+}
+
+html.theme-china .sidebar .nav-item {
+    margin: 3px 10px;
+    padding: 10px 14px;
+    border-radius: 8px 12px !important;
+    color: #c9c0b1 !important;
+    transition: background 220ms ease, color 220ms ease, transform 220ms ease;
+}
+
+html.theme-china .sidebar .nav-item:hover {
+    background: rgba(46, 94, 138, 0.13) !important;
+    color: #f4eddf !important;
+    transform: translateX(2px);
+}
+
+html.theme-china .sidebar .nav-item.active {
+    background:
+        radial-gradient(circle at 10% 50%, rgba(255, 255, 255, 0.14), transparent 38%),
+        linear-gradient(100deg, rgba(200, 46, 59, 0.92), rgba(145, 28, 40, 0.78)) !important;
+    border-left-color: transparent !important;
+    box-shadow: 0 5px 18px rgba(112, 18, 29, 0.26) !important;
+}
+
+html.theme-china .sidebar .nav-item.active,
+html.theme-china .sidebar .nav-item.active .nav-icon,
+html.theme-china .sidebar .nav-item.active .nav-text {
+    color: #fff9ee !important;
+}
+
+html.theme-china .top-bar,
+html.theme-china header {
+    z-index: 99 !important;
+    background: rgba(12, 10, 20, 0.58) !important;
+    border-bottom: 1px solid rgba(46, 94, 138, 0.2) !important;
+    box-shadow: 0 5px 24px rgba(0, 0, 0, 0.2) !important;
+    backdrop-filter: blur(18px) saturate(0.9);
+    -webkit-backdrop-filter: blur(18px) saturate(0.9);
+}
+
+html.theme-china .search-bar,
+html.theme-china .search-input,
+html.theme-china input[type="search"],
+html.theme-china .top-bar input {
+    color: #f2ead8 !important;
+    background: rgba(9, 8, 14, 0.62) !important;
+    border: 1px solid rgba(46, 94, 138, 0.48) !important;
+    border-radius: 8px 13px !important;
+}
+
+html.theme-china input::placeholder,
+html.theme-china textarea::placeholder {
+    color: rgba(226, 217, 200, 0.48) !important;
+}
+
+html.theme-china input:focus,
+html.theme-china textarea:focus,
+html.theme-china select:focus {
+    border-color: rgba(46, 94, 138, 0.85) !important;
+    box-shadow: 0 0 0 3px rgba(46, 94, 138, 0.25), 0 0 22px rgba(46, 94, 138, 0.12) !important;
+    outline: none !important;
+}
+
+html.theme-china .info-card,
+html.theme-china .nested-card,
+html.theme-china .card,
+html.theme-china .quick-action-card,
+html.theme-china .stat-card {
+    position: relative;
+    overflow: hidden;
+    color: #f2ead8 !important;
+    background:
+        repeating-linear-gradient(3deg, transparent 0 5px, rgba(242, 234, 216, 0.012) 5px 6px),
+        linear-gradient(155deg, rgba(24, 21, 30, 0.79), rgba(9, 8, 14, 0.84)) !important;
+    border: 1px solid rgba(46, 94, 138, 0.34) !important;
+    border-radius: 10px 16px !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22), inset 0 1px rgba(242, 234, 216, 0.035) !important;
+    backdrop-filter: blur(18px) saturate(0.86);
+    -webkit-backdrop-filter: blur(18px) saturate(0.86);
+    transition: transform 280ms ease, border-color 280ms ease, box-shadow 280ms ease !important;
+}
+
+html.theme-china .info-card:hover,
+html.theme-china .nested-card:hover,
+html.theme-china .card:hover,
+html.theme-china .quick-action-card:hover,
+html.theme-china .stat-card:hover {
+    transform: translateY(-3px) !important;
+    border-color: rgba(58, 125, 104, 0.52) !important;
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.29), 0 0 28px rgba(46, 94, 138, 0.11) !important;
+}
+
+html.theme-china .info-card::after,
+html.theme-china .card::after,
+html.theme-china .quick-action-card::after {
+    content: "";
+    position: absolute;
+    top: -22px;
+    right: -30px;
+    width: 100px;
+    height: 72px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(46, 94, 138, 0.16), rgba(58, 125, 104, 0.06) 42%, transparent 70%);
+    filter: blur(8px);
+    pointer-events: none;
+    transition: transform 500ms ease, opacity 500ms ease;
+}
+
+html.theme-china .info-card:hover::after,
+html.theme-china .card:hover::after,
+html.theme-china .quick-action-card:hover::after {
+    transform: scale(1.28) translate(-8px, 8px);
+    opacity: 0.9;
+}
+
+html.theme-china h1,
+html.theme-china h2,
+html.theme-china h3 {
+    color: #fff8e8 !important;
+    font-family: var(--font-display) !important;
+    letter-spacing: 0.04em;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.42);
+}
+
+html.theme-china p,
+html.theme-china span,
+html.theme-china label,
+html.theme-china td {
+    color: rgba(242, 234, 216, 0.84) !important;
+}
+
+html.theme-china .text-muted,
+html.theme-china .muted {
+    color: rgba(219, 210, 194, 0.56) !important;
+}
+
+html.theme-china a {
+    color: #8eb1c9 !important;
+}
+
+html.theme-china .btn.btn-primary,
+html.theme-china .btn-primary {
+    color: #fff9ee !important;
+    background: linear-gradient(135deg, #c82e3b, #8f1e2a) !important;
+    border: 1px solid rgba(255, 225, 218, 0.13) !important;
+    border-radius: 8px 12px !important;
+    box-shadow: 0 5px 16px rgba(126, 20, 32, 0.28) !important;
+}
+
+html.theme-china .btn.btn-primary:hover,
+html.theme-china .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(156, 25, 39, 0.38), 0 0 0 4px rgba(200, 46, 59, 0.08) !important;
+}
+
+html.theme-china .form-input,
+html.theme-china input[type="text"],
+html.theme-china input[type="email"],
+html.theme-china input[type="password"],
+html.theme-china textarea,
+html.theme-china select {
+    color: #f2ead8 !important;
+    background: rgba(9, 8, 14, 0.7) !important;
+    border: 1px solid rgba(46, 94, 138, 0.28) !important;
+    border-radius: 8px 12px !important;
+}
+
+html.theme-china .toast,
+html.theme-china .notification,
+html.theme-china .modal,
+html.theme-china .dialog {
+    color: #f2ead8 !important;
+    background: rgba(12, 10, 20, 0.9) !important;
+    border: 1px solid rgba(46, 94, 138, 0.3) !important;
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+}
+
+html.theme-china table,
+html.theme-china th,
+html.theme-china td {
+    border-color: rgba(46, 94, 138, 0.17) !important;
+}
+
+html.theme-china th {
+    color: #fff8e8 !important;
+    background: rgba(46, 94, 138, 0.11) !important;
+}
+
+html.theme-china tr:hover td {
+    background: rgba(58, 125, 104, 0.07) !important;
+}
+
+html.theme-china ::selection {
+    color: #fff !important;
+    background: #c82e3b !important;
+}
+
+/* Module surfaces: override feature-local cyberpunk skins. */
+html.theme-china .asset-wrap,
+html.theme-china .project-management-module,
+html.theme-china .project-detail-module,
+html.theme-china .style-presets-module,
+html.theme-china .user-center-container,
+html.theme-china .tab-content {
+    background: rgba(12, 10, 20, 0.62) !important;
+    border-color: rgba(46, 94, 138, 0.25) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22), inset 0 1px rgba(242, 234, 216, 0.03) !important;
+    backdrop-filter: blur(18px) saturate(0.86);
+    -webkit-backdrop-filter: blur(18px) saturate(0.86);
+}
+
+html.theme-china .asset-wrap::before,
+html.theme-china .asset-wrap::after,
+html.theme-china .project-management-module::before,
+html.theme-china .project-management-module::after,
+html.theme-china .style-presets-module::before,
+html.theme-china .style-presets-module::after {
+    display: none !important;
+}
+
+html.theme-china .asset-search-bar,
+html.theme-china .upload-area,
+html.theme-china .empty-state,
+html.theme-china .batch-bar,
+html.theme-china .input-group,
+html.theme-china .tech-select-trigger,
+html.theme-china .tech-select-menu {
+    color: #f2ead8 !important;
+    background: rgba(9, 8, 14, 0.62) !important;
+    border-color: rgba(46, 94, 138, 0.28) !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+}
+
+html.theme-china .upload-area {
+    border-style: dashed !important;
+    border-color: rgba(200, 46, 59, 0.28) !important;
+}
+
+html.theme-china .upload-area.dragover {
+    background: rgba(200, 46, 59, 0.1) !important;
+    border-color: rgba(200, 46, 59, 0.58) !important;
+}
+
+html.theme-china .tech-select-option:hover,
+html.theme-china .tech-select-option.is-selected {
+    color: #f2ead8 !important;
+    background: rgba(200, 46, 59, 0.16) !important;
+}
+
+html.theme-china .btn:not(.btn-primary),
+html.theme-china #btnDetectSimilar,
+html.theme-china [data-back-to-project] {
+    color: rgba(242, 234, 216, 0.88) !important;
+    background: rgba(46, 94, 138, 0.12) !important;
+    border-color: rgba(46, 94, 138, 0.28) !important;
+    box-shadow: none !important;
+}
+
+html.theme-china .btn:not(.btn-primary):hover,
+html.theme-china #btnDetectSimilar:hover,
+html.theme-china [data-back-to-project]:hover {
+    color: #f2ead8 !important;
+    background: rgba(200, 46, 59, 0.16) !important;
+    border-color: rgba(200, 46, 59, 0.36) !important;
+}
+
+html.theme-china .progress-bar,
+html.theme-china .progress-track {
+    background: rgba(46, 94, 138, 0.15) !important;
+    border-radius: 8px;
+}
+
+html.theme-china .progress-fill,
+html.theme-china .progress-bar-fill {
+    background: linear-gradient(90deg, #2e5e8a, #c82e3b) !important;
+    border-radius: 8px;
+}
+
+html.theme-china ::-webkit-scrollbar { width: 6px; }
+html.theme-china ::-webkit-scrollbar-track { background: transparent; }
+html.theme-china ::-webkit-scrollbar-thumb {
+    background: rgba(46, 94, 138, 0.35) !important;
+    border-radius: 3px;
+}
+html.theme-china ::-webkit-scrollbar-thumb:hover {
+    background: rgba(46, 94, 138, 0.55) !important;
+}
+
+@media (max-width: 768px) {
+    html.theme-china body,
+    html.theme-china body.app-shell {
+        background-position: 58% center !important;
+        background-attachment: scroll !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.theme-china *,
+    html.theme-china *::before,
+    html.theme-china *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

@@ -76,8 +76,9 @@ function generateUniqueUserId() {
     }
 }
 
-// 初始化用户ID
+// 初始化用户ID（由 user-center-page.js 调用）
 // 注意：saveUserConfig / loadUserConfig 已统一在 user-center-page.js 中
+// eslint-disable-next-line no-unused-vars
 function initUserId() {
     const usernameInput = document.getElementById('username');
     if (!usernameInput) return;
@@ -92,7 +93,9 @@ function initUserId() {
                 usernameInput.value = config.userId;
                 return;
             }
-        } catch (_e) { /* ignore */ }
+        } catch (_e) {
+            /* ignore */
+        }
     }
 
     // 生成新的用户 ID（仅本地场景兜底）
@@ -168,7 +171,7 @@ function initApiTechSelect() {
             const rect = trigger.getBoundingClientRect();
             menu.style.minWidth = rect.width + 'px';
             menu.style.left = rect.left + 'px';
-            menu.style.top = (rect.bottom + 4) + 'px';
+            menu.style.top = rect.bottom + 4 + 'px';
         }
     });
 

@@ -7,10 +7,14 @@
 const isProd = (process.env.NODE_ENV || 'development') === 'production';
 
 const logger = {
-    info: (...args) => { if (!isProd) console.log('[INFO]', ...args); },
+    info: (...args) => {
+        if (!isProd) console.log('[INFO]', ...args);
+    },
     warn: (...args) => console.warn('[WARN]', ...args),
     error: (...args) => console.error('[ERROR]', ...args),
-    debug: (...args) => { if (!isProd) console.log('[DEBUG]', ...args); },
+    debug: (...args) => {
+        if (!isProd) console.log('[DEBUG]', ...args);
+    },
 };
 
 module.exports = logger;

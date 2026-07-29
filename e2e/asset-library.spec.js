@@ -7,6 +7,7 @@ async function loginAndGoToAssetLibrary(page) {
     const password = 'test123456';
 
     await page.goto('/login.html');
+    await page.evaluate(() => localStorage.setItem('artifex-onboarding-v2', 'done'));
     await page.click('[data-switch-form="registerForm"]');
     const username = `e2eal${Date.now()}`;
     await page.fill('#registerUsername', username);
@@ -32,6 +33,7 @@ test.describe('素材库', () => {
         await expect(page).toHaveTitle(/素材库/);
         await expect(page.locator('.sidebar')).toBeVisible();
         await expect(page.locator('.main-content')).toBeVisible();
+        await expect(page.locator('.ux-library-toolbar')).toBeVisible();
     });
 
     test('素材库内容区域加载', async ({ page }) => {
@@ -69,5 +71,29 @@ test.describe('素材库', () => {
 
         // Category filter should exist
         await expect(page.locator('#categoryFilter')).toBeAttached();
+    });
+
+    test('和风主题不再叠加旧场景或赛博模块皮肤', async ({ page }) => {
+        await page.evaluate(() => window.RegionThemes.setMode('japan'));
+        await expect(page.locator('html')).toHaveClass(/theme-japan/);
+
+        await page.reload({ waitUntil: 'networkidle' });
+        await expect(page.locator('html')).toHaveAttribute('data-region-theme-bootstrap', 'japan');
+        await expect(page.locator('#theme-decor-layer svg')).toHaveCount(0);
+
+        const visualState = await page.evaluate(() => {
+            const bodyAfter = getComputedStyle(document.body, '::after');
+            const assetWrap = getComputedStyle(document.querySelector('.asset-wrap'));
+            const uploadArea = getComputedStyle(document.querySelector('.upload-area'));
+            return {
+                bodyAfterDisplay: bodyAfter.display,
+                assetWrapBackground: assetWrap.backgroundColor,
+                uploadBorder: uploadArea.borderTopColor,
+            };
+        });
+
+        expect(visualState.bodyAfterDisplay).toBe('none');
+        expect(visualState.assetWrapBackground).toBe('rgba(30, 20, 35, 0.34)');
+        expect(visualState.uploadBorder).toBe('rgba(232, 96, 122, 0.28)');
     });
 });

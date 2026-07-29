@@ -4,15 +4,11 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>风格预设</title>
-        <link rel="manifest" href="../../manifest.json">
-        <meta name="theme-color" content="#00f0ff">
-        <link
-            href="../../vendor/css/google-fonts.css"
-            rel="stylesheet"
-        />
+        <link rel="manifest" href="../../manifest.json" />
+        <meta name="theme-color" content="#00f0ff" />
+        <script src="../../js/theme-bootstrap.js"></script>
+        <link href="../../vendor/css/google-fonts.css" rel="stylesheet" />
         <link rel="stylesheet" href="../../styles/ui-kit.css" />
-        <link rel="stylesheet" href="../../styles/region-themes.css" />
-        <link rel="stylesheet" href="../../styles/theme-japan.css" />
         <link href="../../vendor/css/font-awesome.min.css" rel="stylesheet" />
         <style>
             :root {
@@ -229,6 +225,8 @@
             }
         </style>
         <link rel="stylesheet" href="../../styles/app-shell.css" />
+        <link rel="stylesheet" href="../../styles/region-themes.css" />
+        <link rel="stylesheet" href="../../styles/productivity.css" />
     </head>
     <body class="app-shell" data-app-page="style-presets">
         <div class="pointer-glow" aria-hidden="true"></div>
@@ -241,7 +239,9 @@
                 </div>
                 <ul class="nav-menu">
                     <li class="nav-item">
-                        <a href="#" class="nav-link" data-module="home"><i class="fas fa-home"></i><span data-i18n="nav.home">主页</span></a>
+                        <a href="#" class="nav-link" data-module="home"
+                            ><i class="fas fa-home"></i><span data-i18n="nav.home">主页</span></a
+                        >
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="project-management"
@@ -275,7 +275,13 @@
                 <div class="top-bar">
                     <div class="search-bar">
                         <i class="fas fa-search" aria-hidden="true"></i>
-                        <input type="text" placeholder="搜索项目、资产或文档..." data-i18n="dashboard.searchPlaceholder" data-i18n-aria="common.search" aria-label="搜索" />
+                        <input
+                            type="text"
+                            placeholder="搜索项目、资产或文档..."
+                            data-i18n="dashboard.searchPlaceholder"
+                            data-i18n-aria="common.search"
+                            aria-label="搜索"
+                        />
                     </div>
                     <div class="user-menu">
                         <button type="button" class="notification-btn" aria-label="通知">
@@ -298,12 +304,18 @@
             </main>
         </div>
 
-        <button type="button" class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="菜单"><i class="fas fa-bars"></i></button>
+        <button type="button" class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="菜单">
+            <i class="fas fa-bars"></i>
+        </button>
 
         <!-- 备案信息 -->
         <footer class="beian-footer">
             <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
-                <img src="../../vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+                <img
+                    src="../../vendor/images/beian-icon.png"
+                    alt="公安备案"
+                    class="beian-icon"
+                />京公网安备11010802048813号
             </a>
             <span class="beian-separator">|</span>
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
@@ -311,8 +323,6 @@
 
         <script defer src="../../js/keyboard-shortcuts.js"></script>
         <script src="../../js/i18n.js"></script>
-        <script src="../../vendor/js/tsparticles.bundle.min.js"></script>
-        <script src="../../vendor/js/gsap.min.js"></script>
         <script src="../../js/region-themes.js"></script>
         <script src="../../js/session-guard.js"></script>
         <script defer src="../../js/ui-kit.js"></script>
@@ -324,6 +334,7 @@
         <script defer src="../../js/user-storage-scope.js"></script>
         <script defer src="../../js/page-effects.js"></script>
         <script defer src="style-presets.js"></script>
-            <script defer src="../../js/sw-register.js"></script>
+        <script defer src="../../js/productivity.js"></script>
+        <script defer src="../../js/sw-register.js"></script>
     </body>
 </html>

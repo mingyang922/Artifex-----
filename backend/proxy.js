@@ -18,11 +18,7 @@ const compression = require('compression');
 const logger = require('./lib/logger');
 const { WsServer } = require('./lib/ws-server');
 const arkRestConfig = require('./ark-rest-config');
-const {
-    getTencentCamCredentials,
-    validateTencentCamCredential,
-    normalizeJimengApiKey,
-} = require('./lib/utils');
+const { getTencentCamCredentials, validateTencentCamCredential, normalizeJimengApiKey } = require('./lib/utils');
 const tencentProvider = require('./providers/tencent');
 const alibabaProvider = require('./providers/alibaba');
 const jimengProvider = require('./providers/jimeng');
@@ -67,39 +63,49 @@ const app = express();
 app.set('trust proxy', 1);
 
 // 安全响应头（CSP 允许 Google Fonts 和 CDN）
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-            scriptSrcAttr: ["'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
-            fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
-            imgSrc: ["'self'", 'data:', 'blob:'],
-            mediaSrc: ["'self'", 'data:'],
-            connectSrc: ["'self'", 'https://fonts.googleapis.com', 'https://fonts.gstatic.com'],
-            workerSrc: ["'self'"],
-            upgradeInsecureRequests: null,
+// 生成 CSP nonce 用于内联脚本（替代 unsafe-inline）
+const cspNonce = () => crypto.randomBytes(16).toString('base64');
+app.use((req, res, next) => {
+    res.locals.cspNonce = cspNonce();
+    next();
+});
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: ["'self'", (req, res) => `'nonce-${res.locals.cspNonce}'`],
+                scriptSrcAttr: ["'unsafe-inline'"], // HTML 内联事件处理器暂无法用 nonce 替代
+                styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
+                fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
+                imgSrc: ["'self'", 'data:', 'blob:'],
+                mediaSrc: ["'self'", 'data:'],
+                connectSrc: ["'self'", 'https://fonts.googleapis.com', 'https://fonts.gstatic.com'],
+                workerSrc: ["'self'"],
+                upgradeInsecureRequests: null,
+            },
         },
-    },
-    // 移除已废弃的 x-xss-protection（现代浏览器已弃用，且可能被利用）
-    xssFilter: false,
-    // 移除已废弃的 Pragma 头
-    noSniff: true,
-    crossOriginEmbedderPolicy: false,
-    // 不发送不必要的 X-Download-Options（仅 IE8 需要）
-    ieNoOpen: false,
-}));
+        // 移除已废弃的 x-xss-protection（现代浏览器已弃用，且可能被利用）
+        xssFilter: false,
+        // 移除已废弃的 Pragma 头
+        noSniff: true,
+        crossOriginEmbedderPolicy: false,
+        // 不发送不必要的 X-Download-Options（仅 IE8 需要）
+        ieNoOpen: false,
+    })
+);
 
 // Gzip 压缩（跳过已压缩的图片格式）
-app.use(compression({
-    filter: (req, res) => {
-        if (req.headers['x-no-compression']) return false;
-        const type = res.getHeader('Content-Type') || '';
-        if (/image\/(jpeg|png|webp|gif)/.test(type)) return false;
-        return compression.filter(req, res);
-    },
-}));
+app.use(
+    compression({
+        filter: (req, res) => {
+            if (req.headers['x-no-compression']) return false;
+            const type = res.getHeader('Content-Type') || '';
+            if (/image\/(jpeg|png|webp|gif)/.test(type)) return false;
+            return compression.filter(req, res);
+        },
+    })
+);
 
 app.use(express.json({ limit: '48mb' }));
 
@@ -107,7 +113,10 @@ app.use(express.json({ limit: '48mb' }));
 axios.defaults.proxy = false;
 
 function normalizeNoProxy(existing, hosts) {
-    const items = String(existing || '').split(',').map((v) => v.trim()).filter(Boolean);
+    const items = String(existing || '')
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean);
     for (const host of hosts) {
         if (!items.includes(host)) items.push(host);
     }
@@ -116,15 +125,22 @@ function normalizeNoProxy(existing, hosts) {
 
 function disableDeadLocalProxyIfPresent() {
     const proxyVars = ['HTTP_PROXY', 'http_proxy', 'HTTPS_PROXY', 'https_proxy', 'ALL_PROXY', 'all_proxy'];
-    const proxyValue = proxyVars.map((key) => process.env[key]).filter(Boolean).join(' ');
+    const proxyValue = proxyVars
+        .map((key) => process.env[key])
+        .filter(Boolean)
+        .join(' ');
     if (!/127\.0\.0\.1:7897|localhost:7897/i.test(proxyValue)) return;
 
     for (const key of proxyVars) delete process.env[key];
 
     const hosts = [
-        'localhost', '127.0.0.1', 'dashscope.aliyuncs.com',
-        'ark.cn-beijing.volces.com', 'api.openai.com',
-        'aiart.tencentcloudapi.com', 'tencentcloudapi.com',
+        'localhost',
+        '127.0.0.1',
+        'dashscope.aliyuncs.com',
+        'ark.cn-beijing.volces.com',
+        'api.openai.com',
+        'aiart.tencentcloudapi.com',
+        'tencentcloudapi.com',
     ];
     const mergedNoProxy = normalizeNoProxy(process.env.NO_PROXY || process.env.no_proxy || '', hosts);
     process.env.NO_PROXY = mergedNoProxy;
@@ -135,11 +151,17 @@ disableDeadLocalProxyIfPresent();
 
 // ── CORS ──────────────────────────────────────────────────────────
 const corsAllowedList = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map((v) => v.trim()).filter(Boolean)
-    : isProd ? [] : ['*'];
+    ? process.env.ALLOWED_ORIGINS.split(',')
+          .map((v) => v.trim())
+          .filter(Boolean)
+    : isProd
+      ? []
+      : ['*'];
 
 if (isProd && corsAllowedList.length === 0) {
-    logger.error('FATAL: NODE_ENV=production requires ALLOWED_ORIGINS (comma-separated origins), e.g. https://your-host');
+    logger.error(
+        'FATAL: NODE_ENV=production requires ALLOWED_ORIGINS (comma-separated origins), e.g. https://your-host'
+    );
     process.exit(1);
 }
 
@@ -161,7 +183,10 @@ app.use((req, res, next) => {
     }
 
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-XSRF-Token, X-TC-Timestamp, X-TC-Version, X-TC-Action');
+    res.header(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Authorization, X-XSRF-Token, X-TC-Timestamp, X-TC-Version, X-TC-Action'
+    );
     if (req.method === 'OPTIONS') return res.status(200).end();
     next();
 });
@@ -183,21 +208,25 @@ const sessionStore = new SQLiteStore({
     cleanupInterval: 30 * 60 * 1000, // 30 分钟清理过期会话
 });
 
-app.use(session({
-    store: sessionStore,
-    secret: resolvedSessionSecret,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 24 * 60 * 60 * 1000,
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: isProd,
-    },
-}));
+app.use(
+    session({
+        store: sessionStore,
+        secret: resolvedSessionSecret,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            maxAge: 24 * 60 * 60 * 1000,
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: isProd,
+        },
+    })
+);
 
 // ── CSRF ──────────────────────────────────────────────────────────
-function generateCsrfToken() { return crypto.randomBytes(32).toString('hex'); }
+function generateCsrfToken() {
+    return crypto.randomBytes(32).toString('hex');
+}
 
 function csrfProtection(req, res, next) {
     const cookieToken = (req.headers.cookie || '').match(/XSRF-TOKEN=([^;]+)/);
@@ -211,7 +240,7 @@ function csrfProtection(req, res, next) {
 
 app.get('/api/csrf-token', (req, res) => {
     const token = generateCsrfToken();
-    res.cookie('XSRF-TOKEN', token, { httpOnly: false, sameSite: 'lax', maxAge: 3600 * 1000 });
+    res.cookie('XSRF-TOKEN', token, { httpOnly: false, sameSite: 'lax', secure: isProd, maxAge: 3600 * 1000 });
     res.json({ csrfToken: token });
 });
 
@@ -226,25 +255,32 @@ const apiLimiter = rateLimit({
 app.use('/api/', apiLimiter);
 
 // ── 认证路由 ─────────────────────────────────────────────────────
-app.use('/api', createAuthRouter({
-    usersDb, requireAuth, isAdminUser, csrfProtection, sanitizeApiSettingsPayload,
-}));
+app.use(
+    '/api',
+    createAuthRouter({
+        usersDb,
+        requireAuth,
+        isAdminUser,
+        csrfProtection,
+        sanitizeApiSettingsPayload,
+    })
+);
 
 // ── 静态文件 ─────────────────────────────────────────────────────
 // Docker 生产镜像只包含 Vite 的 dist 产物；开发环境仍直接服务源码目录。
-const staticRoot = isProd
-    ? path.join(__dirname, '..', 'dist')
-    : path.join(__dirname, '..');
-app.use(express.static(staticRoot, {
-    maxAge: isProd ? '7d' : 0,
-    etag: true,
-    setHeaders: (res, filePath) => {
-        // HTML 文件不长缓存（含会话状态）
-        if (filePath.endsWith('.html')) {
-            res.setHeader('Cache-Control', 'no-cache');
-        }
-    },
-}));
+const staticRoot = isProd ? path.join(__dirname, '..', 'dist') : path.join(__dirname, '..');
+app.use(
+    express.static(staticRoot, {
+        maxAge: isProd ? '7d' : 0,
+        etag: true,
+        setHeaders: (res, filePath) => {
+            // HTML 文件不长缓存（含会话状态）
+            if (filePath.endsWith('.html')) {
+                res.setHeader('Cache-Control', 'no-cache');
+            }
+        },
+    })
+);
 app.get('/', (req, res) => res.redirect('/login.html'));
 
 // ── 运行时配置 ───────────────────────────────────────────────────
@@ -292,7 +328,11 @@ const _tencentCamValid = validateTencentCamCredential(_tencentCam.secretId, _ten
 if (!isProd) {
     logger.info('hunyuan configured:', _tencentCamValid.ok);
     logger.info('alibaba configured:', runtimeConfig.alibaba.apiKey !== 'YOUR_ALIBABA_API_KEY');
-    logger.info('tencent image configured:', _tencentCamValid.ok, _tencentCamValid.ok ? '' : `(${_tencentCamValid.code})`);
+    logger.info(
+        'tencent image configured:',
+        _tencentCamValid.ok,
+        _tencentCamValid.ok ? '' : `(${_tencentCamValid.code})`
+    );
 }
 if (!_tencentCamValid.ok && _tencentCam.secretId) {
     logger.warn('[腾讯云] 密钥校验未通过:', _tencentCamValid.message);
@@ -311,17 +351,34 @@ if (!isProd) {
 // ── 业务路由（按模块拆分） ──────────────────────────────────────
 
 // AI 服务商路由（即梦/SD/混元/阿里云）
-app.use('/api', createAiProviderRouter({
-    requireAuth, csrfProtection, runtimeConfig, API_CONFIG, getUserProviderConfig, isAdminUser,
-    tencentProvider, alibabaProvider, jimengProvider, sdWebUiProvider,
-}));
+app.use(
+    '/api',
+    createAiProviderRouter({
+        requireAuth,
+        csrfProtection,
+        runtimeConfig,
+        API_CONFIG,
+        getUserProviderConfig,
+        isAdminUser,
+        tencentProvider,
+        alibabaProvider,
+        jimengProvider,
+        sdWebUiProvider,
+    })
+);
 
 // 图片生成路由
-app.use('/api', createImageRouter({
-    requireAuth, csrfProtection, isAdminUser, getUserProviderConfig,
-    logApiCall: usersDb.logApiCall,
-    checkQuota: usersDb.checkQuota,
-}));
+app.use(
+    '/api',
+    createImageRouter({
+        requireAuth,
+        csrfProtection,
+        isAdminUser,
+        getUserProviderConfig,
+        logApiCall: usersDb.logApiCall,
+        checkQuota: usersDb.checkQuota,
+    })
+);
 
 // 项目管理路由
 app.use('/api', createProjectRouter({ usersDb, requireAuth, csrfProtection }));
@@ -473,3 +530,35 @@ server.on('error', (err) => {
     logger.error(err);
     process.exit(1);
 });
+
+// ── 优雅关闭 ───────────────────────────────────────────────────
+function gracefulShutdown(signal) {
+    logger.info(`\n[artifex] 收到 ${signal}，正在优雅关闭...`);
+    server.close(() => {
+        logger.info('[artifex] HTTP 服务器已关闭');
+        try {
+            wsServer.close?.();
+        } catch (_) {
+            /* ignore */
+        }
+        try {
+            usersDb.close();
+        } catch (_) {
+            /* ignore */
+        }
+        try {
+            sessionStore.close?.();
+        } catch (_) {
+            /* ignore */
+        }
+        logger.info('[artifex] 资源清理完成');
+        process.exit(0);
+    });
+    // 强制退出兜底（10秒超时）
+    setTimeout(() => {
+        logger.error('[artifex] 优雅关闭超时，强制退出');
+        process.exit(1);
+    }, 10000).unref();
+}
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));

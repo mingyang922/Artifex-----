@@ -8,15 +8,13 @@
     let _redirecting = false;
 
     // 静默路径：这些接口返回 401 是正常逻辑，不弹窗
-    const SILENT_PATHS = [
-        '/api/me',
-        '/api/csrf-token',
-        '/api/health',
-    ];
+    const SILENT_PATHS = ['/api/me', '/api/csrf-token', '/api/health'];
 
     function isSilentRequest(url) {
         if (typeof url !== 'string') return false;
-        return SILENT_PATHS.some(function (p) { return url.includes(p); });
+        return SILENT_PATHS.some(function (p) {
+            return url.includes(p);
+        });
     }
 
     // 拦截 fetch，检测 401 响应

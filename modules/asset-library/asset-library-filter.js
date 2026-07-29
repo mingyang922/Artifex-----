@@ -51,11 +51,17 @@
 
         // 排序
         if (sort === 'newest') {
-            filtered.sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+            filtered.sort(function (a, b) {
+                return (b.createdAt || 0) - (a.createdAt || 0);
+            });
         } else if (sort === 'oldest') {
-            filtered.sort(function (a, b) { return (a.createdAt || 0) - (b.createdAt || 0); });
+            filtered.sort(function (a, b) {
+                return (a.createdAt || 0) - (b.createdAt || 0);
+            });
         } else if (sort === 'name') {
-            filtered.sort(function (a, b) { return (a.name || '').localeCompare(b.name || ''); });
+            filtered.sort(function (a, b) {
+                return (a.name || '').localeCompare(b.name || '');
+            });
         }
 
         return filtered;
@@ -63,6 +69,6 @@
 
     // ── 导出 ──
     window.AssetLibraryFilter = {
-        filterAssets: filterAssets
+        filterAssets: filterAssets,
     };
 })();

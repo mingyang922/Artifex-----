@@ -52,14 +52,22 @@ const aiPageUtils =
     window.AiPageUtils && typeof window.AiPageUtils.create === 'function'
         ? window.AiPageUtils.create({ apiBase: API_BASE, toast: themedToast })
         : null;
-const _showApiError = aiPageUtils ? aiPageUtils.showApiError : () => {};
+const STYLE_PRESETS_STORAGE_KEY = 'style_presets_v1';
+window.showApiError = aiPageUtils ? aiPageUtils.showApiError : () => {};
 const getProxyImageUrl = aiPageUtils ? aiPageUtils.getProxyImageUrl : (v) => v;
-const _extractOriginalUrlFromProxy = aiPageUtils ? aiPageUtils.extractOriginalUrlFromProxy : () => null;
-const _fetchImageAsBlob = aiPageUtils ? aiPageUtils.fetchImageAsBlob : () => Promise.reject(new Error('utils missing'));
+window.extractOriginalUrlFromProxy = aiPageUtils ? aiPageUtils.extractOriginalUrlFromProxy : () => null;
+window.fetchImageAsBlob = aiPageUtils ? aiPageUtils.fetchImageAsBlob : () => Promise.reject(new Error('utils missing'));
 const loadImage = aiPageUtils ? aiPageUtils.loadImage : () => Promise.reject(new Error('utils missing'));
 
-let imagePreviewOverlay, imagePreviewModalImg, previewZoomInBtn, previewZoomOutBtn, previewZoomResetBtn, previewCloseBtn;
+let imagePreviewOverlay,
+    imagePreviewModalImg,
+    previewZoomInBtn,
+    previewZoomOutBtn,
+    previewZoomResetBtn,
+    previewCloseBtn;
 let imagePreviewScale = 1;
+let aiGenerator = null;
+let imageGenerator = null;
 
 function updatePreviewScale(nextScale) {
     imagePreviewScale = Math.min(4, Math.max(0.4, nextScale));
@@ -114,7 +122,8 @@ function initImagePreview() {
     }
     if (previewCloseBtn) previewCloseBtn.addEventListener('click', closeImagePreview);
     if (previewZoomInBtn) previewZoomInBtn.addEventListener('click', () => updatePreviewScale(imagePreviewScale + 0.2));
-    if (previewZoomOutBtn) previewZoomOutBtn.addEventListener('click', () => updatePreviewScale(imagePreviewScale - 0.2));
+    if (previewZoomOutBtn)
+        previewZoomOutBtn.addEventListener('click', () => updatePreviewScale(imagePreviewScale - 0.2));
     if (previewZoomResetBtn) previewZoomResetBtn.addEventListener('click', () => updatePreviewScale(1));
     if (imagePreviewModalImg) {
         imagePreviewModalImg.addEventListener(
@@ -141,7 +150,6 @@ if (document.readyState === 'loading') {
 } else {
     initImagePreview();
 }
-
 
 function aiStorageKey(base) {
     if (typeof GameUiUserScope !== 'undefined' && typeof GameUiUserScope.key === 'function') {
@@ -435,7 +443,7 @@ function _compressDataUrlImage(dataUrl, maxSide, outMime, quality) {
 }
 
 /** 移除 tech-select 包装，便于动态重建 options 后重新 init */
-function _teardownTechSelectForSelect(selectEl) {
+window.teardownTechSelectForSelect = function teardownTechSelectForSelect(selectEl) {
     if (!selectEl) return;
     selectEl.dataset.techSelectReady = '0';
     selectEl.classList.remove('tech-select-native');
@@ -446,7 +454,7 @@ function _teardownTechSelectForSelect(selectEl) {
         }
         next.remove();
     }
-}
+};
 
 /** 当前风格片段（textarea），供动作组等与图片生成共用 */
 function getStylePresetSnippetForPrompt() {
@@ -455,14 +463,13 @@ function getStylePresetSnippetForPrompt() {
 }
 
 /** 将风格片段并入一条 Prompt（不重复追加） */
-function _appendStyleRefToPrompt(basePrompt) {
+window.appendStyleRefToPrompt = function appendStyleRefToPrompt(basePrompt) {
     const sn = getStylePresetSnippetForPrompt();
     if (!sn) return String(basePrompt || '').trim();
     const p = String(basePrompt || '').trim();
     if (p.includes(sn)) return p;
     return p ? `${p}。画风参考：${sn}` : `画风参考：${sn}`;
-}
-
+};
 
 function initTechSelects() {
     function labelForSelect(sel) {
@@ -702,15 +709,65 @@ function initTechSelects() {
     });
 }
 
+function initGeneratorTabs() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+
+    tabButtons.forEach((button) => {
+        if (button.dataset.generatorTabBound === '1') return;
+        button.dataset.generatorTabBound = '1';
+        button.addEventListener('click', () => {
+            const targetTab = button.dataset.tab;
+            const currentView = document.querySelector('.generator-view.active');
+            const targetView = document.querySelector(`.generator-view[data-tab="${targetTab}"]`);
+            if (!targetView || currentView === targetView) return;
+
+            tabButtons.forEach((btn) => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            if (currentView) {
+                currentView.classList.add('leaving');
+                currentView.classList.remove('active');
+                currentView.addEventListener(
+                    'transitionend',
+                    function onLeave() {
+                        currentView.removeEventListener('transitionend', onLeave);
+                        currentView.classList.remove('leaving');
+                    },
+                    { once: true }
+                );
+            }
+
+            targetView.classList.add('active');
+
+            document.body.classList.remove('generator-tab-code', 'generator-tab-image', 'generator-tab-action');
+            document.body.classList.add('generator-tab-' + (targetTab === 'action-group' ? 'action' : targetTab));
+
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent && typeof mainContent.scrollTo === 'function') {
+                mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+
+    document.body.classList.add('generator-tab-code');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+    // Keep primary navigation available even if a generator submodule fails to initialize.
+    initGeneratorTabs();
+
     if (typeof GameUiUserScope !== 'undefined' && typeof GameUiUserScope.ensure === 'function') {
         await GameUiUserScope.ensure();
     }
     aiGenerator = new AssetEditor();
     imageGenerator = new ImageGenerator();
+    // Generated asset cards still use inline handlers; expose the instances intentionally.
+    window.aiGenerator = aiGenerator;
+    window.imageGenerator = imageGenerator;
 
     window.addEventListener('storage', (e) => {
-        if (!e.key || e.key !== aiStorageKey(STYLE_PRESETS_KEY) || !imageGenerator) return;
+        if (!e.key || e.key !== aiStorageKey(STYLE_PRESETS_STORAGE_KEY) || !imageGenerator) return;
         const sel = document.getElementById('stylePresetSelect');
         imageGenerator.refreshStylePresetSelect(sel ? sel.value : '');
     });
@@ -795,46 +852,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         observer.observe(document.body, { childList: true, subtree: true });
         window.addEventListener('beforeunload', () => observer.disconnect());
     })();
-
-    // 选项卡切换：三个独立"页面"视图 + 丝滑动画
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const _generatorViews = document.querySelectorAll('.generator-view');
-
-    tabButtons.forEach((button) => {
-        button.addEventListener('click', () => {
-            const targetTab = button.dataset.tab;
-            const currentView = document.querySelector('.generator-view.active');
-            const targetView = document.querySelector(`.generator-view[data-tab="${targetTab}"]`);
-            if (!targetView || currentView === targetView) return;
-
-            tabButtons.forEach((btn) => btn.classList.remove('active'));
-            button.classList.add('active');
-
-            currentView.classList.add('leaving');
-            currentView.classList.remove('active');
-            currentView.addEventListener(
-                'transitionend',
-                function onLeave() {
-                    currentView.removeEventListener('transitionend', onLeave);
-                    currentView.classList.remove('leaving');
-                },
-                { once: true }
-            );
-
-            targetView.classList.add('active');
-
-            document.body.classList.remove('generator-tab-code', 'generator-tab-image', 'generator-tab-action');
-            document.body.classList.add('generator-tab-' + (targetTab === 'action-group' ? 'action' : targetTab));
-
-            const mainContent = document.querySelector('.main-content');
-            if (mainContent && typeof mainContent.scrollTo === 'function') {
-                mainContent.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    });
-
-    document.body.classList.add('generator-tab-code');
 
     // 移动端菜单切换
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');

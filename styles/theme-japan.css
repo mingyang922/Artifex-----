@@ -43,18 +43,15 @@ html.theme-japan {
 /* 天空渐变直接设在 body 上，避免 ::before 的 filter 污染 ::after */
 html.theme-japan body,
 html.theme-japan body.app-shell {
-    background:
-        linear-gradient(180deg,
-            #e8a0b0 0%,
-            #f0b8a0 15%,
-            #f8c8a0 25%,
-            #f0d0b0 35%,
-            #e8b8a8 45%,
-            #c8a0c0 60%,
-            #8878a8 75%,
-            #5a4878 90%,
-            #3a2850 100%
-        ) !important;
+    background-color: #d89aaa !important;
+    background-image:
+        linear-gradient(90deg, rgba(44, 27, 36, 0.14) 0%, rgba(44, 27, 36, 0.02) 28%, rgba(44, 27, 36, 0.04) 100%),
+        linear-gradient(180deg, rgba(255, 239, 226, 0.06) 0%, rgba(54, 32, 49, 0.18) 100%),
+        url("../vendor/images/themes/japan-sakura-fuji.webp") !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    background-attachment: fixed !important;
     color: #ffffff !important;
 }
 
@@ -67,46 +64,37 @@ html.theme-japan body.app-shell::before {
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(ellipse 40% 30% at 65% 25%, rgba(255,200,150,0.3) 0%, transparent 55%),
-        radial-gradient(ellipse 25% 20% at 65% 25%, rgba(255,230,200,0.2) 0%, transparent 40%);
+        linear-gradient(180deg, rgba(39, 23, 35, 0.02) 0%, rgba(39, 23, 35, 0.12) 100%),
+        radial-gradient(ellipse 42% 32% at 58% 24%, rgba(255, 219, 184, 0.12) 0%, transparent 62%);
 }
 
-/* 地景层：富士山 + 樱花林 + 建筑 */
+/* Disable the retired code-drawn landscape layer. */
 html.theme-japan body::after,
 html.theme-japan body.app-shell::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background:
-        /* 富士山主体 */
-        radial-gradient(ellipse 35% 45% at 55% 55%, #6a5a7a 0%, #5a4a6a 40%, transparent 70%),
-        /* 富士山雪顶 */
-        radial-gradient(ellipse 12% 8% at 55% 35%, rgba(255,255,255,0.6) 0%, rgba(255,220,200,0.3) 50%, transparent 80%),
-        /* 富士山暖光 */
-        radial-gradient(ellipse 20% 25% at 58% 50%, rgba(240,180,140,0.25) 0%, transparent 60%),
-        /* 左侧樱花树冠 */
-        radial-gradient(ellipse 25% 35% at 8% 40%, rgba(232,96,122,0.35) 0%, rgba(232,96,122,0.15) 40%, transparent 70%),
-        radial-gradient(ellipse 18% 25% at 5% 35%, rgba(240,128,144,0.3) 0%, rgba(232,96,122,0.1) 50%, transparent 75%),
-        /* 右侧樱花树冠 */
-        radial-gradient(ellipse 22% 30% at 92% 45%, rgba(232,96,122,0.3) 0%, rgba(232,96,122,0.12) 40%, transparent 70%),
-        radial-gradient(ellipse 15% 20% at 95% 38%, rgba(240,128,144,0.25) 0%, rgba(232,96,122,0.08) 50%, transparent 75%),
-        /* 底部樱花林（远景） */
-        radial-gradient(ellipse 80% 15% at 50% 85%, rgba(200,80,100,0.2) 0%, rgba(180,60,80,0.1) 40%, transparent 70%),
-        /* 底部建筑轮廓 */
-        linear-gradient(0deg, rgba(40,20,50,0.8) 0%, rgba(40,20,50,0.4) 8%, transparent 18%),
-        /* 地面暖光 */
-        radial-gradient(ellipse 100% 20% at 50% 95%, rgba(240,160,100,0.15) 0%, transparent 60%);
+    display: none !important;
 }
 
-/* SVG背景插画覆盖层 */
-html.theme-japan .japan-bg-illustration {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
+/* Keep the generated landscape visible through the application shell. */
+html.theme-japan body.app-shell .dashboard-container,
+html.theme-japan body.app-shell .main-content {
+    background-color: transparent !important;
+}
+
+html.theme-japan body.app-shell .main-content {
+    background-image: linear-gradient(180deg, rgba(31, 20, 31, 0.04), rgba(31, 20, 31, 0.12)) !important;
+    background-size: 100% 100% !important;
+}
+
+html.theme-japan body.app-shell .main-content::after {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    html.theme-japan body,
+    html.theme-japan body.app-shell {
+        background-position: 58% center !important;
+        background-attachment: scroll !important;
+    }
 }
 
 
@@ -328,9 +316,30 @@ html.theme-japan .stat-card i {
 }
 
 /* 卡片内文字（链接保持高亮色） */
-html.theme-japan .info-card *,
-html.theme-japan .nested-card *,
-html.theme-japan .card * {
+html.theme-japan .info-card p,
+html.theme-japan .info-card span,
+html.theme-japan .info-card h1,
+html.theme-japan .info-card h2,
+html.theme-japan .info-card h3,
+html.theme-japan .info-card h4,
+html.theme-japan .info-card label,
+html.theme-japan .info-card td,
+html.theme-japan .nested-card p,
+html.theme-japan .nested-card span,
+html.theme-japan .nested-card h1,
+html.theme-japan .nested-card h2,
+html.theme-japan .nested-card h3,
+html.theme-japan .nested-card h4,
+html.theme-japan .nested-card label,
+html.theme-japan .nested-card td,
+html.theme-japan .card p,
+html.theme-japan .card span,
+html.theme-japan .card h1,
+html.theme-japan .card h2,
+html.theme-japan .card h3,
+html.theme-japan .card h4,
+html.theme-japan .card label,
+html.theme-japan .card td {
     color: #ffffff !important;
 }
 html.theme-japan .info-card a,
@@ -364,9 +373,86 @@ html.theme-japan .form-input:focus,
 html.theme-japan input:focus,
 html.theme-japan textarea:focus,
 html.theme-japan select:focus {
-    border-color: rgba(0,212,255,0.25) !important;
-    box-shadow: 0 0 0 2px rgba(0,212,255,0.08) !important;
+    border-color: rgba(0,212,255,0.45) !important;
+    box-shadow: 0 0 0 2px rgba(0,212,255,0.2) !important;
     outline: none !important;
+}
+
+/* Module surfaces: override feature-local cyberpunk skins. */
+html.theme-japan .asset-wrap,
+html.theme-japan .project-management-module,
+html.theme-japan .project-detail-module,
+html.theme-japan .style-presets-module,
+html.theme-japan .user-center-container,
+html.theme-japan .tab-content {
+    background: rgba(30, 20, 35, 0.34) !important;
+    border-color: rgba(255, 255, 255, 0.09) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 12px 34px rgba(44, 27, 36, 0.16), inset 0 1px rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(18px) saturate(1.18);
+    -webkit-backdrop-filter: blur(18px) saturate(1.18);
+}
+
+html.theme-japan .asset-wrap::before,
+html.theme-japan .asset-wrap::after,
+html.theme-japan .project-management-module::before,
+html.theme-japan .project-management-module::after,
+html.theme-japan .style-presets-module::before,
+html.theme-japan .style-presets-module::after {
+    display: none !important;
+}
+
+html.theme-japan .asset-search-bar,
+html.theme-japan .upload-area,
+html.theme-japan .empty-state,
+html.theme-japan .batch-bar,
+html.theme-japan .input-group,
+html.theme-japan .tech-select-trigger,
+html.theme-japan .tech-select-menu {
+    color: #ffffff !important;
+    background: rgba(24, 17, 28, 0.48) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    backdrop-filter: blur(14px);
+}
+
+html.theme-japan .upload-area {
+    border-style: dashed !important;
+    border-color: rgba(232, 96, 122, 0.28) !important;
+}
+
+html.theme-japan .upload-area.dragover {
+    background: rgba(232, 96, 122, 0.1) !important;
+    border-color: rgba(232, 96, 122, 0.58) !important;
+}
+
+html.theme-japan .tech-select-option:hover,
+html.theme-japan .tech-select-option.is-selected {
+    color: #ffffff !important;
+    background: rgba(232, 96, 122, 0.16) !important;
+}
+
+html.theme-japan .btn:not(.btn-primary),
+html.theme-japan #btnDetectSimilar,
+html.theme-japan [data-back-to-project] {
+    color: rgba(255, 255, 255, 0.88) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: none !important;
+}
+
+html.theme-japan .btn:not(.btn-primary):hover,
+html.theme-japan #btnDetectSimilar:hover,
+html.theme-japan [data-back-to-project]:hover {
+    color: #ffffff !important;
+    background: rgba(232, 96, 122, 0.16) !important;
+    border-color: rgba(232, 96, 122, 0.28) !important;
+}
+
+html.theme-japan #currentProjectHint,
+html.theme-japan #currentProjectHint span {
+    color: rgba(255, 255, 255, 0.78) !important;
 }
 
 
@@ -446,5 +532,45 @@ html.theme-japan tr:hover td {
 
 /* 装饰层（SVG）在 body::after 地景之上 */
 html.theme-japan .theme-decor-layer {
-    z-index: 1 !important;
+    display: none !important;
+}
+
+/* Two subtle petals lift from interactive cards on hover. */
+html.theme-japan .info-card::after,
+html.theme-japan .card::after,
+html.theme-japan .quick-action-card::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 22px;
+    height: 14px;
+    background:
+        radial-gradient(ellipse at 28% 52%, rgba(255, 218, 226, 0.95) 0 34%, transparent 38%),
+        radial-gradient(ellipse at 72% 48%, rgba(247, 170, 190, 0.9) 0 32%, transparent 36%);
+    filter: drop-shadow(0 2px 3px rgba(107, 57, 76, 0.16));
+    opacity: 0.38;
+    transform: rotate(-12deg) translate3d(0, 0, 0);
+    transform-origin: center;
+    pointer-events: none;
+}
+
+html.theme-japan .info-card:hover::after,
+html.theme-japan .card:hover::after,
+html.theme-japan .quick-action-card:hover::after {
+    animation: japanCardPetals 1.15s ease-out both;
+}
+
+@keyframes japanCardPetals {
+    0% { opacity: 0.32; transform: translate3d(0, 0, 0) rotate(-12deg); }
+    55% { opacity: 0.72; transform: translate3d(-6px, 5px, 0) rotate(18deg); }
+    100% { opacity: 0.38; transform: translate3d(-2px, 2px, 0) rotate(4deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.theme-japan .info-card:hover::after,
+    html.theme-japan .card:hover::after,
+    html.theme-japan .quick-action-card:hover::after {
+        animation: none !important;
+    }
 }

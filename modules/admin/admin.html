@@ -4,11 +4,10 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Artifex - 管理员面板</title>
-        <link rel="manifest" href="../../manifest.json">
-        <meta name="theme-color" content="#00f0ff">
+        <link rel="manifest" href="../../manifest.json" />
+        <meta name="theme-color" content="#00f0ff" />
+        <script src="../../js/theme-bootstrap.js"></script>
         <link rel="stylesheet" href="../../styles/app-shell.css" />
-        <link rel="stylesheet" href="../../styles/region-themes.css" />
-        <link rel="stylesheet" href="../../styles/theme-japan.css" />
         <link rel="stylesheet" href="../../styles/ui-kit.css" />
         <link href="../../vendor/css/font-awesome.min.css" rel="stylesheet" />
         <link href="../../vendor/css/google-fonts.css" rel="stylesheet" />
@@ -30,7 +29,7 @@
             }
 
             body::before {
-                content: "";
+                content: '';
                 position: fixed;
                 inset: -20%;
                 background:
@@ -174,7 +173,8 @@
                 border-collapse: collapse;
             }
 
-            th, td {
+            th,
+            td {
                 padding: 14px 16px;
                 text-align: left;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.04);
@@ -416,6 +416,8 @@
                     opacity 0.3s ease;
             }
         </style>
+        <link rel="stylesheet" href="../../styles/region-themes.css" />
+        <link rel="stylesheet" href="../../styles/productivity.css" />
     </head>
     <body class="app-shell">
         <div class="pointer-glow"></div>
@@ -467,94 +469,97 @@
             </aside>
 
             <main class="main-content">
-        <div class="admin-container">
-            <div class="admin-header">
-                <h1><i class="fas fa-shield-alt"></i> 管理员面板</h1>
-                <a href="../../dashboard.html" class="btn btn-secondary">返回主页</a>
-            </div>
-
-            <div class="admin-tabs">
-                <div class="admin-tab active" data-tab="overview">概览</div>
-                <div class="admin-tab" data-tab="users">用户管理</div>
-                <div class="admin-tab" data-tab="usage">用量统计</div>
-            </div>
-
-            <!-- 概览 -->
-            <div id="tab-overview" class="tab-content">
-                <div class="stat-grid">
-                    <div class="stat-card">
-                        <div class="label">总用户数</div>
-                        <div class="value" id="stat-total-users">-</div>
+                <div class="admin-container">
+                    <div class="admin-header">
+                        <h1><i class="fas fa-shield-alt"></i> 管理员面板</h1>
+                        <a href="../../dashboard.html" class="btn btn-secondary">返回主页</a>
                     </div>
-                    <div class="stat-card">
-                        <div class="label">今日调用</div>
-                        <div class="value" id="stat-today-calls">-</div>
+
+                    <div class="admin-tabs">
+                        <div class="admin-tab active" data-tab="overview">概览</div>
+                        <div class="admin-tab" data-tab="users">用户管理</div>
+                        <div class="admin-tab" data-tab="usage">用量统计</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="label">总调用次数</div>
-                        <div class="value" id="stat-total-calls">-</div>
+
+                    <!-- 概览 -->
+                    <div id="tab-overview" class="tab-content">
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <div class="label">总用户数</div>
+                                <div class="value" id="stat-total-users">-</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="label">今日调用</div>
+                                <div class="value" id="stat-today-calls">-</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="label">总调用次数</div>
+                                <div class="value" id="stat-total-calls">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 用户管理 -->
+                    <div id="tab-users" class="tab-content" style="display: none">
+                        <div class="card">
+                            <h2><i class="fas fa-users"></i> 用户列表</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>用户名</th>
+                                        <th>邮箱</th>
+                                        <th>角色</th>
+                                        <th>注册时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 用量统计 -->
+                    <div id="tab-usage" class="tab-content" style="display: none">
+                        <div class="card">
+                            <h2><i class="fas fa-chart-bar"></i> 按服务商统计</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>服务商</th>
+                                        <th>调用次数</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="provider-stats-body"></tbody>
+                            </table>
+                        </div>
+                        <div class="card">
+                            <h2><i class="fas fa-list"></i> 详细记录</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>用户</th>
+                                        <th>服务商</th>
+                                        <th>操作</th>
+                                        <th>状态</th>
+                                        <th>次数</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usage-details-body"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- 用户管理 -->
-            <div id="tab-users" class="tab-content" style="display:none">
-                <div class="card">
-                    <h2><i class="fas fa-users"></i> 用户列表</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>用户名</th>
-                                <th>邮箱</th>
-                                <th>角色</th>
-                                <th>注册时间</th>
-                            </tr>
-                        </thead>
-                        <tbody id="users-table-body"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 用量统计 -->
-            <div id="tab-usage" class="tab-content" style="display:none">
-                <div class="card">
-                    <h2><i class="fas fa-chart-bar"></i> 按服务商统计</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>服务商</th>
-                                <th>调用次数</th>
-                            </tr>
-                        </thead>
-                        <tbody id="provider-stats-body"></tbody>
-                    </table>
-                </div>
-                <div class="card">
-                    <h2><i class="fas fa-list"></i> 详细记录</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>用户</th>
-                                <th>服务商</th>
-                                <th>操作</th>
-                                <th>状态</th>
-                                <th>次数</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usage-details-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        </main>
+            </main>
         </div>
 
         <!-- 备案信息 -->
         <footer class="beian-footer">
             <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
-                <img src="../../vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+                <img
+                    src="../../vendor/images/beian-icon.png"
+                    alt="公安备案"
+                    class="beian-icon"
+                />京公网安备11010802048813号
             </a>
             <span class="beian-separator">|</span>
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
@@ -562,14 +567,13 @@
 
         <script defer src="../../js/keyboard-shortcuts.js"></script>
         <script src="../../js/i18n.js"></script>
-        <script src="../../vendor/js/tsparticles.bundle.min.js"></script>
-        <script src="../../vendor/js/gsap.min.js"></script>
         <script src="../../js/region-themes.js"></script>
         <script src="../../js/session-guard.js"></script>
         <script defer src="../../js/html-utils.js"></script>
         <script defer src="../../js/user-storage-scope.js"></script>
         <script defer src="../../js/ui-kit.js"></script>
         <script defer src="admin-init.js"></script>
-            <script defer src="../../js/sw-register.js"></script>
+        <script defer src="../../js/productivity.js"></script>
+        <script defer src="../../js/sw-register.js"></script>
     </body>
 </html>

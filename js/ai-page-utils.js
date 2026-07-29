@@ -63,7 +63,9 @@
                 return Promise.resolve(new Blob([arr], { type: m[1] || 'image/png' }));
             }
             const url = imageUrl.startsWith('http') ? getProxyImageUrl(imageUrl) : imageUrl;
-            return fetch(url, { credentials: 'include' }).then((r) => (r.ok ? r.blob() : Promise.reject(new Error('fetch image failed'))));
+            return fetch(url, { credentials: 'include' }).then((r) =>
+                r.ok ? r.blob() : Promise.reject(new Error('fetch image failed'))
+            );
         };
     }
 

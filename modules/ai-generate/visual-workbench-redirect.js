@@ -4,7 +4,6 @@
  * 版本: 1.3.3 */
 'use strict';
 (function redirectToPrimaryPage() {
-    const target =
-        './ai-generator-new.html' + (window.location.search || '') + (window.location.hash || '');
+    const target = './ai-generator-new.html' + (window.location.search || '') + (window.location.hash || '');
     window.location.replace(target);
 })();

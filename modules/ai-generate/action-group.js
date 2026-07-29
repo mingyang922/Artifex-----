@@ -183,8 +183,14 @@ function parsePromptActions(text) {
             themedWarn('请先上传草图 / 线稿图片。');
             return;
         }
-        const presetKey = document.getElementById('actionThreeViewPreset').value;
-        const extra = (document.getElementById('actionThreeViewExtraPrompt').value || '').trim();
+        const presetEl = document.getElementById('actionThreeViewPreset');
+        const extraEl = document.getElementById('actionThreeViewExtraPrompt');
+        if (!presetEl || !extraEl) {
+            themedWarn('三视图表单元素缺失，请刷新页面重试。');
+            return;
+        }
+        const presetKey = presetEl.value;
+        const extra = (extraEl.value || '').trim();
         const suffix = ACTION_THREE_VIEW_PRESETS[presetKey] || '';
         let fullPrompt = [suffix, extra].filter(Boolean).join(' ');
         fullPrompt = appendStyleRefToPrompt(fullPrompt);
@@ -192,8 +198,10 @@ function parsePromptActions(text) {
             themedWarn('请至少填写「三视图附加提示词」或选择非 custom 的三视图预设。');
             return;
         }
-        const size = document.getElementById('actionThreeViewSize').value;
-        const strength = Number(document.getElementById('actionThreeViewStrength').value) || 0.55;
+        const sizeEl = document.getElementById('actionThreeViewSize');
+        const strengthEl = document.getElementById('actionThreeViewStrength');
+        const size = sizeEl ? sizeEl.value : '1024x1024';
+        const strength = strengthEl ? Number(strengthEl.value) || 0.55 : 0.55;
         const prog = document.getElementById('actionThreeViewProgress');
         const progText = document.getElementById('actionThreeViewProgressText');
         const resWrap = document.getElementById('actionThreeViewResultWrap');
@@ -265,10 +273,12 @@ function parsePromptActions(text) {
 
 document.getElementById('actionGroupGenerateBtn')?.addEventListener('click', async function () {
     const promptEl = document.getElementById('actionCharacterPrompt');
-    const framesPer = parseInt(document.getElementById('actionFramesPer').value, 10);
+    const framesPerEl = document.getElementById('actionFramesPer');
+    const sizeEl = document.getElementById('actionSize');
+    const framesPer = framesPerEl ? parseInt(framesPerEl.value, 10) : 4;
     const provider = 'jimeng';
-    const size = document.getElementById('actionSize').value;
-    const characterPrompt = (promptEl.value || '').trim();
+    const size = sizeEl ? sizeEl.value : '1024x1024';
+    const characterPrompt = promptEl ? (promptEl.value || '').trim() : '';
     if (!window.lastThreeViewImageUrl) {
         themedWarn('请先生成三视图。动作组必须完全参考上列三视图后才能批量生成。');
         return;
@@ -365,7 +375,9 @@ document.getElementById('actionGroupGenerateBtn')?.addEventListener('click', asy
             try {
                 data = text ? JSON.parse(text) : {};
             } catch (_parseErr) {
-                failMessages.push(`第 ${index + 1} 帧: 响应不是 JSON (${res.status}) ${escapeHtml(text.slice(0, 120))}`);
+                failMessages.push(
+                    `第 ${index + 1} 帧: 响应不是 JSON (${res.status}) ${escapeHtml(text.slice(0, 120))}`
+                );
                 console.error('action group frame parse error', res.status, text);
                 return;
             }
@@ -397,13 +409,15 @@ document.getElementById('actionGroupGenerateBtn')?.addEventListener('click', asy
     let nextIndex = 0;
     const workers = [];
     for (let w = 0; w < Math.min(CONCURRENCY, queue.length); w++) {
-        workers.push((async () => {
-            while (queue.length > 0) {
-                const f = queue.shift();
-                const idx = nextIndex++;
-                await generateFrame(f, idx);
-            }
-        })());
+        workers.push(
+            (async () => {
+                while (queue.length > 0) {
+                    const f = queue.shift();
+                    const idx = nextIndex++;
+                    await generateFrame(f, idx);
+                }
+            })()
+        );
     }
     await Promise.all(workers);
 
@@ -517,11 +531,12 @@ async function exportZipByAnimation() {
         themedWarn('请先完成一次「批量生成动作组」');
         return;
     }
-    if (typeof JSZip === 'undefined') {
-        themedWarn('请等待 JSZip 加载完成');
+    const JSZipCtor = await window.ArtifexVendors.ensureJSZip().catch(() => null);
+    if (!JSZipCtor) {
+        themedWarn('导出组件加载失败，请检查网络后重试');
         return;
     }
-    const zip = new JSZip();
+    const zip = new JSZipCtor();
     const actionOrder = [...new Set(r.frames.map((f) => f.action))];
     for (const action of actionOrder) {
         const folder = zip.folder(action);
@@ -545,11 +560,12 @@ async function exportZipByFrame() {
         themedWarn('请先完成一次「批量生成动作组」');
         return;
     }
-    if (typeof JSZip === 'undefined') {
-        themedWarn('请等待 JSZip 加载完成');
+    const JSZipCtor = await window.ArtifexVendors.ensureJSZip().catch(() => null);
+    if (!JSZipCtor) {
+        themedWarn('导出组件加载失败，请检查网络后重试');
         return;
     }
-    const zip = new JSZip();
+    const zip = new JSZipCtor();
     for (let i = 0; i < r.frames.length; i++) {
         const frame = r.frames[i];
         const blob = await fetchImageAsBlob(frame.imageUrl);
@@ -581,12 +597,13 @@ async function downloadThreeViewZip() {
         themedWarn('请先生成三视图');
         return;
     }
-    if (typeof JSZip === 'undefined') {
-        themedWarn('请等待 JSZip 加载完成');
+    const JSZipCtor = await window.ArtifexVendors.ensureJSZip().catch(() => null);
+    if (!JSZipCtor) {
+        themedWarn('导出组件加载失败，请检查网络后重试');
         return;
     }
     const blob = await fetchImageAsBlob(window.lastThreeViewImageUrl);
-    const zip = new JSZip();
+    const zip = new JSZipCtor();
     zip.file('three_view.png', blob, { binary: true });
     const meta = {
         exportedAt: new Date().toISOString(),
@@ -608,4 +625,3 @@ document.getElementById('exportZipByAnimation')?.addEventListener('click', expor
 document.getElementById('exportZipByFrame')?.addEventListener('click', exportZipByFrame);
 document.getElementById('downloadThreeViewPng')?.addEventListener('click', downloadThreeViewPng);
 document.getElementById('downloadThreeViewZip')?.addEventListener('click', downloadThreeViewZip);
-

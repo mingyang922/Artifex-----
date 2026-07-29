@@ -7,6 +7,7 @@ async function login(page) {
     const password = 'test123456';
 
     await page.goto('/login.html');
+    await page.evaluate(() => localStorage.setItem('artifex-onboarding-v2', 'done'));
     await page.click('[data-switch-form="registerForm"]');
     const username = `e2edash${Date.now()}`;
     await page.fill('#registerUsername', username);
@@ -26,6 +27,15 @@ test.describe('控制台', () => {
         await expect(page).toHaveTitle(/主控制台/);
         await expect(page.locator('.sidebar')).toBeVisible();
         await expect(page.locator('.main-content')).toBeVisible();
+        await expect(page.locator('.workspace-stats')).toBeVisible();
+        await expect(page.locator('.workspace-insights')).toBeVisible();
+    });
+
+    test('Ctrl+K 打开全局命令面板', async ({ page }) => {
+        await page.keyboard.press('Control+k');
+        await expect(page.locator('.ux-command-backdrop')).toHaveClass(/is-open/);
+        await page.locator('.ux-command-input').fill('素材库');
+        await expect(page.locator('.ux-command-item')).toHaveCount(1);
     });
 
     test('侧边栏导航链接存在', async ({ page }) => {

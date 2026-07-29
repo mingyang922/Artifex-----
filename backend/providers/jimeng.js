@@ -8,6 +8,7 @@
  */
 const axios = require('axios');
 const arkRestConfig = require('../ark-rest-config');
+const logger = require('../lib/logger');
 const {
     normalizeJimengApiKey,
     normalizePixelSize,
@@ -274,7 +275,7 @@ async function callJimengImageAPIAxios(apiKey, prompt, extra, model, sizeParam, 
                     ' 【建议】在 API Key 管理新建密钥，写入 config/ark-rest-api.local.json 的 apiKey 或 .env 的 JIMENG_API_KEY=sk-...，保存后重启 Node。';
             }
         }
-        console.error('Jimeng API 请求失败:', st, detailStr ? detailStr.slice(0, 800) : e.message);
+        logger.error('Jimeng API 请求失败:', st, detailStr ? detailStr.slice(0, 800) : e.message);
         throw new Error(`即梦 API 错误${st ? ` HTTP ${st}` : ''}${hint}${e.message ? ` — ${e.message}` : ''}`);
     }
     const out = parseJimengImageResponse(r.data);
@@ -291,7 +292,7 @@ async function callJimengImageAPIAxios(apiKey, prompt, extra, model, sizeParam, 
                 return String(r.data);
             }
         })();
-        console.error('Jimeng response (truncated):', snippet);
+        logger.error('Jimeng response (truncated):', snippet);
         throw new Error(
             '即梦 API 返回中未解析到图片 URL，请检查 ark-rest-api.local.json / JIMENG_IMAGE_API_URL、模型 ID 与控制台权限（详见 docs/JIMENG_ARK_SETUP.md）'
         );
@@ -349,13 +350,23 @@ async function callJimengImage2ImageAPI(prompt, imageDataUrl, strength, size, ex
 
     let normalizedImageInput = imageDataUrl;
     if (/^https?:\/\//i.test(String(imageDataUrl || ''))) {
+        // SSRF 防护：校验远程图片 URL，禁止访问内网/保留地址
         try {
+            const { URL } = require('url');
+            const { isBlockedHostname } = require('../lib/ssrf-guard');
+            const parsed = new URL(String(imageDataUrl));
+            if (!['http:', 'https:'].includes(parsed.protocol)) {
+                throw new Error('只允许 http/https 协议');
+            }
+            if (isBlockedHostname(parsed.hostname)) {
+                throw new Error('禁止访问内网地址');
+            }
             const r = await axios.get(String(imageDataUrl), { responseType: 'arraybuffer', timeout: 20000 });
             const contentType = r.headers['content-type'] || 'image/png';
             const b64 = Buffer.from(r.data).toString('base64');
             normalizedImageInput = `data:${contentType};base64,${b64}`;
         } catch (e) {
-            console.warn('[jimeng img2img] 三视图 URL 拉取失败，将回退原始 URL 透传:', e.message);
+            logger.warn('[jimeng img2img] 三视图 URL 拉取失败，将回退原始 URL 透传:', e.message);
         }
     }
 
@@ -383,7 +394,7 @@ async function callJimengImage2ImageAPI(prompt, imageDataUrl, strength, size, ex
         if (!shouldFallback) {
             throw error;
         }
-        console.warn('[jimeng img2img] 图生图字段不被当前模型/网关接受，已回退文本一致性模式:', msg);
+        logger.warn('[jimeng img2img] 图生图字段不被当前模型/网关接受，已回退文本一致性模式:', msg);
         const fallbackPrompt = `${prompt}。请严格参考上传的角色线稿/草图保持轮廓和配饰一致，图生图强度约 ${clampedStrength.toFixed(2)}。`;
         const fallbackExtra = { ...extra };
         if (fallbackExtra.extra_body && typeof fallbackExtra.extra_body === 'object') {
@@ -512,12 +523,10 @@ function logJimengConfig() {
         const rawKey = (rc && rc.apiKey) || process.env.JIMENG_API_KEY || process.env.ARK_API_KEY || '';
         const k = normalizeJimengApiKey(rawKey);
         if (k) {
-            logger.info(
-                `[即梦] 密钥摘要: 长度=${k.length} 前缀=${k.slice(0, 4)}...`
-            );
+            logger.info(`[即梦] 密钥已配置 (长度=${k.length})`);
         }
     } catch (e) {
-        console.warn('[即梦] 密钥摘要输出失败:', e.message);
+        logger.warn('[即梦] 密钥摘要输出失败:', e.message);
     }
 }
 

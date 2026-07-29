@@ -8,9 +8,17 @@
  */
 
 /** 转义 HTML 特殊字符，防止 XSS — 委托给 html-utils.js 全局函数 */
-const escapeNotificationHtml = (typeof escapeHtml === 'function') ? escapeHtml : function(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-};
+const escapeNotificationHtml =
+    typeof escapeHtml === 'function'
+        ? escapeHtml
+        : function (s) {
+              return String(s)
+                  .replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;')
+                  .replace(/'/g, '&#39;');
+          };
 
 class NotificationComponent {
     constructor() {

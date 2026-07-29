@@ -1,0 +1,266 @@
+:root {
+    --ux-surface: rgba(10, 17, 31, 0.92);
+    --ux-surface-soft: rgba(19, 30, 52, 0.72);
+    --ux-border: rgba(125, 211, 252, 0.18);
+    --ux-border-strong: rgba(34, 211, 238, 0.48);
+    --ux-text: #edf7ff;
+    --ux-muted: #93a9c5;
+    --ux-accent: #22d3ee;
+    --ux-violet: #a78bfa;
+    --ux-success: #34d399;
+    --ux-danger: #fb7185;
+    --ux-radius: 16px;
+    --ux-shadow: 0 24px 70px rgba(0, 0, 0, 0.46);
+}
+
+body.app-shell :where(button, a, input, select, textarea):focus-visible {
+    outline: 2px solid var(--ux-accent);
+    outline-offset: 3px;
+}
+
+body.app-shell ::selection { color: #021016; background: #67e8f9; }
+
+body.app-shell :where(.main-content, .ux-command-results) {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(34, 211, 238, 0.42) transparent;
+}
+
+body.app-shell :where(.btn, .btn-primary, .btn-secondary, button) { touch-action: manipulation; }
+
+.ux-command-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+    padding: 4px 8px;
+    border: 1px solid var(--ux-border);
+    border-radius: 7px;
+    color: var(--ux-muted);
+    background: rgba(0, 0, 0, 0.18);
+    font: 600 11px/1 system-ui, sans-serif;
+    letter-spacing: 0.03em;
+}
+
+.ux-command-backdrop,
+.ux-onboarding-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: grid;
+    place-items: start center;
+    padding: min(14vh, 120px) 18px 24px;
+    background: rgba(2, 7, 16, 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.18s ease, visibility 0.18s ease;
+}
+
+.ux-command-backdrop.is-open,
+.ux-onboarding-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.ux-command-dialog {
+    width: min(680px, 100%);
+    overflow: hidden;
+    border: 1px solid var(--ux-border-strong);
+    border-radius: 20px;
+    background: linear-gradient(160deg, rgba(14, 24, 43, 0.98), rgba(6, 12, 24, 0.98));
+    box-shadow: var(--ux-shadow), 0 0 45px rgba(34, 211, 238, 0.1);
+    transform: translateY(-12px) scale(0.985);
+    transition: transform 0.2s ease;
+}
+
+.is-open .ux-command-dialog { transform: none; }
+
+.ux-command-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--ux-border);
+}
+
+.ux-command-input-wrap i { color: var(--ux-accent); }
+
+.ux-command-input {
+    flex: 1;
+    min-width: 0;
+    border: 0 !important;
+    outline: 0;
+    color: var(--ux-text) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font: 600 16px/1.4 system-ui, sans-serif;
+}
+
+.ux-command-results {
+    max-height: min(52vh, 430px);
+    padding: 8px;
+    overflow: auto;
+}
+
+.ux-command-item {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 38px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border: 0;
+    border-radius: 12px;
+    color: var(--ux-text);
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+}
+
+.ux-command-item:hover,
+.ux-command-item.is-active {
+    background: linear-gradient(90deg, rgba(34, 211, 238, 0.13), rgba(167, 139, 250, 0.09));
+}
+
+.ux-command-icon {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--ux-border);
+    border-radius: 11px;
+    color: var(--ux-accent);
+    background: rgba(34, 211, 238, 0.06);
+}
+
+.ux-command-copy strong { display: block; font-size: 14px; }
+.ux-command-copy small { display: block; margin-top: 3px; color: var(--ux-muted); font-size: 12px; }
+.ux-command-type { color: var(--ux-muted); font-size: 11px; }
+.ux-command-empty { padding: 38px 20px; color: var(--ux-muted); text-align: center; }
+.ux-command-footer { padding: 10px 16px; border-top: 1px solid var(--ux-border); color: var(--ux-muted); font-size: 11px; }
+
+.ux-toast-stack {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 11000;
+    display: grid;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.ux-toast {
+    min-width: 260px;
+    max-width: 380px;
+    padding: 13px 15px;
+    border: 1px solid var(--ux-border-strong);
+    border-radius: 12px;
+    color: var(--ux-text);
+    background: var(--ux-surface);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    animation: uxToastIn 0.24s ease both;
+}
+
+.ux-toast.is-success { border-color: rgba(52, 211, 153, 0.5); }
+.ux-toast.is-error { border-color: rgba(251, 113, 133, 0.55); }
+
+.ux-workflow-toolbar,
+.ux-library-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin: 0 0 18px;
+    padding: 12px;
+    border: 1px solid var(--ux-border);
+    border-radius: 14px;
+    background: linear-gradient(100deg, rgba(34, 211, 238, 0.07), rgba(167, 139, 250, 0.06));
+}
+
+.ux-toolbar-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-right: auto;
+    color: var(--ux-text);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ux-tool-button {
+    min-height: 34px;
+    padding: 7px 11px;
+    border: 1px solid var(--ux-border);
+    border-radius: 9px;
+    color: #dcecff;
+    background: rgba(7, 14, 27, 0.6);
+    cursor: pointer;
+    font: 600 12px/1.2 system-ui, sans-serif;
+    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.ux-tool-button:hover,
+.ux-tool-button.is-active {
+    transform: translateY(-1px);
+    border-color: var(--ux-border-strong);
+    background: rgba(34, 211, 238, 0.12);
+}
+
+.ux-library-count { color: var(--ux-muted); font-size: 12px; }
+.asset-grid.ux-list-view { grid-template-columns: 1fr !important; }
+.asset-grid.ux-list-view .asset-card { min-height: 112px; display: grid; grid-template-columns: 132px minmax(0, 1fr); }
+.asset-grid.ux-list-view .thumb { height: 112px !important; }
+
+.ux-onboarding-backdrop { place-items: center; padding-top: 24px; }
+.ux-onboarding-card {
+    width: min(620px, 100%);
+    padding: 30px;
+    border: 1px solid var(--ux-border-strong);
+    border-radius: 24px;
+    color: var(--ux-text);
+    background: linear-gradient(145deg, rgba(15, 28, 50, 0.98), rgba(6, 12, 24, 0.98));
+    box-shadow: var(--ux-shadow);
+}
+.ux-onboarding-step { color: var(--ux-accent); font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+.ux-onboarding-card h2 { margin: 12px 0 9px; font: 700 clamp(23px, 4vw, 34px)/1.2 system-ui, sans-serif; }
+.ux-onboarding-card p { min-height: 54px; color: #afc0d8; line-height: 1.7; }
+.ux-onboarding-visual { min-height: 150px; display: grid; place-items: center; margin: 22px 0; border: 1px solid var(--ux-border); border-radius: 18px; color: var(--ux-accent); background: radial-gradient(circle, rgba(34,211,238,.14), transparent 66%); font-size: 54px; }
+.ux-onboarding-actions { display: flex; align-items: center; gap: 10px; }
+.ux-onboarding-actions button:last-child { margin-left: auto; }
+
+.ux-skeleton {
+    min-height: 180px;
+    border-radius: 14px;
+    background: linear-gradient(100deg, rgba(255,255,255,.035) 20%, rgba(255,255,255,.09) 40%, rgba(255,255,255,.035) 60%);
+    background-size: 220% 100%;
+    animation: uxShimmer 1.35s ease-in-out infinite;
+}
+
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+}
+.reduce-motion .pointer-glow { display: none !important; }
+
+@keyframes uxToastIn { from { opacity: 0; transform: translateY(10px); } }
+@keyframes uxShimmer { to { background-position: -220% 0; } }
+
+@media (max-width: 640px) {
+    .ux-command-backdrop { padding-top: 18px; }
+    .ux-command-results { max-height: 66vh; }
+    .ux-command-type { display: none; }
+    .ux-workflow-toolbar, .ux-library-toolbar { align-items: stretch; }
+    .ux-toolbar-label { width: 100%; }
+    .ux-tool-button { flex: 1 1 130px; }
+    .asset-grid.ux-list-view .asset-card { grid-template-columns: 96px minmax(0, 1fr); }
+    .ux-onboarding-card { padding: 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ux-skeleton, .ux-toast { animation: none !important; }
+}

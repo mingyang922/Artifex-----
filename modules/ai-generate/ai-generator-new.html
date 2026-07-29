@@ -4,19 +4,17 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>AI生成器 - Artifex</title>
-        <link rel="manifest" href="../../manifest.json">
-        <meta name="theme-color" content="#00f0ff">
-        <link
-            href="../../vendor/css/google-fonts.css"
-            rel="stylesheet"
-        />
+        <link rel="manifest" href="../../manifest.json" />
+        <meta name="theme-color" content="#00f0ff" />
+        <script src="../../js/theme-bootstrap.js"></script>
+        <link href="../../vendor/css/google-fonts.css" rel="stylesheet" />
         <link rel="stylesheet" href="../../vendor/css/font-awesome.min.css" />
         <link rel="stylesheet" href="../../styles/ui-kit.css" />
-        <link rel="stylesheet" href="../../styles/region-themes.css" />
-        <link rel="stylesheet" href="../../styles/theme-japan.css" />
         <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet" href="../../styles/region-themes.css" />
+        <link rel="stylesheet" href="../../styles/productivity.css" />
     </head>
-    <body>
+    <body class="app-shell" data-app-page="ai-generate">
         <div class="pointer-glow" aria-hidden="true"></div>
         <div class="pointer-glow pointer-glow--lag" aria-hidden="true"></div>
         <div class="dashboard-container">
@@ -77,7 +75,13 @@
                 <div class="top-bar">
                     <div class="search-bar">
                         <i class="fas fa-search" aria-hidden="true"></i>
-                        <input type="text" placeholder="搜索项目、资产或文档..." data-i18n="dashboard.searchPlaceholder" data-i18n-aria="common.search" aria-label="搜索" />
+                        <input
+                            type="text"
+                            placeholder="搜索项目、资产或文档..."
+                            data-i18n="dashboard.searchPlaceholder"
+                            data-i18n-aria="common.search"
+                            aria-label="搜索"
+                        />
                     </div>
                     <div class="user-menu">
                         <button class="notification-btn" data-i18n-aria="misc.notifications" aria-label="通知">
@@ -109,7 +113,9 @@
                             <button class="tab-button active" data-tab="code">
                                 <i class="fas fa-wand-sparkles"></i> <span data-i18n="ai.assetEditor">资产微调</span>
                             </button>
-                            <button class="tab-button" data-tab="image"><i class="fas fa-image"></i> <span data-i18n="ai.imageGenerate">图片生成</span></button>
+                            <button class="tab-button" data-tab="image">
+                                <i class="fas fa-image"></i> <span data-i18n="ai.imageGenerate">图片生成</span>
+                            </button>
                             <button class="tab-button" data-tab="action-group">
                                 <i class="fas fa-person-running"></i> <span data-i18n="ai.actionGroup">角色动作组</span>
                             </button>
@@ -487,7 +493,9 @@
                                             </button>
                                         </div>
                                         <div class="ae-panel-section">
-                                            <div class="ae-panel-sub-title"><i class="fas fa-swatchbook"></i> 调色板</div>
+                                            <div class="ae-panel-sub-title">
+                                                <i class="fas fa-swatchbook"></i> 调色板
+                                            </div>
                                             <button class="ae-small-btn" id="aeExtractPalette">
                                                 <i class="fas fa-eye-dropper"></i> 提取调色板
                                             </button>
@@ -649,7 +657,8 @@
                                         <div class="st-upload-row">
                                             <div class="st-upload-col">
                                                 <label for="stContentFile"
-                                                    >内容图 <span class="label-hint">(将应用风格的原始图片)</span></label
+                                                    >内容图
+                                                    <span class="label-hint">(将应用风格的原始图片)</span></label
                                                 >
                                                 <div class="sketch-upload-wrap">
                                                     <input
@@ -663,7 +672,8 @@
                                             </div>
                                             <div class="st-upload-col">
                                                 <label for="stRefFile"
-                                                    >风格参考图 <span class="label-hint">(提供艺术风格的图片)</span></label
+                                                    >风格参考图
+                                                    <span class="label-hint">(提供艺术风格的图片)</span></label
                                                 >
                                                 <div class="sketch-upload-wrap">
                                                     <input
@@ -692,7 +702,8 @@
                                         </div>
                                         <p class="hint-text" style="font-size: 12px; color: #888; margin-top: 8px">
                                             <i class="fas fa-info-circle" style="color: #00f0ff"></i>
-                                            风格迁移效果取决于所选 AI 服务商。系统将使用内容图作为基础，结合风格参考图的艺术特征生成新图片。
+                                            风格迁移效果取决于所选 AI
+                                            服务商。系统将使用内容图作为基础，结合风格参考图的艺术特征生成新图片。
                                         </p>
                                     </div>
                                     <!-- 图片放大 -->
@@ -701,9 +712,16 @@
                                         class="form-group full-width img2img-zone"
                                         style="display: none"
                                     >
-                                        <label for="upscaleFile">上传源图片 <span class="label-hint">(需要放大的低分辨率图片)</span></label>
+                                        <label for="upscaleFile"
+                                            >上传源图片 <span class="label-hint">(需要放大的低分辨率图片)</span></label
+                                        >
                                         <div class="sketch-upload-wrap">
-                                            <input type="file" id="upscaleFile" accept="image/jpeg,image/png,image/webp" class="sketch-file-input" />
+                                            <input
+                                                type="file"
+                                                id="upscaleFile"
+                                                accept="image/jpeg,image/png,image/webp"
+                                                class="sketch-file-input"
+                                            />
                                             <div id="upscalePreview" class="sketch-preview"></div>
                                         </div>
                                         <div class="form-group" style="margin-top: 12px">
@@ -724,9 +742,16 @@
                                         class="form-group full-width img2img-zone"
                                         style="display: none"
                                     >
-                                        <label for="removeBgFile">上传源图片 <span class="label-hint">(需要去除背景的图片)</span></label>
+                                        <label for="removeBgFile"
+                                            >上传源图片 <span class="label-hint">(需要去除背景的图片)</span></label
+                                        >
                                         <div class="sketch-upload-wrap">
-                                            <input type="file" id="removeBgFile" accept="image/jpeg,image/png,image/webp" class="sketch-file-input" />
+                                            <input
+                                                type="file"
+                                                id="removeBgFile"
+                                                accept="image/jpeg,image/png,image/webp"
+                                                class="sketch-file-input"
+                                            />
                                             <div id="removeBgPreview" class="sketch-preview"></div>
                                         </div>
                                         <p class="hint-text" style="font-size: 12px; color: #888; margin-top: 8px">
@@ -804,20 +829,117 @@
                                     <div id="templateSection" class="template-section">
                                         <div class="form-section-title" style="margin-bottom: 14px">
                                             <i class="fas fa-th-large"></i> 游戏 UI 模板
-                                            <span style="font-size: 11px; color: #607080; font-weight: normal; text-transform: none; letter-spacing: normal">
+                                            <span
+                                                style="
+                                                    font-size: 11px;
+                                                    color: #607080;
+                                                    font-weight: normal;
+                                                    text-transform: none;
+                                                    letter-spacing: normal;
+                                                "
+                                            >
                                                 (点击分类展开，选择模板自动填入 prompt)
                                             </span>
                                         </div>
                                     </div>
 
                                     <!-- 批量生成选项 -->
-                                    <div id="batchGenWrap" style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-                                        <label style="font-family:var(--font-tech-display);font-size:11px;color:#00f0ff;letter-spacing:0.08em;text-transform:uppercase;font-weight:700;">生成数量</label>
-                                        <div id="batchCountBtns" style="display:flex;gap:4px;">
-                                            <button type="button" class="batch-count-btn" data-count="1" style="min-width:36px;padding:6px 10px;border-radius:6px;border:1px solid rgba(0,240,255,0.35);background:rgba(0,240,255,0.18);color:#00f0ff;font-family:var(--font-tech-display);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;">1</button>
-                                            <button type="button" class="batch-count-btn" data-count="2" style="min-width:36px;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#b0b0c0;font-family:var(--font-tech-display);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;">2</button>
-                                            <button type="button" class="batch-count-btn" data-count="4" style="min-width:36px;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#b0b0c0;font-family:var(--font-tech-display);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;">4</button>
-                                            <button type="button" class="batch-count-btn" data-count="8" style="min-width:36px;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#b0b0c0;font-family:var(--font-tech-display);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;">8</button>
+                                    <div
+                                        id="batchGenWrap"
+                                        style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px"
+                                    >
+                                        <label
+                                            style="
+                                                font-family: var(--font-tech-display);
+                                                font-size: 11px;
+                                                color: #00f0ff;
+                                                letter-spacing: 0.08em;
+                                                text-transform: uppercase;
+                                                font-weight: 700;
+                                            "
+                                            >生成数量</label
+                                        >
+                                        <div id="batchCountBtns" style="display: flex; gap: 4px">
+                                            <button
+                                                type="button"
+                                                class="batch-count-btn"
+                                                data-count="1"
+                                                style="
+                                                    min-width: 36px;
+                                                    padding: 6px 10px;
+                                                    border-radius: 6px;
+                                                    border: 1px solid rgba(0, 240, 255, 0.35);
+                                                    background: rgba(0, 240, 255, 0.18);
+                                                    color: #00f0ff;
+                                                    font-family: var(--font-tech-display);
+                                                    font-size: 11px;
+                                                    font-weight: 700;
+                                                    cursor: pointer;
+                                                    transition: all 0.2s;
+                                                "
+                                            >
+                                                1
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="batch-count-btn"
+                                                data-count="2"
+                                                style="
+                                                    min-width: 36px;
+                                                    padding: 6px 10px;
+                                                    border-radius: 6px;
+                                                    border: 1px solid rgba(255, 255, 255, 0.1);
+                                                    background: rgba(255, 255, 255, 0.04);
+                                                    color: #b0b0c0;
+                                                    font-family: var(--font-tech-display);
+                                                    font-size: 11px;
+                                                    font-weight: 700;
+                                                    cursor: pointer;
+                                                    transition: all 0.2s;
+                                                "
+                                            >
+                                                2
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="batch-count-btn"
+                                                data-count="4"
+                                                style="
+                                                    min-width: 36px;
+                                                    padding: 6px 10px;
+                                                    border-radius: 6px;
+                                                    border: 1px solid rgba(255, 255, 255, 0.1);
+                                                    background: rgba(255, 255, 255, 0.04);
+                                                    color: #b0b0c0;
+                                                    font-family: var(--font-tech-display);
+                                                    font-size: 11px;
+                                                    font-weight: 700;
+                                                    cursor: pointer;
+                                                    transition: all 0.2s;
+                                                "
+                                            >
+                                                4
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="batch-count-btn"
+                                                data-count="8"
+                                                style="
+                                                    min-width: 36px;
+                                                    padding: 6px 10px;
+                                                    border-radius: 6px;
+                                                    border: 1px solid rgba(255, 255, 255, 0.1);
+                                                    background: rgba(255, 255, 255, 0.04);
+                                                    color: #b0b0c0;
+                                                    font-family: var(--font-tech-display);
+                                                    font-size: 11px;
+                                                    font-weight: 700;
+                                                    cursor: pointer;
+                                                    transition: all 0.2s;
+                                                "
+                                            >
+                                                8
+                                            </button>
                                         </div>
                                         <input type="hidden" id="batchCount" value="1" />
                                     </div>
@@ -1168,9 +1290,15 @@
                         </div>
                         <style>
                             @keyframes progress-indeterminate {
-                                0% { transform: translateX(-100%); }
-                                50% { transform: translateX(0%); }
-                                100% { transform: translateX(100%); }
+                                0% {
+                                    transform: translateX(-100%);
+                                }
+                                50% {
+                                    transform: translateX(0%);
+                                }
+                                100% {
+                                    transform: translateX(100%);
+                                }
                             }
                         </style>
 
@@ -1218,17 +1346,20 @@
         <!-- 备案信息 -->
         <footer class="beian-footer">
             <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
-                <img src="../../vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+                <img
+                    src="../../vendor/images/beian-icon.png"
+                    alt="公安备案"
+                    class="beian-icon"
+                />京公网安备11010802048813号
             </a>
             <span class="beian-separator">|</span>
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
         </footer>
 
-        <script defer src="../../vendor/jszip.min.js"></script>
+        <script defer src="../../js/lazy-vendors.js"></script>
+        <script defer src="../../js/image-state-store.js"></script>
         <script defer src="../../js/keyboard-shortcuts.js"></script>
         <script src="../../js/i18n.js"></script>
-        <script src="../../vendor/js/tsparticles.bundle.min.js"></script>
-        <script src="../../vendor/js/gsap.min.js"></script>
         <script src="../../js/region-themes.js"></script>
         <script src="../../js/session-guard.js"></script>
         <script defer src="../../js/ui-kit.js"></script>
@@ -1250,6 +1381,7 @@
         <script defer src="image-style-presets.js"></script>
         <script defer src="image-generator.js"></script>
         <script defer src="templates.js"></script>
-            <script defer src="../../js/sw-register.js"></script>
+        <script defer src="../../js/productivity.js"></script>
+        <script defer src="../../js/sw-register.js"></script>
     </body>
 </html>

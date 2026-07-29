@@ -684,7 +684,7 @@ class PasswordSecurityManager {
         // 备用方案
         const successDiv = document.createElement('div');
         successDiv.className = 'toast-message toast-message--info';
-        successDiv.innerHTML = `<i class="fas fa-info-circle"></i><span>${msg}</span>`;
+        successDiv.innerHTML = `<i class="fas fa-info-circle"></i><span>${typeof escapeHtml === 'function' ? escapeHtml(msg) : msg}</span>`;
         document.body.appendChild(successDiv);
         setTimeout(() => successDiv.remove(), 5000);
     }
@@ -695,7 +695,10 @@ let _passwordSecurityManager;
 
 document.addEventListener('DOMContentLoaded', () => {
     // 安全获取可能由 user-center-page.js 定义的变量
-    const _changePasswordForm = typeof changePasswordForm !== 'undefined' ? changePasswordForm : document.getElementById('change-password-form');
+    const _changePasswordForm =
+        typeof changePasswordForm !== 'undefined'
+            ? changePasswordForm
+            : document.getElementById('change-password-form');
     const _savePermissionsBtn = typeof savePermissionsBtn !== 'undefined' ? savePermissionsBtn : null;
     const _cancelChangesBtn = typeof cancelChangesBtn !== 'undefined' ? cancelChangesBtn : null;
     const _cancelPasswordChangeBtn = typeof cancelPasswordChangeBtn !== 'undefined' ? cancelPasswordChangeBtn : null;

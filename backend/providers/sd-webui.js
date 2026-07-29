@@ -57,7 +57,7 @@ async function handleSdWebUiTxt2Img(req, res, { getUserProviderConfig }) {
                     .replace(/\/$/, '')) ||
             getSdWebUiBaseUrl();
         const body = req.body && typeof req.body === 'object' ? req.body : {};
-        if (body.prompt === null || String(body.prompt).trim() === '') {
+        if (body.prompt === null || body.prompt === undefined || String(body.prompt).trim() === '') {
             return res.status(400).json({ error: 'prompt 不能为空' });
         }
         const { prompt: _omitP, size: _omitS, ...extra } = body;

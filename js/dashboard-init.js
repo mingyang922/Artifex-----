@@ -3,152 +3,286 @@
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
  * 版本: 1.3.3 */
 'use strict';
-            // escapeHtml 由 js/html-utils.js 提供（全局函数）
+// escapeHtml 由 js/html-utils.js 提供（全局函数）
 
-            function formatDate(dateString) {
-                if (!dateString) return '';
-                const d = new Date(dateString);
-                if (isNaN(d.getTime())) return '';
-                const y = d.getFullYear();
-                const m = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                return y + '-' + m + '-' + day;
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return '';
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+}
+
+function _getProjectTypeName(type) {
+    const map = {
+        ui: 'UI设计',
+        game: '游戏界面',
+        other: '其他',
+    };
+    return map[type] || type || '';
+}
+
+function renderRecentProjects() {
+    const grid = document.getElementById('recent-projects-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '<p style="color:#666;text-align:center;">加载中...</p>';
+
+    fetch('/api/projects?page=1&limit=3', { credentials: 'include' })
+        .then(function (res) {
+            if (res.status === 401) {
+                window.location.href = loginHtmlPath();
+                return null;
             }
-
-            function _getProjectTypeName(type) {
-                const map = {
-                    ui: 'UI设计',
-                    game: '游戏界面',
-                    other: '其他',
-                };
-                return map[type] || type || '';
-            }
-
-            function renderRecentProjects() {
-                const grid = document.getElementById('recent-projects-grid');
-                if (!grid) return;
-
-                grid.innerHTML = '<p style="color:#666;text-align:center;">加载中...</p>';
-
-                fetch('/api/projects?page=1&limit=3', { credentials: 'include' })
-                    .then(function (res) {
-                        if (res.status === 401) { window.location.href = loginHtmlPath(); return null; }
-                        if (!res.ok) throw new Error('API ' + res.status);
-                        return res.json();
-                    })
-                    .then(function (data) {
-                        if (!data) return;
-                        let projects = [];
-                        if (data.ok && data.projects) {
-                            projects = data.projects.map(function (p) {
-                                return {
-                                    id: String(p.id),
-                                    name: p.name,
-                                    desc: p.description,
-                                    createTime: p.created_at,
-                                    status: p.status || 'active',
-                                };
-                            });
-                        }
-                        if (projects.length > 0) {
-                            renderProjectCards(grid, projects);
-                        } else {
-                            renderFromLocalStorage(grid);
-                        }
-                    })
-                    .catch(function (err) {
-                        console.warn('[Dashboard] API failed, trying localStorage:', err.message);
-                        renderFromLocalStorage(grid);
-                    });
-            }
-
-            function renderFromLocalStorage(grid) {
-                let projects = [];
-                try {
-                    if (typeof GameUiUserScope !== 'undefined' && GameUiUserScope.key) {
-                        const raw = localStorage.getItem(GameUiUserScope.key('gameui-projects'));
-                        if (raw) projects = JSON.parse(raw) || [];
-                    } else {
-                        const raw = localStorage.getItem('gameui-projects');
-                        if (raw) projects = JSON.parse(raw) || [];
-                    }
-                } catch (_e) { /* ignore */ }
-                renderProjectCards(grid, projects);
-            }
-
-            function renderProjectCards(grid, projects) {
-                grid.innerHTML = '';
-
-                if (!projects.length) {
-                    grid.innerHTML =
-                        '<p style="color:#666;text-align:center;">暂无项目数据，请在"项目管理"中创建项目。</p>';
-                    return;
-                }
-
-                const recent = projects.slice(0, 3);
-
-                recent.forEach(function (project) {
-                    let statusText = '进行中';
-                    if (project.status === 'done') statusText = '已完成';
-                    if (project.status === 'paused') statusText = '已暂停';
-
-                    const card = document.createElement('div');
-                    card.className = 'project-card';
-
-                    card.innerHTML =
-                        '<div class="project-thumbnail">' +
-                        '<span class="project-status">' +
-                        statusText +
-                        '</span>' +
-                        '</div>' +
-                        '<div class="project-info">' +
-                        '<h3 class="project-title">' +
-                        (project.name ? escapeHtml(project.name) : '未命名项目') +
-                        '</h3>' +
-                        '<p class="project-desc">' +
-                        (project.desc ? escapeHtml(project.desc) : '无描述') +
-                        '</p>' +
-                        '<div class="project-meta">' +
-                        '<div class="project-date">' +
-                        '<i class="fas fa-clock"></i>' +
-                        '<span>' +
-                        escapeHtml(formatDate(project.createTime)) +
-                        '</span>' +
-                        '</div>' +
-                        '<div class="project-actions">' +
-                        '<button class="project-action" title="打开项目"><i class="fas fa-arrow-right"></i></button>' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>';
-
-                    const openDetail = function () {
-                        if (!project.id) return;
-                        window.location.href =
-                            'modules/project-management/project-detail.html?id=' + encodeURIComponent(project.id);
+            if (!res.ok) throw new Error('API ' + res.status);
+            return res.json();
+        })
+        .then(function (data) {
+            if (!data) return;
+            let projects = [];
+            if (data.ok && data.projects) {
+                projects = data.projects.map(function (p) {
+                    return {
+                        id: String(p.id),
+                        name: p.name,
+                        desc: p.description,
+                        createTime: p.created_at,
+                        status: p.status || 'active',
                     };
-
-                    card.addEventListener('click', function () {
-                        openDetail();
-                    });
-                    grid.appendChild(card);
                 });
             }
+            if (projects.length > 0) {
+                renderProjectCards(grid, projects);
+            } else {
+                renderFromLocalStorage(grid);
+            }
+        })
+        .catch(function (err) {
+            console.warn('[Dashboard] API failed, trying localStorage:', err.message);
+            renderFromLocalStorage(grid);
+        });
+}
 
-            document.addEventListener('DOMContentLoaded', async function () {
-                try {
-                    await GameUiUserScope.ensure();
-                } catch (e) {
-                    console.warn('用户态校验失败，继续渲染主页：', e);
-                }
+function renderFromLocalStorage(grid) {
+    let projects = [];
+    try {
+        if (typeof GameUiUserScope !== 'undefined' && GameUiUserScope.key) {
+            const raw = localStorage.getItem(GameUiUserScope.key('gameui-projects'));
+            if (raw) projects = JSON.parse(raw) || [];
+        } else {
+            const raw = localStorage.getItem('gameui-projects');
+            if (raw) projects = JSON.parse(raw) || [];
+        }
+    } catch (_e) {
+        /* ignore */
+    }
+    renderProjectCards(grid, projects);
+}
 
-                if (window.PageEffects) {
-                    window.PageEffects.initPointerGlow();
-                    window.PageEffects.initCardSpotlight('.tool-card, .project-card');
-                }
+function renderProjectCards(grid, projects) {
+    grid.innerHTML = '';
 
-                if (window.ParticleNetwork) {
-                    ParticleNetwork.init({ container: document.body, particleCount: 70 });
-                }
+    if (!projects.length) {
+        grid.innerHTML = '<p style="color:#666;text-align:center;">暂无项目数据，请在"项目管理"中创建项目。</p>';
+        return;
+    }
 
-                renderRecentProjects();
-            });
+    const recent = projects.slice(0, 3);
+
+    recent.forEach(function (project) {
+        let statusText = '进行中';
+        if (project.status === 'done') statusText = '已完成';
+        if (project.status === 'paused') statusText = '已暂停';
+
+        const card = document.createElement('div');
+        card.className = 'project-card';
+
+        card.innerHTML =
+            '<div class="project-thumbnail">' +
+            '<span class="project-status">' +
+            statusText +
+            '</span>' +
+            '</div>' +
+            '<div class="project-info">' +
+            '<h3 class="project-title">' +
+            (project.name ? escapeHtml(project.name) : '未命名项目') +
+            '</h3>' +
+            '<p class="project-desc">' +
+            (project.desc ? escapeHtml(project.desc) : '无描述') +
+            '</p>' +
+            '<div class="project-meta">' +
+            '<div class="project-date">' +
+            '<i class="fas fa-clock"></i>' +
+            '<span>' +
+            escapeHtml(formatDate(project.createTime)) +
+            '</span>' +
+            '</div>' +
+            '<div class="project-actions">' +
+            '<button class="project-action" title="打开项目"><i class="fas fa-arrow-right"></i></button>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+
+        const openDetail = function () {
+            if (!project.id) return;
+            window.location.href =
+                'modules/project-management/project-detail.html?id=' + encodeURIComponent(project.id);
+        };
+
+        card.addEventListener('click', function () {
+            openDetail();
+        });
+        grid.appendChild(card);
+    });
+}
+
+function readStoredCollection(suffixes) {
+    const candidates = [];
+    suffixes.forEach(function (suffix) {
+        if (typeof GameUiUserScope !== 'undefined' && typeof GameUiUserScope.key === 'function') {
+            candidates.push(GameUiUserScope.key(suffix));
+        }
+        candidates.push(suffix);
+    });
+    for (const key of [...new Set(candidates)]) {
+        try {
+            const value = JSON.parse(localStorage.getItem(key));
+            if (Array.isArray(value)) return value;
+            if (Array.isArray(value?.assets)) return value.assets;
+        } catch (_error) {
+            /* continue with compatibility scan */
+        }
+    }
+    return [];
+}
+
+function formatStorage(bytes) {
+    if (!Number.isFinite(bytes) || bytes <= 0) return '0 MB';
+    if (bytes < 1024 * 1024) return Math.max(1, Math.round(bytes / 1024)) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(bytes < 10 * 1024 * 1024 ? 1 : 0) + ' MB';
+}
+
+function renderRecentGenerations(generations) {
+    const container = document.getElementById('recent-generations');
+    if (!container) return;
+    const recent = generations.slice(0, 4);
+    if (!recent.length) {
+        container.innerHTML = '<div class="workspace-empty"><i class="fas fa-wand-magic-sparkles"></i><br>还没有生成记录，试着创建第一张素材吧。</div>';
+        return;
+    }
+    container.innerHTML = '';
+    recent.forEach(function (item) {
+        const link = document.createElement('a');
+        link.className = 'recent-generation-item';
+        link.href = 'modules/ai-generate/ai-generator-new.html';
+        const created = item.createdAt || item.timestamp || item.date;
+        link.innerHTML =
+            '<i class="fas fa-image"></i><span><strong>' +
+            escapeHtml(item.name || item.prompt || 'AI 生成素材') +
+            '</strong><small>' +
+            escapeHtml(item.style || item.provider || '生成记录') +
+            '</small></span><span>' +
+            escapeHtml(formatDate(created)) +
+            '</span>';
+        container.appendChild(link);
+    });
+}
+
+async function loadWorkspaceOverview() {
+    const hour = new Date().getHours();
+    const greeting = hour < 6 ? '夜深了' : hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好';
+    const greetingEl = document.getElementById('dashboard-greeting');
+    const dateEl = document.getElementById('dashboard-date');
+    if (greetingEl) greetingEl.textContent = greeting;
+    if (dateEl) {
+        dateEl.textContent = new Intl.DateTimeFormat('zh-CN', {
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long',
+        }).format(new Date());
+    }
+
+    let projectCount = readStoredCollection(['gameui-projects']).length;
+    let assetCount = readStoredCollection(['assetLibrary_v1', 'asset-library']).length;
+    const generations = readStoredCollection(['generatedImages']);
+
+    const responses = await Promise.allSettled([
+        fetch('/api/projects?page=1&limit=100', { credentials: 'include' }).then((response) =>
+            response.ok ? response.json() : null
+        ),
+        fetch('/api/asset-library', { credentials: 'include' }).then((response) =>
+            response.ok ? response.json() : null
+        ),
+        navigator.storage?.estimate ? navigator.storage.estimate() : Promise.resolve(null),
+    ]);
+
+    const projectData = responses[0].status === 'fulfilled' ? responses[0].value : null;
+    const assetData = responses[1].status === 'fulfilled' ? responses[1].value : null;
+    const storageData = responses[2].status === 'fulfilled' ? responses[2].value : null;
+    if (Array.isArray(projectData?.projects)) projectCount = projectData.total ?? projectData.projects.length;
+    if (Array.isArray(assetData?.assets)) assetCount = assetData.total ?? assetData.assets.length;
+
+    const assignments = {
+        statProjects: projectCount,
+        statAssets: assetCount,
+        statGenerations: generations.length,
+        statStorage: formatStorage(storageData?.usage || 0),
+    };
+    Object.entries(assignments).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = String(value);
+    });
+    renderRecentGenerations(generations);
+
+    const nextText = document.getElementById('dashboard-next-step');
+    const nextButton = document.getElementById('dashboard-next-action');
+    if (nextText && nextButton) {
+        const target = projectCount === 0 ? 'project-management' : generations.length === 0 ? 'ai-generate' : 'asset-library';
+        nextText.textContent =
+            target === 'project-management'
+                ? '先创建一个项目，为后续生成内容和素材建立清晰的归属。'
+                : target === 'ai-generate'
+                  ? '项目已经就绪，接下来可以生成第一批视觉素材。'
+                  : '已有生成结果，建议整理进素材库并补充分类与标签。';
+        nextButton.addEventListener('click', () => window.navManager?.navigateTo(target));
+    }
+}
+
+function improveDashboardAccessibility() {
+    document.querySelectorAll('.tool-card[data-target]').forEach(function (card) {
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                card.click();
+            }
+        });
+    });
+    document.querySelectorAll('.workspace-hero-actions [data-target]').forEach(function (button) {
+        button.addEventListener('click', () => window.navManager?.navigateTo(button.dataset.target));
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async function () {
+    try {
+        await GameUiUserScope.ensure();
+    } catch (e) {
+        console.warn('用户态校验失败，继续渲染主页：', e);
+    }
+
+    if (window.PageEffects) {
+        window.PageEffects.initPointerGlow();
+        window.PageEffects.initCardSpotlight('.tool-card, .project-card');
+    }
+
+    if (window.ParticleNetwork) {
+        ParticleNetwork.init({ container: document.body, particleCount: 70 });
+    }
+
+    renderRecentProjects();
+    loadWorkspaceOverview().catch((error) => console.warn('[Dashboard] overview failed:', error));
+    improveDashboardAccessibility();
+});

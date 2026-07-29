@@ -540,6 +540,11 @@ body.app-shell .search-bar input:focus {
 }
 
 /* ── 旋转渐变边框 ── */
+@property --border-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+}
 @keyframes rotate-border {
     0% { --border-angle: 0deg; }
     100% { --border-angle: 360deg; }

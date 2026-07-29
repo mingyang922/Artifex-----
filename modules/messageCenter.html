@@ -4,13 +4,12 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>消息中心 - Artifex</title>
-        <link rel="manifest" href="../manifest.json">
-        <meta name="theme-color" content="#00f0ff">
+        <link rel="manifest" href="../manifest.json" />
+        <meta name="theme-color" content="#00f0ff" />
+        <script src="../js/theme-bootstrap.js"></script>
         <link href="../vendor/css/font-awesome.min.css" rel="stylesheet" />
         <link href="../vendor/css/google-fonts.css" rel="stylesheet" />
         <link rel="stylesheet" href="../styles/ui-kit.css" />
-        <link rel="stylesheet" href="../styles/region-themes.css" />
-        <link rel="stylesheet" href="../styles/theme-japan.css" />
         <style>
             * {
                 margin: 0;
@@ -39,7 +38,9 @@
                 max-width: 800px;
                 max-height: 80vh;
                 overflow: hidden;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 240, 255, 0.06);
+                box-shadow:
+                    0 20px 60px rgba(0, 0, 0, 0.5),
+                    0 0 30px rgba(0, 240, 255, 0.06);
                 border: 1px solid rgba(0, 240, 255, 0.12);
                 animation: fadeIn 0.3s ease-out;
             }
@@ -279,8 +280,14 @@
             }
 
             @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(12px); }
-                to { opacity: 1; transform: translateY(0); }
+                from {
+                    opacity: 0;
+                    transform: translateY(12px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
 
             @media (max-width: 768px) {
@@ -290,11 +297,20 @@
                     border-radius: 0;
                     max-height: 100vh;
                 }
-                .message-center-header { padding: 15px 20px; }
-                .message-item { padding: 15px 20px; }
-                .message-tab { padding: 12px 15px; font-size: 13px; }
+                .message-center-header {
+                    padding: 15px 20px;
+                }
+                .message-item {
+                    padding: 15px 20px;
+                }
+                .message-tab {
+                    padding: 12px 15px;
+                    font-size: 13px;
+                }
             }
         </style>
+        <link rel="stylesheet" href="../styles/region-themes.css" />
+        <link rel="stylesheet" href="../styles/productivity.css" />
     </head>
     <body>
         <div class="message-center-container">
@@ -321,8 +337,12 @@
                             <div class="message-time">2025/1/15 14:30</div>
                         </div>
                         <div class="message-actions">
-                            <button class="message-action-btn" title="标记为已读" data-action="mark-read"><i class="fas fa-check"></i></button>
-                            <button class="message-action-btn delete" title="删除" data-action="delete"><i class="fas fa-trash"></i></button>
+                            <button class="message-action-btn" title="标记为已读" data-action="mark-read">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="message-action-btn delete" title="删除" data-action="delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -334,8 +354,12 @@
                             <div class="message-time">2025/1/15 13:45</div>
                         </div>
                         <div class="message-actions">
-                            <button class="message-action-btn" title="标记为已读" data-action="mark-read"><i class="fas fa-check"></i></button>
-                            <button class="message-action-btn delete" title="删除" data-action="delete"><i class="fas fa-trash"></i></button>
+                            <button class="message-action-btn" title="标记为已读" data-action="mark-read">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="message-action-btn delete" title="删除" data-action="delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -347,8 +371,12 @@
                             <div class="message-time">2025/1/15 10:20</div>
                         </div>
                         <div class="message-actions">
-                            <button class="message-action-btn" title="标记为已读" data-action="mark-read"><i class="fas fa-check"></i></button>
-                            <button class="message-action-btn delete" title="删除" data-action="delete"><i class="fas fa-trash"></i></button>
+                            <button class="message-action-btn" title="标记为已读" data-action="mark-read">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="message-action-btn delete" title="删除" data-action="delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -360,8 +388,12 @@
                             <div class="message-time">2025/1/15 09:15</div>
                         </div>
                         <div class="message-actions">
-                            <button class="message-action-btn" title="标记为已读" data-action="mark-read"><i class="fas fa-check"></i></button>
-                            <button class="message-action-btn delete" title="删除" data-action="delete"><i class="fas fa-trash"></i></button>
+                            <button class="message-action-btn" title="标记为已读" data-action="mark-read">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="message-action-btn delete" title="删除" data-action="delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -371,7 +403,11 @@
         <!-- 备案信息 -->
         <footer class="beian-footer">
             <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
-                <img src="../vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+                <img
+                    src="../vendor/images/beian-icon.png"
+                    alt="公安备案"
+                    class="beian-icon"
+                />京公网安备11010802048813号
             </a>
             <span class="beian-separator">|</span>
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
@@ -379,13 +415,12 @@
 
         <script defer src="../js/keyboard-shortcuts.js"></script>
         <script src="../js/i18n.js"></script>
-        <script src="../vendor/js/tsparticles.bundle.min.js"></script>
-        <script src="../vendor/js/gsap.min.js"></script>
         <script src="../js/region-themes.js"></script>
         <script src="../js/session-guard.js"></script>
         <script defer src="../js/ui-kit.js"></script>
         <script defer src="../js/scroll-animations.js"></script>
         <script defer src="message-center.js"></script>
-            <script defer src="../js/sw-register.js"></script>
+        <script defer src="../js/productivity.js"></script>
+        <script defer src="../js/sw-register.js"></script>
     </body>
 </html>

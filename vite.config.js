@@ -35,6 +35,8 @@ export default defineConfig({
         },
         // 代码分割配置
         chunkSizeWarningLimit: 500,
+        // 启用 CSS 代码分割
+        cssCodeSplit: true,
     },
     // 开发服务器配置（代理后端 API）
     server: {

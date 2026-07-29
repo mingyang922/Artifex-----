@@ -7,6 +7,14 @@
     'use strict';
 
     let _gen = null;
+    const IMAGE_STATE_FIELDS = [
+        'sketchBase64',
+        'styleTransferContentBase64',
+        'styleTransferRefBase64',
+        'upscaleBase64',
+        'removeBgBase64',
+    ];
+    const persistedImageValues = new Map();
 
     function init(gen) {
         _gen = gen;
@@ -18,12 +26,49 @@
 
     function pruneGeneratedImages() {
         const before = Array.isArray(_gen.generatedImages) ? _gen.generatedImages.length : 0;
-        _gen.generatedImages = (Array.isArray(_gen.generatedImages) ? _gen.generatedImages : []).filter(function (image) {
-            return image && image.id && image.name && _gen.isRenderableImageUrl(image.imageUrl);
-        });
+        _gen.generatedImages = (Array.isArray(_gen.generatedImages) ? _gen.generatedImages : []).filter(
+            function (image) {
+                return image && image.id && image.name && (image.imageRef || _gen.isRenderableImageUrl(image.imageUrl));
+            }
+        );
         if (_gen.generatedImages.length !== before) {
-            localStorage.setItem(aiStorageKey('generatedImages'), JSON.stringify(_gen.generatedImages));
+            persistGeneratedImages();
         }
+    }
+
+    function persistGeneratedImages() {
+        const storageKey = aiStorageKey('generatedImages');
+        const writes = [];
+        const serialized = _gen.generatedImages.map((image) => {
+            if (typeof image.imageUrl === 'string' && image.imageUrl.startsWith('data:') && window.ImageStateStore) {
+                const imageRef = image.imageRef || `${storageKey}:${image.id}`;
+                image.imageRef = imageRef;
+                writes.push(window.ImageStateStore.set(imageRef, image.imageUrl));
+                return { ...image, imageUrl: '', imageRef };
+            }
+            return image;
+        });
+        const commitMetadata = () => localStorage.setItem(storageKey, JSON.stringify(serialized));
+        if (writes.length === 0) {
+            commitMetadata();
+            return Promise.resolve();
+        }
+        return Promise.all(writes)
+            .then(commitMetadata)
+            .catch((error) => console.warn('[image-storage] 图片历史迁移失败', error));
+    }
+
+    async function hydrateGeneratedImages() {
+        if (!window.ImageStateStore) return;
+        await Promise.all(
+            _gen.generatedImages.map(async (image) => {
+                if (!image.imageUrl && image.imageRef) {
+                    image.imageUrl = (await window.ImageStateStore.get(image.imageRef).catch(() => '')) || '';
+                    if (!image.imageUrl) image.imageRef = '';
+                }
+            })
+        );
+        await persistGeneratedImages();
     }
 
     function persistGeneratorUiState() {
@@ -41,21 +86,35 @@
                 qwenModel: document.getElementById('qwenModelSelect')?.value || '',
                 strength: document.getElementById('img2imgStrength')?.value || '',
                 proPrompt: document.getElementById('proPromptTextarea')?.value || '',
-                sketchBase64: _gen.sketchBase64 || '',
                 stStrength: document.getElementById('stStrength')?.value || '',
-                styleTransferContentBase64: _gen.styleTransferContentBase64 || '',
-                styleTransferRefBase64: _gen.styleTransferRefBase64 || '',
-                upscaleBase64: _gen.upscaleBase64 || '',
-                removeBgBase64: _gen.removeBgBase64 || '',
                 upscaleFactor: document.getElementById('upscaleFactor')?.value || '2',
+                imageRefs: {},
             };
+            if (window.ImageStateStore) {
+                const stateKey = getGeneratorUiStateKey();
+                IMAGE_STATE_FIELDS.forEach((field) => {
+                    const value = _gen[field] || '';
+                    const ref = `${stateKey}:${field}`;
+                    state.imageRefs[field] = value ? ref : '';
+                    if (persistedImageValues.get(field) === value) return;
+                    persistedImageValues.set(field, value);
+                    const operation = value
+                        ? window.ImageStateStore.set(ref, value)
+                        : window.ImageStateStore.remove(ref);
+                    operation.catch(() => {});
+                });
+            } else {
+                IMAGE_STATE_FIELDS.forEach((field) => {
+                    state[field] = _gen[field] || '';
+                });
+            }
             sessionStorage.setItem(getGeneratorUiStateKey(), JSON.stringify(state));
         } catch (_e) {
             console.warn('保存 AI 生成器状态失败:', _e);
         }
     }
 
-    function restoreGeneratorUiState() {
+    async function restoreGeneratorUiState() {
         let state = null;
         try {
             const raw = sessionStorage.getItem(getGeneratorUiStateKey());
@@ -64,6 +123,20 @@
             state = null;
         }
         if (!state) return;
+
+        if (window.ImageStateStore) {
+            await Promise.all(
+                IMAGE_STATE_FIELDS.map(async (field) => {
+                    const legacyValue = state[field] || '';
+                    const ref = state.imageRefs?.[field];
+                    state[field] = legacyValue || (ref ? await window.ImageStateStore.get(ref).catch(() => '') : '');
+                    persistedImageValues.set(field, state[field] || '');
+                })
+            );
+            IMAGE_STATE_FIELDS.forEach((field) => {
+                _gen[field] = state[field] || null;
+            });
+        }
 
         const setValue = function (id, value) {
             const el = document.getElementById(id);
@@ -84,7 +157,9 @@
         setValue('proPromptTextarea', state.proPrompt);
         setValue('stStrength', state.stStrength);
 
-        const imageModeEl = document.querySelector('input[name="imageMode"][value="' + CSS.escape(state.imageMode || 'text2img') + '"]');
+        const imageModeEl = document.querySelector(
+            'input[name="imageMode"][value="' + CSS.escape(state.imageMode || 'text2img') + '"]'
+        );
         if (imageModeEl) imageModeEl.checked = true;
         const promptModeEl = document.querySelector(
             'input[name="promptMode"][value="' + CSS.escape(state.promptMode || 'custom') + '"]'
@@ -186,7 +261,11 @@
             _gen.sketchBase64 = state.sketchBase64;
             const preview5 = document.getElementById('sketchPreview');
             if (preview5) {
-                preview5.innerHTML = ''; var _img5 = document.createElement('img'); _img5.src = _gen.sketchBase64; _img5.alt = '线稿预览'; preview5.appendChild(_img5);
+                preview5.innerHTML = '';
+                var _img5 = document.createElement('img');
+                _img5.src = _gen.sketchBase64;
+                _img5.alt = '线稿预览';
+                preview5.appendChild(_img5);
             }
         }
     }
@@ -199,9 +278,15 @@
         _gen.generatedImages.unshift(image);
         const maxImages = (window.ArtifexConstants && window.ArtifexConstants.GENERATED_IMAGES_MAX) || 15;
         if (_gen.generatedImages.length > maxImages) {
+            const discarded = _gen.generatedImages.slice(maxImages);
             _gen.generatedImages = _gen.generatedImages.slice(0, maxImages);
+            if (window.ImageStateStore) {
+                discarded.forEach((item) => {
+                    if (item.imageRef) window.ImageStateStore.remove(item.imageRef).catch(() => {});
+                });
+            }
         }
-        localStorage.setItem(aiStorageKey('generatedImages'), JSON.stringify(_gen.generatedImages));
+        persistGeneratedImages();
         _gen.renderImages();
         return true;
     }
@@ -210,8 +295,16 @@
         (async function () {
             const ok = await window.TechUI.confirm('确定要删除这张图片吗？', '删除图片', '删除', '取消');
             if (!ok) return;
-            _gen.generatedImages = _gen.generatedImages.filter(function (i) { return i.id !== imageId; });
-            localStorage.setItem(aiStorageKey('generatedImages'), JSON.stringify(_gen.generatedImages));
+            const removed = _gen.generatedImages.find(function (image) {
+                return image.id === imageId;
+            });
+            _gen.generatedImages = _gen.generatedImages.filter(function (i) {
+                return i.id !== imageId;
+            });
+            if (removed?.imageRef && window.ImageStateStore) {
+                window.ImageStateStore.remove(removed.imageRef).catch(() => {});
+            }
+            persistGeneratedImages();
             _gen.renderImages();
         })();
     }
@@ -240,7 +333,9 @@
     }
 
     async function saveToAssetLibrary(imageId) {
-        const image = _gen.generatedImages.find(function (i) { return i.id === imageId; });
+        const image = _gen.generatedImages.find(function (i) {
+            return i.id === imageId;
+        });
         if (!image) {
             themedWarn('未找到要保存的图片');
             return;
@@ -260,7 +355,9 @@
                 body: JSON.stringify(body),
             });
             if (!resp.ok) {
-                const err = await resp.json().catch(function () { return {}; });
+                const err = await resp.json().catch(function () {
+                    return {};
+                });
                 throw new Error(err.error || '保存失败');
             }
             themedSuccess('图片已保存到素材库');
@@ -287,7 +384,12 @@
 
     function saveToCurrentProject(imageOrId, options) {
         options = options || {};
-        const image = typeof imageOrId === 'string' ? _gen.generatedImages.find(function (i) { return i.id === imageOrId; }) : imageOrId;
+        const image =
+            typeof imageOrId === 'string'
+                ? _gen.generatedImages.find(function (i) {
+                      return i.id === imageOrId;
+                  })
+                : imageOrId;
         if (!image) {
             themedWarn('未找到要加入项目的图片');
             return;
@@ -303,7 +405,9 @@
         } catch (_e) {
             projects = [];
         }
-        const idx = projects.findIndex(function (p) { return p.id === context.id; });
+        const idx = projects.findIndex(function (p) {
+            return p.id === context.id;
+        });
         if (idx === -1) {
             themedWarn('当前项目不存在，可能已被删除');
             return;
@@ -322,7 +426,9 @@
             isAIGenerated: true,
             sourceAssetId: image.id,
         };
-        const existingIndex = project.assets.findIndex(function (asset) { return asset && asset.sourceAssetId === image.id; });
+        const existingIndex = project.assets.findIndex(function (asset) {
+            return asset && asset.sourceAssetId === image.id;
+        });
         if (existingIndex >= 0) {
             project.assets[existingIndex] = assetPayload;
         } else {
@@ -356,12 +462,23 @@
         } catch (_) {}
     }
 
+    function readScopedJson(key, fallback) {
+        try {
+            const raw = localStorage.getItem(aiStorageKey(key));
+            return raw ? JSON.parse(raw) : fallback;
+        } catch (_) {
+            return fallback;
+        }
+    }
+
     // Export to window
     window.ImageStorage = {
         init: init,
+        readScopedJson: readScopedJson,
         writeScopedJson: writeScopedJson,
         getGeneratorUiStateKey: getGeneratorUiStateKey,
         pruneGeneratedImages: pruneGeneratedImages,
+        hydrateGeneratedImages: hydrateGeneratedImages,
         persistGeneratorUiState: persistGeneratorUiState,
         restoreGeneratorUiState: restoreGeneratorUiState,
         saveImage: saveImage,

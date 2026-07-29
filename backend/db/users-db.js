@@ -191,7 +191,10 @@ function init() {
     `);
 
     // Migration: add role column to users if missing
-    const userCols = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
+    const userCols = db
+        .prepare('PRAGMA table_info(users)')
+        .all()
+        .map((c) => c.name);
     if (!userCols.includes('role')) {
         db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'");
         logger.info('[users-db] 已添加 role 列到 users 表');
@@ -358,10 +361,18 @@ function getUserApiCredentialStatus(userId) {
 function getAllUsers(limit, offset) {
     const lim = Math.min(500, Math.max(1, Number(limit) || 100));
     const off = Math.max(0, Number(offset) || 0);
-    const rows = db.prepare('SELECT id, username, email, role, profile_json, created_at FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?').all(lim, off);
+    const rows = db
+        .prepare(
+            'SELECT id, username, email, role, profile_json, created_at FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?'
+        )
+        .all(lim, off);
     return rows.map((row) => {
         let profile = {};
-        try { profile = JSON.parse(row.profile_json || '{}'); } catch (_) { /* profile_json 损坏时降级为空对象 */ }
+        try {
+            profile = JSON.parse(row.profile_json || '{}');
+        } catch (_) {
+            /* profile_json 损坏时降级为空对象 */
+        }
         return {
             id: row.id,
             username: row.username,
@@ -383,29 +394,38 @@ function getAllUsersCount() {
 
 function createProject(userId, name, description, type) {
     const now = new Date().toISOString();
-    const info = db.prepare(
-        'INSERT INTO projects (user_id, name, description, type, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run(Number(userId), name, description || '', type || 'other', now, now);
+    const info = db
+        .prepare(
+            'INSERT INTO projects (user_id, name, description, type, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
+        )
+        .run(Number(userId), name, description || '', type || 'other', now, now);
     const projectId = Number(info.lastInsertRowid);
     // 记录版本历史
-    db.prepare(
-        'INSERT INTO version_history (project_id, version, description, created_at) VALUES (?, 1, ?, ?)'
-    ).run(projectId, '项目创建', now);
+    db.prepare('INSERT INTO version_history (project_id, version, description, created_at) VALUES (?, 1, ?, ?)').run(
+        projectId,
+        '项目创建',
+        now
+    );
     return getProject(projectId);
 }
 
 function getProject(projectId) {
     const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(Number(projectId));
     if (!project) return null;
-    project.assets = db.prepare('SELECT * FROM project_assets WHERE project_id = ? ORDER BY created_at DESC LIMIT 200').all(project.id);
-    project.versionHistory = db.prepare('SELECT * FROM version_history WHERE project_id = ? ORDER BY created_at DESC LIMIT 50').all(project.id);
+    project.assets = db
+        .prepare('SELECT * FROM project_assets WHERE project_id = ? ORDER BY created_at DESC LIMIT 200')
+        .all(project.id);
+    project.versionHistory = db
+        .prepare('SELECT * FROM version_history WHERE project_id = ? ORDER BY created_at DESC LIMIT 50')
+        .all(project.id);
     return project;
 }
 
 function getUserProjects(userId, limit, offset) {
     let projects;
     if (limit !== undefined && offset !== undefined) {
-        projects = db.prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?')
+        projects = db
+            .prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC LIMIT ? OFFSET ?')
             .all(Number(userId), Number(limit), Number(offset));
     } else {
         projects = db.prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC').all(Number(userId));
@@ -414,12 +434,22 @@ function getUserProjects(userId, limit, offset) {
     // 批量查询 assets 和 version_history，避免 N+1
     const ids = projects.map((p) => p.id);
     const placeholders = ids.map(() => '?').join(',');
-    const allAssets = db.prepare(`SELECT * FROM project_assets WHERE project_id IN (${placeholders}) ORDER BY created_at DESC`).all(...ids);
-    const allHistory = db.prepare(`SELECT * FROM version_history WHERE project_id IN (${placeholders}) ORDER BY created_at DESC`).all(...ids);
+    const allAssets = db
+        .prepare(`SELECT * FROM project_assets WHERE project_id IN (${placeholders}) ORDER BY created_at DESC`)
+        .all(...ids);
+    const allHistory = db
+        .prepare(`SELECT * FROM version_history WHERE project_id IN (${placeholders}) ORDER BY created_at DESC`)
+        .all(...ids);
     const assetsMap = new Map();
-    allAssets.forEach((a) => { if (!assetsMap.has(a.project_id)) assetsMap.set(a.project_id, []); assetsMap.get(a.project_id).push(a); });
+    allAssets.forEach((a) => {
+        if (!assetsMap.has(a.project_id)) assetsMap.set(a.project_id, []);
+        assetsMap.get(a.project_id).push(a);
+    });
     const historyMap = new Map();
-    allHistory.forEach((h) => { if (!historyMap.has(h.project_id)) historyMap.set(h.project_id, []); historyMap.get(h.project_id).push(h); });
+    allHistory.forEach((h) => {
+        if (!historyMap.has(h.project_id)) historyMap.set(h.project_id, []);
+        historyMap.get(h.project_id).push(h);
+    });
     return projects.map((p) => {
         p.assets = assetsMap.get(p.id) || [];
         p.versionHistory = historyMap.get(p.id) || [];
@@ -434,12 +464,12 @@ function getProjectCount(userId) {
 
 function updateProject(projectId, userId, updates) {
     const now = new Date().toISOString();
-    const project = db.prepare('SELECT * FROM projects WHERE id = ? AND user_id = ?').get(Number(projectId), Number(userId));
+    const project = db
+        .prepare('SELECT * FROM projects WHERE id = ? AND user_id = ?')
+        .get(Number(projectId), Number(userId));
     if (!project) return null;
     const newVersion = (project.version || 1) + 1;
-    db.prepare(
-        'UPDATE projects SET name = ?, description = ?, type = ?, version = ?, updated_at = ? WHERE id = ?'
-    ).run(
+    db.prepare('UPDATE projects SET name = ?, description = ?, type = ?, version = ?, updated_at = ? WHERE id = ?').run(
         updates.name || project.name,
         updates.description !== undefined ? updates.description : project.description,
         updates.type || project.type,
@@ -447,9 +477,12 @@ function updateProject(projectId, userId, updates) {
         now,
         Number(projectId)
     );
-    db.prepare(
-        'INSERT INTO version_history (project_id, version, description, created_at) VALUES (?, ?, ?, ?)'
-    ).run(Number(projectId), newVersion, updates.versionDesc || '项目更新', now);
+    db.prepare('INSERT INTO version_history (project_id, version, description, created_at) VALUES (?, ?, ?, ?)').run(
+        Number(projectId),
+        newVersion,
+        updates.versionDesc || '项目更新',
+        now
+    );
     return getProject(projectId);
 }
 
@@ -461,9 +494,11 @@ function deleteProject(projectId, userId) {
 
 function addProjectAsset(projectId, userId, name, type, content) {
     const now = new Date().toISOString();
-    const info = db.prepare(
-        'INSERT INTO project_assets (project_id, user_id, name, type, content, created_at) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run(Number(projectId), Number(userId), name, type || 'image', content, now);
+    const info = db
+        .prepare(
+            'INSERT INTO project_assets (project_id, user_id, name, type, content, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+        )
+        .run(Number(projectId), Number(userId), name, type || 'image', content, now);
     return { id: Number(info.lastInsertRowid), project_id: projectId, name, type, content, created_at: now };
 }
 
@@ -475,7 +510,8 @@ function deleteProjectAsset(assetId, userId) {
 
 function getAssetLibrary(userId, limit, offset) {
     if (limit !== undefined && offset !== undefined) {
-        return db.prepare('SELECT * FROM asset_library WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?')
+        return db
+            .prepare('SELECT * FROM asset_library WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?')
             .all(Number(userId), Number(limit), Number(offset));
     }
     return db.prepare('SELECT * FROM asset_library WHERE user_id = ? ORDER BY created_at DESC').all(Number(userId));
@@ -489,27 +525,34 @@ function getAssetLibraryCount(userId) {
 function addAssetLibraryItem(userId, item) {
     const now = new Date().toISOString();
     const tags = item.tags ? (typeof item.tags === 'string' ? item.tags : JSON.stringify(item.tags)) : '[]';
-    const info = db.prepare(
-        'INSERT INTO asset_library (user_id, name, type, content, desc, source, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-    ).run(
-        Number(userId),
-        item.name || '',
-        item.type || 'image',
-        item.content || '',
-        item.desc || '',
-        item.source || '',
-        tags,
-        now
-    );
+    const info = db
+        .prepare(
+            'INSERT INTO asset_library (user_id, name, type, content, desc, source, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        )
+        .run(
+            Number(userId),
+            item.name || '',
+            item.type || 'image',
+            item.content || '',
+            item.desc || '',
+            item.source || '',
+            tags,
+            now
+        );
     return { id: Number(info.lastInsertRowid), user_id: userId, ...item, tags, created_at: now };
 }
 
 function updateAssetLibraryItem(userId, itemId, updates) {
-    const existing = db.prepare('SELECT * FROM asset_library WHERE id = ? AND user_id = ?').get(Number(itemId), Number(userId));
+    const existing = db
+        .prepare('SELECT * FROM asset_library WHERE id = ? AND user_id = ?')
+        .get(Number(itemId), Number(userId));
     if (!existing) return null;
-    const tags = updates.tags !== undefined
-        ? (typeof updates.tags === 'string' ? updates.tags : JSON.stringify(updates.tags))
-        : existing.tags;
+    const tags =
+        updates.tags !== undefined
+            ? typeof updates.tags === 'string'
+                ? updates.tags
+                : JSON.stringify(updates.tags)
+            : existing.tags;
     db.prepare(
         'UPDATE asset_library SET name = ?, type = ?, content = ?, desc = ?, source = ?, tags = ? WHERE id = ? AND user_id = ?'
     ).run(
@@ -537,49 +580,57 @@ function logApiCall(userId, provider, operation, status, durationMs) {
 }
 
 function getUserUsageStats(userId) {
-    return db.prepare(
-        `SELECT provider, operation, status, COUNT(*) AS count, SUM(duration_ms) AS total_ms
+    return db
+        .prepare(
+            `SELECT provider, operation, status, COUNT(*) AS count, SUM(duration_ms) AS total_ms
          FROM usage_logs WHERE user_id = ?
          GROUP BY provider, operation, status`
-    ).all(Number(userId));
+        )
+        .all(Number(userId));
 }
 
 function getUserUsageToday(userId) {
     const today = new Date().toISOString().split('T')[0];
-    return db.prepare(
-        `SELECT provider, COUNT(*) AS count
+    return db
+        .prepare(
+            `SELECT provider, COUNT(*) AS count
          FROM usage_logs WHERE user_id = ? AND created_at >= ?
          GROUP BY provider`
-    ).all(Number(userId), today + 'T00:00:00.000Z');
+        )
+        .all(Number(userId), today + 'T00:00:00.000Z');
 }
 
 function getGlobalUsageStats(limit, offset) {
     const lim = Math.min(1000, Math.max(1, Number(limit) || 200));
     const off = Math.max(0, Number(offset) || 0);
-    return db.prepare(
-        `SELECT u.username, ul.provider, ul.operation, ul.status, COUNT(*) AS count
+    return db
+        .prepare(
+            `SELECT u.username, ul.provider, ul.operation, ul.status, COUNT(*) AS count
          FROM usage_logs ul
          JOIN users u ON u.id = ul.user_id
          GROUP BY ul.user_id, ul.provider, ul.operation, ul.status
          ORDER BY count DESC
          LIMIT ? OFFSET ?`
-    ).all(lim, off);
+        )
+        .all(lim, off);
 }
 
 function getGlobalUsageStatsCount() {
-    const row = db.prepare(
-        'SELECT COUNT(DISTINCT user_id || provider || operation || status) AS count FROM usage_logs'
-    ).get();
+    const row = db
+        .prepare('SELECT COUNT(DISTINCT user_id || provider || operation || status) AS count FROM usage_logs')
+        .get();
     return row ? row.count : 0;
 }
 
 function getGlobalUsageSummary() {
     const total = db.prepare('SELECT COUNT(*) AS c FROM usage_logs').get();
     const today = new Date().toISOString().split('T')[0];
-    const todayCount = db.prepare('SELECT COUNT(*) AS c FROM usage_logs WHERE created_at >= ?').get(today + 'T00:00:00.000Z');
-    const byProvider = db.prepare(
-        `SELECT provider, COUNT(*) AS count FROM usage_logs GROUP BY provider ORDER BY count DESC`
-    ).all();
+    const todayCount = db
+        .prepare('SELECT COUNT(*) AS c FROM usage_logs WHERE created_at >= ?')
+        .get(today + 'T00:00:00.000Z');
+    const byProvider = db
+        .prepare(`SELECT provider, COUNT(*) AS count FROM usage_logs GROUP BY provider ORDER BY count DESC`)
+        .all();
     return { total: total.c, today: todayCount.c, byProvider };
 }
 
@@ -590,15 +641,22 @@ function addActivity(userId, action, targetType, targetId, details) {
     db.prepare(
         `INSERT INTO activity_log (user_id, action, target_type, target_id, details, created_at)
          VALUES (?, ?, ?, ?, ?, ?)`
-    ).run(Number(userId), action, targetType || null, targetId !== null ? String(targetId) : null, details || null, now);
+    ).run(
+        Number(userId),
+        action,
+        targetType || null,
+        targetId !== null ? String(targetId) : null,
+        details || null,
+        now
+    );
 }
 
 function getActivityLog(userId, limit, offset) {
     const lim = Math.min(100, Math.max(1, Number(limit) || 20));
     const off = Math.max(0, Number(offset) || 0);
-    return db.prepare(
-        `SELECT * FROM activity_log WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`
-    ).all(Number(userId), lim, off);
+    return db
+        .prepare(`SELECT * FROM activity_log WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`)
+        .all(Number(userId), lim, off);
 }
 
 function getActivityLogCount(userId) {
@@ -606,13 +664,16 @@ function getActivityLogCount(userId) {
     return row ? row.count : 0;
 }
 
-function getRecentActivity(limit) {
+function getRecentActivity(limit, offset) {
     const lim = Math.min(200, Math.max(1, Number(limit) || 50));
-    return db.prepare(
-        `SELECT al.*, u.username FROM activity_log al
+    const off = Math.max(0, Number(offset) || 0);
+    return db
+        .prepare(
+            `SELECT al.*, u.username FROM activity_log al
          JOIN users u ON u.id = al.user_id
-         ORDER BY al.created_at DESC LIMIT ?`
-    ).all(lim);
+         ORDER BY al.created_at DESC LIMIT ? OFFSET ?`
+        )
+        .all(lim, off);
 }
 
 function getRecentActivityCount() {
@@ -674,7 +735,10 @@ function checkQuota(userId, provider) {
 function close() {
     if (db) {
         try {
-            if (_checkpointTimer) { clearInterval(_checkpointTimer); _checkpointTimer = null; }
+            if (_checkpointTimer) {
+                clearInterval(_checkpointTimer);
+                _checkpointTimer = null;
+            }
             checkpointWal();
             db.close();
         } catch (_e) {

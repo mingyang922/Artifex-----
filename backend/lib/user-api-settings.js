@@ -14,7 +14,9 @@ function createUserApiSettingsHelpers(usersDb) {
         if (!payload || typeof payload !== 'object') return null;
 
         function trimLimit(val) {
-            return String(val || '').trim().slice(0, MAX_FIELD_LEN);
+            return String(val || '')
+                .trim()
+                .slice(0, MAX_FIELD_LEN);
         }
 
         function isPrivateOrReservedHost(hostname) {
@@ -24,7 +26,7 @@ function createUserApiSettingsHelpers(usersDb) {
             if (lower === 'localhost' || lower === '[::1]' || lower.endsWith('.local')) return true;
             // IPv4 private ranges
             const parts = lower.split('.').map(Number);
-            if (parts.length === 4 && parts.every(n => !isNaN(n) && n >= 0 && n <= 255)) {
+            if (parts.length === 4 && parts.every((n) => !isNaN(n) && n >= 0 && n <= 255)) {
                 if (parts[0] === 10) return true;
                 if (parts[0] === 127) return true;
                 if (parts[0] === 169 && parts[1] === 254) return true;

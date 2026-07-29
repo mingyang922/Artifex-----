@@ -7,20 +7,26 @@
     'use strict';
 
     let _gen = null;
+    const STYLE_PRESETS_KEY = 'style_presets_v1';
 
     function init(gen) {
         _gen = gen;
     }
 
     function getStylePresetsList() {
-        return readScopedJson(STYLE_PRESETS_KEY, []);
+        if (window.ImageStorage && window.ImageStorage.readScopedJson) {
+            return window.ImageStorage.readScopedJson(STYLE_PRESETS_KEY, []);
+        }
+        return [];
     }
 
     function saveStylePresetsList(list) {
         if (window.ImageStorage && window.ImageStorage.writeScopedJson) {
             window.ImageStorage.writeScopedJson(STYLE_PRESETS_KEY, list);
         } else {
-            try { localStorage.setItem(aiStorageKey(STYLE_PRESETS_KEY), JSON.stringify(list)); } catch (_) {}
+            try {
+                localStorage.setItem(aiStorageKey(STYLE_PRESETS_KEY), JSON.stringify(list));
+            } catch (_) {}
         }
         try {
             window.dispatchEvent(new CustomEvent('stylePresetsChanged', { bubbles: true }));
@@ -42,7 +48,12 @@
             opt.textContent = (p.name || '未命名') + refMark;
             sel.appendChild(opt);
         });
-        if (cur && list.some(function (x) { return String(x.id) === cur; })) {
+        if (
+            cur &&
+            list.some(function (x) {
+                return String(x.id) === cur;
+            })
+        ) {
             sel.value = cur;
         } else {
             sel.value = '';
@@ -61,7 +72,9 @@
         const id = sel && sel.value ? String(sel.value) : '';
         const sn = (ta && ta.value.trim()) || '';
         if (id) {
-            const pr = getStylePresetsList().find(function (x) { return String(x.id) === id; });
+            const pr = getStylePresetsList().find(function (x) {
+                return String(x.id) === id;
+            });
             const name = (pr && pr.name) || '未命名';
             statusEl.textContent = sn ? '使用预设：' + name + '（片段可编辑）' : '使用预设：' + name;
             return;
@@ -87,7 +100,9 @@
         refreshStylePresetSelect();
 
         if (pickBtn && fileInp) {
-            pickBtn.addEventListener('click', function () { fileInp.click(); });
+            pickBtn.addEventListener('click', function () {
+                fileInp.click();
+            });
         }
         if (fileInp) {
             fileInp.addEventListener('change', function (e) {
@@ -107,7 +122,9 @@
         }
 
         if (extractBtn) {
-            extractBtn.addEventListener('click', function () { extractStyleFromReference(); });
+            extractBtn.addEventListener('click', function () {
+                extractStyleFromReference();
+            });
         }
 
         if (sel && ta) {
@@ -117,11 +134,15 @@
                     updateStylePresetStripStatus();
                     return;
                 }
-                const p = getStylePresetsList().find(function (x) { return String(x.id) === String(id); });
+                const p = getStylePresetsList().find(function (x) {
+                    return String(x.id) === String(id);
+                });
                 if (p && p.styleText) ta.value = p.styleText;
                 updateStylePresetStripStatus();
             });
-            ta.addEventListener('input', function () { updateStylePresetStripStatus(); });
+            ta.addEventListener('input', function () {
+                updateStylePresetStripStatus();
+            });
         }
 
         if (saveBtn) {
@@ -167,7 +188,9 @@
                 }
                 const ok = await window.TechUI.confirm('确定删除该风格预设？', '删除预设', '删除', '取消');
                 if (!ok) return;
-                const next = getStylePresetsList().filter(function (x) { return String(x.id) !== String(id); });
+                const next = getStylePresetsList().filter(function (x) {
+                    return String(x.id) !== String(id);
+                });
                 saveStylePresetsList(next);
                 refreshStylePresetSelect('');
                 if (ta) ta.value = '';
@@ -182,9 +205,7 @@
             return;
         }
         const styleVlModelSelect = document.getElementById('styleVlModelSelect');
-        const vlModel =
-            (styleVlModelSelect && styleVlModelSelect.value) ||
-            'qwen-vl-plus';
+        const vlModel = (styleVlModelSelect && styleVlModelSelect.value) || 'qwen-vl-plus';
         if (!_gen._styleRefRawDataUrl) {
             themedWarn('请先选择参考图');
             return;

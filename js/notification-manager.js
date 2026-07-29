@@ -4,7 +4,17 @@
  * 版本: 1.3.3 */
 'use strict';
 /** 转义 HTML 特殊字符，防止 XSS — 委托给 html-utils.js 全局函数 */
-const escapeManagerHtml = (typeof escapeHtml === 'function') ? escapeHtml : function(s) { if (s == null) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+const escapeManagerHtml =
+    typeof escapeHtml === 'function'
+        ? escapeHtml
+        : function (s) {
+              if (s === null || s === undefined) return '';
+              return String(s)
+                  .replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;');
+          };
 
 /**
  * NotificationManager类 - 统一管理所有页面的消息通知显示和更新
@@ -269,7 +279,6 @@ class NotificationManager {
                     detail: { action: 'markAsRead', id: id },
                 })
             );
-
         }
     }
 
@@ -310,7 +319,6 @@ class NotificationManager {
                     detail: { action: 'markAsRead', notificationId: notificationId },
                 })
             );
-
         }
     }
 

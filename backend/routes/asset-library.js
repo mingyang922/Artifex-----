@@ -5,6 +5,8 @@
 'use strict';
 
 const { Router } = require('express');
+const logger = require('../lib/logger');
+const { sendError, ERR } = require('../lib/error-response');
 
 /**
  * @param {object} deps
@@ -31,25 +33,29 @@ function createAssetLibraryRouter(deps) {
     router.post('/asset-library', requireAuth, csrfProtection, (req, res) => {
         const { name, type, content, desc, source, tags } = req.body || {};
         if (!name || !content) {
-            return res.status(400).json({ error: '素材名称和内容不能为空' });
+            return sendError(res, 400, ERR.VALIDATION, '素材名称和内容不能为空');
         }
         const MAX_ASSET_SIZE = 10 * 1024 * 1024;
         if (typeof content === 'string' && content.length > MAX_ASSET_SIZE) {
-            return res.status(413).json({ error: '素材内容过大，最大允许 10MB' });
+            return sendError(res, 413, ERR.VALIDATION, '素材内容过大，最大允许 10MB');
         }
         const item = usersDb.addAssetLibraryItem(req.currentUser.id, { name, type, content, desc, source, tags });
-        try { usersDb.addActivity(req.currentUser.id, '保存素材', 'asset', item.id, name); } catch (_) { /* 活动日志非关键 */ }
+        try {
+            usersDb.addActivity(req.currentUser.id, '保存素材', 'asset', item.id, name);
+        } catch (_) {
+            /* 活动日志非关键 */
+        }
         res.json({ ok: true, item });
     });
 
     // 更新素材
     router.put('/asset-library/:id', requireAuth, csrfProtection, (req, res) => {
         const assetId = Number(req.params.id);
-        if (!assetId || isNaN(assetId)) return res.status(400).json({ error: '无效的素材 ID' });
+        if (!assetId || isNaN(assetId)) return sendError(res, 400, ERR.VALIDATION, '无效的素材 ID');
         const updates = req.body || {};
         const item = usersDb.updateAssetLibraryItem(req.currentUser.id, assetId, updates);
         if (!item) {
-            return res.status(404).json({ error: '素材不存在' });
+            return sendError(res, 404, ERR.NOT_FOUND, '素材不存在');
         }
         res.json({ ok: true, item });
     });
@@ -57,9 +63,17 @@ function createAssetLibraryRouter(deps) {
     // 删除素材
     router.delete('/asset-library/:id', requireAuth, csrfProtection, (req, res) => {
         const assetId = Number(req.params.id);
-        if (!assetId || isNaN(assetId)) return res.status(400).json({ error: '无效的素材 ID' });
+        if (!assetId || isNaN(assetId)) return sendError(res, 400, ERR.VALIDATION, '无效的素材 ID');
         usersDb.deleteAssetLibraryItem(req.currentUser.id, assetId);
         res.json({ ok: true });
+    });
+
+    // ── 全局错误处理 ──
+    router.use((err, req, res, _next) => {
+        logger.error('[asset-library] 未处理的路由错误:', err);
+        if (!res.headersSent) {
+            sendError(res, 500, ERR.INTERNAL, '服务器内部错误');
+        }
     });
 
     return router;

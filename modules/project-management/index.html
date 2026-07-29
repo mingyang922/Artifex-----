@@ -3,17 +3,13 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>项目管理 - Artifex</title>
-        <link rel="manifest" href="../../manifest.json">
-        <meta name="theme-color" content="#00f0ff">
-        <link
-            href="../../vendor/css/google-fonts.css"
-            rel="stylesheet"
-        />
+        <title data-i18n="pm.pageTitle">项目管理 - Artifex</title>
+        <link rel="manifest" href="../../manifest.json" />
+        <meta name="theme-color" content="#00f0ff" />
+        <script src="../../js/theme-bootstrap.js"></script>
+        <link href="../../vendor/css/google-fonts.css" rel="stylesheet" />
         <link rel="stylesheet" href="./style.css" />
         <link rel="stylesheet" href="../../styles/ui-kit.css" />
-        <link rel="stylesheet" href="../../styles/region-themes.css" />
-        <link rel="stylesheet" href="../../styles/theme-japan.css" />
         <link rel="stylesheet" href="../../vendor/css/font-awesome.min.css" />
         <style>
             :root {
@@ -581,7 +577,7 @@
                 }
             }
 
-            input[type="checkbox"] {
+            input[type='checkbox'] {
                 appearance: none;
                 -webkit-appearance: none;
                 width: 18px;
@@ -593,11 +589,11 @@
                 transition: all 0.2s ease;
                 position: relative;
             }
-            input[type="checkbox"]:checked {
+            input[type='checkbox']:checked {
                 border-color: #00f0ff;
                 background: rgba(0, 240, 255, 0.15);
             }
-            input[type="checkbox"]:checked::after {
+            input[type='checkbox']:checked::after {
                 content: '✓';
                 position: absolute;
                 top: 50%;
@@ -607,7 +603,7 @@
                 font-size: 12px;
                 font-weight: bold;
             }
-            input[type="checkbox"]:focus-visible {
+            input[type='checkbox']:focus-visible {
                 box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.4);
             }
             .notification-btn:hover {
@@ -632,6 +628,8 @@
             }
         </style>
         <link rel="stylesheet" href="../../styles/app-shell.css" />
+        <link rel="stylesheet" href="../../styles/region-themes.css" />
+        <link rel="stylesheet" href="../../styles/productivity.css" />
     </head>
     <body class="app-shell" data-app-page="project-management">
         <div class="pointer-glow" aria-hidden="true"></div>
@@ -689,10 +687,16 @@
                 <div class="top-bar">
                     <div class="search-bar">
                         <i class="fas fa-search" aria-hidden="true"></i>
-                        <input type="text" placeholder="搜索项目、资产或文档..." aria-label="搜索" />
+                        <input
+                            type="text"
+                            placeholder="搜索项目、资产或文档..."
+                            data-i18n="dashboard.searchPlaceholder"
+                            data-i18n-aria="common.search"
+                            aria-label="搜索"
+                        />
                     </div>
                     <div class="user-menu">
-                        <button class="notification-btn" aria-label="通知">
+                        <button class="notification-btn" data-i18n-aria="misc.notifications" aria-label="通知">
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge">3</span>
                         </button>
@@ -706,105 +710,252 @@
                 <div class="project-management-module scroll-section">
                     <!-- 顶部操作区 -->
                     <div class="module-header">
-                        <h2 class="module-title">项目管理</h2>
+                        <h2 class="module-title" data-i18n="pm.title">项目管理</h2>
                         <div class="header-actions">
-                            <button
-                                id="sketch-to-asset-btn"
-                                class="secondary-btn"
-                            >
-                                <i class="fas fa-pencil-alt"></i> 从线稿生成
+                            <button id="sketch-to-asset-btn" class="secondary-btn">
+                                <i class="fas fa-pencil-alt"></i> <span data-i18n="pm.sketchToAsset">从线稿生成</span>
                             </button>
-                            <button
-                                id="desc-to-asset-btn"
-                                class="secondary-btn"
-                            >
-                                <i class="fas fa-file-alt"></i> 从描述生成
+                            <button id="desc-to-asset-btn" class="secondary-btn">
+                                <i class="fas fa-file-alt"></i> <span data-i18n="pm.descToAsset">从描述生成</span>
                             </button>
-                            <button
-                                id="create-project-btn"
-                                class="primary-btn"
-                            >
-                                + 新建项目
+                            <button id="create-project-btn" class="primary-btn">
+                                + <span data-i18n="pm.newProject">新建项目</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- 项目创建表单（默认隐藏，点击"新建项目"显示） -->
                     <div id="create-project-form" class="project-form hidden">
-                        <h3>创建新项目</h3>
+                        <h3 data-i18n="pm.createProject">创建新项目</h3>
                         <!-- 项目模板选择 -->
-                        <div id="projectTemplates" style="margin-bottom:18px;">
-                            <label style="display:block;margin-bottom:10px;color:rgba(0,240,255,0.88);font-family:Orbitron,sans-serif;font-weight:700;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;">快速模板</label>
-                            <div id="templateCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
-                                <div class="template-card" data-tpl="blank" style="background:rgba(0,240,255,0.08);border:1px solid rgba(0,240,255,0.35);border-radius:8px;padding:14px;cursor:pointer;text-align:center;transition:all 0.2s;">
-                                    <i class="fas fa-plus-circle" style="font-size:22px;color:#00f0ff;margin-bottom:6px;display:block;"></i>
-                                    <div style="font-weight:600;color:#e0faff;font-size:13px;">空白项目</div>
-                                    <div style="font-size:11px;color:#8090a8;margin-top:4px;">从零开始</div>
+                        <div id="projectTemplates" style="margin-bottom: 18px">
+                            <label
+                                style="
+                                    display: block;
+                                    margin-bottom: 10px;
+                                    color: rgba(0, 240, 255, 0.88);
+                                    font-family: Orbitron, sans-serif;
+                                    font-weight: 700;
+                                    font-size: 12px;
+                                    letter-spacing: 0.1em;
+                                    text-transform: uppercase;
+                                "
+                                data-i18n="pm.quickTemplates"
+                                >快速模板</label
+                            >
+                            <div
+                                id="templateCards"
+                                style="
+                                    display: grid;
+                                    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                                    gap: 10px;
+                                "
+                            >
+                                <div
+                                    class="template-card"
+                                    data-tpl="blank"
+                                    style="
+                                        background: rgba(0, 240, 255, 0.08);
+                                        border: 1px solid rgba(0, 240, 255, 0.35);
+                                        border-radius: 8px;
+                                        padding: 14px;
+                                        cursor: pointer;
+                                        text-align: center;
+                                        transition: all 0.2s;
+                                    "
+                                >
+                                    <i
+                                        class="fas fa-plus-circle"
+                                        style="font-size: 22px; color: #00f0ff; margin-bottom: 6px; display: block"
+                                    ></i>
+                                    <div
+                                        style="font-weight: 600; color: #e0faff; font-size: 13px"
+                                        data-i18n="pm.blankProject"
+                                    >
+                                        空白项目
+                                    </div>
+                                    <div
+                                        style="font-size: 11px; color: #8090a8; margin-top: 4px"
+                                        data-i18n="pm.fromScratch"
+                                    >
+                                        从零开始
+                                    </div>
                                 </div>
-                                <div class="template-card" data-tpl="rpg" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;cursor:pointer;text-align:center;transition:all 0.2s;">
-                                    <i class="fas fa-dragon" style="font-size:22px;color:#a78bfa;margin-bottom:6px;display:block;"></i>
-                                    <div style="font-weight:600;color:#e0faff;font-size:13px;">RPG 游戏</div>
-                                    <div style="font-size:11px;color:#8090a8;margin-top:4px;">角色 / 地图 / UI / 道具</div>
+                                <div
+                                    class="template-card"
+                                    data-tpl="rpg"
+                                    style="
+                                        background: rgba(255, 255, 255, 0.03);
+                                        border: 1px solid rgba(255, 255, 255, 0.08);
+                                        border-radius: 8px;
+                                        padding: 14px;
+                                        cursor: pointer;
+                                        text-align: center;
+                                        transition: all 0.2s;
+                                    "
+                                >
+                                    <i
+                                        class="fas fa-dragon"
+                                        style="font-size: 22px; color: #a78bfa; margin-bottom: 6px; display: block"
+                                    ></i>
+                                    <div
+                                        style="font-weight: 600; color: #e0faff; font-size: 13px"
+                                        data-i18n="pm.tplRpg"
+                                    >
+                                        RPG 游戏
+                                    </div>
+                                    <div
+                                        style="font-size: 11px; color: #8090a8; margin-top: 4px"
+                                        data-i18n="pm.tplRpgDesc"
+                                    >
+                                        角色 / 地图 / UI / 道具
+                                    </div>
                                 </div>
-                                <div class="template-card" data-tpl="platformer" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;cursor:pointer;text-align:center;transition:all 0.2s;">
-                                    <i class="fas fa-running" style="font-size:22px;color:#4ade80;margin-bottom:6px;display:block;"></i>
-                                    <div style="font-weight:600;color:#e0faff;font-size:13px;">平台跳跃</div>
-                                    <div style="font-size:11px;color:#8090a8;margin-top:4px;">角色 / 背景 / 平台 / 道具</div>
+                                <div
+                                    class="template-card"
+                                    data-tpl="platformer"
+                                    style="
+                                        background: rgba(255, 255, 255, 0.03);
+                                        border: 1px solid rgba(255, 255, 255, 0.08);
+                                        border-radius: 8px;
+                                        padding: 14px;
+                                        cursor: pointer;
+                                        text-align: center;
+                                        transition: all 0.2s;
+                                    "
+                                >
+                                    <i
+                                        class="fas fa-running"
+                                        style="font-size: 22px; color: #4ade80; margin-bottom: 6px; display: block"
+                                    ></i>
+                                    <div
+                                        style="font-weight: 600; color: #e0faff; font-size: 13px"
+                                        data-i18n="pm.tplPlatformer"
+                                    >
+                                        平台跳跃
+                                    </div>
+                                    <div
+                                        style="font-size: 11px; color: #8090a8; margin-top: 4px"
+                                        data-i18n="pm.tplPlatformerDesc"
+                                    >
+                                        角色 / 背景 / 平台 / 道具
+                                    </div>
                                 </div>
-                                <div class="template-card" data-tpl="puzzle" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;cursor:pointer;text-align:center;transition:all 0.2s;">
-                                    <i class="fas fa-puzzle-piece" style="font-size:22px;color:#f59e0b;margin-bottom:6px;display:block;"></i>
-                                    <div style="font-weight:600;color:#e0faff;font-size:13px;">消除游戏</div>
-                                    <div style="font-size:11px;color:#8090a8;margin-top:4px;">宝石 / 特效 / UI / 背景</div>
+                                <div
+                                    class="template-card"
+                                    data-tpl="puzzle"
+                                    style="
+                                        background: rgba(255, 255, 255, 0.03);
+                                        border: 1px solid rgba(255, 255, 255, 0.08);
+                                        border-radius: 8px;
+                                        padding: 14px;
+                                        cursor: pointer;
+                                        text-align: center;
+                                        transition: all 0.2s;
+                                    "
+                                >
+                                    <i
+                                        class="fas fa-puzzle-piece"
+                                        style="font-size: 22px; color: #f59e0b; margin-bottom: 6px; display: block"
+                                    ></i>
+                                    <div
+                                        style="font-weight: 600; color: #e0faff; font-size: 13px"
+                                        data-i18n="pm.tplPuzzle"
+                                    >
+                                        消除游戏
+                                    </div>
+                                    <div
+                                        style="font-size: 11px; color: #8090a8; margin-top: 4px"
+                                        data-i18n="pm.tplPuzzleDesc"
+                                    >
+                                        宝石 / 特效 / UI / 背景
+                                    </div>
                                 </div>
-                                <div class="template-card" data-tpl="ui-kit" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;cursor:pointer;text-align:center;transition:all 0.2s;">
-                                    <i class="fas fa-layer-group" style="font-size:22px;color:#00f0ff;margin-bottom:6px;display:block;"></i>
-                                    <div style="font-weight:600;color:#e0faff;font-size:13px;">UI 套件</div>
-                                    <div style="font-size:11px;color:#8090a8;margin-top:4px;">按钮 / 血条 / 弹窗 / 图标</div>
+                                <div
+                                    class="template-card"
+                                    data-tpl="ui-kit"
+                                    style="
+                                        background: rgba(255, 255, 255, 0.03);
+                                        border: 1px solid rgba(255, 255, 255, 0.08);
+                                        border-radius: 8px;
+                                        padding: 14px;
+                                        cursor: pointer;
+                                        text-align: center;
+                                        transition: all 0.2s;
+                                    "
+                                >
+                                    <i
+                                        class="fas fa-layer-group"
+                                        style="font-size: 22px; color: #00f0ff; margin-bottom: 6px; display: block"
+                                    ></i>
+                                    <div
+                                        style="font-weight: 600; color: #e0faff; font-size: 13px"
+                                        data-i18n="pm.tplUiKit"
+                                    >
+                                        UI 套件
+                                    </div>
+                                    <div
+                                        style="font-size: 11px; color: #8090a8; margin-top: 4px"
+                                        data-i18n="pm.tplUiKitDesc"
+                                    >
+                                        按钮 / 血条 / 弹窗 / 图标
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>项目名称*</label>
-                            <input type="text" id="project-name" placeholder="输入项目名称" required />
+                            <label data-i18n="pm.projectNameRequired">项目名称*</label>
+                            <input
+                                type="text"
+                                id="project-name"
+                                placeholder="输入项目名称"
+                                data-i18n="pm.namePlaceholder"
+                                required
+                            />
                         </div>
                         <div class="form-group">
-                            <label>项目描述</label>
-                            <textarea id="project-desc" placeholder="简要描述项目用途"></textarea>
+                            <label data-i18n="pm.projectDesc">项目描述</label>
+                            <textarea
+                                id="project-desc"
+                                placeholder="简要描述项目用途"
+                                data-i18n="pm.descPlaceholder"
+                            ></textarea>
                         </div>
                         <div class="form-group">
-                            <label>项目类型</label>
+                            <label data-i18n="pm.projectType">项目类型</label>
                             <select id="project-type">
-                                <option value="ui">UI设计</option>
-                                <option value="game">游戏界面</option>
-                                <option value="character">角色设计</option>
-                                <option value="environment">场景设计</option>
-                                <option value="other">其他</option>
+                                <option value="ui" data-i18n="pm.typeUi">UI设计</option>
+                                <option value="game" data-i18n="pm.typeGame">游戏界面</option>
+                                <option value="character" data-i18n="pm.typeCharacter">角色设计</option>
+                                <option value="environment" data-i18n="pm.typeEnvironment">场景设计</option>
+                                <option value="other" data-i18n="pm.typeOther">其他</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer">
                                 <input type="checkbox" id="open-ai-after-create" checked />
-                                <span>创建后直接进入 AI 生成</span>
+                                <span data-i18n="pm.openAiAfterCreate">创建后直接进入 AI 生成</span>
                             </label>
                         </div>
                         <div class="form-actions">
-                            <button id="cancel-create-btn" class="secondary-btn">取消</button>
-                            <button id="submit-project-btn" class="primary-btn">创建</button>
+                            <button id="cancel-create-btn" class="secondary-btn" data-i18n="common.cancel">取消</button>
+                            <button id="submit-project-btn" class="primary-btn" data-i18n="common.create">创建</button>
                         </div>
                     </div>
 
                     <!-- 项目列表区 -->
                     <div class="project-list-section">
-                        <h3>我的项目</h3>
+                        <h3 data-i18n="pm.myProjects">我的项目</h3>
                         <div
                             id="project-empty-state"
                             class="empty-state"
                             role="button"
                             tabindex="0"
+                            data-i18n-aria="pm.openCreateAria"
                             aria-label="点击打开新建项目表单"
                         >
                             <i class="fas fa-folder-open"></i>
-                            <p>暂无项目，点击"新建项目"开始创建</p>
+                            <p data-i18n="pm.emptyStart">暂无项目，点击"新建项目"开始创建</p>
                         </div>
                         <div id="project-list" class="project-list"></div>
                     </div>
@@ -816,34 +967,34 @@
         <div id="edit-project-modal" class="modal hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>编辑项目</h3>
+                    <h3 data-i18n="pm.editProject">编辑项目</h3>
                     <button class="close-modal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="edit-project-id" />
                     <!-- 存储当前编辑项目ID -->
                     <div class="form-group">
-                        <label>项目名称*</label>
+                        <label data-i18n="pm.projectNameRequired">项目名称*</label>
                         <input type="text" id="edit-project-name" required />
                     </div>
                     <div class="form-group">
-                        <label>项目描述</label>
+                        <label data-i18n="pm.projectDesc">项目描述</label>
                         <textarea id="edit-project-desc"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>项目类型</label>
+                        <label data-i18n="pm.projectType">项目类型</label>
                         <select id="edit-project-type">
-                            <option value="ui">UI设计</option>
-                            <option value="game">游戏界面</option>
-                            <option value="character">角色设计</option>
-                            <option value="environment">场景设计</option>
-                            <option value="other">其他</option>
+                            <option value="ui" data-i18n="pm.typeUi">UI设计</option>
+                            <option value="game" data-i18n="pm.typeGame">游戏界面</option>
+                            <option value="character" data-i18n="pm.typeCharacter">角色设计</option>
+                            <option value="environment" data-i18n="pm.typeEnvironment">场景设计</option>
+                            <option value="other" data-i18n="pm.typeOther">其他</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="secondary-btn close-modal">取消</button>
-                    <button id="save-edit-btn" class="primary-btn">保存</button>
+                    <button class="secondary-btn close-modal" data-i18n="common.cancel">取消</button>
+                    <button id="save-edit-btn" class="primary-btn" data-i18n="common.save">保存</button>
                 </div>
             </div>
         </div>
@@ -852,7 +1003,7 @@
         <div id="version-history-modal" class="modal hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>版本历史</h3>
+                    <h3 data-i18n="pm.versionHistory">版本历史</h3>
                     <button class="close-modal">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -869,21 +1020,21 @@
         <div id="share-project-modal" class="modal hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>分享项目</h3>
+                    <h3 data-i18n="pm.shareProject">分享项目</h3>
                     <button class="close-modal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="share-project-id" />
                     <!-- 存储当前项目ID -->
                     <div class="form-group">
-                        <label>分享链接</label>
+                        <label data-i18n="pm.shareLink">分享链接</label>
                         <input type="text" id="share-link" readonly />
                     </div>
-                    <p>复制链接分享给他人，对方可以查看和编辑此项目。</p>
+                    <p data-i18n="pm.shareHelp">复制链接分享给他人，对方可以查看和编辑此项目。</p>
                 </div>
                 <div class="modal-footer">
-                    <button class="secondary-btn close-modal">关闭</button>
-                    <button id="copy-link-btn" class="primary-btn">复制链接</button>
+                    <button class="secondary-btn close-modal" data-i18n="common.close">关闭</button>
+                    <button id="copy-link-btn" class="primary-btn" data-i18n="pm.copyLink">复制链接</button>
                 </div>
             </div>
         </div>
@@ -892,31 +1043,41 @@
         <div id="project-assets-modal" class="modal hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>项目素材管理</h3>
+                    <h3 data-i18n="pm.assetsManagement">项目素材管理</h3>
                     <button class="close-modal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="assets-project-id" />
                     <!-- 存储当前项目ID -->
                     <div class="form-group">
-                        <label>添加素材</label>
+                        <label data-i18n="pm.addAsset">添加素材</label>
                         <div class="add-asset-container">
-                            <input type="text" id="asset-name" placeholder="素材名称" />
+                            <input type="text" id="asset-name" placeholder="素材名称" data-i18n="pm.assetName" />
                             <select id="asset-type">
-                                <option value="image">图片</option>
-                                <option value="icon">图标</option>
-                                <option value="button">按钮</option>
-                                <option value="component">组件</option>
-                                <option value="character">角色</option>
-                                <option value="environment">场景</option>
-                                <option value="prop">道具</option>
+                                <option value="image" data-i18n="pm.assetImage">图片</option>
+                                <option value="icon" data-i18n="pm.assetIcon">图标</option>
+                                <option value="button" data-i18n="pm.assetButton">按钮</option>
+                                <option value="component" data-i18n="pm.assetComponent">组件</option>
+                                <option value="character" data-i18n="pm.assetCharacter">角色</option>
+                                <option value="environment" data-i18n="pm.assetEnvironment">场景</option>
+                                <option value="prop" data-i18n="pm.assetProp">道具</option>
                             </select>
-                            <input type="text" id="asset-url" placeholder="素材URL或内容（可选）" />
+                            <input
+                                type="text"
+                                id="asset-url"
+                                placeholder="素材URL或内容（可选）"
+                                data-i18n="pm.assetContent"
+                            />
                             <div style="display: flex; align-items: center; gap: 8px">
                                 <input type="file" id="asset-file" accept="image/*,.webp,.png,.jpg,.jpeg,.gif" />
-                                <span id="asset-file-name" style="font-size: 12px; color: #b0b0c0">未选择本地文件</span>
+                                <span
+                                    id="asset-file-name"
+                                    style="font-size: 12px; color: #b0b0c0"
+                                    data-i18n="pm.noLocalFile"
+                                    >未选择本地文件</span
+                                >
                             </div>
-                            <button id="add-asset-btn" class="primary-btn">添加</button>
+                            <button id="add-asset-btn" class="primary-btn" data-i18n="pm.add">添加</button>
                         </div>
                     </div>
                     <div id="assets-list" class="assets-list">
@@ -924,7 +1085,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="secondary-btn close-modal">关闭</button>
+                    <button class="secondary-btn close-modal" data-i18n="common.close">关闭</button>
                 </div>
             </div>
         </div>
@@ -933,37 +1094,42 @@
         <div id="sketch-to-asset-modal" class="modal hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>从线稿生成素材</h3>
+                    <h3 data-i18n="pm.sketchTitle">从线稿生成素材</h3>
                     <button class="close-modal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>线稿图片URL*</label>
-                        <input type="text" id="sketch-url" placeholder="输入线稿图片的URL" />
+                        <label data-i18n="pm.sketchUrl">线稿图片URL*</label>
+                        <input
+                            type="text"
+                            id="sketch-url"
+                            placeholder="输入线稿图片的URL"
+                            data-i18n="pm.sketchUrlPlaceholder"
+                        />
                     </div>
                     <div class="form-group">
-                        <label>目标风格</label>
+                        <label data-i18n="pm.targetStyle">目标风格</label>
                         <select id="sketch-style">
-                            <option value="cartoon">卡通风格</option>
-                            <option value="anime">动漫风格</option>
-                            <option value="realistic">写实风格</option>
-                            <option value="pixel">像素风格</option>
-                            <option value="hand-drawn">手绘风格</option>
+                            <option value="cartoon" data-i18n="pm.styleCartoon">卡通风格</option>
+                            <option value="anime" data-i18n="pm.styleAnime">动漫风格</option>
+                            <option value="realistic" data-i18n="pm.styleRealistic">写实风格</option>
+                            <option value="pixel" data-i18n="pm.stylePixel">像素风格</option>
+                            <option value="hand-drawn" data-i18n="pm.styleHandDrawn">手绘风格</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>输出类型</label>
+                        <label data-i18n="pm.outputType">输出类型</label>
                         <select id="sketch-output-type">
-                            <option value="image">图片</option>
-                            <option value="character">角色</option>
-                            <option value="environment">场景</option>
-                            <option value="prop">道具</option>
+                            <option value="image" data-i18n="pm.assetImage">图片</option>
+                            <option value="character" data-i18n="pm.assetCharacter">角色</option>
+                            <option value="environment" data-i18n="pm.assetEnvironment">场景</option>
+                            <option value="prop" data-i18n="pm.assetProp">道具</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="secondary-btn close-modal">取消</button>
-                    <button id="confirm-sketch-btn" class="primary-btn">开始生成</button>
+                    <button class="secondary-btn close-modal" data-i18n="common.cancel">取消</button>
+                    <button id="confirm-sketch-btn" class="primary-btn" data-i18n="pm.startGenerate">开始生成</button>
                 </div>
             </div>
         </div>
@@ -972,42 +1138,43 @@
         <div id="desc-to-asset-modal" class="modal hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>从描述生成素材</h3>
+                    <h3 data-i18n="pm.descTitle">从描述生成素材</h3>
                     <button class="close-modal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>素材描述*</label>
+                        <label data-i18n="pm.assetDescription">素材描述*</label>
                         <textarea
                             id="asset-description"
                             placeholder="详细描述你想要的素材，例如：一个穿着太空服的卡通角色，蓝色背景，像素风格"
+                            data-i18n="pm.assetPromptPlaceholder"
                         ></textarea>
                     </div>
                     <div class="form-group">
-                        <label>目标风格</label>
+                        <label data-i18n="pm.targetStyle">目标风格</label>
                         <select id="desc-style">
-                            <option value="cartoon">卡通风格</option>
-                            <option value="anime">动漫风格</option>
-                            <option value="realistic">写实风格</option>
-                            <option value="pixel">像素风格</option>
-                            <option value="hand-drawn">手绘风格</option>
+                            <option value="cartoon" data-i18n="pm.styleCartoon">卡通风格</option>
+                            <option value="anime" data-i18n="pm.styleAnime">动漫风格</option>
+                            <option value="realistic" data-i18n="pm.styleRealistic">写实风格</option>
+                            <option value="pixel" data-i18n="pm.stylePixel">像素风格</option>
+                            <option value="hand-drawn" data-i18n="pm.styleHandDrawn">手绘风格</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>输出类型</label>
+                        <label data-i18n="pm.outputType">输出类型</label>
                         <select id="desc-output-type">
-                            <option value="image">图片</option>
-                            <option value="character">角色</option>
-                            <option value="environment">场景</option>
-                            <option value="prop">道具</option>
-                            <option value="icon">图标</option>
-                            <option value="button">按钮</option>
+                            <option value="image" data-i18n="pm.assetImage">图片</option>
+                            <option value="character" data-i18n="pm.assetCharacter">角色</option>
+                            <option value="environment" data-i18n="pm.assetEnvironment">场景</option>
+                            <option value="prop" data-i18n="pm.assetProp">道具</option>
+                            <option value="icon" data-i18n="pm.assetIcon">图标</option>
+                            <option value="button" data-i18n="pm.assetButton">按钮</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="secondary-btn close-modal">取消</button>
-                    <button id="confirm-desc-btn" class="primary-btn">开始生成</button>
+                    <button class="secondary-btn close-modal" data-i18n="common.cancel">取消</button>
+                    <button id="confirm-desc-btn" class="primary-btn" data-i18n="pm.startGenerate">开始生成</button>
                 </div>
             </div>
         </div>
@@ -1016,40 +1183,46 @@
         <div id="unify-style-modal" class="modal hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>统一项目风格</h3>
+                    <h3 data-i18n="pm.unifyStyle">统一项目风格</h3>
                     <button class="close-modal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="unify-style-project-id" />
                     <!-- 存储当前项目ID -->
                     <div class="form-group">
-                        <label>目标风格*</label>
+                        <label data-i18n="pm.targetStyle">目标风格*</label>
                         <select id="target-style">
-                            <option value="cartoon">卡通风格</option>
-                            <option value="anime">动漫风格</option>
-                            <option value="realistic">写实风格</option>
-                            <option value="pixel">像素风格</option>
-                            <option value="hand-drawn">手绘风格</option>
+                            <option value="cartoon" data-i18n="pm.styleCartoon">卡通风格</option>
+                            <option value="anime" data-i18n="pm.styleAnime">动漫风格</option>
+                            <option value="realistic" data-i18n="pm.styleRealistic">写实风格</option>
+                            <option value="pixel" data-i18n="pm.stylePixel">像素风格</option>
+                            <option value="hand-drawn" data-i18n="pm.styleHandDrawn">手绘风格</option>
                         </select>
                     </div>
-                    <p>此操作将对项目中的所有素材应用统一的风格。处理时间可能较长，请耐心等待。</p>
+                    <p data-i18n="pm.unifyHelp">
+                        此操作将对项目中的所有素材应用统一的风格。处理时间可能较长，请耐心等待。
+                    </p>
                 </div>
                 <div class="modal-footer">
-                    <button class="secondary-btn close-modal">取消</button>
-                    <button id="confirm-unify-btn" class="primary-btn">开始统一</button>
+                    <button class="secondary-btn close-modal" data-i18n="common.cancel">取消</button>
+                    <button id="confirm-unify-btn" class="primary-btn" data-i18n="pm.startUnify">开始统一</button>
                 </div>
             </div>
         </div>
 
         <!-- 移动端菜单按钮 -->
-        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="菜单">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" data-i18n-aria="misc.menu" aria-label="菜单">
             <i class="fas fa-bars"></i>
         </button>
 
         <!-- 备案信息 -->
         <footer class="beian-footer">
             <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
-                <img src="../../vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+                <img
+                    src="../../vendor/images/beian-icon.png"
+                    alt="公安备案"
+                    class="beian-icon"
+                />京公网安备11010802048813号
             </a>
             <span class="beian-separator">|</span>
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
@@ -1057,8 +1230,6 @@
 
         <script defer src="../../js/keyboard-shortcuts.js"></script>
         <script src="../../js/i18n.js"></script>
-        <script src="../../vendor/js/tsparticles.bundle.min.js"></script>
-        <script src="../../vendor/js/gsap.min.js"></script>
         <script src="../../js/region-themes.js"></script>
         <script src="../../js/session-guard.js"></script>
         <script defer src="../../js/ui-kit.js"></script>
@@ -1073,6 +1244,7 @@
         <script defer src="../../js/notification-manager.js"></script>
         <script defer src="../../js/scroll-animations.js"></script>
         <script defer src="../../js/page-effects.js"></script>
-            <script defer src="../../js/sw-register.js"></script>
+        <script defer src="../../js/productivity.js"></script>
+        <script defer src="../../js/sw-register.js"></script>
     </body>
 </html>

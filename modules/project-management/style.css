@@ -984,3 +984,21 @@ select.pm-tech-select-native {
 .hidden {
     display: none !important;
 }
+
+/* ── 尊重用户动画偏好 ── */
+@media (prefers-reduced-motion: reduce) {
+    .project-card,
+    .tool-card,
+    .add-project-card {
+        transition: none !important;
+    }
+    .project-card:hover,
+    .tool-card:hover,
+    .add-project-card:hover {
+        transform: none !important;
+    }
+    .loading-sweep,
+    .glow-effect {
+        animation: none !important;
+    }
+}

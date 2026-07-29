@@ -5,6 +5,8 @@
 'use strict';
 
 const { Router } = require('express');
+const logger = require('../lib/logger');
+const { sendError, ERR } = require('../lib/error-response');
 
 /**
  * @param {object} deps
@@ -28,7 +30,7 @@ function createAdminRouter(deps) {
     // 管理员：全局用量
     router.get('/admin/usage', requireAuth, (req, res) => {
         if (!isAdminUser(req.currentUser)) {
-            return res.status(403).json({ error: '权限不足' });
+            return sendError(res, 403, ERR.FORBIDDEN, '权限不足');
         }
         const limit = parseInt(req.query.limit, 10) || 200;
         const offset = parseInt(req.query.offset, 10) || 0;
@@ -41,13 +43,21 @@ function createAdminRouter(deps) {
     // 管理员：用户列表
     router.get('/admin/users', requireAuth, (req, res) => {
         if (!isAdminUser(req.currentUser)) {
-            return res.status(403).json({ error: '权限不足' });
+            return sendError(res, 403, ERR.FORBIDDEN, '权限不足');
         }
         const limit = parseInt(req.query.limit, 10) || 100;
         const offset = parseInt(req.query.offset, 10) || 0;
         const users = usersDb.getAllUsers(limit, offset);
         const total = usersDb.getAllUsersCount();
         res.json({ ok: true, users, total, limit, offset });
+    });
+
+    // ── 全局错误处理 ──
+    router.use((err, req, res, _next) => {
+        logger.error('[admin] 未处理的路由错误:', err);
+        if (!res.headersSent) {
+            sendError(res, 500, ERR.INTERNAL, '服务器内部错误');
+        }
     });
 
     return router;

@@ -9,6 +9,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const logger = require('./lib/logger');
 
 const CONFIG_NAME = 'ark-rest-api.local.json';
 
@@ -42,7 +43,7 @@ function loadArkRestConfig() {
         }
         return j;
     } catch (e) {
-        console.warn(`[即梦 REST] 读取 ${CONFIG_NAME} 失败:`, e.message);
+        logger.warn(`[即梦 REST] 读取 ${CONFIG_NAME} 失败:`, e.message);
         return null;
     }
 }

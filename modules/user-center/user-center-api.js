@@ -104,7 +104,9 @@
             }
             const data = await r.json();
             const status = data.status || {};
-            const parts = ['jimeng', 'alibaba', 'tencent', 'sdwebui'].map((k) => `${k}:${status[k] ? '已配置' : '未配置'}`);
+            const parts = ['jimeng', 'alibaba', 'tencent', 'sdwebui'].map(
+                (k) => `${k}:${status[k] ? '已配置' : '未配置'}`
+            );
             statusEl.textContent = `配置状态：${parts.join(' | ')}${data.isAdmin ? ' | 角色:管理员' : ' | 角色:普通用户'}`;
             return data;
         } catch (_e) {

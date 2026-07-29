@@ -121,18 +121,18 @@ async function loadProjects() {
         }
         const data = await res.json();
         if (data.ok) {
-            projects = (data.projects || []).map(p => ({
+            projects = (data.projects || []).map((p) => ({
                 id: p.id.toString(),
                 name: p.name,
                 desc: p.description,
                 type: p.type,
                 createTime: p.created_at,
                 version: p.version,
-                versionHistory: (p.versionHistory || []).map(v => ({
+                versionHistory: (p.versionHistory || []).map((v) => ({
                     time: v.created_at,
                     desc: v.description,
                 })),
-                assets: (p.assets || []).map(a => ({
+                assets: (p.assets || []).map((a) => ({
                     id: a.id.toString(),
                     name: a.name,
                     type: a.type,
@@ -178,7 +178,7 @@ async function saveProjectToServer(project) {
 }
 
 let saveProjectsToStorage = debounce(function () {
-    projects.forEach(p => saveProjectToServer(p));
+    projects.forEach((p) => saveProjectToServer(p));
     projectsCache = projects;
 }, 300);
 
@@ -342,19 +342,25 @@ async function persistProjectsNow() {
 }
 
 function renderProjectInfo() {
-    document.getElementById('project-name').textContent = currentProject.name;
-    document.getElementById('project-description').textContent = currentProject.desc || '无描述';
-    document.getElementById('project-create-time').textContent = formatDate(currentProject.createTime);
-    document.getElementById('project-version').textContent = currentProject.version;
-    document.getElementById('project-asset-count').textContent = currentProject.assets
-        ? currentProject.assets.length
-        : 0;
+    const el = (id) => document.getElementById(id);
+    const nameEl = el('project-name');
+    if (nameEl) nameEl.textContent = currentProject.name;
+    const descEl = el('project-description');
+    if (descEl) descEl.textContent = currentProject.desc || '无描述';
+    const timeEl = el('project-create-time');
+    if (timeEl) timeEl.textContent = formatDate(currentProject.createTime);
+    const verEl = el('project-version');
+    if (verEl) verEl.textContent = currentProject.version;
+    const countEl = el('project-asset-count');
+    if (countEl) countEl.textContent = currentProject.assets ? currentProject.assets.length : 0;
 
-    const projectTypeBadge = document.getElementById('project-type-badge');
-    projectTypeBadge.textContent = getProjectTypeName(currentProject.type);
+    const badge = el('project-type-badge');
+    if (badge) badge.textContent = getProjectTypeName(currentProject.type);
 
-    document.getElementById('edit-project-id').value = currentProject.id;
-    document.getElementById('unify-style-project-id').value = currentProject.id;
+    const editIdEl = el('edit-project-id');
+    if (editIdEl) editIdEl.value = currentProject.id;
+    const unifyIdEl = el('unify-style-project-id');
+    if (unifyIdEl) unifyIdEl.value = currentProject.id;
 }
 
 function filterProjectAssets() {
@@ -370,6 +376,7 @@ function filterProjectAssets() {
 function renderAssetList() {
     const assetGrid = document.getElementById('asset-grid');
     const emptyAssets = document.getElementById('empty-assets');
+    if (!assetGrid || !emptyAssets) return;
 
     if (!currentProject.assets || currentProject.assets.length === 0) {
         assetGrid.innerHTML = '';
@@ -797,7 +804,9 @@ async function syncProjectAssetToLibrary(project, asset) {
                     const existing = listData.items.find((item) => item.source === sourceId);
                     if (existing) {
                         // Delete existing before re-adding
-                        await fetchWithCsrf('/api/asset-library/' + encodeURIComponent(existing.id), { method: 'DELETE' });
+                        await fetchWithCsrf('/api/asset-library/' + encodeURIComponent(existing.id), {
+                            method: 'DELETE',
+                        });
                         wasDeduped = true;
                     }
                 }
@@ -828,7 +837,8 @@ async function syncProjectAssetToLibrary(project, asset) {
 }
 
 function generateAsset() {
-    const method = document.querySelector('input[name="ai-method"]:checked').value;
+    const checked = document.querySelector('input[name="ai-method"]:checked');
+    const method = checked ? checked.value : 'description';
 
     if (method === 'sketch') {
         generateFromSketch();

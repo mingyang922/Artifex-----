@@ -7,6 +7,12 @@
 
     const PMSharedLib = window.PMShared || {};
 
+    function tr(key, fallback) {
+        if (!window.i18n) return fallback;
+        const translated = window.i18n.t(key);
+        return translated === key ? fallback : translated;
+    }
+
     // ── Custom select component ──
 
     function initModalTechSelects() {
@@ -96,7 +102,7 @@
 
             const syncUI = function () {
                 const current = select.options[select.selectedIndex];
-                value.textContent = current ? current.textContent : '请选择';
+                value.textContent = current ? current.textContent : tr('common.select', '请选择');
                 value.classList.toggle('is-placeholder', !select.value || select.value === 'all');
                 menu.querySelectorAll('.pm-tech-select-option').forEach(function (item) {
                     item.classList.toggle('is-selected', item.dataset.value === select.value);
@@ -198,24 +204,64 @@
             card.dataset.id = project.id;
 
             const isInDashboard = window.location.pathname.includes('dashboard.html');
-            const detailPagePath = isInDashboard ? 'modules/project-management/project-detail.html' : 'project-detail.html';
+            const detailPagePath = isInDashboard
+                ? 'modules/project-management/project-detail.html'
+                : 'project-detail.html';
 
             const esc = PMSharedLib.escapeHtml;
             card.innerHTML =
-                '<h4>' + esc(project.name) + '</h4>' +
-                '<span class="project-type">' + esc(PMSharedLib.getProjectTypeName(project.type)) + '</span>' +
-                '<p class="project-desc">' + esc(project.desc || project.description || '无描述') + '</p>' +
+                '<h4>' +
+                esc(project.name) +
+                '</h4>' +
+                '<span class="project-type">' +
+                esc(PMSharedLib.getProjectTypeName(project.type)) +
+                '</span>' +
+                '<p class="project-desc">' +
+                esc(project.desc || project.description || tr('pm.noDescription', '无描述')) +
+                '</p>' +
                 '<div class="project-meta">' +
-                '<span>创建时间: ' + esc(PMSharedLib.formatDate(project.createTime || project.created_at)) + '</span>' +
-                '<span>版本: v' + esc(project.version) + '</span>' +
-                '<span>素材数: ' + (project.assets ? project.assets.length : 0) + '</span>' +
+                '<span>' +
+                esc(tr('pm.createdAt', '创建时间')) +
+                ': ' +
+                esc(PMSharedLib.formatDate(project.createTime || project.created_at)) +
+                '</span>' +
+                '<span>' +
+                esc(tr('pm.version', '版本')) +
+                ': v' +
+                esc(project.version) +
+                '</span>' +
+                '<span>' +
+                esc(tr('pm.assetCount', '素材数')) +
+                ': ' +
+                (project.assets ? project.assets.length : 0) +
+                '</span>' +
                 '</div>' +
                 '<div class="project-card-actions">' +
-                '<button class="icon-btn edit-project" title="编辑项目"><i class="fas fa-edit"></i><span class="action-label">编辑</span></button>' +
-                '<button class="icon-btn delete-project" title="删除项目"><i class="fas fa-trash"></i><span class="action-label">删除</span></button>' +
-                '<button class="icon-btn version-history" title="查看版本历史"><i class="fas fa-history"></i><span class="action-label">版本</span></button>' +
-                '<button class="icon-btn share-project" title="分享项目"><i class="fas fa-share-alt"></i><span class="action-label">分享</span></button>' +
-                '<button class="icon-btn manage-assets" title="管理素材"><i class="fas fa-images"></i><span class="action-label">素材</span></button>' +
+                '<button class="icon-btn edit-project" title="' +
+                esc(tr('pm.editProject', '编辑项目')) +
+                '"><i class="fas fa-edit"></i><span class="action-label">' +
+                esc(tr('pm.edit', '编辑')) +
+                '</span></button>' +
+                '<button class="icon-btn delete-project" title="' +
+                esc(tr('pm.deleteProject', '删除项目')) +
+                '"><i class="fas fa-trash"></i><span class="action-label">' +
+                esc(tr('common.delete', '删除')) +
+                '</span></button>' +
+                '<button class="icon-btn version-history" title="' +
+                esc(tr('pm.versionHistory', '查看版本历史')) +
+                '"><i class="fas fa-history"></i><span class="action-label">' +
+                esc(tr('pm.history', '版本')) +
+                '</span></button>' +
+                '<button class="icon-btn share-project" title="' +
+                esc(tr('pm.shareProject', '分享项目')) +
+                '"><i class="fas fa-share-alt"></i><span class="action-label">' +
+                esc(tr('pm.share', '分享')) +
+                '</span></button>' +
+                '<button class="icon-btn manage-assets" title="' +
+                esc(tr('pm.manageAssets', '管理素材')) +
+                '"><i class="fas fa-images"></i><span class="action-label">' +
+                esc(tr('pm.assets', '素材')) +
+                '</span></button>' +
                 '</div>';
 
             card.addEventListener('click', function (e) {
@@ -223,7 +269,7 @@
                     return;
                 }
                 setActiveProjectCard(project.id);
-                window.location.href = detailPagePath + '?id=' + project.id;
+                window.location.href = detailPagePath + '?id=' + encodeURIComponent(project.id);
             });
 
             fragment.appendChild(card);
@@ -303,16 +349,23 @@
                 const sketchUrl = (sketchUrlInput && sketchUrlInput.value ? sketchUrlInput.value : '').trim();
                 if (!sketchUrl) {
                     await PMSharedLib.showTechPrompt({
-                        title: '输入有误',
-                        message: '请先填写线稿图片 URL。',
-                        confirmText: '知道了',
+                        title: tr('pm.invalidInput', '输入有误'),
+                        message: tr('pm.enterSketchUrl', '请先填写线稿图片 URL。'),
+                        confirmText: tr('pm.gotIt', '知道了'),
                     });
                     return;
                 }
                 const style = sketchStyleInput ? sketchStyleInput.value : '';
                 const outputType = sketchOutputTypeInput ? sketchOutputTypeInput.value : '';
                 const aiPagePath = getAIGeneratePath();
-                window.location.href = aiPagePath + '?from=project-management&mode=sketch&sourceUrl=' + encodeURIComponent(sketchUrl) + '&style=' + encodeURIComponent(style) + '&outputType=' + encodeURIComponent(outputType);
+                window.location.href =
+                    aiPagePath +
+                    '?from=project-management&mode=sketch&sourceUrl=' +
+                    encodeURIComponent(sketchUrl) +
+                    '&style=' +
+                    encodeURIComponent(style) +
+                    '&outputType=' +
+                    encodeURIComponent(outputType);
             });
         }
 
@@ -325,16 +378,23 @@
                 const description = (descriptionInput && descriptionInput.value ? descriptionInput.value : '').trim();
                 if (!description) {
                     await PMSharedLib.showTechPrompt({
-                        title: '输入有误',
-                        message: '请先填写素材描述。',
-                        confirmText: '知道了',
+                        title: tr('pm.invalidInput', '输入有误'),
+                        message: tr('pm.enterDescription', '请先填写素材描述。'),
+                        confirmText: tr('pm.gotIt', '知道了'),
                     });
                     return;
                 }
                 const style = descStyleInput ? descStyleInput.value : '';
                 const outputType = descOutputTypeInput ? descOutputTypeInput.value : '';
                 const aiPagePath = getAIGeneratePath();
-                window.location.href = aiPagePath + '?from=project-management&mode=description&prompt=' + encodeURIComponent(description) + '&style=' + encodeURIComponent(style) + '&outputType=' + encodeURIComponent(outputType);
+                window.location.href =
+                    aiPagePath +
+                    '?from=project-management&mode=description&prompt=' +
+                    encodeURIComponent(description) +
+                    '&style=' +
+                    encodeURIComponent(style) +
+                    '&outputType=' +
+                    encodeURIComponent(outputType);
             });
         }
 
@@ -362,7 +422,7 @@
                     linkInput.select();
                     document.execCommand('copy');
                 }
-                PMSharedLib.uiToast('分享链接已复制！', 'success');
+                PMSharedLib.uiToast(tr('pm.linkCopied', '分享链接已复制！'), 'success');
             });
         }
 
@@ -376,7 +436,7 @@
         if (assetFileInput && assetFileName) {
             assetFileInput.addEventListener('change', function () {
                 const file = assetFileInput.files && assetFileInput.files[0];
-                assetFileName.textContent = file ? file.name : '未选择本地文件';
+                assetFileName.textContent = file ? file.name : tr('pm.noLocalFile', '未选择本地文件');
                 const assetNameInput = document.getElementById('asset-name');
                 if (file && assetNameInput && !assetNameInput.value.trim()) {
                     assetNameInput.value = file.name.replace(/\.[^/.]+$/, '');
@@ -403,10 +463,10 @@
                 const projectId = e.target.closest('.project-card').dataset.id;
                 setActiveProjectCard(projectId);
                 const ok = await PMSharedLib.showTechPrompt({
-                    title: '删除项目',
-                    message: '确定删除该项目？此操作不可恢复！',
-                    confirmText: '删除',
-                    cancelText: '取消',
+                    title: tr('pm.deleteProject', '删除项目'),
+                    message: tr('pm.deleteProjectConfirm', '确定删除该项目？此操作不可恢复！'),
+                    confirmText: tr('common.delete', '删除'),
+                    cancelText: tr('common.cancel', '取消'),
                     showCancel: true,
                 });
                 if (ok) {
@@ -452,15 +512,17 @@
                 const projectId = e.target.closest('.delete-asset').dataset.projectId;
 
                 const ok = await PMSharedLib.showTechPrompt({
-                    title: '删除素材',
-                    message: '确定删除此素材？',
-                    confirmText: '删除',
-                    cancelText: '取消',
+                    title: tr('pm.deleteAsset', '删除素材'),
+                    message: tr('pm.deleteAssetConfirm', '确定删除此素材？'),
+                    confirmText: tr('common.delete', '删除'),
+                    cancelText: tr('common.cancel', '取消'),
                     showCancel: true,
                 });
                 if (!ok) return;
 
-                const project = projects.find(function (p) { return p.id === projectId; });
+                const project = projects.find(function (p) {
+                    return p.id === projectId;
+                });
                 if (project && project.assets && project.assets[index]) {
                     project.assets.splice(index, 1);
                     saveProjectsToStorage();
@@ -473,7 +535,9 @@
     // ── Modal management ──
 
     function openEditModal(projectId) {
-        const project = projects.find(function (p) { return p.id === projectId; });
+        const project = projects.find(function (p) {
+            return p.id === projectId;
+        });
         if (!project) return;
 
         currentProjectId = projectId;
@@ -488,14 +552,17 @@
     }
 
     function openVersionHistoryModal(projectId) {
-        const project = projects.find(function (p) { return p.id === projectId; });
+        const project = projects.find(function (p) {
+            return p.id === projectId;
+        });
         if (!project) return;
 
         document.getElementById('history-project-id').value = projectId;
         const versionListEl = document.getElementById('version-list');
 
         if (!project.versionHistory || project.versionHistory.length === 0) {
-            versionListEl.innerHTML = '<p class="no-versions">暂无版本历史记录</p>';
+            versionListEl.innerHTML =
+                '<p class="no-versions">' + PMSharedLib.escapeHtml(tr('pm.noVersions', '暂无版本历史记录')) + '</p>';
         } else {
             const fragment = document.createDocumentFragment();
             const sortedHistory = project.versionHistory.slice().sort(function (a, b) {
@@ -507,10 +574,16 @@
                 versionItem.className = 'version-item';
                 versionItem.innerHTML =
                     '<div class="version-header">' +
-                    '<span class="version-index">' + (index + 1) + '</span>' +
-                    '<span class="version-time">' + PMSharedLib.formatDate(version.time) + '</span>' +
+                    '<span class="version-index">' +
+                    (index + 1) +
+                    '</span>' +
+                    '<span class="version-time">' +
+                    PMSharedLib.formatDate(version.time) +
+                    '</span>' +
                     '</div>' +
-                    '<div class="version-desc">' + PMSharedLib.escapeHtml(version.desc || '') + '</div>';
+                    '<div class="version-desc">' +
+                    PMSharedLib.escapeHtml(version.desc || '') +
+                    '</div>';
                 fragment.appendChild(versionItem);
             });
 
@@ -523,7 +596,9 @@
     }
 
     function openShareModal(projectId) {
-        const project = projects.find(function (p) { return p.id === projectId; });
+        const project = projects.find(function (p) {
+            return p.id === projectId;
+        });
         if (!project) return;
 
         document.getElementById('share-project-id').value = projectId;
@@ -531,7 +606,8 @@
         const isInDashboard = window.location.pathname.includes('dashboard.html');
         const detailPagePath = isInDashboard ? 'modules/project-management/project-detail.html' : 'project-detail.html';
 
-        const shareLink = window.location.origin + window.location.pathname.replace(/[^/]+$/, detailPagePath) + '?id=' + projectId;
+        const shareLink =
+            window.location.origin + window.location.pathname.replace(/[^/]+$/, detailPagePath) + '?id=' + projectId;
         document.getElementById('share-link').value = shareLink;
 
         initModalTechSelects();
@@ -539,14 +615,18 @@
     }
 
     function openAssetsModal(projectId) {
-        const project = projects.find(function (p) { return p.id === projectId; });
+        const project = projects.find(function (p) {
+            return p.id === projectId;
+        });
         if (!project) return;
 
         const assetsListEl = document.getElementById('assets-list');
 
         if (!project.assets || project.assets.length === 0) {
             assetsListEl.innerHTML =
-                '<div class="empty-state"><i class="fas fa-image"></i><p>暂无素材，点击添加素材按钮开始添加</p></div>';
+                '<div class="empty-state"><i class="fas fa-image"></i><p>' +
+                PMSharedLib.escapeHtml(tr('pm.noAssetsStart', '暂无素材，点击添加素材按钮开始添加')) +
+                '</p></div>';
         } else {
             const fragment = document.createDocumentFragment();
             const esc = PMSharedLib.escapeHtml;
@@ -556,13 +636,28 @@
                 assetItem.className = 'asset-item';
                 assetItem.innerHTML =
                     '<div class="asset-info">' +
-                    '<div class="asset-name">' + esc(asset.name) + '</div>' +
-                    '<div class="asset-type">' + esc(PMSharedLib.getAssetTypeName(asset.type)) + '</div>' +
-                    '<div class="asset-content">' + esc(asset.content.substring(0, 50)) + (asset.content.length > 50 ? '...' : '') + '</div>' +
+                    '<div class="asset-name">' +
+                    esc(asset.name) +
+                    '</div>' +
+                    '<div class="asset-type">' +
+                    esc(PMSharedLib.getAssetTypeName(asset.type)) +
+                    '</div>' +
+                    '<div class="asset-content">' +
+                    esc(asset.content.substring(0, 50)) +
+                    (asset.content.length > 50 ? '...' : '') +
+                    '</div>' +
                     '</div>' +
                     '<div class="asset-actions">' +
-                    '<button class="icon-btn edit-asset" data-index="' + index + '" data-project-id="' + projectId + '"><i class="fas fa-edit"></i></button>' +
-                    '<button class="icon-btn delete-asset" data-index="' + index + '" data-project-id="' + projectId + '"><i class="fas fa-trash"></i></button>' +
+                    '<button class="icon-btn edit-asset" data-index="' +
+                    index +
+                    '" data-project-id="' +
+                    projectId +
+                    '"><i class="fas fa-edit"></i></button>' +
+                    '<button class="icon-btn delete-asset" data-index="' +
+                    index +
+                    '" data-project-id="' +
+                    projectId +
+                    '"><i class="fas fa-trash"></i></button>' +
                     '</div>';
                 fragment.appendChild(assetItem);
             });
@@ -602,6 +697,6 @@
         openVersionHistoryModal: openVersionHistoryModal,
         openShareModal: openShareModal,
         openAssetsModal: openAssetsModal,
-        resetForm: resetForm
+        resetForm: resetForm,
     };
 })();

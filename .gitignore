@@ -61,4 +61,6 @@ scripts/generate_final_report_pdf.py
 scripts/generate_security_course_report.py
 
 # 素材库测试图片
-modules/asset-library/素材库图片/
+modules/asset-library/素材库图片/*
+!modules/asset-library/素材库图片/thumbs/
+!modules/asset-library/素材库图片/thumbs/*.webp

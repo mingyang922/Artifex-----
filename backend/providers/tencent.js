@@ -6,11 +6,8 @@
 /**
  * 腾讯云混元 / 文生图 / 图生图 API 提供商（从 proxy.js 提取）
  */
-const {
-    getTencentCamCredentials,
-    validateTencentCamCredential,
-    assertTencentCamCredential,
-} = require('../lib/utils');
+const logger = require('../lib/logger');
+const { getTencentCamCredentials, validateTencentCamCredential, assertTencentCamCredential } = require('../lib/utils');
 
 // 腾讯云混元API代理（用户级配置，使用官方SDK）
 async function handleHunyuanProxy(req, res, { _runtimeConfig, _API_CONFIG, getUserProviderConfig, isAdminUser }) {
@@ -35,9 +32,10 @@ async function handleHunyuanProxy(req, res, { _runtimeConfig, _API_CONFIG, getUs
         if (!camCheck.ok) {
             return res.status(400).json({
                 error: 'API密钥无效',
-                message: (req.currentUser && getUserProviderConfig(req.currentUser.id, 'tencent'))
-                    ? camCheck.message
-                    : '请先在用户中心配置腾讯云 SecretId / SecretKey',
+                message:
+                    req.currentUser && getUserProviderConfig(req.currentUser.id, 'tencent')
+                        ? camCheck.message
+                        : '请先在用户中心配置腾讯云 SecretId / SecretKey',
                 code: camCheck.code,
                 provider: 'tencent',
             });
@@ -54,7 +52,7 @@ async function handleHunyuanProxy(req, res, { _runtimeConfig, _API_CONFIG, getUs
         const result = await client.ChatCompletions(requestData);
         res.json({ Response: result });
     } catch (error) {
-        console.error('API代理错误:', error.message || error);
+        logger.error('API代理错误:', error.message || error);
 
         if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
             res.status(408).json({
@@ -151,7 +149,7 @@ async function callTencentImageAPI(prompt, size, userConfig) {
             throw new Error('腾讯云API返回格式错误，未找到图片数据');
         }
     } catch (error) {
-        console.error('腾讯云API调用失败:', error.message || error);
+        logger.error('腾讯云API调用失败:', error.message || error);
 
         if (error.message.includes('ResourceUnavailable.NotExist')) {
             throw new Error('混元生图服务未开通，请在腾讯云控制台开通服务');
@@ -184,8 +182,8 @@ async function handleTencentStatus(req, res, { getUserProviderConfig, isAdminUse
         hint: hasOwnKeys
             ? '使用你自配的腾讯云密钥'
             : isAdmin
-                ? '使用平台默认密钥（管理员权限）'
-                : '请在「用户中心」配置你自己的腾讯云 SecretId / SecretKey',
+              ? '使用平台默认密钥（管理员权限）'
+              : '请在「用户中心」配置你自己的腾讯云 SecretId / SecretKey',
     };
     if (!validation.ok) {
         return res.json(out);

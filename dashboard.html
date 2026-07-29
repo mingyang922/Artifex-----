@@ -4,26 +4,19 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Artifex - 主控制台</title>
-        <link rel="manifest" href="manifest.json">
-        <meta name="theme-color" content="#00f0ff">
-        <link
-            href="vendor/css/google-fonts.css"
-            rel="stylesheet"
-        />
+        <link rel="manifest" href="manifest.json" />
+        <meta name="theme-color" content="#00f0ff" />
+        <script src="js/theme-bootstrap.js"></script>
+        <link href="vendor/css/google-fonts.css" rel="stylesheet" />
         <!-- 预连接CDN，提高外部资源加载速度 -->
         <link rel="stylesheet" href="styles/ui-kit.css" />
         <!-- 异步加载非关键CSS -->
-        <link
-            rel="stylesheet"
-            href="vendor/css/font-awesome.min.css"
-            media="print"
-            onload="this.media = 'all'"
-        />
+        <link rel="stylesheet" href="vendor/css/font-awesome.min.css" media="print" onload="this.media = 'all'" />
         <!-- dashboard 样式 -->
         <link rel="stylesheet" href="styles/dashboard.css" />
         <link rel="stylesheet" href="styles/app-shell.css" />
         <link rel="stylesheet" href="styles/region-themes.css" />
-        <link rel="stylesheet" href="styles/theme-japan.css" />
+        <link rel="stylesheet" href="styles/productivity.css" />
     </head>
     <body class="app-shell" data-app-page="home">
         <div class="pointer-glow" aria-hidden="true"></div>
@@ -81,7 +74,13 @@
                 <div class="top-bar">
                     <div class="search-bar">
                         <i class="fas fa-search" aria-hidden="true"></i>
-                        <input type="text" placeholder="搜索项目、资产或文档..." data-i18n="dashboard.searchPlaceholder" data-i18n-aria="common.search" aria-label="搜索" />
+                        <input
+                            type="text"
+                            placeholder="搜索项目、资产或文档..."
+                            data-i18n="dashboard.searchPlaceholder"
+                            data-i18n-aria="common.search"
+                            aria-label="搜索"
+                        />
                     </div>
                     <div class="user-menu">
                         <button class="notification-btn" data-i18n-aria="misc.notifications" aria-label="通知">
@@ -95,6 +94,25 @@
                 </div>
 
                 <!-- 快捷工具 -->
+                <section class="workspace-hero scroll-section" aria-labelledby="workspace-title">
+                    <div>
+                        <span class="workspace-eyebrow"><i class="fas fa-sparkles"></i> ARTIFEX WORKSPACE</span>
+                        <h2 id="workspace-title"><span id="dashboard-greeting">欢迎回来</span>，开始创造吧</h2>
+                        <p id="dashboard-date">正在同步你的工作空间…</p>
+                    </div>
+                    <div class="workspace-hero-actions">
+                        <button type="button" class="workspace-primary-action" data-target="ai-generate"><i class="fas fa-wand-magic-sparkles"></i> 开始生成</button>
+                        <button type="button" class="workspace-secondary-action" data-target="project-management"><i class="fas fa-plus"></i> 新建项目</button>
+                    </div>
+                </section>
+
+                <section class="workspace-stats scroll-section" aria-label="工作空间概览">
+                    <article class="workspace-stat-card"><span class="workspace-stat-icon cyan"><i class="fas fa-diagram-project"></i></span><span><strong id="statProjects">—</strong><small>项目总数</small></span></article>
+                    <article class="workspace-stat-card"><span class="workspace-stat-icon violet"><i class="fas fa-images"></i></span><span><strong id="statAssets">—</strong><small>素材数量</small></span></article>
+                    <article class="workspace-stat-card"><span class="workspace-stat-icon green"><i class="fas fa-wand-magic-sparkles"></i></span><span><strong id="statGenerations">—</strong><small>生成记录</small></span></article>
+                    <article class="workspace-stat-card"><span class="workspace-stat-icon amber"><i class="fas fa-hard-drive"></i></span><span><strong id="statStorage">—</strong><small>本地空间</small></span></article>
+                </section>
+
                 <section class="quick-tools-section scroll-section">
                     <div class="quick-tools">
                         <div class="tool-card" data-target="project-management">
@@ -119,11 +137,29 @@
                 <section class="recent-projects scroll-section">
                     <div class="section-header">
                         <h2 class="section-title" data-i18n="dashboard.recentProjects">最近项目</h2>
-                        <a href="#" class="view-all" data-target="project-management" data-i18n="dashboard.viewAll">查看全部</a>
+                        <a href="#" class="view-all" data-target="project-management" data-i18n="dashboard.viewAll"
+                            >查看全部</a
+                        >
                     </div>
                     <div class="projects-grid" id="recent-projects-grid">
                         <!-- 将由脚本根据 localStorage.gameui-projects 动态渲染最近项目 -->
                     </div>
+                </section>
+
+                <section class="workspace-insights scroll-section">
+                    <article class="workspace-panel">
+                        <div class="section-header">
+                            <h2 class="section-title"><i class="fas fa-clock-rotate-left"></i> 最近生成</h2>
+                            <a href="#" class="view-all" data-target="ai-generate">继续创作</a>
+                        </div>
+                        <div id="recent-generations" class="recent-generation-list"></div>
+                    </article>
+                    <article class="workspace-panel workspace-next-step">
+                        <span class="workspace-eyebrow">SMART NEXT STEP</span>
+                        <h2>推荐下一步</h2>
+                        <p id="dashboard-next-step">正在根据你的工作状态生成建议…</p>
+                        <button type="button" class="workspace-secondary-action" id="dashboard-next-action">立即前往</button>
+                    </article>
                 </section>
 
                 <section
@@ -190,7 +226,7 @@
         <!-- 备案信息 -->
         <footer class="beian-footer">
             <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
-                <img src="vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+                <img src="vendor/images/beian-icon.png" alt="公安备案" class="beian-icon" />京公网安备11010802048813号
             </a>
             <span class="beian-separator">|</span>
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
@@ -198,8 +234,6 @@
 
         <!-- 简化的JavaScript代码 -->
         <script src="js/i18n.js"></script>
-        <script src="vendor/js/tsparticles.bundle.min.js"></script>
-        <script src="vendor/js/gsap.min.js"></script>
         <script src="js/region-themes.js"></script>
         <script src="js/session-guard.js"></script>
         <script defer src="js/ui-kit.js"></script>
@@ -218,6 +252,7 @@
         <script defer src="js/holographic-cards.js"></script>
         <script defer src="js/keyboard-shortcuts.js"></script>
         <script src="js/dashboard-init.js"></script>
+        <script defer src="js/productivity.js"></script>
         <script src="js/sw-register.js"></script>
     </body>
 </html>

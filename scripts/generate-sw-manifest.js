@@ -1,8 +1,6 @@
 /**
- * Artifex - Service Worker Manifest Generator
- * 扫描 dist/ 目录，生成 sw-manifest.json 供 Service Worker 预缓存使用
- *
- * 用法: node scripts/generate-sw-manifest.js
+ * Generate the production Service Worker precache manifest.
+ * Large source images are intentionally left to the runtime cache.
  */
 
 const fs = require('fs');
@@ -11,34 +9,46 @@ const path = require('path');
 const distDir = path.join(__dirname, '..', 'dist');
 const manifestPath = path.join(distDir, 'sw-manifest.json');
 const pkg = require('../package.json');
+const MAX_PRECACHE_FILE_SIZE = 512 * 1024;
+const CACHEABLE_EXTENSION = /\.(html|js|css|png|jpe?g|gif|svg|woff2?|ttf|eot|webp|avif|ico|json)$/i;
 
-/**
- * 递归扫描目录，收集所有可缓存的静态资源
- * @param {string} dir  - 要扫描的绝对路径
- * @param {string} base - 相对于 dist/ 的路径前缀（递归用）
- * @returns {string[]}  - 以 '/' 开头的资源路径列表
- */
+function shouldPrecache(relativePath, size) {
+    const normalized = relativePath.replace(/\\/g, '/');
+    if (!CACHEABLE_EXTENSION.test(normalized) || normalized.endsWith('.map')) return false;
+    if (size > MAX_PRECACHE_FILE_SIZE) return false;
+    if (/^modules\/asset-library\/素材库图片\/(?!thumbs\/)/.test(normalized)) return false;
+
+    return (
+        normalized.endsWith('.html') ||
+        normalized === 'manifest.json' ||
+        normalized === 'js/theme-bootstrap.js' ||
+        normalized.startsWith('assets/') ||
+        normalized.startsWith('styles/') ||
+        normalized.startsWith('vendor/css/') ||
+        normalized.startsWith('vendor/fonts/') ||
+        normalized.startsWith('vendor/images/') ||
+        normalized.startsWith('modules/asset-library/素材库图片/thumbs/')
+    );
+}
+
 function scanDir(dir, base = '') {
     const entries = [];
     if (!fs.existsSync(dir)) return entries;
 
-    const items = fs.readdirSync(dir);
-    for (const item of items) {
+    for (const item of fs.readdirSync(dir)) {
         const fullPath = path.join(dir, item);
-        const relPath = path.join(base, item).replace(/\\/g, '/');
+        const relativePath = path.join(base, item).replace(/\\/g, '/');
         const stat = fs.statSync(fullPath);
-
         if (stat.isDirectory()) {
-            entries.push(...scanDir(fullPath, relPath));
-        } else if (/\.(js|css|png|jpg|jpeg|gif|svg|woff2?|ttf|eot|webp|avif|ico)$/.test(item) && !/\.map$/.test(item)) {
-            entries.push('/' + relPath);
+            entries.push(...scanDir(fullPath, relativePath));
+        } else if (shouldPrecache(relativePath, stat.size)) {
+            entries.push('/' + relativePath);
         }
     }
     return entries;
 }
 
-// --- Main ---
-const assets = scanDir(distDir);
+const assets = scanDir(distDir).sort();
 const manifest = {
     assets,
     generatedAt: new Date().toISOString(),
@@ -46,4 +56,4 @@ const manifest = {
 };
 
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-console.log(`[sw-manifest] Generated manifest with ${assets.length} assets -> ${manifestPath}`);
+console.log(`[sw-manifest] Generated ${assets.length} entries -> ${manifestPath}`);

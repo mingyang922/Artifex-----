@@ -6,7 +6,17 @@
 const PMSharedLib = window.PMShared || {};
 const PMUI = window.PMUI || {};
 const PMTemplates = window.PMTemplates || {};
-const pmStorageKey = PMSharedLib.pmStorageKey || function (base) { return base; };
+const pmStorageKey =
+    PMSharedLib.pmStorageKey ||
+    function (base) {
+        return base;
+    };
+
+function tr(key, fallback) {
+    if (!window.i18n) return fallback;
+    const translated = window.i18n.t(key);
+    return translated === key ? fallback : translated;
+}
 
 // 全局变量定义
 let projects = []; // 项目列表
@@ -28,6 +38,13 @@ async function init() {
     window.refreshPmTechSelects = PMUI.initModalTechSelects;
     setTimeout(PMUI.initModalTechSelects, 0);
     if (PMTemplates.initCards) PMTemplates.initCards();
+    if (!window.__pmLanguageChangeBound) {
+        window.__pmLanguageChangeBound = true;
+        window.addEventListener('languageChanged', function () {
+            PMUI.renderProjectList();
+            PMUI.initModalTechSelects();
+        });
+    }
 }
 
 // 加载项目数据（从服务端 API）
@@ -75,7 +92,7 @@ async function loadProjects() {
         console.error('加载项目数据失败:', error);
         projects = [];
         projectsCache = [];
-        PMSharedLib.uiToast('加载项目列表失败，请刷新重试', 'error');
+        PMSharedLib.uiToast(tr('pm.loadFailed', '加载项目列表失败，请刷新重试'), 'error');
     }
 }
 
@@ -113,7 +130,7 @@ async function saveProjectToServer(project, versionDesc) {
         }
     } catch (error) {
         console.error('保存项目失败:', error);
-        PMSharedLib.uiToast('保存项目失败', 'error');
+        PMSharedLib.uiToast(tr('pm.saveFailed', '保存项目失败'), 'error');
     }
 }
 
@@ -121,12 +138,16 @@ async function saveProjectToServer(project, versionDesc) {
 function syncProjectsToLocalStorage() {
     try {
         localStorage.setItem(pmStorageKey('gameui-projects'), JSON.stringify(projects));
-    } catch (_e) { /* ignore */ }
+    } catch (_e) {
+        /* ignore */
+    }
 }
 
 // 批量保存项目到服务端
 const saveProjectsToStorage = debounce(function (versionDesc) {
-    projects.forEach(function (p) { saveProjectToServer(p, versionDesc); });
+    projects.forEach(function (p) {
+        saveProjectToServer(p, versionDesc);
+    });
     projectsCache = projects;
 }, 300);
 
@@ -137,7 +158,8 @@ function showTechPrompt(options) {
     return Promise.resolve(false);
 }
 
-// 创建项目
+// 创建项目（由 pm-ui.js 事件处理器调用）
+// eslint-disable-next-line no-unused-vars
 async function createProject() {
     const nameInput = document.getElementById('project-name');
     const descInput = document.getElementById('project-desc');
@@ -147,9 +169,9 @@ async function createProject() {
     // 表单验证
     if (!nameInput.value.trim()) {
         await showTechPrompt({
-            title: '输入有误',
-            message: '项目名称不能为空！',
-            confirmText: '知道了',
+            title: tr('pm.invalidInput', '输入有误'),
+            message: tr('pm.projectNameEmpty', '项目名称不能为空！'),
+            confirmText: tr('pm.gotIt', '知道了'),
         });
         return;
     }
@@ -170,7 +192,7 @@ async function createProject() {
         });
         const data = await res.json();
         if (!data.ok) {
-            PMSharedLib.uiToast(data.error || '创建失败', 'error');
+            PMSharedLib.uiToast(data.error || tr('pm.createFailed', '创建项目失败'), 'error');
             return;
         }
         // 转换为前端格式并添加到列表
@@ -190,7 +212,7 @@ async function createProject() {
         projectsCache = projects;
     } catch (error) {
         console.error('创建项目失败:', error);
-        PMSharedLib.uiToast('创建项目失败', 'error');
+        PMSharedLib.uiToast(tr('pm.createFailed', '创建项目失败'), 'error');
         return;
     }
 
@@ -251,7 +273,7 @@ async function createProject() {
 
     saveProjectsToStorage();
     syncProjectsToLocalStorage();
-    PMSharedLib.uiToast('项目创建成功！', 'success');
+    PMSharedLib.uiToast(tr('pm.createSuccess', '项目创建成功！'), 'success');
 }
 
 function getAIGeneratePath() {
@@ -264,7 +286,8 @@ function getAIGeneratePath() {
     return 'modules/ai-generate/ai-generator-new.html';
 }
 
-// 保存编辑项目
+// 保存编辑项目（由 pm-ui.js 事件处理器调用）
+// eslint-disable-next-line no-unused-vars
 async function saveEditProject() {
     const projectId = document.getElementById('edit-project-id').value;
     const nameInput = document.getElementById('edit-project-name');
@@ -273,14 +296,16 @@ async function saveEditProject() {
 
     if (!nameInput.value.trim()) {
         await showTechPrompt({
-            title: '输入有误',
-            message: '项目名称不能为空！',
-            confirmText: '知道了',
+            title: tr('pm.invalidInput', '输入有误'),
+            message: tr('pm.projectNameEmpty', '项目名称不能为空！'),
+            confirmText: tr('pm.gotIt', '知道了'),
         });
         return;
     }
 
-    const projectIndex = projects.findIndex(function (p) { return p.id === projectId; });
+    const projectIndex = projects.findIndex(function (p) {
+        return p.id === projectId;
+    });
     if (projectIndex === -1) return;
 
     projects[projectIndex].name = nameInput.value.trim();
@@ -291,10 +316,11 @@ async function saveEditProject() {
     syncProjectsToLocalStorage();
     PMUI.renderProjectList();
     document.getElementById('edit-project-modal').classList.add('hidden');
-    PMSharedLib.uiToast('项目更新成功！', 'success');
+    PMSharedLib.uiToast(tr('pm.updateSuccess', '项目更新成功！'), 'success');
 }
 
-// 删除项目
+// 删除项目（由 pm-ui.js 事件处理器调用）
+// eslint-disable-next-line no-unused-vars
 async function deleteProject(projectId) {
     try {
         const csrfToken = await getCsrfToken();
@@ -306,13 +332,15 @@ async function deleteProject(projectId) {
         if (!res.ok) {
             throw new Error('删除项目失败');
         }
-        projects = projects.filter(function (p) { return p.id !== projectId; });
+        projects = projects.filter(function (p) {
+            return p.id !== projectId;
+        });
         projectsCache = projects;
         syncProjectsToLocalStorage();
         PMUI.renderProjectList();
     } catch (error) {
         console.error('删除项目失败:', error);
-        PMSharedLib.uiToast('删除项目失败，请重试', 'error');
+        PMSharedLib.uiToast(tr('pm.deleteFailed', '删除项目失败，请重试'), 'error');
     }
 }
 
@@ -321,7 +349,9 @@ async function deleteProject(projectId) {
 function readFileAsDataURL(file) {
     return new Promise(function (resolve, reject) {
         const reader = new FileReader();
-        reader.onload = function (e) { resolve(e.target && e.target.result ? e.target.result : ''); };
+        reader.onload = function (e) {
+            resolve(e.target && e.target.result ? e.target.result : '');
+        };
         reader.onerror = reject;
         reader.readAsDataURL(file);
     });
@@ -407,7 +437,7 @@ async function syncProjectAssetToLibrary(project, asset) {
             const m = content.match(/^data:([^;]+);/);
             if (m && m[1]) mime = m[1];
         }
-        const fileExt = mime.includes('jpeg') ? 'jpg' : (mime.split('/')[1] || 'png');
+        const fileExt = mime.includes('jpeg') ? 'jpg' : mime.split('/')[1] || 'png';
         const safeName = (asset.name || 'asset').replace(/[\\/:*?"<>|]/g, '_');
         const sourceId = 'project_' + project.id + '_' + asset.id;
 
@@ -418,9 +448,13 @@ async function syncProjectAssetToLibrary(project, asset) {
             if (listResp.ok) {
                 const listData = await listResp.json();
                 if (listData.ok && Array.isArray(listData.items)) {
-                    const existing = listData.items.find(function (item) { return item.source === sourceId; });
+                    const existing = listData.items.find(function (item) {
+                        return item.source === sourceId;
+                    });
                     if (existing) {
-                        await fetchWithCsrf('/api/asset-library/' + encodeURIComponent(existing.id), { method: 'DELETE' });
+                        await fetchWithCsrf('/api/asset-library/' + encodeURIComponent(existing.id), {
+                            method: 'DELETE',
+                        });
                         wasDeduped = true;
                     }
                 }
@@ -440,7 +474,9 @@ async function syncProjectAssetToLibrary(project, asset) {
             body: JSON.stringify(body),
         });
         if (!resp.ok) {
-            const err = await resp.json().catch(function () { return {}; });
+            const err = await resp.json().catch(function () {
+                return {};
+            });
             throw new Error(err.error || '同步失败');
         }
         return { ok: true, deduped: wasDeduped, nearLimit: false };
@@ -450,7 +486,8 @@ async function syncProjectAssetToLibrary(project, asset) {
     }
 }
 
-// 添加项目素材（支持 URL / 文本 / 本地文件）
+// 添加项目素材（由 pm-ui.js 事件处理器调用）
+// eslint-disable-next-line no-unused-vars
 async function addProjectAsset() {
     const projectId = document.getElementById('assets-project-id').value;
     const assetName = document.getElementById('asset-name').value.trim();
@@ -461,22 +498,24 @@ async function addProjectAsset() {
 
     if (!assetName) {
         await showTechPrompt({
-            title: '输入有误',
-            message: '素材名称不能为空！',
-            confirmText: '知道了',
+            title: tr('pm.invalidInput', '输入有误'),
+            message: tr('pm.assetNameEmpty', '素材名称不能为空！'),
+            confirmText: tr('pm.gotIt', '知道了'),
         });
         return;
     }
     if (!assetContent && !selectedFile) {
         await showTechPrompt({
-            title: '输入有误',
-            message: '请填写素材URL/内容，或选择一个本地文件！',
-            confirmText: '知道了',
+            title: tr('pm.invalidInput', '输入有误'),
+            message: tr('pm.assetSourceEmpty', '请填写素材URL/内容，或选择一个本地文件！'),
+            confirmText: tr('pm.gotIt', '知道了'),
         });
         return;
     }
 
-    const project = projects.find(function (p) { return p.id === projectId; });
+    const project = projects.find(function (p) {
+        return p.id === projectId;
+    });
     if (!project) return;
 
     if (!project.assets) {
@@ -490,9 +529,9 @@ async function addProjectAsset() {
         } catch (e) {
             console.error('读取本地文件失败:', e);
             await showTechPrompt({
-                title: '读取失败',
-                message: '读取本地文件失败，或文件过大（非图片建议小于1MB）。请压缩后重试。',
-                confirmText: '知道了',
+                title: tr('pm.readFailed', '读取失败'),
+                message: tr('pm.readFileFailed', '读取本地文件失败，或文件过大（非图片建议小于1MB）。请压缩后重试。'),
+                confirmText: tr('pm.gotIt', '知道了'),
             });
             return;
         }
@@ -520,24 +559,24 @@ async function addProjectAsset() {
     }
     const assetFileName = document.getElementById('asset-file-name');
     if (assetFileName) {
-        assetFileName.textContent = '未选择本地文件';
+        assetFileName.textContent = tr('pm.noLocalFile', '未选择本地文件');
     }
 
-    let tip = '素材添加成功！';
+    let tip = tr('pm.assetAdded', '素材添加成功！');
     if (syncResult && syncResult.ok) {
-        tip += syncResult.deduped ? '\n素材库中已有同源素材，已更新并置顶。' : '\n已同步到素材库。';
+        tip += '\n' + tr('pm.assetSynced', '已同步到素材库。');
         if (syncResult.nearLimit) {
-            tip += '\n提示：本地存储空间接近上限，建议及时清理不需要的素材。';
+            tip += '\n' + tr('pm.storageWarning', '提示：本地存储空间接近上限，建议及时清理不需要的素材。');
         }
     } else {
-        tip += '\n但同步到素材库失败，请稍后重试。';
+        tip += '\n' + tr('pm.assetSyncFailed', '但同步到素材库失败，请稍后重试。');
     }
 
     const goToLibrary = await showTechPrompt({
-        title: '素材同步完成',
-        message: tip + '\n\n是否前往素材库查看？',
-        confirmText: '前往素材库',
-        cancelText: '留在当前页',
+        title: tr('pm.assetSyncComplete', '素材同步完成'),
+        message: tip + '\n\n' + tr('pm.viewLibraryQuestion', '是否前往素材库查看？'),
+        confirmText: tr('pm.goToLibrary', '前往素材库'),
+        cancelText: tr('pm.stayHere', '留在当前页'),
         showCancel: true,
     });
     if (goToLibrary) {
@@ -545,19 +584,22 @@ async function addProjectAsset() {
     }
 }
 
-// 辅助函数：格式化日期
+// 辅助函数：格式化日期（由 pm-ui.js 调用）
+// eslint-disable-next-line no-unused-vars
 function formatDate(isoString) {
     if (PMSharedLib.formatDate) return PMSharedLib.formatDate(isoString);
     return isoString || '-';
 }
 
-// 辅助函数：项目类型名称映射
+// 辅助函数：项目类型名称映射（由 pm-ui.js 调用）
+// eslint-disable-next-line no-unused-vars
 function getProjectTypeName(type) {
     if (PMSharedLib.getProjectTypeName) return PMSharedLib.getProjectTypeName(type);
     return type || '未分类';
 }
 
-// 辅助函数：素材类型名称映射
+// 辅助函数：素材类型名称映射（由 pm-ui.js 调用）
+// eslint-disable-next-line no-unused-vars
 function getAssetTypeName(type) {
     if (PMSharedLib.getAssetTypeName) return PMSharedLib.getAssetTypeName(type);
     return type || '未分类';

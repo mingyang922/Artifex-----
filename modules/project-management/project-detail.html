@@ -4,15 +4,14 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>项目详情 - 游戏美术资产生成平台</title>
-        <link rel="manifest" href="../../manifest.json">
-        <meta name="theme-color" content="#00f0ff">
+        <link rel="manifest" href="../../manifest.json" />
+        <meta name="theme-color" content="#00f0ff" />
+        <script src="../../js/theme-bootstrap.js"></script>
         <link rel="stylesheet" href="../../vendor/css/font-awesome.min.css" />
         <link rel="stylesheet" href="style.css" />
         <link rel="stylesheet" href="../../styles/ui-kit.css" />
         <link href="../../vendor/css/google-fonts.css" rel="stylesheet" />
         <link rel="stylesheet" href="../../styles/app-shell.css" />
-        <link rel="stylesheet" href="../../styles/region-themes.css" />
-        <link rel="stylesheet" href="../../styles/theme-japan.css" />
         <style>
             /* 项目详情页面特定样式 */
             .project-detail-container {
@@ -591,7 +590,7 @@
                 margin-top: 4px;
             }
 
-            input[type="radio"] {
+            input[type='radio'] {
                 appearance: none;
                 -webkit-appearance: none;
                 width: 18px;
@@ -603,11 +602,11 @@
                 transition: all 0.2s ease;
                 position: relative;
             }
-            input[type="radio"]:checked {
+            input[type='radio']:checked {
                 border-color: #00f0ff;
                 background: rgba(0, 240, 255, 0.15);
             }
-            input[type="radio"]:checked::after {
+            input[type='radio']:checked::after {
                 content: '';
                 position: absolute;
                 top: 50%;
@@ -618,7 +617,7 @@
                 background: #00f0ff;
                 border-radius: 50%;
             }
-            input[type="radio"]:focus-visible {
+            input[type='radio']:focus-visible {
                 box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.4);
             }
 
@@ -657,7 +656,9 @@
                 font-size: 15px;
                 font-family: 'Rajdhani', 'Segoe UI', sans-serif;
                 outline: none;
-                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+                transition:
+                    border-color 0.2s ease,
+                    box-shadow 0.2s ease;
             }
             .asset-list-search input:focus {
                 border-color: rgba(0, 240, 255, 0.55);
@@ -676,6 +677,8 @@
                 pointer-events: none;
             }
         </style>
+        <link rel="stylesheet" href="../../styles/region-themes.css" />
+        <link rel="stylesheet" href="../../styles/productivity.css" />
     </head>
     <body class="app-shell">
         <div class="pointer-glow"></div>
@@ -719,325 +722,378 @@
             </ul>
         </aside>
         <main class="main-content">
-        <div class="project-detail-container scroll-section">
-            <!-- 返回按钮 -->
-            <button id="back-to-projects" class="back-btn secondary-btn">
-                <i class="fas fa-arrow-left"></i> 返回项目列表
-            </button>
+            <div class="project-detail-container scroll-section">
+                <!-- 返回按钮 -->
+                <button id="back-to-projects" class="back-btn secondary-btn">
+                    <i class="fas fa-arrow-left"></i> 返回项目列表
+                </button>
 
-            <!-- 项目基本信息 -->
-            <div class="project-header">
-                <h2 id="project-title"><span id="project-type-badge"></span> <span id="project-name"></span></h2>
-                <div class="project-info">
-                    <span><i class="far fa-calendar-alt"></i> 创建时间：<span id="project-create-time"></span></span>
-                    <span><i class="fas fa-code-branch"></i> 版本：v<span id="project-version"></span></span>
-                    <span><i class="fas fa-images"></i> 素材数：<span id="project-asset-count"></span></span>
-                </div>
-                <p id="project-description"></p>
-                <div class="project-actions">
-                    <button id="edit-project-btn" class="secondary-btn"><i class="fas fa-edit"></i> 编辑项目</button>
-                    <button id="version-history-btn" class="secondary-btn">
-                        <i class="fas fa-history"></i> 版本历史
-                    </button>
-                    <button id="share-project-btn" class="secondary-btn">
-                        <i class="fas fa-share-alt"></i> 分享项目
-                    </button>
-                    <button id="unify-style-btn" class="primary-btn">
-                        <i class="fas fa-paint-brush"></i> 统一风格
-                    </button>
-                </div>
-            </div>
-
-            <!-- 素材上传区域 -->
-            <div class="asset-upload-section">
-                <h3>添加素材</h3>
-                <div class="upload-tabs">
-                    <button class="upload-tab active" data-tab="local-upload">本地导入</button>
-                    <button class="upload-tab" data-tab="ai-generate">AI生成</button>
-                    <button class="upload-tab" data-tab="asset-library">素材库</button>
+                <!-- 项目基本信息 -->
+                <div class="project-header">
+                    <h2 id="project-title"><span id="project-type-badge"></span> <span id="project-name"></span></h2>
+                    <div class="project-info">
+                        <span
+                            ><i class="far fa-calendar-alt"></i> 创建时间：<span id="project-create-time"></span
+                        ></span>
+                        <span><i class="fas fa-code-branch"></i> 版本：v<span id="project-version"></span></span>
+                        <span><i class="fas fa-images"></i> 素材数：<span id="project-asset-count"></span></span>
+                    </div>
+                    <p id="project-description"></p>
+                    <div class="project-actions">
+                        <button id="edit-project-btn" class="secondary-btn">
+                            <i class="fas fa-edit"></i> 编辑项目
+                        </button>
+                        <button id="version-history-btn" class="secondary-btn">
+                            <i class="fas fa-history"></i> 版本历史
+                        </button>
+                        <button id="share-project-btn" class="secondary-btn">
+                            <i class="fas fa-share-alt"></i> 分享项目
+                        </button>
+                        <button id="unify-style-btn" class="primary-btn">
+                            <i class="fas fa-paint-brush"></i> 统一风格
+                        </button>
+                    </div>
                 </div>
 
-                <!-- 本地导入 -->
-                <div class="upload-content active" id="local-upload">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>素材名称</label>
-                            <input type="text" id="local-asset-name" placeholder="请输入素材名称" />
+                <!-- 素材上传区域 -->
+                <div class="asset-upload-section">
+                    <h3>添加素材</h3>
+                    <div class="upload-tabs">
+                        <button class="upload-tab active" data-tab="local-upload">本地导入</button>
+                        <button class="upload-tab" data-tab="ai-generate">AI生成</button>
+                        <button class="upload-tab" data-tab="asset-library">素材库</button>
+                    </div>
+
+                    <!-- 本地导入 -->
+                    <div class="upload-content active" id="local-upload">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>素材名称</label>
+                                <input type="text" id="local-asset-name" placeholder="请输入素材名称" />
+                            </div>
+                            <div class="form-group">
+                                <label>素材类型</label>
+                                <select id="local-asset-type">
+                                    <option value="image">图片</option>
+                                    <option value="character">角色</option>
+                                    <option value="environment">场景</option>
+                                    <option value="prop">道具</option>
+                                    <option value="icon">图标</option>
+                                    <option value="button">按钮</option>
+                                    <option value="component">组件</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>上传文件</label>
+                                <div class="file-input-wrapper">
+                                    <button class="secondary-btn">选择文件</button>
+                                    <input type="file" id="local-file-input" accept="image/*" />
+                                </div>
+                                <p id="selected-file-name" class="file-name">未选择文件</p>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label>素材类型</label>
-                            <select id="local-asset-type">
-                                <option value="image">图片</option>
+                            <label>素材描述</label>
+                            <textarea id="local-asset-desc" placeholder="请输入素材描述"></textarea>
+                        </div>
+                        <button id="upload-asset-btn" class="primary-btn">上传素材</button>
+                    </div>
+
+                    <!-- AI生成 -->
+                    <div class="upload-content" id="ai-generate">
+                        <div class="form-group">
+                            <label>生成方式</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="ai-method" value="sketch" checked /> 从线稿生成</label>
+                                <label><input type="radio" name="ai-method" value="description" /> 从描述生成</label>
+                            </div>
+                        </div>
+
+                        <!-- 从线稿生成 -->
+                        <div id="sketch-generate" class="ai-method-content">
+                            <div class="form-group">
+                                <label>线稿图片URL</label>
+                                <input type="text" id="sketch-url" placeholder="请输入线稿图片URL" />
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>目标风格</label>
+                                    <select id="sketch-style">
+                                        <option value="卡通">卡通风格</option>
+                                        <option value="写实">写实风格</option>
+                                        <option value="像素">像素风格</option>
+                                        <option value="手绘">手绘风格</option>
+                                        <option value="赛博朋克">赛博朋克风格</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>输出类型</label>
+                                    <select id="sketch-output-type">
+                                        <option value="character">角色</option>
+                                        <option value="environment">场景</option>
+                                        <option value="prop">道具</option>
+                                        <option value="image">图片</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 从描述生成 -->
+                        <div id="description-generate" class="ai-method-content hidden">
+                            <div class="form-group">
+                                <label>素材描述</label>
+                                <textarea id="asset-description" placeholder="请详细描述您想要生成的素材"></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>目标风格</label>
+                                    <select id="desc-style">
+                                        <option value="卡通">卡通风格</option>
+                                        <option value="写实">写实风格</option>
+                                        <option value="像素">像素风格</option>
+                                        <option value="手绘">手绘风格</option>
+                                        <option value="赛博朋克">赛博朋克风格</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>输出类型</label>
+                                    <select id="desc-output-type">
+                                        <option value="character">角色</option>
+                                        <option value="environment">场景</option>
+                                        <option value="prop">道具</option>
+                                        <option value="image">图片</option>
+                                        <option value="icon">图标</option>
+                                        <option value="button">按钮</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="generate-asset-btn" class="primary-btn">AI生成素材</button>
+                    </div>
+
+                    <!-- 素材库 -->
+                    <div class="upload-content" id="asset-library">
+                        <div class="form-group">
+                            <label>搜索素材</label>
+                            <input type="text" id="library-search" placeholder="请输入素材关键词" />
+                        </div>
+                        <div class="form-group">
+                            <label>素材分类</label>
+                            <select id="library-category">
+                                <option value="all">全部素材</option>
                                 <option value="character">角色</option>
                                 <option value="environment">场景</option>
                                 <option value="prop">道具</option>
                                 <option value="icon">图标</option>
                                 <option value="button">按钮</option>
-                                <option value="component">组件</option>
+                            </select>
+                        </div>
+
+                        <!-- 素材库预览 -->
+                        <div class="asset-library-grid">
+                            <div class="asset-library-item" data-id="lib1">
+                                <div
+                                    class="asset-preview"
+                                    style="
+                                        background: linear-gradient(
+                                            135deg,
+                                            rgba(0, 240, 255, 0.1),
+                                            rgba(139, 92, 246, 0.1)
+                                        );
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        height: 120px;
+                                        color: #8b5cf6;
+                                        font-size: 14px;
+                                    "
+                                >
+                                    <i class="fas fa-user" style="font-size: 24px; margin-right: 8px"></i> 角色素材
+                                </div>
+                                <div class="asset-info">
+                                    <h4>卡通角色</h4>
+                                    <span class="asset-type">角色</span>
+                                    <button class="add-from-library-btn" data-id="lib1">添加</button>
+                                </div>
+                            </div>
+                            <div class="asset-library-item" data-id="lib2">
+                                <div
+                                    class="asset-preview"
+                                    style="
+                                        background: linear-gradient(
+                                            135deg,
+                                            rgba(0, 240, 255, 0.1),
+                                            rgba(139, 92, 246, 0.1)
+                                        );
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        height: 120px;
+                                        color: #00f0ff;
+                                        font-size: 14px;
+                                    "
+                                >
+                                    <i class="fas fa-mountain" style="font-size: 24px; margin-right: 8px"></i> 场景素材
+                                </div>
+                                <div class="asset-info">
+                                    <h4>森林场景</h4>
+                                    <span class="asset-type">场景</span>
+                                    <button class="add-from-library-btn" data-id="lib2">添加</button>
+                                </div>
+                            </div>
+                            <div class="asset-library-item" data-id="lib3">
+                                <div
+                                    class="asset-preview"
+                                    style="
+                                        background: linear-gradient(
+                                            135deg,
+                                            rgba(0, 240, 255, 0.1),
+                                            rgba(139, 92, 246, 0.1)
+                                        );
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        height: 120px;
+                                        color: #f59e0b;
+                                        font-size: 14px;
+                                    "
+                                >
+                                    <i class="fas fa-cube" style="font-size: 24px; margin-right: 8px"></i> 道具素材
+                                </div>
+                                <div class="asset-info">
+                                    <h4>魔法书</h4>
+                                    <span class="asset-type">道具</span>
+                                    <button class="add-from-library-btn" data-id="lib3">添加</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 素材列表 -->
+                <div class="asset-list-section">
+                    <h3>项目素材</h3>
+                    <div class="asset-list-search">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <input type="text" id="assetSearchInput" placeholder="搜索素材名称..." aria-label="搜索素材" />
+                    </div>
+                    <div id="empty-assets" class="empty-assets hidden">
+                        <i class="fas fa-image"></i>
+                        <p>暂无素材，点击上方"添加素材"按钮开始添加</p>
+                    </div>
+                    <div id="asset-grid" class="asset-grid"></div>
+                </div>
+            </div>
+
+            <!-- 版本历史弹窗（默认隐藏） -->
+            <div id="version-history-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>版本历史</h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="version-list" class="version-list"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="secondary-btn close-modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分享项目弹窗（默认隐藏） -->
+            <div id="share-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>分享项目</h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p>复制以下链接分享项目：</p>
+                        <div class="share-link-container">
+                            <input type="text" id="share-link" readonly />
+                            <button id="copy-link-btn">复制</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="secondary-btn close-modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 编辑项目弹窗（默认隐藏） -->
+            <div id="edit-project-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>编辑项目</h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="edit-project-id" />
+                        <div class="form-group">
+                            <label>项目名称*</label>
+                            <input type="text" id="edit-project-name" required />
+                        </div>
+                        <div class="form-group">
+                            <label>项目描述</label>
+                            <textarea id="edit-project-desc"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>项目类型</label>
+                            <select id="edit-project-type">
+                                <option value="ui">UI设计</option>
+                                <option value="game">游戏界面</option>
+                                <option value="character">角色设计</option>
+                                <option value="environment">场景设计</option>
+                                <option value="other">其他</option>
                             </select>
                         </div>
                     </div>
-                    <div class="form-row">
+                    <div class="modal-footer">
+                        <button class="secondary-btn close-modal">取消</button>
+                        <button id="save-edit-btn" class="primary-btn">保存</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 统一风格弹窗（默认隐藏） -->
+            <div id="unify-style-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>统一项目风格</h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="unify-style-project-id" />
                         <div class="form-group">
-                            <label>上传文件</label>
-                            <div class="file-input-wrapper">
-                                <button class="secondary-btn">选择文件</button>
-                                <input type="file" id="local-file-input" accept="image/*" />
-                            </div>
-                            <p id="selected-file-name" class="file-name">未选择文件</p>
+                            <label>选择目标风格</label>
+                            <select id="target-style">
+                                <option value="卡通">卡通风格</option>
+                                <option value="写实">写实风格</option>
+                                <option value="像素">像素风格</option>
+                                <option value="手绘">手绘风格</option>
+                                <option value="赛博朋克">赛博朋克风格</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>素材描述</label>
-                        <textarea id="local-asset-desc" placeholder="请输入素材描述"></textarea>
-                    </div>
-                    <button id="upload-asset-btn" class="primary-btn">上传素材</button>
-                </div>
-
-                <!-- AI生成 -->
-                <div class="upload-content" id="ai-generate">
-                    <div class="form-group">
-                        <label>生成方式</label>
-                        <div class="radio-group">
-                            <label><input type="radio" name="ai-method" value="sketch" checked /> 从线稿生成</label>
-                            <label><input type="radio" name="ai-method" value="description" /> 从描述生成</label>
-                        </div>
-                    </div>
-
-                    <!-- 从线稿生成 -->
-                    <div id="sketch-generate" class="ai-method-content">
-                        <div class="form-group">
-                            <label>线稿图片URL</label>
-                            <input type="text" id="sketch-url" placeholder="请输入线稿图片URL" />
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>目标风格</label>
-                                <select id="sketch-style">
-                                    <option value="卡通">卡通风格</option>
-                                    <option value="写实">写实风格</option>
-                                    <option value="像素">像素风格</option>
-                                    <option value="手绘">手绘风格</option>
-                                    <option value="赛博朋克">赛博朋克风格</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>输出类型</label>
-                                <select id="sketch-output-type">
-                                    <option value="character">角色</option>
-                                    <option value="environment">场景</option>
-                                    <option value="prop">道具</option>
-                                    <option value="image">图片</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 从描述生成 -->
-                    <div id="description-generate" class="ai-method-content hidden">
-                        <div class="form-group">
-                            <label>素材描述</label>
-                            <textarea id="asset-description" placeholder="请详细描述您想要生成的素材"></textarea>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>目标风格</label>
-                                <select id="desc-style">
-                                    <option value="卡通">卡通风格</option>
-                                    <option value="写实">写实风格</option>
-                                    <option value="像素">像素风格</option>
-                                    <option value="手绘">手绘风格</option>
-                                    <option value="赛博朋克">赛博朋克风格</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>输出类型</label>
-                                <select id="desc-output-type">
-                                    <option value="character">角色</option>
-                                    <option value="environment">场景</option>
-                                    <option value="prop">道具</option>
-                                    <option value="image">图片</option>
-                                    <option value="icon">图标</option>
-                                    <option value="button">按钮</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <button id="generate-asset-btn" class="primary-btn">AI生成素材</button>
-                </div>
-
-                <!-- 素材库 -->
-                <div class="upload-content" id="asset-library">
-                    <div class="form-group">
-                        <label>搜索素材</label>
-                        <input type="text" id="library-search" placeholder="请输入素材关键词" />
-                    </div>
-                    <div class="form-group">
-                        <label>素材分类</label>
-                        <select id="library-category">
-                            <option value="all">全部素材</option>
-                            <option value="character">角色</option>
-                            <option value="environment">场景</option>
-                            <option value="prop">道具</option>
-                            <option value="icon">图标</option>
-                            <option value="button">按钮</option>
-                        </select>
-                    </div>
-
-                    <!-- 素材库预览 -->
-                    <div class="asset-library-grid">
-                        <div class="asset-library-item" data-id="lib1">
-                            <div class="asset-preview" style="background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(139,92,246,0.1));display:flex;align-items:center;justify-content:center;height:120px;color:#8b5cf6;font-size:14px;">
-                                <i class="fas fa-user" style="font-size:24px;margin-right:8px;"></i> 角色素材
-                            </div>
-                            <div class="asset-info">
-                                <h4>卡通角色</h4>
-                                <span class="asset-type">角色</span>
-                                <button class="add-from-library-btn" data-id="lib1">添加</button>
-                            </div>
-                        </div>
-                        <div class="asset-library-item" data-id="lib2">
-                            <div class="asset-preview" style="background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(139,92,246,0.1));display:flex;align-items:center;justify-content:center;height:120px;color:#00f0ff;font-size:14px;">
-                                <i class="fas fa-mountain" style="font-size:24px;margin-right:8px;"></i> 场景素材
-                            </div>
-                            <div class="asset-info">
-                                <h4>森林场景</h4>
-                                <span class="asset-type">场景</span>
-                                <button class="add-from-library-btn" data-id="lib2">添加</button>
-                            </div>
-                        </div>
-                        <div class="asset-library-item" data-id="lib3">
-                            <div class="asset-preview" style="background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(139,92,246,0.1));display:flex;align-items:center;justify-content:center;height:120px;color:#f59e0b;font-size:14px;">
-                                <i class="fas fa-cube" style="font-size:24px;margin-right:8px;"></i> 道具素材
-                            </div>
-                            <div class="asset-info">
-                                <h4>魔法书</h4>
-                                <span class="asset-type">道具</span>
-                                <button class="add-from-library-btn" data-id="lib3">添加</button>
-                            </div>
-                        </div>
+                    <div class="modal-footer">
+                        <button class="secondary-btn close-modal">取消</button>
+                        <button id="confirm-unify-btn" class="primary-btn">确认统一</button>
                     </div>
                 </div>
             </div>
-
-            <!-- 素材列表 -->
-            <div class="asset-list-section">
-                <h3>项目素材</h3>
-                <div class="asset-list-search">
-                    <i class="fas fa-search" aria-hidden="true"></i>
-                    <input type="text" id="assetSearchInput" placeholder="搜索素材名称..." aria-label="搜索素材" />
-                </div>
-                <div id="empty-assets" class="empty-assets hidden">
-                    <i class="fas fa-image"></i>
-                    <p>暂无素材，点击上方"添加素材"按钮开始添加</p>
-                </div>
-                <div id="asset-grid" class="asset-grid"></div>
-            </div>
-        </div>
-
-        <!-- 版本历史弹窗（默认隐藏） -->
-        <div id="version-history-modal" class="modal hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>版本历史</h3>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div id="version-list" class="version-list"></div>
-                </div>
-                <div class="modal-footer">
-                    <button class="secondary-btn close-modal">关闭</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 分享项目弹窗（默认隐藏） -->
-        <div id="share-modal" class="modal hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>分享项目</h3>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p>复制以下链接分享项目：</p>
-                    <div class="share-link-container">
-                        <input type="text" id="share-link" readonly />
-                        <button id="copy-link-btn">复制</button>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="secondary-btn close-modal">关闭</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 编辑项目弹窗（默认隐藏） -->
-        <div id="edit-project-modal" class="modal hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>编辑项目</h3>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="edit-project-id" />
-                    <div class="form-group">
-                        <label>项目名称*</label>
-                        <input type="text" id="edit-project-name" required />
-                    </div>
-                    <div class="form-group">
-                        <label>项目描述</label>
-                        <textarea id="edit-project-desc"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>项目类型</label>
-                        <select id="edit-project-type">
-                            <option value="ui">UI设计</option>
-                            <option value="game">游戏界面</option>
-                            <option value="character">角色设计</option>
-                            <option value="environment">场景设计</option>
-                            <option value="other">其他</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="secondary-btn close-modal">取消</button>
-                    <button id="save-edit-btn" class="primary-btn">保存</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 统一风格弹窗（默认隐藏） -->
-        <div id="unify-style-modal" class="modal hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>统一项目风格</h3>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="unify-style-project-id" />
-                    <div class="form-group">
-                        <label>选择目标风格</label>
-                        <select id="target-style">
-                            <option value="卡通">卡通风格</option>
-                            <option value="写实">写实风格</option>
-                            <option value="像素">像素风格</option>
-                            <option value="手绘">手绘风格</option>
-                            <option value="赛博朋克">赛博朋克风格</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="secondary-btn close-modal">取消</button>
-                    <button id="confirm-unify-btn" class="primary-btn">确认统一</button>
-                </div>
-            </div>
-        </div>
         </main>
 
         <!-- 备案信息 -->
         <footer class="beian-footer">
             <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
-                <img src="../../vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+                <img
+                    src="../../vendor/images/beian-icon.png"
+                    alt="公安备案"
+                    class="beian-icon"
+                />京公网安备11010802048813号
             </a>
             <span class="beian-separator">|</span>
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
@@ -1045,8 +1101,6 @@
 
         <script defer src="../../js/keyboard-shortcuts.js"></script>
         <script src="../../js/i18n.js"></script>
-        <script src="../../vendor/js/tsparticles.bundle.min.js"></script>
-        <script src="../../vendor/js/gsap.min.js"></script>
         <script src="../../js/region-themes.js"></script>
         <script src="../../js/session-guard.js"></script>
         <script defer src="../../js/user-storage-scope.js"></script>
@@ -1057,6 +1111,7 @@
         <script defer src="pm-shared.js"></script>
         <script defer src="project-detail-init.js"></script>
         <script defer src="project-detail.js"></script>
-            <script defer src="../../js/sw-register.js"></script>
+        <script defer src="../../js/productivity.js"></script>
+        <script defer src="../../js/sw-register.js"></script>
     </body>
 </html>

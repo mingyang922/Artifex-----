@@ -16,13 +16,15 @@
         }
 
         bindEvents() {
-            document.getElementById('closeMessageCenter').addEventListener('click', () => {
+            const closeBtn = document.getElementById('closeMessageCenter');
+            if (closeBtn) closeBtn.addEventListener('click', () => {
                 this.close();
             });
 
             document.querySelectorAll('.message-tab').forEach((tab) => {
                 tab.addEventListener('click', () => {
-                    this.switchTab(tab.dataset.messageTab);
+                    const tabType = tab.dataset.messageTab;
+                    if (tabType) this.switchTab(tabType);
                 });
             });
 

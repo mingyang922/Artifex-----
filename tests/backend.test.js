@@ -490,7 +490,7 @@ describe('provider-routing', () => {
         const result = await dispatchImageGeneration({ ...baseCtx, provider: 'mock' });
         assert.ok(typeof result === 'string');
         assert.ok(result.length > 0);
-        assert.ok(result.includes('placeholder.com'), 'mock should return a placeholder URL');
+        assert.ok(result.startsWith('data:image/svg+xml;base64,'), 'mock should return a CSP-compatible data URI');
     });
 
     it('dispatchImageGeneration with free provider returns URL or data URI', async () => {
@@ -568,12 +568,16 @@ describe('ssrf-protection', () => {
 
     it('should block IPv6 localhost ::1', () => {
         assert.equal(isBlockedHostname('::1'), true);
+        assert.equal(isBlockedHostname('[::1]'), true);
     });
 
     it('should block IPv6 private addresses', () => {
         assert.equal(isBlockedHostname('fc00::1'), true);
         assert.equal(isBlockedHostname('fd00::1'), true);
+        assert.equal(isBlockedHostname('fc12::1'), true);
+        assert.equal(isBlockedHostname('fdab::1'), true);
         assert.equal(isBlockedHostname('fe80::1'), true);
+        assert.equal(isBlockedHostname('fe90::1'), true);
         assert.equal(isBlockedHostname('::'), true);
     });
 

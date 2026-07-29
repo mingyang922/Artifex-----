@@ -56,7 +56,9 @@ class WsServer {
      */
     _authenticateAndRegister(ws, req) {
         ws.isAlive = true;
-        ws.on('pong', () => { ws.isAlive = true; });
+        ws.on('pong', () => {
+            ws.isAlive = true;
+        });
 
         // 解析 cookie
         const cookies = cookie.parse(req.headers.cookie || '');
@@ -68,9 +70,7 @@ class WsServer {
         }
 
         // express-session 签名格式: s:<sid>.<signature>
-        const sid = signedSid.startsWith('s:')
-            ? cookieSignature.unsign(signedSid.slice(2), this._sessionSecret)
-            : null;
+        const sid = signedSid.startsWith('s:') ? cookieSignature.unsign(signedSid.slice(2), this._sessionSecret) : null;
 
         if (!sid) {
             ws.close(4001, 'session cookie 签名无效');

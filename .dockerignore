@@ -5,6 +5,8 @@ dist
 *.sqlite-shm
 *.sqlite-wal
 .env
+config/.env
+backend/.env
 backend/data
 logs
 tests

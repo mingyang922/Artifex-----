@@ -8,7 +8,6 @@ const { spawnSync } = require('child_process');
 
 function sqliteOk() {
     try {
-         
         const Database = require('better-sqlite3');
         new Database(':memory:').close();
         return true;

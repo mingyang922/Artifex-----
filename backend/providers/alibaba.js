@@ -7,6 +7,7 @@
  * 阿里云通义千问 / 万相 API 提供商（从 proxy.js 提取）
  */
 const axios = require('axios');
+const logger = require('../lib/logger');
 const { extractDashscopeMultimodalText } = require('../lib/utils');
 
 // 阿里云通义千问API代理
@@ -18,7 +19,7 @@ async function handleAlibabaProxy(req, res, { runtimeConfig, API_CONFIG, getUser
             prompt,
             model = (userAlibabaConfig && userAlibabaConfig.model) || runtimeConfig.alibaba.model,
             max_tokens = 1000,
-        } = req.body;
+        } = req.body || {};
 
         if (!apiKey || apiKey === 'YOUR_ALIBABA_API_KEY') {
             return res.status(400).json({
@@ -44,13 +45,12 @@ async function handleAlibabaProxy(req, res, { runtimeConfig, API_CONFIG, getUser
 
         res.json(response.data);
     } catch (error) {
-        console.error('阿里云API代理错误:', error.message || error);
+        logger.error('阿里云API代理错误:', error.message || error);
 
         if (error.response) {
             res.status(error.response.status).json({
                 error: '阿里云API错误',
-                message:
-                    (error.response.data && error.response.data.message) || '阿里云 API 请求失败',
+                message: (error.response.data && error.response.data.message) || '阿里云 API 请求失败',
                 provider: 'alibaba',
                 code: error.response.status,
             });
@@ -172,13 +172,14 @@ async function handleAlibabaVisionProxy(req, res, { runtimeConfig, API_CONFIG, g
     try {
         const userAlibabaConfig = getUserProviderConfig(req.currentUser.id, 'alibaba');
         const apiKey = userAlibabaConfig && userAlibabaConfig.apiKey;
+        const body = req.body || {};
         const model =
-            req.body.model ||
+            body.model ||
             (userAlibabaConfig && userAlibabaConfig.visionModel) ||
             runtimeConfig.alibaba.visionModel ||
             'qwen-vl-plus';
-        const max_tokens = Math.min(2048, Math.max(64, parseInt(req.body.max_tokens, 10) || 512));
-        const rawImage = req.body.image_base64;
+        const max_tokens = Math.min(2048, Math.max(64, parseInt(body.max_tokens, 10) || 512));
+        const rawImage = body.image_base64;
 
         if (!apiKey || apiKey === 'YOUR_ALIBABA_API_KEY') {
             return res.status(400).json({
@@ -226,7 +227,7 @@ async function handleAlibabaVisionProxy(req, res, { runtimeConfig, API_CONFIG, g
 
         const text = extractDashscopeMultimodalText(response.data);
         if (!text) {
-            console.error('alibaba-vision-proxy 未解析到文本:', JSON.stringify(response.data).slice(0, 800));
+            logger.error('alibaba-vision-proxy 未解析到文本:', JSON.stringify(response.data).slice(0, 800));
             return res.status(502).json({
                 error: '解析失败',
                 message: '多模态接口返回格式异常，未找到正文',
@@ -236,7 +237,7 @@ async function handleAlibabaVisionProxy(req, res, { runtimeConfig, API_CONFIG, g
 
         res.json({ output: { text }, model, request_id: response.data && response.data.request_id });
     } catch (error) {
-        console.error('阿里云多模态代理错误:', error.message || error);
+        logger.error('阿里云多模态代理错误:', error.message || error);
         if (error.response) {
             const body = error.response.data;
             res.status(error.response.status).json({

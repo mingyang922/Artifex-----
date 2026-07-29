@@ -10,8 +10,8 @@
         "start": "node backend/proxy.js",
         "start:open": "concurrently -n backend,ready \"cross-env NODE_ENV=development npm start\" \"wait-on http://127.0.0.1:3000/api/health -t 120000 && node scripts/open-browser.js\"",
         "dev": "concurrently -n backend,vite \"nodemon backend/proxy.js\" \"vite\"",
-        "build": "vite build && node scripts/prepare-dist.js",
-        "build:with-sw": "npm run build && node scripts/generate-sw-manifest.js",
+        "build": "vite build && node scripts/prepare-dist.js && node scripts/generate-sw-manifest.js",
+        "build:with-sw": "npm run build",
         "preview": "vite preview",
         "lint": "eslint --no-error-on-unmatched-pattern backend js modules scripts *.js",
         "lint:fix": "npm run lint -- --fix",
@@ -37,7 +37,7 @@
         "express-session": "^1.19.0",
         "form-data": "^4.0.5",
         "helmet": "^8.2.0",
-        "tencentcloud-sdk-nodejs": "^4.1.237",
+        "tencentcloud-sdk-nodejs": "^4.0.821",
         "ws": "^8.21.0"
     },
     "devDependencies": {
@@ -63,5 +63,8 @@
     "license": "MIT",
     "engines": {
         "node": ">=22.14.0"
+    },
+    "volta": {
+        "node": "22.22.0"
     }
 }

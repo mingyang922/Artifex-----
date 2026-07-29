@@ -39,6 +39,7 @@ function switchForm(formId) {
 
 function showMessage(text, type) {
     const message = document.getElementById('message');
+    if (!message) return;
     message.textContent = text;
     message.className = 'message ' + type;
     message.classList.add('show');
@@ -174,9 +175,7 @@ function setupRegisterForm() {
                     /* ignore */
                 }
             }
-            const registrationTime = new Date(
-                data.user && data.user.created_at ? data.user.created_at : Date.now()
-            );
+            const registrationTime = new Date(data.user && data.user.created_at ? data.user.created_at : Date.now());
             const registrationData = {
                 registrationDate: registrationTime.toISOString(),
                 registrationDateFormatted:

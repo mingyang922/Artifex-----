@@ -4,6 +4,11 @@
  * 版本: 1.3.3 */
 (function exposePmShared() {
     'use strict';
+    function tr(key, fallback) {
+        if (!window.i18n) return fallback;
+        const translated = window.i18n.t(key);
+        return translated === key ? fallback : translated;
+    }
     function pmStorageKey(base) {
         if (typeof GameUiUserScope !== 'undefined' && typeof GameUiUserScope.key === 'function') {
             return GameUiUserScope.key(base);
@@ -30,10 +35,10 @@
         if (window.TechUI) {
             const opts = Object.assign(
                 {
-                    title: '操作提示',
+                    title: tr('common.prompt', '操作提示'),
                     message: '',
-                    confirmText: '确定',
-                    cancelText: '取消',
+                    confirmText: tr('common.confirm', '确定'),
+                    cancelText: tr('common.cancel', '取消'),
                     showCancel: false,
                 },
                 options || {}
@@ -46,10 +51,10 @@
 
         const opts = Object.assign(
             {
-                title: '操作提示',
+                title: tr('common.prompt', '操作提示'),
                 message: '',
-                confirmText: '确定',
-                cancelText: '取消',
+                confirmText: tr('common.confirm', '确定'),
+                cancelText: tr('common.cancel', '取消'),
                 showCancel: false,
             },
             options || {}
@@ -142,48 +147,61 @@
         if (!isoString) return '-';
         const d = new Date(isoString);
         if (Number.isNaN(d.getTime())) return '-';
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        const locales = { zh: 'zh-CN', zht: 'zh-TW', en: 'en-US', ja: 'ja-JP', ko: 'ko-KR' };
+        const lang = window.i18n ? window.i18n.getLanguage() : 'zh';
+        return new Intl.DateTimeFormat(locales[lang] || 'zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+        }).format(d);
     }
 
     function getProjectTypeName(type) {
         const map = {
-            ui: 'UI设计',
-            game: '游戏界面',
-            character: '角色设计',
-            environment: '场景设计',
-            action: '动作游戏',
-            roleplay: '角色扮演',
-            strategy: '策略游戏',
-            simulation: '模拟经营',
-            puzzle: '益智解谜',
-            other: '其他',
+            ui: tr('pm.typeUi', 'UI设计'),
+            game: tr('pm.typeGame', '游戏界面'),
+            character: tr('pm.typeCharacter', '角色设计'),
+            environment: tr('pm.typeEnvironment', '场景设计'),
+            action: tr('pm.typeAction', '动作游戏'),
+            roleplay: tr('pm.typeRoleplay', '角色扮演'),
+            strategy: tr('pm.typeStrategy', '策略游戏'),
+            simulation: tr('pm.typeSimulation', '模拟经营'),
+            puzzle: tr('pm.typePuzzle', '益智解谜'),
+            other: tr('pm.typeOther', '其他'),
         };
-        return map[type] || type || '未分类';
+        return map[type] || type || tr('pm.uncategorized', '未分类');
     }
 
     function getAssetTypeName(type) {
         const map = {
-            image: '图片',
-            icon: '图标',
-            button: '按钮',
-            component: '组件',
-            character: '角色',
-            scene: '场景',
-            environment: '场景',
-            prop: '道具',
+            image: tr('pm.assetImage', '图片'),
+            icon: tr('pm.assetIcon', '图标'),
+            button: tr('pm.assetButton', '按钮'),
+            component: tr('pm.assetComponent', '组件'),
+            character: tr('pm.assetCharacter', '角色'),
+            scene: tr('pm.assetEnvironment', '场景'),
+            environment: tr('pm.assetEnvironment', '场景'),
+            prop: tr('pm.assetProp', '道具'),
             ui: 'UI',
-            effect: '特效',
-            animation: '动画',
-            other: '其他',
+            effect: tr('pm.assetEffect', '特效'),
+            animation: tr('pm.assetAnimation', '动画'),
+            other: tr('pm.typeOther', '其他'),
         };
-        return map[type] || type || '未分类';
+        return map[type] || type || tr('pm.uncategorized', '未分类');
     }
 
     // escapeHtml 由 js/html-utils.js 提供（全局函数）
     function escapeHtml(str) {
         if (typeof window.escapeHtml === 'function') return window.escapeHtml(str);
         if (!str) return '';
-        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
     window.PMShared = {

@@ -6,6 +6,7 @@
 /**
  * 共享工具函数（从 proxy.js 提取）
  */
+const logger = require('./logger');
 
 // —— 腾讯云 CAM 密钥工具 ——
 
@@ -55,45 +56,6 @@ function assertTencentCamCredential(secretId, secretKey) {
         err.tencentValidationCode = v.code;
         throw err;
     }
-}
-
-// —— 完整的腾讯云 TC3-HMAC-SHA256 签名算法 ——
-
-function generateSignature(
-    secretId,
-    secretKey,
-    timestamp,
-    payload,
-    service = 'hunyuan',
-    endpoint = 'hunyuan.tencentcloudapi.com'
-) {
-    const crypto = require('crypto');
-    const method = 'POST';
-    const canonicalUri = '/';
-    const canonicalQueryString = '';
-    const canonicalHeaders = `content-type:application/json\nhost:${endpoint}\n`;
-    const signedHeaders = 'content-type;host';
-
-    const hashedPayload = crypto.createHash('sha256').update(payload).digest('hex');
-    const canonicalRequest = `${method}\n${canonicalUri}\n${canonicalQueryString}\n${canonicalHeaders}\n${signedHeaders}\n${hashedPayload}`;
-
-    const algorithm = 'TC3-HMAC-SHA256';
-    const date = new Date(timestamp * 1000).toISOString().split('T')[0].replace(/-/g, '');
-    const credentialScope = `${date}/${service}/tc3_request`;
-
-    const hashedCanonicalRequest = crypto.createHash('sha256').update(canonicalRequest).digest('hex');
-    const stringToSign = `${algorithm}\n${timestamp}\n${credentialScope}\n${hashedCanonicalRequest}`;
-
-    const secretDate = crypto
-        .createHmac('sha256', 'TC3' + secretKey)
-        .update(date)
-        .digest();
-    const secretService = crypto.createHmac('sha256', secretDate).update(service).digest();
-    const secretSigning = crypto.createHmac('sha256', secretService).update('tc3_request').digest();
-
-    const signature = crypto.createHmac('sha256', secretSigning).update(stringToSign).digest('hex');
-
-    return `${algorithm} Credential=${secretId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
 }
 
 // —— 即梦 / 图片通用工具 ——
@@ -195,9 +157,18 @@ function clamp01Range(v, min, max, fallback) {
 function generateMockImage(prompt, size) {
     const colors = ['667eea', '764ba2', 'f093fb', 'f5576c', '4facfe', '00f2fe'];
     const color = colors[Math.floor(Math.random() * colors.length)];
-    const sizeStr = size || '512x512';
-    const promptText = encodeURIComponent(prompt.substring(0, 20));
-    return `https://via.placeholder.com/${sizeStr}/${color}/ffffff?text=${promptText}`;
+    const [rawWidth, rawHeight] = String(size || '512x512').split('x');
+    const width = Math.min(2048, Math.max(64, parseInt(rawWidth, 10) || 512));
+    const height = Math.min(2048, Math.max(64, parseInt(rawHeight, 10) || 512));
+    const promptText = String(prompt || '')
+        .slice(0, 40)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="100%" height="100%" fill="#${color}"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="${Math.max(16, Math.round(Math.min(width, height) / 16))}">${promptText}</text></svg>`;
+    return `data:image/svg+xml;base64,${Buffer.from(svg, 'utf8').toString('base64')}`;
 }
 
 async function callFreeImageAPI(prompt, size) {
@@ -225,7 +196,8 @@ async function callFreeImageAPI(prompt, size) {
         } catch (_e) {
             const w = Math.max(256, parseInt(width, 10) || 512);
             const h = Math.max(256, parseInt(height, 10) || 512);
-            const safePrompt = String(prompt || 'FREE').slice(0, 36)
+            const safePrompt = String(prompt || 'FREE')
+                .slice(0, 36)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
@@ -278,14 +250,17 @@ function getEncryptionKey() {
     const key = process.env.ENCRYPTION_KEY || process.env.SESSION_SECRET;
     const isProd = (process.env.NODE_ENV || 'development') === 'production';
     if (!key && isProd) {
-        console.error('FATAL: NODE_ENV=production requires ENCRYPTION_KEY or SESSION_SECRET for API key encryption.');
+        logger.error('FATAL: NODE_ENV=production requires ENCRYPTION_KEY or SESSION_SECRET for API key encryption.');
         process.exit(1);
     }
     if (!key) {
-        console.warn('[utils] 警告: 未设置 ENCRYPTION_KEY 或 SESSION_SECRET，API 密钥加密使用默认值（仅限开发环境）');
+        logger.warn('[utils] 警告: 未设置 ENCRYPTION_KEY 或 SESSION_SECRET，API 密钥加密使用默认值（仅限开发环境）');
     }
     // 确保密钥为 32 字节
-    return crypto.createHash('sha256').update(key || 'artifex-dev-only-default-key').digest();
+    return crypto
+        .createHash('sha256')
+        .update(key || 'artifex-dev-only-default-key')
+        .digest();
 }
 
 /**
@@ -338,7 +313,7 @@ function decryptText(encryptedText) {
         return encryptedText;
     } catch (_e) {
         // 解密失败（密钥轮换等）返回空字符串，避免使用错误数据
-        console.warn('[utils] decryptText 解密失败，可能密钥已变更:', _e.message);
+        logger.warn('[utils] decryptText 解密失败，可能密钥已变更:', _e.message);
         return '';
     }
 }
@@ -381,7 +356,6 @@ module.exports = {
     getTencentCamCredentials,
     validateTencentCamCredential,
     assertTencentCamCredential,
-    generateSignature,
     normalizeJimengApiKey,
     normalizePixelSize,
     parseJimengImageResponse,

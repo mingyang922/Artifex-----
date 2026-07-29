@@ -4,18 +4,16 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Artifex - 用户中心</title>
-        <link rel="manifest" href="../../manifest.json">
-        <meta name="theme-color" content="#00f0ff">
+        <link rel="manifest" href="../../manifest.json" />
+        <meta name="theme-color" content="#00f0ff" />
+        <script src="../../js/theme-bootstrap.js"></script>
         <link rel="stylesheet" href="../../styles/app-shell.css" />
-        <link rel="stylesheet" href="../../styles/region-themes.css" />
-        <link rel="stylesheet" href="../../styles/theme-japan.css" />
-        <link
-            href="../../vendor/css/google-fonts.css"
-            rel="stylesheet"
-        />
+        <link href="../../vendor/css/google-fonts.css" rel="stylesheet" />
         <link href="../../vendor/css/font-awesome.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="../../styles/ui-kit.css" />
         <link rel="stylesheet" href="user-center-styles.css" />
+        <link rel="stylesheet" href="../../styles/region-themes.css" />
+        <link rel="stylesheet" href="../../styles/productivity.css" />
     </head>
     <body class="app-shell" data-app-page="user-center">
         <div class="pointer-glow" aria-hidden="true"></div>
@@ -79,7 +77,13 @@
                 <div class="top-bar">
                     <div class="search-bar">
                         <i class="fas fa-search" aria-hidden="true"></i>
-                        <input type="text" placeholder="搜索用户设置..." data-i18n="common.search" data-i18n-aria="common.search" aria-label="搜索" />
+                        <input
+                            type="text"
+                            placeholder="搜索用户设置..."
+                            data-i18n="common.search"
+                            data-i18n-aria="common.search"
+                            aria-label="搜索"
+                        />
                     </div>
                     <div class="user-menu">
                         <div class="notification-container">
@@ -144,7 +148,9 @@
 
                 <!-- 用户中心选项卡 -->
                 <div class="user-center-tabs">
-                    <div class="user-center-tab active" data-tab="personal-info" data-i18n="uc.personalInfo">个人信息</div>
+                    <div class="user-center-tab active" data-tab="personal-info" data-i18n="uc.personalInfo">
+                        个人信息
+                    </div>
                     <div class="user-center-tab" data-tab="api-settings" data-i18n="uc.apiSettings">API设置</div>
                     <div class="user-center-tab" data-tab="change-password" data-i18n="uc.changePassword">修改密码</div>
                     <div class="user-center-tab" data-tab="permissions" data-i18n="uc.permissions">权限设置</div>
@@ -185,20 +191,23 @@
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label" data-i18n="uc.role">身份</label>
-                                        <div id="userRole" style="
-                                            padding: 10px 15px;
-                                            background: rgba(0, 240, 255, 0.06);
-                                            border: 1px solid rgba(0, 240, 255, 0.2);
-                                            border-radius: 8px;
-                                            color: #00f0ff;
-                                            font-size: 14px;
-                                            font-weight: 600;
-                                            letter-spacing: 1px;
-                                            display: flex;
-                                            align-items: center;
-                                            gap: 8px;
-                                        ">
-                                            <i class="fas fa-shield-alt" style="font-size: 13px; opacity: 0.7;"></i>
+                                        <div
+                                            id="userRole"
+                                            style="
+                                                padding: 10px 15px;
+                                                background: rgba(0, 240, 255, 0.06);
+                                                border: 1px solid rgba(0, 240, 255, 0.2);
+                                                border-radius: 8px;
+                                                color: #00f0ff;
+                                                font-size: 14px;
+                                                font-weight: 600;
+                                                letter-spacing: 1px;
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 8px;
+                                            "
+                                        >
+                                            <i class="fas fa-shield-alt" style="font-size: 13px; opacity: 0.7"></i>
                                             <span>普通用户</span>
                                         </div>
                                     </div>
@@ -224,7 +233,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label" for="gender" data-i18n="uc.gender">性别</label>
-                                        <input type="hidden" id="gender" value="">
+                                        <input type="hidden" id="gender" value="" />
                                         <div class="tech-select tech-select-disabled" id="genderSelect" data-value="">
                                             <div class="tech-select-trigger">请选择</div>
                                             <div class="tech-select-menu">
@@ -448,7 +457,9 @@
                                         />
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label" for="language" data-i18n="uc.language">偏好语言</label>
+                                        <label class="form-label" for="language" data-i18n="uc.language"
+                                            >偏好语言</label
+                                        >
                                         <select class="form-select tech-select-native" id="language" disabled>
                                             <option value="zh" selected>简体中文</option>
                                             <option value="zht">繁體中文</option>
@@ -458,7 +469,9 @@
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label" for="region-theme-select" data-i18n="uc.themeSetting">主题风格</label>
+                                        <label class="form-label" for="region-theme-select" data-i18n="uc.themeSetting"
+                                            >主题风格</label
+                                        >
                                         <select class="form-select tech-select-native" id="region-theme-select">
                                             <option value="off" selected data-i18n="uc.themeOff">赛博朋克</option>
                                             <option value="auto" data-i18n="uc.themeAuto">跟随语言地区</option>
@@ -468,12 +481,21 @@
                                             <option value="uk" data-i18n="uc.themeUk">英伦油画</option>
                                             <option value="tc" data-i18n="uc.themeTc">華夏雅韻</option>
                                         </select>
-                                        <p class="form-hint" style="color: #8888a0; font-size: 13px; margin-top: 6px" data-i18n="uc.themeDesc">
+                                        <p
+                                            class="form-hint"
+                                            style="color: #8888a0; font-size: 13px; margin-top: 6px"
+                                            data-i18n="uc.themeDesc"
+                                        >
                                             开启后页面风格将根据您的语言和地区自动变化，也可手动选择
                                         </p>
                                     </div>
                                     <div style="display: flex; gap: 10px; margin-top: 20px">
-                                        <button type="button" class="btn btn-primary" id="edit-info-btn" data-i18n="uc.editInfo">
+                                        <button
+                                            type="button"
+                                            class="btn btn-primary"
+                                            id="edit-info-btn"
+                                            data-i18n="uc.editInfo"
+                                        >
                                             修改信息
                                         </button>
                                         <button
@@ -504,7 +526,13 @@
                                     <div class="info-card-icon">
                                         <i class="fas fa-chart-line"></i>
                                     </div>
-                                    <h3 class="info-card-title" data-translate="account-stats" data-i18n="uc.accountStats">账户统计</h3>
+                                    <h3
+                                        class="info-card-title"
+                                        data-translate="account-stats"
+                                        data-i18n="uc.accountStats"
+                                    >
+                                        账户统计
+                                    </h3>
                                 </div>
                                 <div style="display: flex; flex-direction: column; gap: 15px">
                                     <div style="display: flex; justify-content: space-between; align-items: center">
@@ -657,7 +685,12 @@
                                             placeholder="请输入当前密码"
                                             autocomplete="current-password"
                                         />
-                                        <button type="button" class="password-toggle" id="toggle-current-password" aria-label="显示密码">
+                                        <button
+                                            type="button"
+                                            class="password-toggle"
+                                            id="toggle-current-password"
+                                            aria-label="显示密码"
+                                        >
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -694,7 +727,12 @@
                                             placeholder="请输入新密码"
                                             autocomplete="new-password"
                                         />
-                                        <button type="button" class="password-toggle" id="toggle-new-password" aria-label="显示密码">
+                                        <button
+                                            type="button"
+                                            class="password-toggle"
+                                            id="toggle-new-password"
+                                            aria-label="显示密码"
+                                        >
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -772,7 +810,12 @@
                                             placeholder="请再次输入新密码"
                                             autocomplete="new-password"
                                         />
-                                        <button type="button" class="password-toggle" id="toggle-confirm-password" aria-label="显示密码">
+                                        <button
+                                            type="button"
+                                            class="password-toggle"
+                                            id="toggle-confirm-password"
+                                            aria-label="显示密码"
+                                        >
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -1004,7 +1047,14 @@
                                 </div>
                             </div>
                             <div style="margin-top: 30px">
-                                <button type="button" class="btn btn-primary" id="save-permissions" data-i18n="uc.saveSettings">保存设置</button>
+                                <button
+                                    type="button"
+                                    class="btn btn-primary"
+                                    id="save-permissions"
+                                    data-i18n="uc.saveSettings"
+                                >
+                                    保存设置
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1037,11 +1087,19 @@
                                         ×
                                     </button>
                                 </div>
-                                <p style="color: #888; font-size: 14px; margin-bottom: 12px" data-i18n="uc.avatarFormats">
+                                <p
+                                    style="color: #888; font-size: 14px; margin-bottom: 12px"
+                                    data-i18n="uc.avatarFormats"
+                                >
                                     支持JPG、PNG、GIF格式，建议尺寸200x200像素
                                 </p>
                                 <div class="avatar-upload-actions">
-                                    <button type="button" class="btn btn-primary" id="upload-avatar-btn" data-i18n="uc.uploadAvatar">
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        id="upload-avatar-btn"
+                                        data-i18n="uc.uploadAvatar"
+                                    >
                                         上传新头像
                                     </button>
                                     <button
@@ -1085,7 +1143,10 @@
                                     <span style="color: #b0b0c0; margin-left: 10px">加载中...</span>
                                 </div>
                             </div>
-                            <div id="activity-load-more-wrap" style="text-align: center; margin-top: 20px; display: none">
+                            <div
+                                id="activity-load-more-wrap"
+                                style="text-align: center; margin-top: 20px; display: none"
+                            >
                                 <button type="button" class="btn btn-secondary" id="activity-load-more-btn">
                                     <i class="fas fa-chevron-down" style="margin-right: 6px"></i>加载更多
                                 </button>
@@ -1104,7 +1165,11 @@
         <!-- 备案信息 -->
         <footer class="beian-footer">
             <a href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802048813" rel="noreferrer" target="_blank">
-                <img src="../../vendor/images/beian-icon.png" alt="公安备案" class="beian-icon">京公网安备11010802048813号
+                <img
+                    src="../../vendor/images/beian-icon.png"
+                    alt="公安备案"
+                    class="beian-icon"
+                />京公网安备11010802048813号
             </a>
             <span class="beian-separator">|</span>
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">京ICP备2026031602号</a>
@@ -1112,8 +1177,6 @@
 
         <script defer src="../../js/keyboard-shortcuts.js"></script>
         <script src="../../js/i18n.js"></script>
-        <script src="../../vendor/js/tsparticles.bundle.min.js"></script>
-        <script src="../../vendor/js/gsap.min.js"></script>
         <script src="../../js/region-themes.js"></script>
         <script src="../../js/session-guard.js"></script>
         <script defer src="../../js/user-storage-scope.js"></script>
@@ -1131,6 +1194,7 @@
         <script defer src="user-center-activity.js"></script>
         <script defer src="user-center-page.js"></script>
         <script defer src="user-center-init.js"></script>
-            <script defer src="../../js/sw-register.js"></script>
+        <script defer src="../../js/productivity.js"></script>
+        <script defer src="../../js/sw-register.js"></script>
     </body>
 </html>

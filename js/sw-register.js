@@ -4,7 +4,10 @@
  */
 'use strict';
 
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+if (
+    'serviceWorker' in navigator &&
+    (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+) {
     window.addEventListener('load', () => {
         navigator.serviceWorker
             .register('/sw.js')
@@ -27,9 +30,12 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
                 });
 
                 // 定期检查更新（每 30 分钟）
-                setInterval(() => {
-                    registration.update().catch(() => {});
-                }, 30 * 60 * 1000);
+                setInterval(
+                    () => {
+                        registration.update().catch(() => {});
+                    },
+                    30 * 60 * 1000
+                );
             })
             .catch((error) => {
                 console.debug('[SW] 注册失败:', error);

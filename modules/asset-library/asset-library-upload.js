@@ -10,13 +10,11 @@
     'use strict';
 
     // ── 依赖注入（由 asset-library.js init 时调用 setDeps 传入） ──
-    let assets = null;
     let persistAssetItem = null;
     let uiToast = null;
     let escapeHtml = null;
 
     function setDeps(deps) {
-        assets = deps.assets;
         persistAssetItem = deps.persistAssetItem;
         uiToast = deps.uiToast;
         escapeHtml = deps.escapeHtml;
@@ -73,7 +71,8 @@
     }
 
     async function addAssetFromFile(file, defaultNameVal, categoryVal) {
-        const MAX_NON_IMAGE_FILE_SIZE = (window.ArtifexConstants && window.ArtifexConstants.MAX_NON_IMAGE_FILE_SIZE) || 2.5 * 1024 * 1024;
+        const MAX_NON_IMAGE_FILE_SIZE =
+            (window.ArtifexConstants && window.ArtifexConstants.MAX_NON_IMAGE_FILE_SIZE) || 2.5 * 1024 * 1024;
         const isImage = !!(file.type && file.type.startsWith('image/'));
         if (!isImage && file.size > MAX_NON_IMAGE_FILE_SIZE) {
             throw new Error(`文件过大（${(file.size / 1024 / 1024).toFixed(1)}MB），非图片建议不超过 2.5MB`);
@@ -186,62 +185,144 @@
         // URL 导入按钮
         const btnUrlImport = document.getElementById('btnUrlImport');
         if (btnUrlImport) {
-            btnUrlImport.addEventListener('click', function () { showUrlImportDialog(); });
+            btnUrlImport.addEventListener('click', function () {
+                showUrlImportDialog();
+            });
         }
     }
 
     // ── URL 导入对话框 ──
     function showUrlImportDialog() {
-        const dialog = document.createElement('div'); dialog.className = 'url-import-dialog';
-        const box = document.createElement('div'); box.className = 'url-import-box';
-        const title = document.createElement('h3'); title.textContent = '从 URL 导入图片'; box.appendChild(title);
-        const urlField = document.createElement('input'); urlField.type = 'text'; urlField.className = 'url-field'; urlField.placeholder = '输入图片 URL (http/https)...';
+        const dialog = document.createElement('div');
+        dialog.className = 'url-import-dialog';
+        const box = document.createElement('div');
+        box.className = 'url-import-box';
+        const title = document.createElement('h3');
+        title.textContent = '从 URL 导入图片';
+        box.appendChild(title);
+        const urlField = document.createElement('input');
+        urlField.type = 'text';
+        urlField.className = 'url-field';
+        urlField.placeholder = '输入图片 URL (http/https)...';
         box.appendChild(urlField);
-        const preview = document.createElement('div'); preview.className = 'url-preview-area';
+        const preview = document.createElement('div');
+        preview.className = 'url-preview-area';
         preview.innerHTML = '<div class="preview-placeholder">输入 URL 后预览图片</div>';
         box.appendChild(preview);
-        const loadingDiv = document.createElement('div'); loadingDiv.className = 'url-import-loading'; loadingDiv.style.display = 'none';
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'url-import-loading';
+        loadingDiv.style.display = 'none';
         loadingDiv.innerHTML = '<div class="spinner"></div> 加载中...';
         box.appendChild(loadingDiv);
-        const actionsDiv = document.createElement('div'); actionsDiv.className = 'url-import-actions';
-        const importBtn = document.createElement('button'); importBtn.className = 'btn btn-primary'; importBtn.textContent = '导入'; importBtn.disabled = true; importBtn.style.opacity = '0.5';
-        const cancelBtn = document.createElement('button'); cancelBtn.className = 'btn'; cancelBtn.textContent = '取消'; cancelBtn.addEventListener('click', function() { dialog.remove(); });
-        actionsDiv.appendChild(cancelBtn); actionsDiv.appendChild(importBtn); box.appendChild(actionsDiv);
-        dialog.appendChild(box); dialog.addEventListener('click', function(e) { if (e.target === dialog) dialog.remove(); });
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'url-import-actions';
+        const importBtn = document.createElement('button');
+        importBtn.className = 'btn btn-primary';
+        importBtn.textContent = '导入';
+        importBtn.disabled = true;
+        importBtn.style.opacity = '0.5';
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn';
+        cancelBtn.textContent = '取消';
+        cancelBtn.addEventListener('click', function () {
+            dialog.remove();
+        });
+        actionsDiv.appendChild(cancelBtn);
+        actionsDiv.appendChild(importBtn);
+        box.appendChild(actionsDiv);
+        dialog.appendChild(box);
+        dialog.addEventListener('click', function (e) {
+            if (e.target === dialog) dialog.remove();
+        });
         document.body.appendChild(dialog);
-        let previewDataUrl = null; let debounceTimer = null;
-        urlField.addEventListener('input', function() {
-            clearTimeout(debounceTimer); const url = urlField.value.trim();
-            if (!url) { preview.innerHTML = '<div class="preview-placeholder">输入 URL 后预览图片</div>'; importBtn.disabled = true; importBtn.style.opacity = '0.5'; previewDataUrl = null; return; }
-            try { const parsed = new URL(url); if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') { preview.innerHTML = '<div class="preview-placeholder">仅支持 http/https 协议</div>'; return; } }
-            catch (_e) { preview.innerHTML = '<div class="preview-placeholder">无效的 URL</div>'; return; }
-            debounceTimer = setTimeout(function() {
-                loadingDiv.style.display = 'flex'; preview.innerHTML = '';
+        let previewDataUrl = null;
+        let debounceTimer = null;
+        urlField.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            const url = urlField.value.trim();
+            if (!url) {
+                preview.innerHTML = '<div class="preview-placeholder">输入 URL 后预览图片</div>';
+                importBtn.disabled = true;
+                importBtn.style.opacity = '0.5';
+                previewDataUrl = null;
+                return;
+            }
+            try {
+                const parsed = new URL(url);
+                if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+                    preview.innerHTML = '<div class="preview-placeholder">仅支持 http/https 协议</div>';
+                    return;
+                }
+            } catch (_e) {
+                preview.innerHTML = '<div class="preview-placeholder">无效的 URL</div>';
+                return;
+            }
+            debounceTimer = setTimeout(function () {
+                loadingDiv.style.display = 'flex';
+                preview.innerHTML = '';
                 const proxyUrl = '/api/proxy-image?url=' + encodeURIComponent(url);
                 fetch(proxyUrl, { credentials: 'include' })
-                .then(function(r) { if (!r.ok) throw new Error('图片加载失败'); return r.blob(); })
-                .then(function(blob) { return new Promise(function(resolve, reject) { const reader = new FileReader(); reader.onload = function() { resolve(reader.result); }; reader.onerror = reject; reader.readAsDataURL(blob); }); })
-                .then(function(dataUrl) {
-                    previewDataUrl = dataUrl; preview.innerHTML = '';
-                    const img = document.createElement('img'); img.src = dataUrl; preview.appendChild(img);
-                    importBtn.disabled = false; importBtn.style.opacity = '1'; loadingDiv.style.display = 'none';
-                })
-                .catch(function(err) {
-                    preview.innerHTML = '<div class="preview-placeholder">加载失败: ' + escapeHtml(err.message) + '</div>';
-                    loadingDiv.style.display = 'none'; previewDataUrl = null; importBtn.disabled = true; importBtn.style.opacity = '0.5';
-                });
+                    .then(function (r) {
+                        if (!r.ok) throw new Error('图片加载失败');
+                        return r.blob();
+                    })
+                    .then(function (blob) {
+                        return new Promise(function (resolve, reject) {
+                            const reader = new FileReader();
+                            reader.onload = function () {
+                                resolve(reader.result);
+                            };
+                            reader.onerror = reject;
+                            reader.readAsDataURL(blob);
+                        });
+                    })
+                    .then(function (dataUrl) {
+                        previewDataUrl = dataUrl;
+                        preview.innerHTML = '';
+                        const img = document.createElement('img');
+                        img.src = dataUrl;
+                        preview.appendChild(img);
+                        importBtn.disabled = false;
+                        importBtn.style.opacity = '1';
+                        loadingDiv.style.display = 'none';
+                    })
+                    .catch(function (err) {
+                        preview.innerHTML =
+                            '<div class="preview-placeholder">加载失败: ' + escapeHtml(err.message) + '</div>';
+                        loadingDiv.style.display = 'none';
+                        previewDataUrl = null;
+                        importBtn.disabled = true;
+                        importBtn.style.opacity = '0.5';
+                    });
             }, 500);
         });
-        importBtn.addEventListener('click', function() {
+        importBtn.addEventListener('click', function () {
             if (!previewDataUrl) return;
-            importBtn.disabled = true; importBtn.textContent = '导入中...';
+            importBtn.disabled = true;
+            importBtn.textContent = '导入中...';
             const uploadCategoryEl = document.getElementById('uploadCategory');
             const cat = uploadCategoryEl ? uploadCategoryEl.value : '其他';
             const fileName = 'url_import_' + Date.now();
-            const item = { id: 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8), name: fileName, fileName: fileName, category: cat, type: 'image', dataURL: previewDataUrl, favorite: false, tags: [], createdAt: Date.now() };
-            persistAssetItem(item).then(function(ok) {
-                if (ok) { uiToast('URL 图片导入成功', 'success'); dialog.remove(); }
-                else { uiToast('导入失败', 'warn'); importBtn.disabled = false; importBtn.textContent = '导入'; }
+            const item = {
+                id: 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+                name: fileName,
+                fileName: fileName,
+                category: cat,
+                type: 'image',
+                dataURL: previewDataUrl,
+                favorite: false,
+                tags: [],
+                createdAt: Date.now(),
+            };
+            persistAssetItem(item).then(function (ok) {
+                if (ok) {
+                    uiToast('URL 图片导入成功', 'success');
+                    dialog.remove();
+                } else {
+                    uiToast('导入失败', 'warn');
+                    importBtn.disabled = false;
+                    importBtn.textContent = '导入';
+                }
             });
         });
     }

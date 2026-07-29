@@ -75,9 +75,10 @@ class UserRateLimiter {
     middleware() {
         return (req, res, next) => {
             // Unauthenticated requests get IP-based limiting
-            const userId = (req.currentUser && req.currentUser.id)
-                ? req.currentUser.id
-                : `ip:${req.ip || req.connection?.remoteAddress || 'unknown'}`;
+            const userId =
+                req.currentUser && req.currentUser.id
+                    ? req.currentUser.id
+                    : `ip:${req.ip || req.connection?.remoteAddress || 'unknown'}`;
 
             const result = this.check(userId);
 

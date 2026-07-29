@@ -13,7 +13,13 @@
             "src": "vendor/images/app-icon.svg",
             "sizes": "any",
             "type": "image/svg+xml",
-            "purpose": "any maskable"
+            "purpose": "any"
+        },
+        {
+            "src": "vendor/images/app-icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "maskable"
         },
         {
             "src": "vendor/images/app-icon.png",

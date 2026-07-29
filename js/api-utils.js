@@ -14,7 +14,7 @@ const CSRF_TOKEN_TTL = 50 * 60 * 1000; // 50 分钟
  */
 async function getCsrfToken() {
     const now = Date.now();
-    if (_csrfToken && (now - _csrfTokenTime) < CSRF_TOKEN_TTL) {
+    if (_csrfToken && now - _csrfTokenTime < CSRF_TOKEN_TTL) {
         return _csrfToken;
     }
     try {
@@ -55,7 +55,7 @@ window.getCsrfToken = getCsrfToken;
 window.fetchWithCsrf = fetchWithCsrf;
 
 // 全局错误监控
-window.addEventListener('error', function(event) {
+window.addEventListener('error', function (event) {
     console.error('[Artifex Error]', {
         message: event.message,
         filename: event.filename,
@@ -67,7 +67,7 @@ window.addEventListener('error', function(event) {
     });
 });
 
-window.addEventListener('unhandledrejection', function(event) {
+window.addEventListener('unhandledrejection', function (event) {
     console.error('[Artifex Unhandled Promise]', {
         reason: event.reason ? String(event.reason) : 'Unknown',
         timestamp: new Date().toISOString(),
