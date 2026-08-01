@@ -10,8 +10,9 @@
         <link rel="stylesheet" href="../../styles/app-shell.css" />
         <link rel="stylesheet" href="../../styles/ui-kit.css" />
         <link rel="stylesheet" href="workflow-hub.css" />
+        <link rel="stylesheet" href="workflow-insights.css" />
         <link rel="stylesheet" href="../../styles/region-themes.css" />
-        <script src="../../js/theme-bootstrap.js"></script>
+        <script vite-ignore src="../../js/theme-bootstrap.js"></script>
     </head>
     <body class="app-shell" data-app-page="workflow-hub">
         <div class="dashboard-container">
@@ -57,10 +58,16 @@
 
                 <nav class="workflow-tabs" aria-label="工作流模块">
                     <button class="is-active" data-panel="jobs">生成历史</button>
-                    <button data-panel="characters">角色一致性</button>
+                    <button data-panel="characters">
+                        角色一致性
+                        <span class="capability-pill" data-capability-badge="characterConsistency">检查中</span>
+                    </button>
                     <button data-panel="collaboration">协作与审核</button>
-                    <button data-panel="lora">LoRA 训练</button>
+                    <button data-panel="lora">
+                        LoRA 训练 <span class="capability-pill" data-capability-badge="loraTraining">检查中</span>
+                    </button>
                     <button data-panel="notifications">通知与成本</button>
+                    <button data-panel="insights">研究与模板</button>
                 </nav>
 
                 <section class="workflow-panel is-active" data-workflow-panel="jobs">
@@ -77,9 +84,12 @@
                 <section class="workflow-panel" data-workflow-panel="characters">
                     <div class="panel-heading">
                         <div>
-                            <h2>角色一致性档案</h2>
-                            <p>锁定角色设定、配色、Seed、参考图和禁止变化项。</p>
+                            <h2>角色一致性档案（简化版）</h2>
+                            <p>锁定角色设定、配色、Seed、参考图和禁止变化项，不承诺模型级一致性。</p>
                         </div>
+                    </div>
+                    <div class="capability-notice" id="characterCapabilityNotice" role="status">
+                        正在确认当前部署的能力边界…
                     </div>
                     <form id="characterForm" class="workflow-form">
                         <input name="name" placeholder="角色名称" required />
@@ -159,6 +169,7 @@
                             <p>登记训练集与参数，交由本地 SD WebUI/训练 Worker 执行。</p>
                         </div>
                     </div>
+                    <div class="capability-notice" id="loraCapabilityNotice" role="status">正在检查训练 Worker…</div>
                     <form id="loraForm" class="workflow-form">
                         <input name="name" placeholder="LoRA 名称" required />
                         <select name="provider">
@@ -167,7 +178,7 @@
                         </select>
                         <textarea name="images" placeholder="每行一个训练图 URL，至少需要 5 张" required></textarea>
                         <input name="triggerWord" placeholder="触发词，例如 artifex_style" />
-                        <button class="primary-action" type="submit">创建训练任务</button>
+                        <button class="primary-action" id="createLoraJob" type="submit" disabled>创建训练任务</button>
                     </form>
                     <div id="loraList" class="card-list"></div>
                 </section>
@@ -183,15 +194,68 @@
                     <div id="costSummary" class="cost-grid"></div>
                     <div id="notificationList" class="card-list"></div>
                 </section>
+
+                <section class="workflow-panel" data-workflow-panel="insights">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>研究工作台</h2>
+                            <p>用可解释评估、结构化模板和真实指标验证美术生产流程。</p>
+                        </div>
+                        <div class="inline-actions">
+                            <button class="secondary-action" id="createDemoWorkspace">创建示例项目</button>
+                            <button class="secondary-action" id="removeDemoWorkspace">移除示例</button>
+                        </div>
+                    </div>
+
+                    <h3>游戏美术工作流模板</h3>
+                    <div id="workflowTemplateList" class="card-grid insight-template-grid"></div>
+
+                    <div class="two-column insight-columns">
+                        <section class="insight-block">
+                            <h3>角色约束覆盖评估</h3>
+                            <p class="insight-help">基于 Prompt、人工观察和配色文本进行可解释检查，不冒充图像识别。</p>
+                            <form id="consistencyForm" class="workflow-form compact">
+                                <select name="characterId" id="evaluationCharacter" required></select>
+                                <textarea
+                                    name="description"
+                                    placeholder="粘贴生成 Prompt，或填写图片中实际观察到的特征"
+                                    required
+                                ></textarea>
+                                <input name="palette" placeholder="观察到的配色，例如：墨黑、朱红" />
+                                <button class="primary-action" type="submit">开始评估</button>
+                            </form>
+                            <div id="consistencyResult" class="insight-result" aria-live="polite"></div>
+                        </section>
+
+                        <section class="insight-block">
+                            <h3>生产指标</h3>
+                            <p class="insight-help">数据来自真实生成任务和评估记录，可用于阶段性实验分析。</p>
+                            <div id="workflowMetricDetails" class="insight-metrics"></div>
+                        </section>
+                    </div>
+
+                    <section class="insight-block">
+                        <h3>服务端数据备份</h3>
+                        <p class="insight-help">
+                            导出项目、素材、角色档案和生成记录；导入采用追加模式，不覆盖现有数据。
+                        </p>
+                        <div class="inline-actions">
+                            <button class="secondary-action" id="exportWorkspace">导出工作区 JSON</button>
+                            <button class="secondary-action" id="importWorkspace">导入工作区 JSON</button>
+                            <input id="workspaceImportFile" type="file" accept="application/json,.json" hidden />
+                        </div>
+                    </section>
+                </section>
             </main>
         </div>
         <div id="workflowToast" role="status" aria-live="polite"></div>
-        <script src="../../js/session-guard.js"></script>
-        <script src="../../js/api-utils.js"></script>
-        <script src="../../js/html-utils.js"></script>
-        <script src="../../js/region-themes.js"></script>
-        <script src="../../js/ws-client.js"></script>
-        <script src="workflow-hub.js"></script>
-        <script src="../../js/sw-register.js"></script>
+        <script vite-ignore src="../../js/session-guard.js"></script>
+        <script vite-ignore src="../../js/api-utils.js"></script>
+        <script vite-ignore src="../../js/html-utils.js"></script>
+        <script vite-ignore src="../../js/region-themes.js"></script>
+        <script vite-ignore src="../../js/ws-client.js"></script>
+        <script vite-ignore src="workflow-hub.js"></script>
+        <script vite-ignore src="workflow-insights.js"></script>
+        <script vite-ignore src="../../js/sw-register.js"></script>
     </body>
 </html>

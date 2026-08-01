@@ -1,0 +1,565 @@
+/* ========== AI 生成器统一配色（与平台主色一致） ========== */
+body.generator-tab-code,
+body.generator-tab-image,
+body.generator-tab-action {
+    --tab-accent: #00f0ff;
+    --tab-accent-rgb: 0, 240, 255;
+    --tab-accent-end: #0077ff;
+    --tab-glow: rgba(0, 240, 255, 0.15);
+}
+
+/* Tab 按钮：当前 Tab 使用对应主题色 */
+body.generator-tab-code .tab-button.active {
+    background: rgba(var(--tab-accent-rgb), 0.15);
+    color: var(--tab-accent);
+    border-color: rgba(var(--tab-accent-rgb), 0.4);
+    box-shadow: 0 2px 8px var(--tab-glow);
+}
+body.generator-tab-image .tab-button.active {
+    background: rgba(var(--tab-accent-rgb), 0.15);
+    color: var(--tab-accent);
+    border-color: rgba(var(--tab-accent-rgb), 0.4);
+    box-shadow: 0 2px 8px var(--tab-glow);
+}
+body.generator-tab-action .tab-button.active {
+    background: rgba(var(--tab-accent-rgb), 0.15);
+    color: var(--tab-accent);
+    border-color: rgba(var(--tab-accent-rgb), 0.4);
+    box-shadow: 0 2px 8px var(--tab-glow);
+}
+body.generator-tab-code .tab-button.active i {
+    color: var(--tab-accent);
+}
+body.generator-tab-image .tab-button.active i {
+    color: var(--tab-accent);
+}
+body.generator-tab-action .tab-button.active i {
+    color: var(--tab-accent);
+}
+
+/* 表单区：左边线 + 悬停与当前主题一致 */
+body.generator-tab-code .generator-view.active .generator-form,
+body.generator-tab-image .generator-view.active .generator-form,
+body.generator-tab-action .generator-view.active .generator-form {
+    border-left-color: var(--tab-accent);
+}
+body.generator-tab-code .generator-view.active .generator-form:hover {
+    border-left-color: var(--tab-accent);
+}
+body.generator-tab-image .generator-view.active .generator-form:hover {
+    border-left-color: var(--tab-accent);
+}
+body.generator-tab-action .generator-view.active .generator-form:hover {
+    border-left-color: var(--tab-accent);
+}
+
+/* 主按钮：各 Tab 渐变 */
+body.generator-tab-code .generator-view.active .generate-btn {
+    background: linear-gradient(135deg, var(--tab-accent) 0%, var(--tab-accent-end) 100%);
+    box-shadow: 0 2px 12px rgba(var(--tab-accent-rgb), 0.3);
+}
+body.generator-tab-code .generator-view.active .generate-btn:hover {
+    box-shadow: 0 6px 20px rgba(var(--tab-accent-rgb), 0.4);
+}
+body.generator-tab-image .generator-view.active .generate-btn {
+    background: linear-gradient(135deg, var(--tab-accent) 0%, var(--tab-accent-end) 100%);
+    box-shadow: 0 2px 12px rgba(var(--tab-accent-rgb), 0.3);
+}
+body.generator-tab-image .generator-view.active .generate-btn:hover {
+    box-shadow: 0 6px 20px rgba(var(--tab-accent-rgb), 0.4);
+}
+body.generator-tab-action .generator-view.active .generate-btn {
+    background: linear-gradient(135deg, var(--tab-accent) 0%, var(--tab-accent-end) 100%);
+    box-shadow: 0 2px 12px rgba(var(--tab-accent-rgb), 0.3);
+}
+body.generator-tab-action .generator-view.active .generate-btn:hover {
+    box-shadow: 0 6px 20px rgba(var(--tab-accent-rgb), 0.4);
+}
+
+/* 风格预设共用条：与 .generator-form 一致的左侧主题边线 + 悬停追光 + 流光扫过 */
+#generatorStylePresetStrip {
+    display: none;
+    margin: 10px 0 20px;
+    padding: 22px 26px;
+    border-radius: 12px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-left: 3px solid rgba(0, 240, 255, 0.5);
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    position: relative;
+    overflow: hidden;
+    --card-x: 50%;
+    --card-y: 50%;
+    transition:
+        border-color 0.3s ease,
+        border-left-color 0.3s ease,
+        background 0.3s ease;
+}
+#generatorStylePresetStrip:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+    border-left-color: #00f0ff;
+}
+body.generator-tab-image #generatorStylePresetStrip,
+body.generator-tab-action #generatorStylePresetStrip {
+    display: block;
+    border-left-color: var(--tab-accent);
+}
+body.generator-tab-image #generatorStylePresetStrip:hover,
+body.generator-tab-action #generatorStylePresetStrip:hover {
+    border-left-color: var(--tab-accent);
+}
+#generatorStylePresetStrip::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+        360px circle at var(--card-x) var(--card-y),
+        rgba(0, 240, 255, 0.26),
+        rgba(139, 92, 246, 0.12) 38%,
+        transparent 68%
+    );
+    opacity: 0;
+    transition: opacity 0.16s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+#generatorStylePresetStrip:hover::before {
+    opacity: 1;
+}
+#generatorStylePresetStrip::after {
+    content: '';
+    position: absolute;
+    top: -120%;
+    left: -20%;
+    width: 55%;
+    height: 280%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+    transform: rotate(10deg);
+    animation: sectionSweep 2.4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+#generatorStylePresetStrip > * {
+    position: relative;
+    z-index: 1;
+}
+.style-preset-compact-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+}
+.style-preset-strip-status {
+    font-size: 14px;
+    color: rgba(232, 236, 244, 0.85);
+    white-space: nowrap;
+}
+.style-preset-select-wrap {
+    flex: 1;
+    min-width: 200px;
+}
+/* 详细区「多模态模型」与表单内下拉一致：固定宽度、form-group 便于 tech-select 打开时抬升 z-index，避免被 flex 拉满整行 */
+.style-preset-inline-model-wrap {
+    flex: 0 1 220px;
+    min-width: 140px;
+    max-width: 240px;
+    width: 100%;
+    margin-bottom: 0 !important;
+}
+.style-preset-inline-model-wrap .tech-select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+.style-preset-inline-model-wrap .tech-select-trigger {
+    max-width: 100%;
+    background-clip: padding-box;
+}
+/* 条带在表单外：打开下拉时避免父层裁切，并与 .generator-form:has(.tech-select.is-open) 行为对齐 */
+#generatorStylePresetStrip:has(.tech-select.is-open),
+#generatorStylePresetStrip details.generator-style-preset-details:has(.tech-select.is-open) {
+    overflow: visible !important;
+}
+#generatorStylePresetStrip details.generator-style-preset-details {
+    overflow: visible;
+    margin-top: 14px;
+    padding-top: 0;
+    border-top: none;
+    transition: opacity 0.18s ease;
+}
+/* 详细选项：与 tech-select 触发条同款（左文案 | 竖线 | 双 chevron，展开时箭头朝上） */
+#generatorStylePresetStrip details.generator-style-preset-details > summary {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 48px;
+    padding: 12px 40px 12px 14px;
+    margin: 0;
+    border-radius: 6px;
+    border: 1px solid rgba(var(--tab-accent-rgb, 0, 240, 255), 0.72);
+    background:
+        linear-gradient(
+                to right,
+                rgba(var(--tab-accent-rgb, 0, 240, 255), 0.3),
+                rgba(var(--tab-accent-rgb, 0, 240, 255), 0.08)
+            )
+            calc(100% - 38px) 50% / 1px 62% no-repeat,
+        #0b1220;
+    color: #e8f8ff;
+    font-family: var(--font-tech-ui);
+    font-size: 16px;
+    font-weight: 600;
+    text-align: left;
+    letter-spacing: 0.02em;
+    line-height: 1.35;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    position: relative;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+    box-shadow:
+        inset 0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.1),
+        0 0 0 1px rgba(3, 8, 18, 0.75);
+    mix-blend-mode: normal;
+    isolation: isolate;
+}
+#generatorStylePresetStrip details.generator-style-preset-details > summary::-webkit-details-marker {
+    display: none;
+}
+#generatorStylePresetStrip details.generator-style-preset-details > summary::marker {
+    content: '';
+}
+#generatorStylePresetStrip details.generator-style-preset-details > summary::before,
+#generatorStylePresetStrip details.generator-style-preset-details > summary::after {
+    content: '';
+    position: absolute;
+    right: 14px;
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid rgba(var(--tab-accent-rgb, 0, 240, 255), 0.92);
+    border-bottom: 2px solid rgba(var(--tab-accent-rgb, 0, 240, 255), 0.92);
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+    pointer-events: none;
+}
+#generatorStylePresetStrip details.generator-style-preset-details > summary::before {
+    top: calc(50% - 6px);
+}
+#generatorStylePresetStrip details.generator-style-preset-details > summary::after {
+    top: calc(50% - 1px);
+}
+#generatorStylePresetStrip details.generator-style-preset-details > summary:hover {
+    border-color: rgba(var(--tab-accent-rgb, 0, 240, 255), 0.82);
+    box-shadow:
+        inset 0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.18),
+        0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.16),
+        0 0 20px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.14);
+}
+#generatorStylePresetStrip details.generator-style-preset-details[open] > summary {
+    margin-bottom: 12px;
+    border-color: rgba(var(--tab-accent-rgb, 0, 240, 255), 0.92);
+    box-shadow:
+        inset 0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.24),
+        0 0 0 2px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.18),
+        0 0 24px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.16);
+}
+#generatorStylePresetStrip details.generator-style-preset-details[open] > summary::before {
+    transform: rotate(225deg) translate(1px, 1px);
+}
+#generatorStylePresetStrip details.generator-style-preset-details[open] > summary::after {
+    transform: rotate(225deg) translate(-1px, -1px);
+}
+#generatorStylePresetStrip details.generator-style-preset-details > summary:focus-visible {
+    outline: none;
+    border-color: rgba(var(--tab-accent-rgb, 0, 240, 255), 0.92);
+    box-shadow:
+        inset 0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.24),
+        0 0 0 2px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.22),
+        0 0 24px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.2);
+}
+.style-preset-details-body .style-preset-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+#styleRefThumbWrap {
+    display: none;
+    margin-top: 8px;
+}
+#styleRefThumbWrap.is-visible {
+    display: block !important;
+}
+#styleRefThumbImg {
+    max-height: 120px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+#styleExtractHint {
+    font-size: 12px;
+    color: #9aa8c4;
+    margin: 0 0 8px;
+    line-height: 1.5;
+}
+
+/* 风格预设条内次要按钮：与 tech-select 下拉同一套深色 + 青色描边（页面未引入全局 .btn-secondary 时避免白底） */
+#generatorStylePresetStrip .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: 1px solid rgba(var(--tab-accent-rgb, 0, 240, 255), 0.72);
+    background: #0b1220;
+    color: #e8f8ff;
+    font-family: var(--font-tech-ui);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        color 0.2s ease,
+        background 0.2s ease;
+    box-shadow:
+        inset 0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.1),
+        0 0 0 1px rgba(3, 8, 18, 0.75);
+}
+#generatorStylePresetStrip .btn-secondary i {
+    color: rgba(var(--tab-accent-rgb, 0, 240, 255), 0.92);
+    font-size: 14px;
+}
+#generatorStylePresetStrip .btn-secondary:hover {
+    border-color: rgba(var(--tab-accent-rgb, 0, 240, 255), 0.88);
+    color: #f4feff;
+    background: rgba(11, 18, 32, 0.96);
+    box-shadow:
+        inset 0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.18),
+        0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.14),
+        0 0 18px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.12);
+}
+#generatorStylePresetStrip .btn-secondary:focus-visible {
+    outline: none;
+    border-color: rgba(var(--tab-accent-rgb, 0, 240, 255), 0.92);
+    box-shadow:
+        inset 0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.22),
+        0 0 0 2px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.2),
+        0 0 22px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.16);
+}
+#generatorStylePresetStrip .btn-secondary:disabled {
+    opacity: 0.48;
+    cursor: not-allowed;
+    box-shadow: inset 0 0 0 1px rgba(var(--tab-accent-rgb, 0, 240, 255), 0.06);
+}
+
+/* 表单标签与输入框焦点：跟随当前 Tab 主题 */
+body.generator-tab-code .generator-view.active .form-group label {
+    color: var(--tab-accent);
+}
+body.generator-tab-image .generator-view.active .form-group label {
+    color: var(--tab-accent);
+}
+body.generator-tab-action .generator-view.active .form-group label {
+    color: var(--tab-accent);
+}
+body.generator-tab-code .generator-view.active .form-control:focus {
+    border-color: var(--tab-accent);
+    box-shadow: 0 0 0 2px var(--tab-glow);
+}
+body.generator-tab-image .generator-view.active .form-control:focus {
+    border-color: var(--tab-accent);
+    box-shadow: 0 0 0 2px var(--tab-glow);
+}
+body.generator-tab-action .generator-view.active .form-control:focus {
+    border-color: var(--tab-accent);
+    box-shadow: 0 0 0 2px var(--tab-glow);
+}
+/* 风格预设条在视图外：文本框/名称输入焦点环与当前 Tab 内表单一致 */
+body.generator-tab-code #generatorStylePresetStrip .form-control:focus,
+body.generator-tab-code #generatorStylePresetStrip .form-control:focus-visible,
+body.generator-tab-image #generatorStylePresetStrip .form-control:focus,
+body.generator-tab-image #generatorStylePresetStrip .form-control:focus-visible,
+body.generator-tab-action #generatorStylePresetStrip .form-control:focus,
+body.generator-tab-action #generatorStylePresetStrip .form-control:focus-visible {
+    border-color: var(--tab-accent);
+    box-shadow: 0 0 0 2px var(--tab-glow);
+}
+/* 分区标题图标与步骤圆点随当前 Tab 主题 */
+body.generator-tab-code .generator-view.active .form-section-title i,
+body.generator-tab-code .generator-view.active .form-section-title .step-num {
+    color: var(--tab-accent);
+    background: rgba(var(--tab-accent-rgb), 0.2);
+}
+body.generator-tab-code .generator-view.active .form-section-title i {
+    color: var(--tab-accent);
+}
+body.generator-tab-image .generator-view.active .form-section-title i {
+    color: var(--tab-accent);
+}
+body.generator-tab-action .generator-view.active .form-section-title i {
+    color: var(--tab-accent);
+}
+
+/* 图片页：模式选项、线稿区、滑块跟随主题 */
+body.generator-tab-image .generator-view.active .mode-option:hover,
+body.generator-tab-image .generator-view.active .mode-option:has(input:checked) {
+    background: rgba(var(--tab-accent-rgb), 0.12);
+    border-color: var(--tab-accent);
+    color: var(--tab-accent);
+}
+body.generator-tab-image .generator-view.active .mode-option input {
+    accent-color: var(--tab-accent);
+}
+body.generator-tab-image .generator-view.active .strength-slider {
+    accent-color: var(--tab-accent);
+}
+body.generator-tab-image .generator-view.active .image-action:hover {
+    background: rgba(var(--tab-accent-rgb), 0.2);
+    color: var(--tab-accent);
+    border-color: var(--tab-accent);
+}
+
+/* 各视图内容区统一轻微背景 */
+body.generator-tab-code .generator-views,
+body.generator-tab-image .generator-views,
+body.generator-tab-action .generator-views {
+    background: linear-gradient(180deg, rgba(0, 240, 255, 0.02) 0%, transparent 120px);
+    border-radius: 12px;
+}
+
+/* 当前 Tab 下标题区图标与副标题色与主题一致 */
+body.generator-tab-code .ai-generator-container .section-title {
+    color: var(--tab-accent);
+}
+body.generator-tab-code .ai-generator-container .section-title i {
+    color: var(--tab-accent);
+}
+body.generator-tab-image .ai-generator-container .section-title {
+    color: var(--tab-accent);
+}
+body.generator-tab-image .ai-generator-container .section-title i {
+    color: var(--tab-accent);
+}
+body.generator-tab-action .ai-generator-container .section-title {
+    color: var(--tab-accent);
+}
+body.generator-tab-action .ai-generator-container .section-title i {
+    color: var(--tab-accent);
+}
+body.generator-tab-code .ai-generator-container .section-subtitle {
+    color: rgba(var(--tab-accent-rgb), 0.85);
+}
+body.generator-tab-image .ai-generator-container .section-subtitle {
+    color: rgba(var(--tab-accent-rgb), 0.85);
+}
+body.generator-tab-action .ai-generator-container .section-subtitle {
+    color: rgba(var(--tab-accent-rgb), 0.85);
+}
+
+/* 代码/图片共用结果区：加载与结果框随当前 Tab 主题 */
+body.generator-tab-code .generator-shared-results .loading-container {
+    border-left-color: var(--tab-accent);
+}
+body.generator-tab-code .generator-shared-results .loading-spinner {
+    border-top-color: var(--tab-accent);
+}
+body.generator-tab-code .generator-shared-results .result-container .result-header {
+    color: var(--tab-accent);
+}
+body.generator-tab-code .generator-shared-results .result-container .result-header i {
+    color: var(--tab-accent);
+}
+body.generator-tab-image .generator-shared-results .loading-container {
+    border-left-color: var(--tab-accent);
+}
+body.generator-tab-image .generator-shared-results .loading-spinner {
+    border-top-color: var(--tab-accent);
+}
+body.generator-tab-image .generator-shared-results .result-container .result-header {
+    color: var(--tab-accent);
+}
+body.generator-tab-image .generator-shared-results .result-container .result-header i {
+    color: var(--tab-accent);
+}
+/* 动作组内加载与结果区（在 view 内） */
+body.generator-tab-action #actionGroupProgress .loading-spinner {
+    border-top-color: var(--tab-accent);
+}
+body.generator-tab-action #actionGroupResult .result-header {
+    color: var(--tab-accent);
+}
+body.generator-tab-action #actionGroupResult .result-header i {
+    color: var(--tab-accent);
+}
+
+.tab-content {
+    display: block;
+}
+
+/* 图片生成：分区内网格由 .form-section-content 控制 */
+.image-form .form-group.full-width {
+    margin-bottom: 16px;
+}
+
+.image-preview {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.image-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.image-action {
+    background: rgba(255, 255, 255, 0.05);
+    color: #b0b0c0;
+    border: 1px solid rgba(0, 240, 255, 0.16);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 11px;
+    font-family: var(--font-tech-display);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.image-action:hover {
+    background: rgba(0, 240, 255, 0.2);
+    color: #00f0ff;
+    border-color: #00f0ff;
+}
+
+.empty-state-panel {
+    text-align: center;
+    padding: 26px 16px;
+    border: 1px dashed rgba(0, 240, 255, 0.22);
+    border-radius: 10px;
+    background: rgba(8, 12, 24, 0.68);
+    color: #9aa8c4;
+    font-family: var(--font-tech-ui);
+    font-size: 15px;
+    line-height: 1.5;
+}

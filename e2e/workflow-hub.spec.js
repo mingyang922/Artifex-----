@@ -17,7 +17,7 @@ async function register(page, prefix) {
 }
 
 test.describe('生产工作台', () => {
-    test('生成历史、角色档案、协作分享和 LoRA 队列形成完整闭环', async ({ page }) => {
+    test('生成历史、简化版角色档案、协作分享和 LoRA 能力边界形成真实闭环', async ({ page }) => {
         const pageErrors = [];
         page.on('pageerror', (error) => pageErrors.push(error.message));
         const csrfToken = await register(page, 'workflow');
@@ -46,6 +46,16 @@ test.describe('生产工作台', () => {
         await expect(page.locator('#metricProjects')).toHaveText('1');
         await expect(page.locator('#jobList')).toContainText('pixel art hero');
         await expect(page.locator('#characterList')).toContainText('墨影');
+        await expect(page.locator('[data-capability-badge="characterConsistency"]')).toHaveText('简化版');
+
+        await page.click('[data-panel="insights"]');
+        await expect(page.locator('#workflowTemplateList .workflow-card')).toHaveCount(7);
+        await expect(page.locator('#evaluationCharacter')).toContainText('墨影');
+        await page.fill('#consistencyForm textarea[name="description"]', '黑衣剑客，红色围巾');
+        await page.fill('#consistencyForm input[name="palette"]', '黑、红、金');
+        await page.click('#consistencyForm button[type="submit"]');
+        await expect(page.locator('#consistencyResult')).toContainText('不等同于图像识别');
+        await expect(page.locator('#workflowMetricDetails')).toContainText('一致性评估');
 
         await page.click('[data-panel="collaboration"]');
         await expect(page.locator('#projectSelect')).toHaveValue(String(project.id));
@@ -60,19 +70,9 @@ test.describe('生产工作台', () => {
         await sharePage.close();
 
         await page.click('[data-panel="lora"]');
-        await page.fill('#loraForm input[name="name"]', '像素角色风格');
-        await page.fill(
-            '#loraForm textarea[name="images"]',
-            ['https://example.com/1.png', 'https://example.com/2.png', 'https://example.com/3.png', 'https://example.com/4.png', 'https://example.com/5.png'].join('\n')
-        );
-        const loraResponsePromise = page.waitForResponse(
-            (response) => response.url().includes('/api/lora-jobs') && response.request().method() === 'POST'
-        );
-        await page.click('#loraForm button[type="submit"]');
-        const loraResponse = await loraResponsePromise;
-        const loraData = await loraResponse.json();
-        expect(loraResponse.ok(), JSON.stringify(loraData)).toBeTruthy();
-        await expect(page.locator('#loraList')).toContainText('像素角色风格');
+        await expect(page.locator('[data-capability-badge="loraTraining"]')).toHaveText('未配置训练 Worker');
+        await expect(page.locator('#loraCapabilityNotice')).toContainText('不会创建无法执行的排队任务');
+        await expect(page.locator('#createLoraJob')).toBeDisabled();
         expect(pageErrors).toEqual([]);
     });
 
@@ -102,7 +102,9 @@ test.describe('生产工作台', () => {
         expect((await page.request.delete(`/api/asset-library/${assetId}`, { headers })).ok()).toBeTruthy();
         const trash = await (await page.request.get('/api/asset-library?deleted=1')).json();
         expect(trash.items.some((item) => item.id === assetId)).toBeTruthy();
-        expect((await page.request.post(`/api/asset-library/${assetId}/restore`, { headers, data: {} })).ok()).toBeTruthy();
+        expect(
+            (await page.request.post(`/api/asset-library/${assetId}/restore`, { headers, data: {} })).ok()
+        ).toBeTruthy();
         const restored = await (await page.request.get('/api/asset-library?q=骑士')).json();
         expect(restored.items.some((item) => item.id === assetId)).toBeTruthy();
     });

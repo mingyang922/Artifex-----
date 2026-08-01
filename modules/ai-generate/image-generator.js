@@ -416,8 +416,7 @@ class ImageGenerator {
         const status = (payload && payload.status) || {};
         const isAdmin = !!(payload && payload.isAdmin);
         const optionMap = new Map(Array.from(select.options).map((opt) => [opt.value, opt]));
-        // free/mock 对所有用户可用
-        // jimeng/alibaba/tencent/sdwebui：管理员可直接用项目密钥，普通用户需自行配置
+        // free/mock 仅管理员可用；真实服务商允许管理员使用平台密钥，普通用户需自行配置。
         ['jimeng', 'alibaba', 'tencent', 'sdwebui'].forEach((value) => {
             const opt = optionMap.get(value);
             if (!opt) return;
@@ -566,6 +565,8 @@ class ImageGenerator {
             upscaleBase64: this.upscaleBase64,
             removeBgBase64: this.removeBgBase64,
             upscaleFactor: document.getElementById('upscaleFactor')?.value || '2',
+            characterId: new URLSearchParams(location.search).get('characterId') || undefined,
+            templateId: new URLSearchParams(location.search).get('workflow') || undefined,
         };
     }
 
@@ -685,6 +686,7 @@ class ImageGenerator {
                 timestamp: new Date().toLocaleString('zh-CN'),
                 presetId: formData.presetId || '',
                 stylePresetSnippet: (formData.stylePresetSnippet && String(formData.stylePresetSnippet).trim()) || '',
+                generationJobId: this.lastGenerationJobId || null,
             };
         } catch (error) {
             console.error('图片API调用失败:', error);
@@ -753,6 +755,8 @@ class ImageGenerator {
             num_images: 1,
             mode: mode,
             imageModel: formData.wanxModel || undefined,
+            characterId: formData.characterId,
+            templateId: formData.templateId,
         };
         if (mode === 'img2img') {
             requestData.image = formData.sketchImageBase64;
@@ -811,6 +815,7 @@ class ImageGenerator {
             }
 
             const data = await response.json();
+            this.lastGenerationJobId = data.job_id || null;
 
             let outputUrl;
             if (data.image_url) {

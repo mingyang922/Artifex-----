@@ -11,6 +11,7 @@ process.env.USERS_DB_PATH = dbPath;
 
 const usersDb = require('../backend/db/users-db');
 const { createWorkspaceDb } = require('../backend/db/workspace-db');
+const { getWorkflowCapabilities } = require('../backend/routes/workspace');
 
 let workspace;
 let owner;
@@ -27,6 +28,23 @@ before(() => {
 });
 
 describe('workspace production workflows', () => {
+    it('reports honest runtime capability boundaries', () => {
+        const unavailable = getWorkflowCapabilities({});
+        assert.equal(unavailable.characterConsistency.status, 'simplified');
+        assert.equal(unavailable.loraTraining.enabled, false);
+        assert.deepEqual(unavailable.loraTraining.requirements, {
+            webhookConfigured: false,
+            workerTokenConfigured: false,
+        });
+
+        const available = getWorkflowCapabilities({
+            LORA_TRAINING_WEBHOOK_URL: 'https://worker.example.test/jobs',
+            LORA_WORKER_TOKEN: 'test-worker-token-at-least-32-characters',
+        });
+        assert.equal(available.loraTraining.status, 'available');
+        assert.equal(available.loraTraining.enabled, true);
+    });
+
     it('stores and updates generation jobs', () => {
         const job = workspace.createGenerationJob(owner.id, {
             prompt: 'pixel hero',

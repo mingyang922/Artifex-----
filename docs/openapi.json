@@ -6,9 +6,7 @@
         "version": "1.4.0",
         "contact": { "name": "Artifex Team" }
     },
-    "servers": [
-        { "url": "http://127.0.0.1:3000", "description": "本地开发" }
-    ],
+    "servers": [{ "url": "http://127.0.0.1:3000", "description": "本地开发" }],
     "tags": [
         { "name": "auth", "description": "认证与用户管理" },
         { "name": "config", "description": "运行时配置" },
@@ -18,9 +16,9 @@
         { "name": "projects", "description": "项目管理" },
         { "name": "asset-library", "description": "素材库" },
         { "name": "admin", "description": "管理员功能" },
-        { "name": "usage", "description": "用量统计" }
-        ,{ "name": "workflow", "description": "生成历史、角色档案、LoRA 与通知" }
-        ,{ "name": "collaboration", "description": "项目成员、审核、版本和分享" }
+        { "name": "usage", "description": "用量统计" },
+        { "name": "workflow", "description": "生成历史、角色档案、LoRA 与通知" },
+        { "name": "collaboration", "description": "项目成员、审核、版本和分享" }
     ],
     "paths": {
         "/api/health": {
@@ -93,14 +91,22 @@
             "post": { "tags": ["auth"], "summary": "登出", "responses": { "200": { "description": "已登出" } } }
         },
         "/api/me": {
-            "get": { "tags": ["auth"], "summary": "获取当前用户信息", "responses": { "200": { "description": "用户信息" } } }
+            "get": {
+                "tags": ["auth"],
+                "summary": "获取当前用户信息",
+                "responses": { "200": { "description": "用户信息" } }
+            }
         },
         "/api/me/profile": {
             "put": {
                 "tags": ["auth"],
                 "summary": "更新用户资料",
                 "requestBody": {
-                    "content": { "application/json": { "schema": { "type": "object", "properties": { "profile": { "type": "object" } } } } }
+                    "content": {
+                        "application/json": {
+                            "schema": { "type": "object", "properties": { "profile": { "type": "object" } } }
+                        }
+                    }
                 },
                 "responses": { "200": { "description": "更新成功" } }
             }
@@ -111,7 +117,18 @@
                 "summary": "修改密码（限流：5次/15分钟）",
                 "requestBody": {
                     "required": true,
-                    "content": { "application/json": { "schema": { "type": "object", "required": ["currentPassword", "newPassword"], "properties": { "currentPassword": { "type": "string" }, "newPassword": { "type": "string", "minLength": 6 } } } } }
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["currentPassword", "newPassword"],
+                                "properties": {
+                                    "currentPassword": { "type": "string" },
+                                    "newPassword": { "type": "string", "minLength": 6 }
+                                }
+                            }
+                        }
+                    }
                 },
                 "responses": { "200": { "description": "密码修改成功" }, "401": { "description": "当前密码不正确" } }
             }
@@ -122,13 +139,25 @@
                 "summary": "验证 API 密钥有效性",
                 "requestBody": {
                     "required": true,
-                    "content": { "application/json": { "schema": { "type": "object", "required": ["provider", "credentials"], "properties": { "provider": { "type": "string" }, "credentials": { "type": "object" } } } } }
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["provider", "credentials"],
+                                "properties": { "provider": { "type": "string" }, "credentials": { "type": "object" } }
+                            }
+                        }
+                    }
                 },
                 "responses": { "200": { "description": "验证结果" } }
             }
         },
         "/api/me/api-settings": {
-            "get": { "tags": ["auth"], "summary": "获取 API 设置（脱敏）", "responses": { "200": { "description": "API 设置" } } },
+            "get": {
+                "tags": ["auth"],
+                "summary": "获取 API 设置（脱敏）",
+                "responses": { "200": { "description": "API 设置" } }
+            },
             "put": {
                 "tags": ["auth"],
                 "summary": "更新 API 设置",
@@ -138,7 +167,10 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "provider": { "type": "string", "enum": ["tencent", "alibaba", "jimeng", "sdwebui"] },
+                                    "provider": {
+                                        "type": "string",
+                                        "enum": ["tencent", "alibaba", "jimeng", "sdwebui"]
+                                    },
                                     "credentials": { "type": "object" }
                                 }
                             }
@@ -171,8 +203,16 @@
                                 "properties": {
                                     "prompt": { "type": "string", "description": "生成提示词" },
                                     "size": { "type": "string", "description": "尺寸，如 1024x1024" },
-                                    "provider": { "type": "string", "enum": ["tencent", "alibaba", "jimeng", "sdwebui", "free", "mock"], "default": "tencent" },
-                                    "mode": { "type": "string", "enum": ["text2img", "img2img"], "default": "text2img" },
+                                    "provider": {
+                                        "type": "string",
+                                        "enum": ["tencent", "alibaba", "jimeng", "sdwebui", "free", "mock"],
+                                        "default": "tencent"
+                                    },
+                                    "mode": {
+                                        "type": "string",
+                                        "enum": ["text2img", "img2img"],
+                                        "default": "text2img"
+                                    },
                                     "image": { "type": "string", "description": "图生图的 base64 / data URL" },
                                     "strength": { "type": "number", "default": 0.7 },
                                     "imageModel": { "type": "string" },
@@ -219,27 +259,57 @@
             }
         },
         "/api/config": {
-            "get": { "tags": ["config"], "summary": "获取运行时配置状态", "responses": { "200": { "description": "配置状态" } } }
+            "get": {
+                "tags": ["config"],
+                "summary": "获取运行时配置状态",
+                "responses": { "200": { "description": "配置状态" } }
+            }
         },
         "/api/tencent/status": {
-            "get": { "tags": ["status"], "summary": "腾讯云密钥自检", "responses": { "200": { "description": "状态信息" } } }
+            "get": {
+                "tags": ["status"],
+                "summary": "腾讯云密钥自检",
+                "responses": { "200": { "description": "状态信息" } }
+            }
         },
         "/api/sd-webui/status": {
-            "get": { "tags": ["status"], "summary": "SD Web UI 连通性", "responses": { "200": { "description": "状态信息" } } }
+            "get": {
+                "tags": ["status"],
+                "summary": "SD Web UI 连通性",
+                "responses": { "200": { "description": "状态信息" } }
+            }
         },
         "/api/jimeng/status": {
-            "get": { "tags": ["status"], "summary": "即梦连通性", "responses": { "200": { "description": "状态信息" } } }
+            "get": {
+                "tags": ["status"],
+                "summary": "即梦连通性",
+                "responses": { "200": { "description": "状态信息" } }
+            }
         },
         "/api/jimeng/live-test": {
-            "post": { "tags": ["status"], "summary": "即梦在线测试（消耗 API 配额）", "responses": { "200": { "description": "测试结果" } } }
+            "post": {
+                "tags": ["status"],
+                "summary": "即梦在线测试（消耗 API 配额）",
+                "responses": { "200": { "description": "测试结果" } }
+            }
         },
         "/api/projects": {
             "get": {
                 "tags": ["projects"],
                 "summary": "获取用户所有项目",
                 "parameters": [
-                    { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1, "minimum": 1 }, "description": "页码" },
-                    { "name": "pageSize", "in": "query", "schema": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 }, "description": "每页条数" }
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": { "type": "integer", "default": 1, "minimum": 1 },
+                        "description": "页码"
+                    },
+                    {
+                        "name": "pageSize",
+                        "in": "query",
+                        "schema": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 },
+                        "description": "每页条数"
+                    }
                 ],
                 "responses": { "200": { "description": "项目列表" } }
             },
@@ -272,9 +342,7 @@
             "put": {
                 "tags": ["projects"],
                 "summary": "更新项目",
-                "parameters": [
-                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
-                ],
+                "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -298,9 +366,7 @@
             "delete": {
                 "tags": ["projects"],
                 "summary": "删除项目",
-                "parameters": [
-                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
-                ],
+                "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
                 "responses": { "200": { "description": "删除成功" } }
             }
         },
@@ -309,9 +375,7 @@
                 "tags": ["projects"],
                 "summary": "添加项目素材",
                 "description": "向项目添加素材。内容大小限制为 10MB。仅接受 PNG、JPG/JPEG、GIF、WebP、SVG 格式的图片。",
-                "parameters": [
-                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
-                ],
+                "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -322,7 +386,10 @@
                                 "properties": {
                                     "name": { "type": "string", "description": "素材名称" },
                                     "type": { "type": "string", "description": "素材类型（如 image/png, image/jpeg）" },
-                                    "content": { "type": "string", "description": "素材内容（base64 或 data URL），最大 10MB" }
+                                    "content": {
+                                        "type": "string",
+                                        "description": "素材内容（base64 或 data URL），最大 10MB"
+                                    }
                                 }
                             }
                         }
@@ -339,9 +406,7 @@
             "delete": {
                 "tags": ["projects"],
                 "summary": "删除项目素材",
-                "parameters": [
-                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
-                ],
+                "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
                 "responses": { "200": { "description": "删除成功" } }
             }
         },
@@ -350,8 +415,18 @@
                 "tags": ["asset-library"],
                 "summary": "获取用户素材库",
                 "parameters": [
-                    { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1, "minimum": 1 }, "description": "页码" },
-                    { "name": "pageSize", "in": "query", "schema": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 }, "description": "每页条数" }
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": { "type": "integer", "default": 1, "minimum": 1 },
+                        "description": "页码"
+                    },
+                    {
+                        "name": "pageSize",
+                        "in": "query",
+                        "schema": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 },
+                        "description": "每页条数"
+                    }
                 ],
                 "responses": { "200": { "description": "素材列表" } }
             },
@@ -368,7 +443,10 @@
                                 "properties": {
                                     "name": { "type": "string", "description": "素材名称" },
                                     "type": { "type": "string", "description": "素材类型" },
-                                    "content": { "type": "string", "description": "素材内容（base64 或 data URL），最大 10MB" },
+                                    "content": {
+                                        "type": "string",
+                                        "description": "素材内容（base64 或 data URL），最大 10MB"
+                                    },
                                     "desc": { "type": "string", "description": "素材描述" },
                                     "source": { "type": "string", "description": "素材来源" },
                                     "tags": { "type": "string", "description": "标签（逗号分隔）" }
@@ -388,9 +466,7 @@
             "put": {
                 "tags": ["asset-library"],
                 "summary": "更新素材库素材",
-                "parameters": [
-                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
-                ],
+                "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -413,9 +489,7 @@
             "delete": {
                 "tags": ["asset-library"],
                 "summary": "删除素材库素材",
-                "parameters": [
-                    { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
-                ],
+                "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
                 "responses": { "200": { "description": "删除成功" } }
             }
         },
@@ -450,12 +524,19 @@
             "get": {
                 "tags": ["admin"],
                 "summary": "管理员：查看全部活动日志",
-                "parameters": [
-                    { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } }
-                ],
+                "parameters": [{ "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } }],
                 "responses": {
                     "200": { "description": "活动日志" },
                     "403": { "description": "权限不足" }
+                }
+            }
+        },
+        "/api/capabilities": {
+            "get": {
+                "tags": ["workflow"],
+                "summary": "获取当前部署的真实功能状态与限制",
+                "responses": {
+                    "200": { "description": "角色一致性、LoRA、密码找回和 Figma 集成的运行时能力" }
                 }
             }
         },
@@ -472,49 +553,183 @@
             },
             "post": {
                 "tags": ["workflow"],
-                "summary": "创建排队任务（状态和成本由服务端维护）",
-                "responses": { "201": { "description": "已创建" }, "400": { "description": "参数无效" } }
+                "summary": "创建可复现草稿；真实执行必须从生成器提交",
+                "responses": { "201": { "description": "草稿已创建" }, "400": { "description": "参数无效" } }
             }
         },
         "/api/generation-jobs/{jobId}/retry": {
             "post": {
                 "tags": ["workflow"],
-                "summary": "将失败任务重新排队",
+                "summary": "基于原参数创建可复现草稿",
                 "parameters": [{ "name": "jobId", "in": "path", "required": true, "schema": { "type": "integer" } }],
-                "responses": { "200": { "description": "已重新排队" }, "404": { "description": "任务不存在" } }
+                "responses": { "201": { "description": "草稿已创建" }, "404": { "description": "任务不存在" } }
+            }
+        },
+        "/api/generation-jobs/{jobId}/duplicate": {
+            "post": {
+                "tags": ["workflow"],
+                "summary": "复制任务参数为草稿",
+                "responses": { "201": { "description": "草稿已创建" }, "404": { "description": "任务不存在" } }
+            }
+        },
+        "/api/generation-jobs/{jobId}/replay": {
+            "get": {
+                "tags": ["workflow"],
+                "summary": "读取任务的可复现参数",
+                "responses": { "200": { "description": "服务商、模式、Prompt、角色和参数" } }
+            }
+        },
+        "/api/generation-jobs/{jobId}/cancel": {
+            "post": {
+                "tags": ["workflow"],
+                "summary": "取消尚未执行的草稿",
+                "responses": { "200": { "description": "已取消" }, "409": { "description": "任务已执行，不能取消" } }
+            }
+        },
+        "/api/generation-jobs/{jobId}/diagnosis": {
+            "get": {
+                "tags": ["workflow"],
+                "summary": "获取失败分类和处理建议",
+                "responses": { "200": { "description": "错误分类与建议" } }
             }
         },
         "/api/characters": {
-            "get": { "tags": ["workflow"], "summary": "获取角色一致性档案", "responses": { "200": { "description": "角色列表" } } },
-            "post": { "tags": ["workflow"], "summary": "创建角色档案", "responses": { "201": { "description": "已创建" } } }
+            "get": {
+                "tags": ["workflow"],
+                "summary": "获取角色一致性档案",
+                "responses": { "200": { "description": "角色列表" } }
+            },
+            "post": {
+                "tags": ["workflow"],
+                "summary": "创建角色档案",
+                "responses": { "201": { "description": "已创建" } }
+            }
+        },
+        "/api/characters/{characterId}/evaluate": {
+            "post": {
+                "tags": ["workflow"],
+                "summary": "执行可解释的角色元数据约束覆盖评估",
+                "responses": { "201": { "description": "评分、匹配项、缺失项和建议" } }
+            }
+        },
+        "/api/workflow-templates": {
+            "get": {
+                "tags": ["workflow"],
+                "summary": "获取游戏美术生产模板",
+                "responses": { "200": { "description": "结构化模板目录" } }
+            }
+        },
+        "/api/me/workflow-metrics": {
+            "get": {
+                "tags": ["workflow"],
+                "summary": "获取生成与一致性评估指标",
+                "responses": { "200": { "description": "成功率、耗时、服务商和评分统计" } }
+            }
+        },
+        "/api/workspace-export": {
+            "get": {
+                "tags": ["workflow"],
+                "summary": "导出当前用户的服务端工作区备份",
+                "responses": { "200": { "description": "版本化 JSON 备份" } }
+            }
+        },
+        "/api/workspace-import": {
+            "post": {
+                "tags": ["workflow"],
+                "summary": "以追加模式导入服务端工作区备份",
+                "responses": { "201": { "description": "导入数量" }, "413": { "description": "备份超过 20MB" } }
+            }
+        },
+        "/api/demo-workspace": {
+            "post": {
+                "tags": ["workflow"],
+                "summary": "幂等创建墨影示例工作区",
+                "responses": { "201": { "description": "示例已创建" }, "200": { "description": "示例已存在" } }
+            },
+            "delete": {
+                "tags": ["workflow"],
+                "summary": "仅移除系统标记的示例数据",
+                "responses": { "200": { "description": "示例已移除" } }
+            }
         },
         "/api/lora-jobs": {
-            "get": { "tags": ["workflow"], "summary": "获取 LoRA 训练任务", "responses": { "200": { "description": "LoRA 任务列表" } } },
-            "post": { "tags": ["workflow"], "summary": "创建 LoRA 训练任务", "responses": { "201": { "description": "已排队" } } }
+            "get": {
+                "tags": ["workflow"],
+                "summary": "获取 LoRA 训练任务",
+                "responses": { "200": { "description": "LoRA 任务列表" } }
+            },
+            "post": {
+                "tags": ["workflow"],
+                "summary": "创建 LoRA 训练任务（仅在外部 Worker 就绪时开放）",
+                "responses": {
+                    "201": { "description": "已派发到训练 Worker" },
+                    "503": { "description": "训练 Webhook 或 Worker Token 未配置" }
+                }
+            }
         },
         "/api/collaboration/projects": {
-            "get": { "tags": ["collaboration"], "summary": "获取拥有或参与的项目", "responses": { "200": { "description": "协作项目列表" } } }
+            "get": {
+                "tags": ["collaboration"],
+                "summary": "获取拥有或参与的项目",
+                "responses": { "200": { "description": "协作项目列表" } }
+            }
         },
         "/api/projects/{id}/members": {
-            "get": { "tags": ["collaboration"], "summary": "获取项目成员", "responses": { "200": { "description": "成员列表" } } },
-            "post": { "tags": ["collaboration"], "summary": "项目所有者添加成员", "responses": { "200": { "description": "已添加" }, "403": { "description": "权限不足" } } }
+            "get": {
+                "tags": ["collaboration"],
+                "summary": "获取项目成员",
+                "responses": { "200": { "description": "成员列表" } }
+            },
+            "post": {
+                "tags": ["collaboration"],
+                "summary": "项目所有者添加成员",
+                "responses": { "200": { "description": "已添加" }, "403": { "description": "权限不足" } }
+            }
         },
         "/api/projects/{id}/comments": {
-            "get": { "tags": ["collaboration"], "summary": "获取项目批注", "responses": { "200": { "description": "批注列表" } } },
-            "post": { "tags": ["collaboration"], "summary": "发布项目批注", "responses": { "201": { "description": "已发布" } } }
+            "get": {
+                "tags": ["collaboration"],
+                "summary": "获取项目批注",
+                "responses": { "200": { "description": "批注列表" } }
+            },
+            "post": {
+                "tags": ["collaboration"],
+                "summary": "发布项目批注",
+                "responses": { "201": { "description": "已发布" } }
+            }
         },
         "/api/projects/{id}/review": {
-            "put": { "tags": ["collaboration"], "summary": "按角色权限更新审核状态", "responses": { "200": { "description": "已更新" }, "403": { "description": "角色无权设置该状态" } } }
+            "put": {
+                "tags": ["collaboration"],
+                "summary": "按角色权限更新审核状态",
+                "responses": { "200": { "description": "已更新" }, "403": { "description": "角色无权设置该状态" } }
+            }
         },
         "/api/projects/{id}/versions": {
-            "get": { "tags": ["collaboration"], "summary": "获取项目版本快照", "responses": { "200": { "description": "版本列表" } } }
+            "get": {
+                "tags": ["collaboration"],
+                "summary": "获取项目版本快照",
+                "responses": { "200": { "description": "版本列表" } }
+            }
         },
         "/api/projects/{id}/versions/{version}/restore": {
-            "post": { "tags": ["collaboration"], "summary": "事务性恢复项目与素材快照", "responses": { "200": { "description": "恢复成功" }, "403": { "description": "权限不足" } } }
+            "post": {
+                "tags": ["collaboration"],
+                "summary": "事务性恢复项目与素材快照",
+                "responses": { "200": { "description": "恢复成功" }, "403": { "description": "权限不足" } }
+            }
         },
         "/api/projects/{id}/invites": {
-            "get": { "tags": ["collaboration"], "summary": "项目所有者获取邀请", "responses": { "200": { "description": "邀请列表" } } },
-            "post": { "tags": ["collaboration"], "summary": "创建成员邀请或只读分享", "responses": { "201": { "description": "已创建" } } }
+            "get": {
+                "tags": ["collaboration"],
+                "summary": "项目所有者获取邀请",
+                "responses": { "200": { "description": "邀请列表" } }
+            },
+            "post": {
+                "tags": ["collaboration"],
+                "summary": "创建成员邀请或只读分享",
+                "responses": { "201": { "description": "已创建" } }
+            }
         },
         "/api/shared-projects/{token}": {
             "get": {
@@ -525,17 +740,37 @@
             }
         },
         "/api/notifications": {
-            "get": { "tags": ["workflow"], "summary": "获取当前用户通知", "responses": { "200": { "description": "通知列表" } } }
+            "get": {
+                "tags": ["workflow"],
+                "summary": "获取当前用户通知",
+                "responses": { "200": { "description": "通知列表" } }
+            }
         },
         "/api/notifications/read-all": {
-            "put": { "tags": ["workflow"], "summary": "全部标记已读", "responses": { "200": { "description": "已更新" } } }
+            "put": {
+                "tags": ["workflow"],
+                "summary": "全部标记已读",
+                "responses": { "200": { "description": "已更新" } }
+            }
         },
         "/api/asset-collections": {
-            "get": { "tags": ["asset-library"], "summary": "获取素材集合", "responses": { "200": { "description": "集合列表" } } },
-            "post": { "tags": ["asset-library"], "summary": "创建素材集合", "responses": { "201": { "description": "已创建" } } }
+            "get": {
+                "tags": ["asset-library"],
+                "summary": "获取素材集合",
+                "responses": { "200": { "description": "集合列表" } }
+            },
+            "post": {
+                "tags": ["asset-library"],
+                "summary": "创建素材集合",
+                "responses": { "201": { "description": "已创建" } }
+            }
         },
         "/api/me/cost-summary": {
-            "get": { "tags": ["usage"], "summary": "获取服务商任务与估算成本汇总", "responses": { "200": { "description": "成本与配额预警" } } }
+            "get": {
+                "tags": ["usage"],
+                "summary": "获取服务商任务与估算成本汇总",
+                "responses": { "200": { "description": "成本与配额预警" } }
+            }
         },
         "/api/health/detail": {
             "get": {

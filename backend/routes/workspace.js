@@ -6,9 +6,96 @@
 const { Router } = require('express');
 const { sendError, ERR } = require('../lib/error-response');
 
+function getWorkflowCapabilities(environment = process.env) {
+    const webhookValue = String(environment.LORA_TRAINING_WEBHOOK_URL || '').trim();
+    const workerTokenValue = String(environment.LORA_WORKER_TOKEN || '').trim();
+    let webhookConfigured = false;
+    try {
+        webhookConfigured = ['http:', 'https:'].includes(new URL(webhookValue).protocol);
+    } catch (_) {
+        // Invalid or missing URL keeps the external capability disabled.
+    }
+    const workerTokenConfigured = workerTokenValue.length >= 32;
+    const loraReady = webhookConfigured && workerTokenConfigured;
+
+    return {
+        characterConsistency: {
+            status: 'simplified',
+            enabled: true,
+            label: '简化版',
+            description: '保存 Seed、提示词、锁定属性与参考图 URL，并注入生成器。',
+            limitations: ['不包含角色 embedding', '不包含多参考图一致性模型', '不保证跨批次像素级一致'],
+        },
+        loraTraining: {
+            status: loraReady ? 'available' : 'unavailable',
+            enabled: loraReady,
+            label: loraReady ? 'Worker 已连接' : '未配置训练 Worker',
+            description: loraReady
+                ? '新任务会派发到外部训练 Worker，并通过安全回调更新进度。'
+                : '需要同时配置训练 Webhook 与 Worker Token，当前不会创建无法执行的排队任务。',
+            requirements: {
+                webhookConfigured,
+                workerTokenConfigured,
+            },
+        },
+        passwordReset: {
+            status: 'unavailable',
+            enabled: false,
+            label: '未完成',
+            description: '当前部署没有完整的用户自助投递与密码更新闭环。',
+        },
+        figmaIntegration: {
+            status: 'not_implemented',
+            enabled: false,
+            label: '未实现',
+            description: '当前没有 Figma API、插件或 OAuth 集成。',
+        },
+    };
+}
+
+async function dispatchLoraWebhook({ fetchImpl, url, token, jobKey, payload, timeoutMs = 10000, onAttempt }) {
+    let lastError;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+        onAttempt?.(attempt);
+        const controller = new AbortController();
+        const timeout = setTimeout(
+            () => controller.abort(),
+            Math.min(30000, Math.max(1000, Number(timeoutMs) || 10000))
+        );
+        try {
+            const response = await fetchImpl(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                    'Idempotency-Key': jobKey,
+                },
+                body: JSON.stringify(payload),
+                signal: controller.signal,
+            });
+            if (!response.ok) throw new Error(`Worker returned HTTP ${response.status}`);
+            return { attempts: attempt };
+        } catch (error) {
+            lastError = error;
+            if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, attempt * 300));
+        } finally {
+            clearTimeout(timeout);
+        }
+    }
+    throw lastError;
+}
+
 function createWorkspaceRouter(deps) {
     const router = Router();
-    const { workspaceDb, usersDb, requireAuth, csrfProtection, notifyUser = () => {} } = deps;
+    const {
+        workspaceDb,
+        usersDb,
+        requireAuth,
+        csrfProtection,
+        notifyUser = () => {},
+        environment = process.env,
+        fetchImpl = global.fetch,
+    } = deps;
     const db = workspaceDb.db;
     const rolePermissions = {
         owner: new Set(['view', 'comment', 'edit', 'review', 'restore', 'manage']),
@@ -35,6 +122,10 @@ function createWorkspaceRouter(deps) {
         };
     }
 
+    router.get('/capabilities', requireAuth, (_req, res) => {
+        res.json({ ok: true, capabilities: getWorkflowCapabilities(environment) });
+    });
+
     // Public, revocable read-only share.
     router.get('/shared-projects/:token', (req, res) => {
         const project = workspaceDb.publicShare(req.params.token);
@@ -44,7 +135,7 @@ function createWorkspaceRouter(deps) {
 
     // Callback used by a separately deployed LoRA worker.
     router.post('/lora-jobs/:jobId/callback', (req, res) => {
-        const configuredToken = process.env.LORA_WORKER_TOKEN;
+        const configuredToken = environment.LORA_WORKER_TOKEN;
         const suppliedToken = String(req.get('authorization') || '').replace(/^Bearer\s+/i, '');
         if (!configuredToken || suppliedToken !== configuredToken) {
             return sendError(res, 401, ERR.UNAUTHORIZED, 'LoRA worker token 无效');
@@ -53,6 +144,7 @@ function createWorkspaceRouter(deps) {
         const status = allowed.includes(req.body?.status) ? req.body.status : 'running';
         const job = db.prepare('SELECT * FROM lora_jobs WHERE id=?').get(Number(req.params.jobId));
         if (!job) return sendError(res, 404, ERR.NOT_FOUND, 'LoRA 任务不存在');
+        if (job.status === 'cancelled') return sendError(res, 409, ERR.CONFLICT, '已取消任务不能再更新进度');
         db.prepare(`UPDATE lora_jobs SET status=?, progress=?, model_path=?, error=?, updated_at=? WHERE id=?`).run(
             status,
             Math.min(100, Math.max(0, Number(req.body?.progress) || 0)),
@@ -95,7 +187,7 @@ function createWorkspaceRouter(deps) {
             projectId: input.projectId || null,
             characterId: input.characterId || null,
             params: input.params && typeof input.params === 'object' ? input.params : {},
-            status: 'queued',
+            status: 'draft',
         });
         res.status(201).json({ ok: true, job });
     });
@@ -103,9 +195,21 @@ function createWorkspaceRouter(deps) {
         sendError(res, 405, ERR.FORBIDDEN, '生成任务状态由服务端维护');
     });
     router.post('/generation-jobs/:jobId/retry', requireAuth, csrfProtection, (req, res) => {
-        const job = workspaceDb.updateGenerationJob(req.currentUser.id, req.params.jobId, { retry: true });
-        if (!job) return sendError(res, 404, ERR.NOT_FOUND, '生成任务不存在');
-        res.json({ ok: true, job });
+        const source = db
+            .prepare('SELECT * FROM generation_jobs WHERE id=? AND user_id=?')
+            .get(Number(req.params.jobId), req.currentUser.id);
+        if (!source) return sendError(res, 404, ERR.NOT_FOUND, '生成任务不存在');
+        const job = workspaceDb.createGenerationJob(req.currentUser.id, {
+            projectId: source.project_id,
+            characterId: source.character_id,
+            provider: source.provider,
+            mode: source.mode,
+            prompt: source.prompt,
+            negativePrompt: source.negative_prompt,
+            params: workspaceDb.json(source.params_json, {}),
+            status: 'draft',
+        });
+        res.status(201).json({ ok: true, job, sourceJobId: source.id });
     });
 
     // Character consistency profiles.
@@ -157,17 +261,28 @@ function createWorkspaceRouter(deps) {
         res.json({ ok: true, jobs });
     });
     router.post('/lora-jobs', requireAuth, csrfProtection, (req, res) => {
+        const capability = getWorkflowCapabilities(environment).loraTraining;
+        if (!capability.enabled) {
+            return sendError(
+                res,
+                503,
+                ERR.SERVICE_UNAVAILABLE,
+                'LoRA 训练 Worker 未配置，当前不能创建训练任务',
+                capability.requirements
+            );
+        }
         const input = req.body || {};
         const images = Array.isArray(input.images) ? input.images.slice(0, 50) : [];
         if (!input.name || images.length < 5) {
             return sendError(res, 400, ERR.VALIDATION, 'LoRA 任务需要名称和至少 5 张训练图');
         }
         const now = new Date().toISOString();
+        const workerJobKey = `artifex-lora-${req.currentUser.id}-${Date.now()}`;
         const info = db
             .prepare(
                 `INSERT INTO lora_jobs
-                 (user_id, project_id, name, provider, images_json, params_json, status, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, 'queued', ?, ?)`
+                 (user_id, project_id, name, provider, images_json, params_json, status, worker_job_key, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, 'queued', ?, ?, ?)`
             )
             .run(
                 req.currentUser.id,
@@ -176,52 +291,67 @@ function createWorkspaceRouter(deps) {
                 input.provider || 'sdwebui',
                 JSON.stringify(images),
                 JSON.stringify(input.params || {}),
+                workerJobKey,
                 now,
                 now
             );
         const jobId = Number(info.lastInsertRowid);
-        const webhookUrl = process.env.LORA_TRAINING_WEBHOOK_URL;
-        if (webhookUrl) {
-            const callbackUrl = `${req.protocol}://${req.get('host')}/api/lora-jobs/${jobId}/callback`;
-            fetch(webhookUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(process.env.LORA_WORKER_TOKEN
-                        ? { Authorization: `Bearer ${process.env.LORA_WORKER_TOKEN}` }
-                        : {}),
-                },
-                body: JSON.stringify({
-                    jobId,
-                    name: String(input.name).slice(0, 100),
-                    provider: input.provider || 'sdwebui',
-                    images,
-                    params: input.params || {},
-                    callbackUrl,
-                }),
-            }).catch((error) => {
-                console.error('[lora] training webhook failed:', error.message);
+        const webhookUrl = environment.LORA_TRAINING_WEBHOOK_URL;
+        const callbackUrl = `${req.protocol}://${req.get('host')}/api/lora-jobs/${jobId}/callback`;
+        dispatchLoraWebhook({
+            fetchImpl,
+            url: webhookUrl,
+            token: environment.LORA_WORKER_TOKEN,
+            jobKey: workerJobKey,
+            timeoutMs: environment.LORA_DISPATCH_TIMEOUT_MS,
+            payload: {
+                jobId,
+                idempotencyKey: workerJobKey,
+                name: String(input.name).slice(0, 100),
+                provider: input.provider || 'sdwebui',
+                images,
+                params: input.params || {},
+                callbackUrl,
+            },
+            onAttempt: (attempt) => {
+                db.prepare('UPDATE lora_jobs SET dispatch_attempts=?, updated_at=? WHERE id=?').run(
+                    attempt,
+                    new Date().toISOString(),
+                    jobId
+                );
+            },
+        }).catch((error) => {
+            console.error('[lora] training webhook failed:', error.message);
+            db.prepare(`UPDATE lora_jobs SET status='failed', error=?, updated_at=? WHERE id=?`).run(
+                `训练 Worker 派发失败：${String(error.message).slice(0, 500)}`,
+                new Date().toISOString(),
+                jobId
+            );
+            emit(req.currentUser.id, {
+                type: 'failed',
+                title: 'LoRA 任务派发失败',
+                body: String(input.name).slice(0, 100),
+                link: '/modules/workflow-hub/index.html#lora',
             });
-        }
-        res.status(201).json({ ok: true, id: jobId, status: 'queued', dispatched: Boolean(webhookUrl) });
+        });
+        res.status(201).json({ ok: true, id: jobId, status: 'queued', dispatched: true, workerJobKey });
     });
     router.put('/lora-jobs/:jobId', requireAuth, csrfProtection, (req, res) => {
-        const input = req.body || {};
-        const allowed = ['queued', 'running', 'completed', 'failed', 'cancelled'];
-        const status = allowed.includes(input.status) ? input.status : 'running';
-        db.prepare(
-            `UPDATE lora_jobs SET status=?, progress=?, model_path=?, error=?, updated_at=?
-             WHERE id=? AND user_id=?`
-        ).run(
-            status,
-            Math.min(100, Math.max(0, Number(input.progress) || 0)),
-            input.modelPath || '',
-            input.error || '',
+        const job = db
+            .prepare('SELECT * FROM lora_jobs WHERE id=? AND user_id=?')
+            .get(Number(req.params.jobId), req.currentUser.id);
+        if (!job) return sendError(res, 404, ERR.NOT_FOUND, 'LoRA 任务不存在');
+        if (req.body?.status !== 'cancelled') {
+            return sendError(res, 403, ERR.FORBIDDEN, '训练状态和模型路径只能由 Worker 回调更新');
+        }
+        if (!['queued', 'running'].includes(job.status)) {
+            return sendError(res, 409, ERR.CONFLICT, '当前任务状态不能取消');
+        }
+        db.prepare("UPDATE lora_jobs SET status='cancelled', updated_at=? WHERE id=?").run(
             new Date().toISOString(),
-            Number(req.params.jobId),
-            req.currentUser.id
+            job.id
         );
-        res.json({ ok: true });
+        res.json({ ok: true, status: 'cancelled' });
     });
 
     // Projects visible through ownership or membership.
@@ -508,4 +638,4 @@ function createWorkspaceRouter(deps) {
     return router;
 }
 
-module.exports = { createWorkspaceRouter };
+module.exports = { createWorkspaceRouter, getWorkflowCapabilities, dispatchLoraWebhook };

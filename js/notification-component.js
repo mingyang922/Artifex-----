@@ -22,27 +22,12 @@ const escapeNotificationHtml =
 
 class NotificationComponent {
     constructor() {
-        // 演示数据：实际使用时通过 loadFromServer() 从后端加载
-        this.notifications = this.getDemoNotifications();
+        this.notifications = [];
         this.init();
         this.loadFromServer();
     }
 
-    /** 获取演示通知数据 */
-    getDemoNotifications() {
-        return [
-            {
-                id: 1,
-                title: '欢迎使用 Artifex',
-                message: '您已成功登录，可以开始创建项目和生成 AI 资产',
-                time: '刚刚',
-                icon: 'fas fa-hand-sparkles',
-                unread: true,
-            },
-        ];
-    }
-
-    /** 从服务端加载通知数据（待后端 API 实现后启用） */
+    /** 从服务端加载真实通知；失败时保留空状态，不伪造演示消息。 */
     async loadFromServer() {
         try {
             const res = await fetch('/api/notifications', { credentials: 'include' });
@@ -63,7 +48,9 @@ class NotificationComponent {
                 }
             }
         } catch (_) {
-            // 服务端 API 未实现时静默回退到演示数据
+            this.notifications = [];
+            this.refreshDropdownContent();
+            this.updateNotificationBadge();
         }
     }
 
@@ -160,6 +147,9 @@ class NotificationComponent {
      * 渲染通知项
      */
     renderNotificationItems() {
+        if (this.notifications.length === 0) {
+            return '<div class="notification-empty">暂无通知</div>';
+        }
         return this.notifications
             .map(
                 (notification) => `

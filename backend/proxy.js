@@ -30,6 +30,7 @@ const { createAssetLibraryRouter } = require('./routes/asset-library');
 const { createAdminRouter } = require('./routes/admin');
 const { createAiProviderRouter } = require('./routes/ai-providers');
 const { createWorkspaceRouter } = require('./routes/workspace');
+const { createProductionInsightsRouter } = require('./routes/production-insights');
 const { createWorkspaceDb } = require('./db/workspace-db');
 
 // ── 环境变量 ──────────────────────────────────────────────────────
@@ -204,7 +205,7 @@ app.use((req, res, next) => {
 
 // ── 用户库 + Session ─────────────────────────────────────────────
 const session = require('express-session');
-const SQLiteStore = require('connect-sqlite3')(session);
+const SqliteSessionStore = require('./lib/sqlite-session-store');
 const usersDb = require('./db/users-db');
 const { createAuthPolicy } = require('./lib/auth-policy');
 const { createUserApiSettingsHelpers } = require('./lib/user-api-settings');
@@ -213,9 +214,8 @@ const workspaceDb = createWorkspaceDb(usersDb.getDb());
 const { requireAuth, isAdminUser } = createAuthPolicy(usersDb);
 const { sanitizeApiSettingsPayload, getUserProviderConfig } = createUserApiSettingsHelpers(usersDb);
 
-const sessionStore = new SQLiteStore({
-    db: 'sessions.sqlite',
-    dir: path.join(__dirname, 'data'),
+const sessionStore = new SqliteSessionStore({
+    dbPath: path.join(__dirname, 'data', 'sessions.sqlite'),
     ttl: 24 * 60 * 60, // 24 小时
     cleanupInterval: 30 * 60 * 1000, // 30 分钟清理过期会话
 });
@@ -278,6 +278,9 @@ app.use(
         workspaceDb,
     })
 );
+
+// 生产洞察：一致性评估、模板、指标、示例工作区与服务端备份。
+app.use('/api', createProductionInsightsRouter({ workspaceDb, usersDb, requireAuth, csrfProtection }));
 
 // ── 静态文件 ─────────────────────────────────────────────────────
 // Docker 生产镜像只包含 Vite 的 dist 产物；开发环境仍直接服务源码目录。

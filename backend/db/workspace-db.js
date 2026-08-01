@@ -65,6 +65,22 @@ function createWorkspaceDb(db) {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL
         );
+        CREATE TABLE IF NOT EXISTS character_evaluations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            character_id INTEGER NOT NULL,
+            generation_job_id INTEGER,
+            method TEXT NOT NULL,
+            score INTEGER NOT NULL,
+            observation_json TEXT NOT NULL DEFAULT '{}',
+            result_json TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (character_id) REFERENCES character_profiles(id) ON DELETE CASCADE,
+            FOREIGN KEY (generation_job_id) REFERENCES generation_jobs(id) ON DELETE SET NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_character_evaluations_user_created
+            ON character_evaluations(user_id, created_at);
         CREATE TABLE IF NOT EXISTS lora_jobs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
@@ -178,6 +194,16 @@ function createWorkspaceDb(db) {
     if (!versionColumns.includes('snapshot_json')) {
         db.exec('ALTER TABLE version_history ADD COLUMN snapshot_json TEXT');
     }
+    const loraColumns = db
+        .prepare('PRAGMA table_info(lora_jobs)')
+        .all()
+        .map((c) => c.name);
+    if (!loraColumns.includes('dispatch_attempts')) {
+        db.exec('ALTER TABLE lora_jobs ADD COLUMN dispatch_attempts INTEGER NOT NULL DEFAULT 0');
+    }
+    if (!loraColumns.includes('worker_job_key')) {
+        db.exec("ALTER TABLE lora_jobs ADD COLUMN worker_job_key TEXT NOT NULL DEFAULT ''");
+    }
 
     function hydrateJob(row) {
         if (!row) return null;
@@ -230,7 +256,9 @@ function createWorkspaceDb(db) {
 
     function createGenerationJob(userId, input) {
         const now = new Date().toISOString();
-        const status = ['queued', 'running', 'completed', 'failed'].includes(input.status) ? input.status : 'queued';
+        const status = ['draft', 'queued', 'running', 'completed', 'failed', 'cancelled'].includes(input.status)
+            ? input.status
+            : 'draft';
         const info = db
             .prepare(
                 `INSERT INTO generation_jobs
@@ -262,7 +290,7 @@ function createWorkspaceDb(db) {
             .prepare('SELECT * FROM generation_jobs WHERE id = ? AND user_id = ?')
             .get(Number(id), Number(userId));
         if (!existing) return null;
-        const nextStatus = input.retry ? 'queued' : input.status || existing.status;
+        const nextStatus = input.retry ? 'draft' : input.status || existing.status;
         const now = new Date().toISOString();
         db.prepare(
             `UPDATE generation_jobs SET status = ?, outputs_json = ?, error = ?, estimated_cost = ?, updated_at = ?

@@ -1,6 +1,6 @@
 # 面向游戏美术的大模型辅助资产生成平台 — 实现与改进计划
 
-> 2026-07-30 状态：本文原列出的线稿转成品、角色一致性档案、LoRA 训练接入、生成历史、协作审核、版本恢复、素材治理、通知与成本控制均已落地；生产使用说明见 `docs/PRODUCTION_WORKFLOWS.md`。
+> 2026-08-01 状态：生成历史、协作审核、版本恢复、素材治理、通知和成本控制已形成可运行闭环；角色一致性仍为简化版，LoRA 仅完成外部 Worker 编排。事实边界以 `docs/CAPABILITY_MATRIX.md` 为准。
 
 > 对照策划书要求与现有代码，制定的分阶段实现/改进计划（可直接按任务落地开发）。
 
@@ -34,12 +34,12 @@
 
 ---
 
-## 二、现有代码结构速览（v1.3.3 更新）
+## 二、现有代码结构速览（v1.4.0 更新）
 
 ```
 Artifex/
 ├── backend/
-│   ├── proxy.js / proxy.ts          # 服务入口、Session、中间件、路由注册
+│   ├── proxy.js                     # 服务入口、Session、中间件、路由注册
 │   ├── routes/                      # auth / image-proxy / projects / asset-library / admin / ai-providers
 │   ├── providers/                   # tencent / alibaba / jimeng / sd-webui
 │   ├── lib/                         # utils / auth-policy / rate-limiter / logger / ws-server / user-api-settings
@@ -57,7 +57,7 @@ Artifex/
 ├── vendor/                          # 本地化 CDN 资源（Font Awesome / Google Fonts / JSZip）
 ├── tests/ + e2e/                    # 单元测试 + Playwright E2E 测试
 ├── sw.js + manifest.json            # PWA 支持
-├── vite.config.js + tsconfig.json   # 构建工具 + TypeScript 配置
+├── vite.config.js                   # 前端构建配置
 └── docs/                            # 用户手册、安全审计、性能基准、源代码文档、OpenAPI
 ```
 
@@ -79,8 +79,8 @@ Artifex/
 - PWA 离线支持 + Service Worker 缓存策略
 - WebSocket 实时通知
 - 多语言（中/繁中/英/日/韩）
-- TypeScript 迁移（后端 21 个文件，strict 模式）
-- E2E 测试（23 个 Playwright 用例）
+- TypeScript 状态：尚未迁移（当前后端 **0** 个 `.ts` 源文件）；现有后端仍为 CommonJS JavaScript
+- E2E 测试（40 个 Playwright 业务用例 + 生产产物烟测）
 - Docker 多阶段构建 + CI/CD（GitHub Actions）
 - Vite 打包 + 代码分割 + script defer 优化
 

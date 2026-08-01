@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-    const state = { projects: [], projectId: null };
+    const state = { projects: [], projectId: null, capabilities: null };
     const $ = (selector) => document.querySelector(selector);
     const esc = (value) =>
         typeof escapeHtml === 'function'
@@ -18,7 +18,7 @@
     async function api(url, options) {
         const response = options ? await fetchWithCsrf(url, options) : await fetch(url, { credentials: 'include' });
         const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.message || data.error || '请求失败');
+        if (!response.ok) throw new Error(data.error?.message || data.message || data.error || '请求失败');
         return data;
     }
     function card(title, body, badges = '', actions = '') {
@@ -26,6 +26,58 @@
     }
     function badge(value) {
         return `<span class="badge">${esc(value)}</span>`;
+    }
+
+    function renderCapability(name, capability, noticeSelector) {
+        const badgeNode = document.querySelector(`[data-capability-badge="${name}"]`);
+        if (badgeNode) {
+            badgeNode.textContent = capability.label;
+            badgeNode.dataset.status = capability.status;
+        }
+        const notice = $(noticeSelector);
+        if (notice) {
+            const limitations = Array.isArray(capability.limitations)
+                ? ` 限制：${capability.limitations.join('；')}。`
+                : '';
+            notice.textContent = capability.description + limitations;
+            notice.dataset.status = capability.status;
+        }
+    }
+
+    function setLoraFormEnabled(enabled) {
+        document
+            .querySelectorAll('#loraForm input, #loraForm select, #loraForm textarea, #loraForm button')
+            .forEach((node) => {
+                node.disabled = !enabled;
+            });
+    }
+
+    async function loadCapabilities() {
+        try {
+            const data = await api('/api/capabilities');
+            state.capabilities = data.capabilities;
+            renderCapability(
+                'characterConsistency',
+                data.capabilities.characterConsistency,
+                '#characterCapabilityNotice'
+            );
+            renderCapability('loraTraining', data.capabilities.loraTraining, '#loraCapabilityNotice');
+            setLoraFormEnabled(data.capabilities.loraTraining.enabled);
+        } catch (error) {
+            state.capabilities = null;
+            renderCapability(
+                'characterConsistency',
+                { status: 'unknown', label: '状态未知', description: '无法确认能力状态，请刷新页面后重试。' },
+                '#characterCapabilityNotice'
+            );
+            renderCapability(
+                'loraTraining',
+                { status: 'unknown', label: '不可提交', description: '无法确认训练 Worker 状态，已停止接收新任务。' },
+                '#loraCapabilityNotice'
+            );
+            setLoraFormEnabled(false);
+            toast(error.message);
+        }
     }
 
     document.querySelectorAll('.workflow-tabs button').forEach((button) => {
@@ -52,18 +104,40 @@
                           `${job.provider || '未指定服务商'} · ${job.mode}`,
                           badge(job.status) +
                               badge(new Date(job.created_at).toLocaleString()) +
+                              (job.status === 'draft'
+                                  ? `<a class="secondary-action" href="../ai-generate/ai-generator-new.html?replayJobId=${job.id}">打开复现草稿</a>`
+                                  : '') +
+                              (['completed', 'failed'].includes(job.status)
+                                  ? `<button class="secondary-action duplicate-job" data-id="${job.id}">复制参数</button>`
+                                  : '') +
+                              (['draft', 'queued'].includes(job.status)
+                                  ? `<button class="secondary-action cancel-job" data-id="${job.id}">取消草稿</button>`
+                                  : '') +
                               (job.status === 'failed'
-                                  ? `<button class="secondary-action retry-job" data-id="${job.id}">重试</button>`
+                                  ? `<button class="secondary-action diagnose-job" data-id="${job.id}">查看失败建议</button>`
                                   : '')
                       )
                   )
                   .join('')
             : card('暂无生成历史', '从 AI 生成器完成一次生成后会自动记录。');
-        document.querySelectorAll('.retry-job').forEach((button) =>
+        document.querySelectorAll('.duplicate-job').forEach((button) =>
             button.addEventListener('click', async () => {
-                await api(`/api/generation-jobs/${button.dataset.id}/retry`, { method: 'POST', body: '{}' });
-                toast('任务已重新排队');
+                await api(`/api/generation-jobs/${button.dataset.id}/duplicate`, { method: 'POST', body: '{}' });
+                toast('已创建可复现草稿，请从草稿进入生成器提交');
                 loadJobs();
+            })
+        );
+        document.querySelectorAll('.cancel-job').forEach((button) =>
+            button.addEventListener('click', async () => {
+                await api(`/api/generation-jobs/${button.dataset.id}/cancel`, { method: 'POST', body: '{}' });
+                toast('草稿已取消');
+                loadJobs();
+            })
+        );
+        document.querySelectorAll('.diagnose-job').forEach((button) =>
+            button.addEventListener('click', async () => {
+                const data = await api(`/api/generation-jobs/${button.dataset.id}/diagnosis`);
+                toast(`${data.diagnosis.label}：${data.diagnosis.suggestion}`);
             })
         );
     }
@@ -278,6 +352,10 @@
     }
     $('#loraForm').addEventListener('submit', async (event) => {
         event.preventDefault();
+        if (!state.capabilities?.loraTraining?.enabled) {
+            toast('训练 Worker 未就绪，当前不能创建 LoRA 任务');
+            return;
+        }
         const form = event.currentTarget;
         const fd = new FormData(form);
         const images = String(fd.get('images') || '')
@@ -347,6 +425,7 @@
     }
     Promise.resolve()
         .then(acceptInviteFromUrl)
+        .then(loadCapabilities)
         .then(() => Promise.all([loadJobs(), loadCharacters(), loadProjects(), loadLora(), loadNotifications()]))
         .catch((error) => toast(error.message));
     if (window.WsClient) {

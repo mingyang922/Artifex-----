@@ -24,9 +24,15 @@ usersDb.init();
 
 // 清理临时文件
 const cleanup = () => {
-    try { require('fs').unlinkSync(testDbPath); } catch (_) {}
-    try { require('fs').unlinkSync(testDbPath + '-shm'); } catch (_) {}
-    try { require('fs').unlinkSync(testDbPath + '-wal'); } catch (_) {}
+    try {
+        require('fs').unlinkSync(testDbPath);
+    } catch (_) {}
+    try {
+        require('fs').unlinkSync(testDbPath + '-shm');
+    } catch (_) {}
+    try {
+        require('fs').unlinkSync(testDbPath + '-wal');
+    } catch (_) {}
 };
 
 describe('image-proxy route module', () => {
@@ -54,10 +60,7 @@ describe('image-proxy route module', () => {
             headers: { location: 'http://127.0.0.1/admin' },
         });
 
-        await assert.rejects(
-            fetchPublicImage('https://example.com/image.png', request, lookup),
-            /禁止访问内网地址/
-        );
+        await assert.rejects(fetchPublicImage('https://example.com/image.png', request, lookup), /禁止访问内网地址/);
     });
 
     it('should disable automatic redirects when fetching proxied images', async () => {
@@ -197,6 +200,7 @@ describe('workspace route module', () => {
         const express = require('express');
         const request = require('supertest');
         const { createWorkspaceRouter } = require('../backend/routes/workspace');
+        const { createProductionInsightsRouter } = require('../backend/routes/production-insights');
         const { createWorkspaceDb } = require('../backend/db/workspace-db');
         const workspaceDb = createWorkspaceDb(usersDb.getDb());
         const owner = usersDb.createUser('routeowner', 'routeowner@example.test', 'hash');
@@ -223,6 +227,15 @@ describe('workspace route module', () => {
                 csrfProtection: (req, res, next) => next(),
             })
         );
+        app.use(
+            '/api',
+            createProductionInsightsRouter({
+                workspaceDb,
+                usersDb,
+                requireAuth: (req, res, next) => next(),
+                csrfProtection: (req, res, next) => next(),
+            })
+        );
 
         const approved = await request(app).put(`/api/projects/${project.id}/review`).send({ status: 'approved' });
         assert.equal(approved.status, 200);
@@ -230,6 +243,79 @@ describe('workspace route module', () => {
         assert.equal(delivered.status, 403);
         const restored = await request(app).post(`/api/projects/${project.id}/versions/1/restore`).send({});
         assert.equal(restored.status, 403);
+
+        const capabilities = await request(app).get('/api/capabilities');
+        assert.equal(capabilities.status, 200);
+        assert.equal(capabilities.body.capabilities.characterConsistency.status, 'simplified');
+        assert.equal(capabilities.body.capabilities.loraTraining.enabled, false);
+
+        const lora = await request(app)
+            .post('/api/lora-jobs')
+            .send({
+                name: '不应进入队列',
+                images: ['1.png', '2.png', '3.png', '4.png', '5.png'],
+            });
+        assert.equal(lora.status, 503);
+        assert.equal(lora.body.error.code, 'ERR_SERVICE_UNAVAILABLE');
+        assert.equal(workspaceDb.db.prepare('SELECT COUNT(*) AS count FROM lora_jobs').get().count, 0);
+
+        const templates = await request(app).get('/api/workflow-templates');
+        assert.equal(templates.status, 200);
+        assert.equal(templates.body.templates.length, 7);
+
+        const demo = await request(app).post('/api/demo-workspace').send({});
+        assert.equal(demo.status, 201);
+        const duplicateDemo = await request(app).post('/api/demo-workspace').send({});
+        assert.equal(duplicateDemo.status, 200);
+        assert.equal(duplicateDemo.body.created, false);
+
+        const characters = await request(app).get('/api/characters');
+        const demoCharacter = characters.body.characters.find((character) => character.name === '墨影');
+        const evaluation = await request(app).post(`/api/characters/${demoCharacter.id}/evaluate`).send({
+            description: '黑色长袍，高束发，红色围巾，手持木质长剑',
+            palette: '墨黑、朱红、暗金',
+        });
+        assert.equal(evaluation.status, 201);
+        assert.equal(evaluation.body.evaluation.score, 100);
+
+        const metrics = await request(app).get('/api/me/workflow-metrics');
+        assert.equal(metrics.status, 200);
+        assert.equal(metrics.body.metrics.consistency.total, 1);
+
+        const demoJob = workspaceDb.db
+            .prepare('SELECT * FROM generation_jobs WHERE user_id=? AND params_json LIKE \'%"demo":true%\'')
+            .get(reviewer.id);
+        const duplicated = await request(app).post(`/api/generation-jobs/${demoJob.id}/duplicate`).send({});
+        assert.equal(duplicated.status, 201);
+        assert.equal(duplicated.body.job.status, 'draft');
+        const replay = await request(app).get(`/api/generation-jobs/${duplicated.body.job.id}/replay`);
+        assert.equal(replay.body.replay.prompt, demoJob.prompt);
+        const cancelled = await request(app).post(`/api/generation-jobs/${duplicated.body.job.id}/cancel`).send({});
+        assert.equal(cancelled.status, 200);
+
+        const exported = await request(app).get('/api/workspace-export');
+        assert.equal(exported.status, 200);
+        assert.equal(exported.body.schemaVersion, 1);
+        assert.ok(exported.body.projects.some((item) => item.name.includes('墨影')));
+        const imported = await request(app)
+            .post('/api/workspace-import')
+            .send({
+                schemaVersion: 1,
+                projects: [{ name: '导入项目', description: '备份恢复验证', type: 'game', assets: [] }],
+                characters: [{ name: '导入角色', lockedTraits: ['斗笠'] }],
+                assetLibrary: [],
+            });
+        assert.equal(imported.status, 201);
+        assert.deepEqual(imported.body.imported, {
+            projects: 1,
+            projectAssets: 0,
+            characters: 1,
+            assetLibrary: 0,
+        });
+
+        const removed = await request(app).delete('/api/demo-workspace').send({});
+        assert.equal(removed.status, 200);
+        assert.equal(removed.body.removed, 1);
     });
 });
 

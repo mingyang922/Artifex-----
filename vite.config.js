@@ -1,7 +1,18 @@
-import { defineConfig } from 'vite';
+import { createLogger, defineConfig } from 'vite';
 import { resolve } from 'path';
 
+const logger = createLogger();
+const warn = logger.warn.bind(logger);
+logger.warn = (message, options) => {
+    // prepare-dist removes Font Awesome's unused v4 compatibility face before
+    // verifying dist, so these two missing optional font files are intentional.
+    if (message.includes('../webfonts/fa-v4compatibility') && message.includes("didn't resolve at build time")) return;
+    warn(message, options);
+};
+logger.warnOnce = logger.warn;
+
 export default defineConfig({
+    customLogger: logger,
     root: '.',
     build: {
         outDir: 'dist',

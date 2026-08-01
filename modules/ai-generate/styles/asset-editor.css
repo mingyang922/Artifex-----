@@ -1,0 +1,366 @@
+/* ========== 资产微调编辑器 ========== */
+.asset-editor-root {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 180px);
+    min-height: 520px;
+    gap: 0;
+}
+.ae-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: rgba(15, 21, 41, 0.95);
+    border-bottom: 1px solid rgba(0, 240, 255, 0.12);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    z-index: 10;
+}
+.ae-toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.ae-toolbar-group + .ae-toolbar-group {
+    margin-left: 6px;
+    padding-left: 10px;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ae-tool-btn,
+.ae-action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    color: #b0b8d0;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s;
+}
+.ae-tool-btn:hover,
+.ae-action-btn:hover {
+    background: rgba(0, 240, 255, 0.08);
+    color: #e0e8f4;
+}
+.ae-tool-btn.ae-tool-active {
+    background: rgba(0, 240, 255, 0.18);
+    color: #00f0ff;
+    border-color: rgba(0, 240, 255, 0.35);
+}
+.ae-sep {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 0 4px;
+}
+.ae-tool-options {
+    font-size: 12px;
+    color: #8090a8;
+}
+.ae-tool-options label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: default;
+}
+.ae-slider {
+    width: 60px;
+    accent-color: #00f0ff;
+    cursor: pointer;
+}
+.ae-color-swatch {
+    width: 28px;
+    height: 28px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 5px;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+}
+.ae-zoom-label {
+    font-size: 12px;
+    color: #00f0ff;
+    min-width: 42px;
+    text-align: center;
+    font-family: monospace;
+}
+.ae-actions-bar {
+    margin-left: auto;
+}
+
+.ae-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.ae-panel {
+    width: 240px;
+    min-width: 200px;
+    flex-shrink: 0;
+    background: rgba(12, 16, 32, 0.96);
+    border-right: 1px solid rgba(0, 240, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    font-size: 13px;
+}
+.ae-panel-right {
+    border-right: none;
+    border-left: 1px solid rgba(0, 240, 255, 0.08);
+}
+.ae-panel-header {
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #00f0ff;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.08);
+    flex-shrink: 0;
+}
+.ae-panel-section {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.ae-panel-sub-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #a0b4cc;
+    margin-bottom: 8px;
+}
+.ae-panel-sub-title i {
+    margin-right: 4px;
+}
+.ae-panel-section label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #8090a8;
+    margin-bottom: 6px;
+}
+.ae-panel-section .ae-slider {
+    flex: 1;
+}
+.ae-hint {
+    font-size: 11px;
+    color: #607080;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+.ae-textarea {
+    width: 100%;
+    background: rgba(20, 28, 50, 0.9);
+    border: 1px solid rgba(0, 240, 255, 0.12);
+    border-radius: 6px;
+    color: #e0e8f4;
+    padding: 8px;
+    font-size: 12px;
+    resize: vertical;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+.ae-textarea:focus {
+    border-color: rgba(0, 240, 255, 0.4);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.1);
+}
+.ae-sm-select {
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+    margin-bottom: 8px;
+}
+.ae-sm-input {
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+    width: 100px;
+    margin-bottom: 8px;
+}
+.ae-ai-btn {
+    font-size: 13px !important;
+    padding: 8px 14px !important;
+    width: 100%;
+    margin-top: 6px;
+}
+.ae-small-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    font-size: 12px;
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.18);
+    border-radius: 5px;
+    color: #00f0ff;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin: 2px;
+}
+.ae-small-btn:hover {
+    background: rgba(0, 240, 255, 0.18);
+}
+.ae-small-btn-ghost {
+    background: transparent;
+    color: #8090a8;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+.ae-small-btn-ghost:hover {
+    color: #e0e8f4;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+.ae-upload-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px;
+    border: 2px dashed rgba(0, 240, 255, 0.2);
+    border-radius: 6px;
+    cursor: pointer;
+    color: #6080a0;
+    font-size: 12px;
+    transition: all 0.15s;
+    text-align: center;
+}
+.ae-upload-btn:hover {
+    border-color: rgba(0, 240, 255, 0.4);
+    color: #00f0ff;
+    background: rgba(0, 240, 255, 0.04);
+}
+
+.ae-asset-list {
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.ae-asset-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 5px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    object-fit: cover;
+    transition: border-color 0.15s;
+}
+.ae-asset-thumb:hover {
+    border-color: rgba(0, 240, 255, 0.5);
+}
+.ae-empty-hint {
+    color: #505868;
+    font-size: 11px;
+    text-align: center;
+    padding: 16px 4px;
+}
+
+.ae-canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #0c1020;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ae-canvas-bg {
+    position: relative;
+    background-image:
+        linear-gradient(45deg, #181e30 25%, transparent 25%), linear-gradient(-45deg, #181e30 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #181e30 75%), linear-gradient(-45deg, transparent 75%, #181e30 75%);
+    background-size: 16px 16px;
+    background-position:
+        0 0,
+        0 8px,
+        8px -8px,
+        -8px 0;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+    transform-origin: center center;
+}
+#aeCanvas {
+    display: block;
+    image-rendering: pixelated;
+}
+.ae-overlay-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+.ae-canvas-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #405060;
+    text-align: center;
+    pointer-events: none;
+}
+.ae-statusbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 24px;
+    background: rgba(10, 14, 24, 0.92);
+    border-top: 1px solid rgba(0, 240, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    font-size: 11px;
+    font-family: monospace;
+    color: #7090a8;
+    z-index: 5;
+    flex-shrink: 0;
+}
+.ae-sep-v {
+    width: 1px;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* 资产微调 tab 时隐藏共用结果区 */
+body.generator-tab-code .generator-shared-results {
+    display: none !important;
+}
+
+@media (max-width: 900px) {
+    .ae-body {
+        flex-direction: column;
+    }
+    .ae-panel {
+        width: 100%;
+        min-width: unset;
+        max-height: 200px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 240, 255, 0.08);
+    }
+    .ae-panel-right {
+        border-left: none;
+        border-top: 1px solid rgba(0, 240, 255, 0.08);
+    }
+    .ae-panel-section {
+        flex: 1;
+        min-width: 160px;
+    }
+    .asset-editor-root {
+        height: auto;
+        min-height: 90vh;
+    }
+}
+
+/* 在角色动作组视图时隐藏代码/图片共用的结果区 */
+body.generator-tab-action .generator-shared-results {
+    display: none !important;
+}

@@ -226,6 +226,8 @@ function createImageRouter(deps) {
                 const startTime = Date.now();
                 if (workspaceDb) {
                     const job = workspaceDb.createGenerationJob(req.currentUser.id, {
+                        projectId: req.body.projectId || null,
+                        characterId: req.body.characterId || null,
                         provider: normalizedProvider,
                         mode: isImg2Img ? 'img2img' : 'text2img',
                         prompt: effectivePrompt,
@@ -233,6 +235,7 @@ function createImageRouter(deps) {
                             size,
                             strength: effectiveStrength,
                             imageModel,
+                            templateId: String(req.body.templateId || '').slice(0, 80),
                         },
                         status: 'running',
                     });
@@ -298,6 +301,7 @@ function createImageRouter(deps) {
                         prompt: effectivePrompt,
                         size,
                         mode: isImg2Img ? 'img2img' : 'text2img',
+                        job_id: historyJobId,
                     });
                 } catch (err) {
                     // 记录失败

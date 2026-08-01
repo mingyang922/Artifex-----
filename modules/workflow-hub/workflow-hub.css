@@ -70,6 +70,11 @@
     color: #06131a;
     background: linear-gradient(135deg, #00f0ff, #5dffca);
 }
+.primary-action:disabled {
+    cursor: not-allowed;
+    filter: saturate(0.25);
+    opacity: 0.55;
+}
 .secondary-action {
     color: #dbe8f7;
     border: 1px solid rgba(0, 240, 255, 0.25);
@@ -117,6 +122,50 @@
     color: #07141b;
     background: #00f0ff;
     border-color: #00f0ff;
+}
+.capability-pill {
+    display: inline-flex;
+    margin-left: 5px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(255, 196, 72, 0.16);
+    color: #ffd477;
+    font-size: 10px;
+    vertical-align: middle;
+}
+.workflow-tabs button.is-active .capability-pill {
+    background: rgba(7, 20, 27, 0.16);
+    color: #17333b;
+}
+.capability-pill[data-status='available'] {
+    background: rgba(93, 255, 202, 0.16);
+    color: #75ffd2;
+}
+.capability-pill[data-status='unavailable'],
+.capability-pill[data-status='unknown'] {
+    background: rgba(255, 112, 112, 0.16);
+    color: #ff9e9e;
+}
+.capability-notice {
+    margin: -5px 0 18px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 196, 72, 0.24);
+    border-radius: 10px;
+    background: rgba(255, 196, 72, 0.07);
+    color: #d9c38f;
+    font-size: 13px;
+    line-height: 1.55;
+}
+.capability-notice[data-status='available'] {
+    border-color: rgba(93, 255, 202, 0.24);
+    background: rgba(93, 255, 202, 0.07);
+    color: #a9ead5;
+}
+.capability-notice[data-status='unavailable'],
+.capability-notice[data-status='unknown'] {
+    border-color: rgba(255, 112, 112, 0.24);
+    background: rgba(255, 112, 112, 0.07);
+    color: #f2b3b3;
 }
 .workflow-panel {
     display: none;
