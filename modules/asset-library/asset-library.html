@@ -1564,7 +1564,12 @@
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge">3</span>
                         </button>
-                        <div class="user-avatar user-avatar--placeholder" role="img" aria-label="用户头像">
+                        <div
+                            class="user-avatar user-avatar--placeholder"
+                            role="img"
+                            aria-label="用户头像"
+                            data-i18n-aria="misc.userAvatar"
+                        >
                             <i class="fas fa-user" aria-hidden="true"></i>
                         </div>
                     </div>
@@ -1572,13 +1577,13 @@
 
                 <div class="asset-wrap scroll-section">
                     <div class="form-header">
-                        <h2>素材库</h2>
-                        <p>上传、分类、检索并管理你的素材。</p>
+                        <h2 data-i18n="assets.pageTitle">素材库</h2>
+                        <p data-i18n="assets.pageSubtitle">上传、分类、检索并管理你的素材。</p>
                         <div
                             id="currentProjectHint"
                             style="margin-top: 8px; font-size: 13px; color: #00f0ff; display: none"
                         >
-                            当前关联项目：<span data-project-name></span>
+                            <span data-i18n="module.currentProject">当前关联项目：</span><span data-project-name></span>
                             <button
                                 type="button"
                                 data-back-to-project
@@ -1593,7 +1598,7 @@
                                     font-size: 12px;
                                 "
                             >
-                                返回项目详情
+                                <span data-i18n="module.backToProject">返回项目详情</span>
                             </button>
                         </div>
                     </div>
@@ -1606,29 +1611,37 @@
                                 type="text"
                                 placeholder="搜索素材名称或描述..."
                                 aria-label="搜索素材"
+                                data-i18n="assets.searchPlaceholder"
+                                data-i18n-aria="assets.searchAria"
                             />
                         </div>
                         <div class="filters">
                             <select id="typeFilter" class="input-group">
-                                <option value="all">全部类型</option>
-                                <option value="image">图片</option>
-                                <option value="icon">图标</option>
-                                <option value="button">按钮</option>
-                                <option value="component">组件</option>
-                                <option value="character">角色</option>
-                                <option value="environment">场景</option>
-                                <option value="prop">道具</option>
+                                <option value="all" data-i18n="assets.allTypes">全部类型</option>
+                                <option value="image" data-i18n="assets.image">图片</option>
+                                <option value="icon" data-i18n="assets.icon">图标</option>
+                                <option value="button" data-i18n="assets.button">按钮</option>
+                                <option value="component" data-i18n="assets.component">组件</option>
+                                <option value="character" data-i18n="assets.character">角色</option>
+                                <option value="environment" data-i18n="assets.environment">场景</option>
+                                <option value="prop" data-i18n="assets.prop">道具</option>
                             </select>
                             <select id="sortOrder" class="input-group">
-                                <option value="newest">最新优先</option>
-                                <option value="oldest">最早优先</option>
-                                <option value="name">按名称</option>
+                                <option value="newest" data-i18n="assets.newest">最新优先</option>
+                                <option value="oldest" data-i18n="assets.oldest">最早优先</option>
+                                <option value="name" data-i18n="assets.byName">按名称</option>
                             </select>
                             <select id="categoryFilter" class="input-group">
-                                <option value="all">全部分类</option>
+                                <option value="all" data-i18n="assets.allCategories">全部分类</option>
                             </select>
-                            <button id="btnAddCategory" class="btn btn-primary btn-small">新增分类</button>
-                            <button id="btnClearAll" class="btn btn-small">清空所有</button>
+                            <button
+                                id="btnAddCategory"
+                                class="btn btn-primary btn-small"
+                                data-i18n="assets.addCategory"
+                            >
+                                新增分类
+                            </button>
+                            <button id="btnClearAll" class="btn btn-small" data-i18n="assets.clearAll">清空所有</button>
                             <button
                                 id="btnDetectSimilar"
                                 class="btn btn-small"
@@ -1638,33 +1651,41 @@
                                     color: #a78bfa;
                                 "
                             >
-                                <i class="fas fa-clone" style="margin-right: 4px"></i>检测相似素材
+                                <i class="fas fa-clone" style="margin-right: 4px"></i
+                                ><span data-i18n="assets.detectSimilar">检测相似素材</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- 标签筛选栏 -->
                     <div id="tagFilterBar" class="tag-filter-bar" style="display: none">
-                        <span class="tag-filter-label"><i class="fas fa-tags"></i> 按标签筛选：</span>
+                        <span class="tag-filter-label"
+                            ><i class="fas fa-tags"></i> <span data-i18n="assets.filterByTag">按标签筛选：</span></span
+                        >
                         <div id="tagFilterChips"></div>
                     </div>
 
                     <div class="upload-area" id="uploadArea">
-                        <p>把文件拖到这里或点击下面按钮上传（支持多选）</p>
+                        <p data-i18n="assets.dropHint">把文件拖到这里或点击下面按钮上传（支持多选）</p>
                         <div style="margin-top: 12px; display: flex; gap: 8px; justify-content: center">
                             <input type="file" id="fileInput" multiple style="display: none" />
-                            <button id="btnChoose" class="btn btn-primary">选择文件</button>
+                            <button id="btnChoose" class="btn btn-primary" data-i18n="assets.chooseFiles">
+                                选择文件
+                            </button>
                             <button id="btnUrlImport" class="btn btn-primary">
-                                <i class="fas fa-link" style="margin-right: 4px"></i>从 URL 导入
+                                <i class="fas fa-link" style="margin-right: 4px"></i
+                                ><span data-i18n="assets.importUrl">从 URL 导入</span>
                             </button>
                             <button id="btnFindSimilar" class="btn btn-primary">
-                                <i class="fas fa-copy" style="margin-right: 4px"></i>检测相似素材
+                                <i class="fas fa-copy" style="margin-right: 4px"></i
+                                ><span data-i18n="assets.detectSimilar">检测相似素材</span>
                             </button>
                             <select id="uploadCategory" class="input-group" style="width: 160px"></select>
                             <input
                                 id="defaultName"
                                 class="input-group"
                                 placeholder="为上传文件设置默认显示名（可选）"
+                                data-i18n="assets.defaultName"
                                 style="width: 220px"
                             />
                         </div>
@@ -1672,17 +1693,19 @@
 
                     <!-- 批量操作栏 -->
                     <div id="batchBar" class="batch-bar" style="display: none">
-                        <span id="batchCount" class="batch-count">已选 0 个素材</span>
+                        <span id="batchCount" class="batch-count" data-i18n="assets.selectedCount">已选 0 个素材</span>
                         <button id="btnSelectAll" class="btn btn-small">
-                            <i class="fas fa-check-double"></i> 全选
+                            <i class="fas fa-check-double"></i> <span data-i18n="assets.selectAll">全选</span>
                         </button>
-                        <button id="btnDeselectAll" class="btn btn-small"><i class="fas fa-times"></i> 取消选择</button>
+                        <button id="btnDeselectAll" class="btn btn-small">
+                            <i class="fas fa-times"></i> <span data-i18n="assets.deselectAll">取消选择</span>
+                        </button>
                         <button id="btnBatchDelete" class="btn btn-small batch-delete-btn">
-                            <i class="fas fa-trash"></i> 批量删除
+                            <i class="fas fa-trash"></i> <span data-i18n="assets.batchDelete">批量删除</span>
                         </button>
                         <div class="export-dropdown-wrap">
                             <button id="btnExportMenu" class="btn btn-primary btn-small">
-                                <i class="fas fa-file-export"></i> 导出格式
+                                <i class="fas fa-file-export"></i> <span data-i18n="assets.exportFormat">导出格式</span>
                                 <i class="fas fa-caret-down" style="margin-left: 4px"></i>
                             </button>
                             <div id="exportMenu" class="export-menu">
@@ -1693,14 +1716,17 @@
                                     <i class="fas fa-cube"></i> Godot Atlas
                                 </button>
                                 <button class="export-option" data-format="spritesheet">
-                                    <i class="fas fa-th"></i> 通用 SpriteSheet
+                                    <i class="fas fa-th"></i>
+                                    <span data-i18n="assets.generalSpriteSheet">通用 SpriteSheet</span>
                                 </button>
                             </div>
                         </div>
                     </div>
 
                     <div id="assetGrid" class="asset-grid"></div>
-                    <div id="noAssets" class="no-assets" style="display: none">暂无素材。试试上传一些文件。</div>
+                    <div id="noAssets" class="no-assets" style="display: none" data-i18n="assets.empty">
+                        暂无素材。试试上传一些文件。
+                    </div>
                 </div>
             </main>
         </div>

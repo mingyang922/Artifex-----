@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 'use strict';
 // ImageGenerator类 - 负责AI图片生成功能
 class ImageGenerator {
@@ -812,14 +812,16 @@ class ImageGenerator {
 
             const data = await response.json();
 
+            let outputUrl;
             if (data.image_url) {
-                return data.image_url;
+                outputUrl = data.image_url;
             } else if (data.images && data.images.length > 0) {
-                return data.images[0].url;
+                outputUrl = data.images[0].url;
             } else {
                 console.error('API返回格式错误:', data);
                 throw new Error('API返回格式错误，未找到图片URL');
             }
+            return outputUrl;
         } catch (error) {
             if (error.message && !error.message.startsWith('HTTP ')) {
                 console.error('图片API调用失败:', error);

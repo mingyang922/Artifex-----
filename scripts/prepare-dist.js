@@ -43,19 +43,36 @@ copyFile('manifest.json');
 
 const missing = [];
 const htmlFiles = [];
+const cssFiles = [];
 
-function collectHtmlFiles(directory) {
+function collectBuildFiles(directory) {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
         const absolutePath = path.join(directory, entry.name);
         if (entry.isDirectory()) {
-            collectHtmlFiles(absolutePath);
+            collectBuildFiles(absolutePath);
         } else if (entry.name.endsWith('.html')) {
             htmlFiles.push(absolutePath);
+        } else if (entry.name.endsWith('.css')) {
+            cssFiles.push(absolutePath);
         }
     }
 }
 
-collectHtmlFiles(distRoot);
+collectBuildFiles(distRoot);
+
+// Vite emits linked vendor CSS into dist/assets without relocating its
+// ../webfonts references. From that directory the browser would request the
+// nonexistent /webfonts path, while prepare-dist copies the fonts to
+// /vendor/webfonts. Normalize those URLs to a stable server-root path.
+for (const cssFile of cssFiles) {
+    const css = fs.readFileSync(cssFile, 'utf8');
+    const normalizedCss = css
+        // The vendored compatibility face is not used by Artifex and its
+        // optional font files are not part of the checked-in Font Awesome set.
+        .replace(/@font-face\{[^{}]*fa-v4compatibility[^{}]*\}/g, '')
+        .replace(/url\((['"]?)\.\.\/webfonts\//g, 'url($1/vendor/webfonts/');
+    if (normalizedCss !== css) fs.writeFileSync(cssFile, normalizedCss);
+}
 
 function bundleClassicScripts(htmlFile) {
     let html = fs.readFileSync(htmlFile, 'utf8');
@@ -125,8 +142,28 @@ for (const htmlFile of htmlFiles) {
     }
 }
 
+for (const cssFile of cssFiles) {
+    const css = fs.readFileSync(cssFile, 'utf8');
+    const references = css.matchAll(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g);
+
+    for (const match of references) {
+        const reference = match[2].split(/[?#]/, 1)[0];
+        if (/^(?:[a-z]+:|\/\/|data:|#)/i.test(reference)) continue;
+
+        const target = reference.startsWith('/')
+            ? path.join(distRoot, reference.slice(1))
+            : path.resolve(path.dirname(cssFile), reference);
+
+        if (!fs.existsSync(target)) {
+            missing.push(`${path.relative(distRoot, cssFile)} -> ${reference}`);
+        }
+    }
+}
+
 if (missing.length > 0) {
     throw new Error(`dist contains missing local assets:\n${missing.join('\n')}`);
 }
 
-console.log(`[prepare-dist] copied classic-script assets and verified ${htmlFiles.length} HTML files`);
+console.log(
+    `[prepare-dist] copied classic-script assets and verified ${htmlFiles.length} HTML files plus ${cssFiles.length} CSS files`
+);

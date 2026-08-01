@@ -1,13 +1,15 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3
+ * 版本: 1.4.0
  *
  * 素材库 - 渲染和 UI
  * 从 asset-library.js 拆分，通过 AssetLibraryRender 暴露
  */
 (function () {
     'use strict';
+    const tr = (key, variables) =>
+        window.i18n && typeof window.i18n.t === 'function' ? window.i18n.t(key, variables) : key;
 
     // ── 依赖注入（由 asset-library.js init 时调用 setDeps 传入） ──
     let assetGrid = null;
@@ -41,7 +43,7 @@
         assetGrid.innerHTML = '';
         if (filtered.length === 0) {
             noAssets.style.display = 'block';
-            noAssets.textContent = '暂无素材。试试上传一些文件。';
+            noAssets.textContent = tr('assets.empty');
         } else {
             noAssets.style.display = 'none';
         }
@@ -84,7 +86,7 @@
                 img.style.objectFit = 'cover';
                 thumb.appendChild(img);
             } else {
-                thumb.textContent = a.fileName || a.name || '文件';
+                thumb.textContent = a.fileName || a.name || tr('assets.image');
             }
 
             const meta = document.createElement('div');
@@ -95,7 +97,7 @@
             name.textContent = a.name || a.fileName;
             const cat = document.createElement('div');
             cat.className = 'cat';
-            cat.textContent = a.category || '未分类';
+            cat.textContent = a.category || tr('assets.uncategorized');
             meta.appendChild(name);
             meta.appendChild(cat);
 
@@ -103,7 +105,7 @@
             actions.className = 'card-actions';
             const btnView = document.createElement('button');
             btnView.className = 'btn btn-small';
-            btnView.textContent = '预览';
+            btnView.textContent = tr('assets.preview');
             btnView.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -111,7 +113,7 @@
             });
             const btnDownload = document.createElement('button');
             btnDownload.className = 'btn btn-small';
-            btnDownload.textContent = '下载';
+            btnDownload.textContent = tr('assets.download');
             btnDownload.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -119,7 +121,7 @@
             });
             const btnDelete = document.createElement('button');
             btnDelete.className = 'btn btn-small';
-            btnDelete.textContent = '删除';
+            btnDelete.textContent = tr('assets.delete');
             btnDelete.addEventListener('click', async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -150,7 +152,7 @@
         box.className = 'box';
         const title = document.createElement('div');
         title.style.marginBottom = '8px';
-        title.innerHTML = `<strong>${escapeHtml(a.name || a.fileName)}</strong> <span style="color:#666">（${escapeHtml(a.category || '未分类')}, ${escapeHtml(a.fileName || '')}）</span>`;
+        title.innerHTML = `<strong>${escapeHtml(a.name || a.fileName)}</strong> <span style="color:#666">（${escapeHtml(a.category || tr('assets.uncategorized'))}, ${escapeHtml(a.fileName || '')}）</span>`;
         box.appendChild(title);
         if (a.type && a.type.startsWith('image/') && a.dataURL) {
             const img = document.createElement('img');
@@ -176,7 +178,7 @@
         close.style.marginTop = '12px';
         const btn = document.createElement('button');
         btn.className = 'btn btn-primary';
-        btn.textContent = '关闭';
+        btn.textContent = tr('common.close');
         btn.addEventListener('click', () => {
             modalRoot.style.display = 'none';
             modalRoot.innerHTML = '';
@@ -233,7 +235,7 @@
                 p.textContent = '右键点击图片选择"另存为"来保存文件';
                 body.appendChild(p);
                 const btn = doc.createElement('button');
-                btn.textContent = '关闭';
+                btn.textContent = tr('common.close');
                 btn.style.cssText =
                     'padding:10px 20px; background:#00f0ff; color:#1a1a2e; border:none; border-radius:5px; cursor:pointer;';
                 btn.addEventListener('click', function () {
@@ -292,7 +294,7 @@
         if (!bar || !count) return;
         if (selectedAssets.size > 0) {
             bar.style.display = 'flex';
-            count.textContent = '已选 ' + selectedAssets.size + ' 个素材';
+            count.textContent = tr('assets.selectedCount', { count: selectedAssets.size });
         } else {
             bar.style.display = 'none';
         }
@@ -588,7 +590,9 @@
         const uploadCategoryEl = document.getElementById('uploadCategory');
         // 筛选器
         categoryFilterEl.innerHTML =
-            '<option value="all">全部分类</option>' +
+            '<option value="all">' +
+            escapeHtml(tr('assets.allCategories')) +
+            '</option>' +
             categories.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
         uploadCategoryEl.innerHTML = categories
             .map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`)

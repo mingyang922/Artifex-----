@@ -89,11 +89,14 @@ test.describe('素材库', () => {
                 bodyAfterDisplay: bodyAfter.display,
                 assetWrapBackground: assetWrap.backgroundColor,
                 uploadBorder: uploadArea.borderTopColor,
+                regionBorder: getComputedStyle(document.documentElement)
+                    .getPropertyValue('--region-border')
+                    .trim(),
             };
         });
 
         expect(visualState.bodyAfterDisplay).toBe('none');
         expect(visualState.assetWrapBackground).toBe('rgba(30, 20, 35, 0.34)');
-        expect(visualState.uploadBorder).toBe('rgba(232, 96, 122, 0.28)');
+        expect(visualState.uploadBorder).toBe(visualState.regionBorder);
     });
 });

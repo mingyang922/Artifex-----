@@ -22,6 +22,20 @@ html.theme-china {
     --login-cyan: #2e5e8a;
     --login-violet: #c82e3b;
     --login-bg: #0c0a14;
+    --region-text: #f2ead8;
+    --region-muted: rgba(220, 211, 194, 0.68);
+    --region-accent: #c82e3b;
+    --region-accent-2: #2e5e8a;
+    --region-accent-soft: rgba(200, 46, 59, 0.14);
+    --region-surface: rgba(12, 10, 20, 0.62);
+    --region-surface-strong: rgba(9, 8, 14, 0.78);
+    --region-surface-soft: rgba(22, 18, 27, 0.5);
+    --region-control: rgba(9, 8, 14, 0.62);
+    --region-border: rgba(46, 94, 138, 0.25);
+    --region-border-strong: rgba(200, 46, 59, 0.38);
+    --region-shadow: 0 14px 36px rgba(0, 0, 0, 0.24), inset 0 1px rgba(242, 234, 216, 0.035);
+    --region-radius: 14px;
+    --region-blur: blur(18px) saturate(0.86);
 }
 
 html.theme-china body,
@@ -383,6 +397,116 @@ html.theme-china ::-webkit-scrollbar-thumb {
 }
 html.theme-china ::-webkit-scrollbar-thumb:hover {
     background: rgba(46, 94, 138, 0.55) !important;
+}
+
+/*
+ * Traditional Chinese variant.
+ * It intentionally shares the ink-landscape artwork with the China theme,
+ * but uses its own gold and sky-blue interface language on every module.
+ * Keep these rules after the shared China module overrides because this
+ * stylesheet is loaded after region-themes.css.
+ */
+html.theme-china[data-region-theme="tc"] .sidebar {
+    border-right-color: var(--region-border) !important;
+}
+
+html.theme-china[data-region-theme="tc"] .sidebar::after {
+    background: linear-gradient(
+        180deg,
+        transparent,
+        rgba(56, 189, 248, 0.46) 32%,
+        rgba(232, 168, 56, 0.4) 70%,
+        transparent
+    ) !important;
+}
+
+html.theme-china[data-region-theme="tc"] .sidebar .nav-item:hover {
+    background: rgba(56, 189, 248, 0.13) !important;
+}
+
+html.theme-china[data-region-theme="tc"] .sidebar .nav-item.active {
+    background:
+        radial-gradient(circle at 10% 50%, rgba(255, 255, 255, 0.14), transparent 38%),
+        linear-gradient(100deg, rgba(232, 168, 56, 0.94), rgba(186, 117, 24, 0.82)) !important;
+    box-shadow: 0 5px 18px rgba(155, 95, 14, 0.28) !important;
+}
+
+html.theme-china[data-region-theme="tc"] .top-bar,
+html.theme-china[data-region-theme="tc"] header {
+    border-bottom-color: var(--region-border) !important;
+}
+
+html.theme-china[data-region-theme="tc"] .search-bar,
+html.theme-china[data-region-theme="tc"] .search-input,
+html.theme-china[data-region-theme="tc"] input[type="search"],
+html.theme-china[data-region-theme="tc"] .top-bar input {
+    border-color: rgba(56, 189, 248, 0.46) !important;
+}
+
+html.theme-china[data-region-theme="tc"] input:focus,
+html.theme-china[data-region-theme="tc"] textarea:focus,
+html.theme-china[data-region-theme="tc"] select:focus {
+    border-color: rgba(232, 168, 56, 0.82) !important;
+    box-shadow: 0 0 0 3px rgba(232, 168, 56, 0.2), 0 0 22px rgba(56, 189, 248, 0.11) !important;
+}
+
+html.theme-china[data-region-theme="tc"] .asset-wrap,
+html.theme-china[data-region-theme="tc"] .project-management-module,
+html.theme-china[data-region-theme="tc"] .project-detail-module,
+html.theme-china[data-region-theme="tc"] .style-presets-module,
+html.theme-china[data-region-theme="tc"] .user-center-container,
+html.theme-china[data-region-theme="tc"] .tab-content,
+html.theme-china[data-region-theme="tc"] .asset-search-bar,
+html.theme-china[data-region-theme="tc"] .upload-area,
+html.theme-china[data-region-theme="tc"] .empty-state,
+html.theme-china[data-region-theme="tc"] .batch-bar,
+html.theme-china[data-region-theme="tc"] .input-group,
+html.theme-china[data-region-theme="tc"] .tech-select-trigger,
+html.theme-china[data-region-theme="tc"] .tech-select-menu {
+    border-color: var(--region-border) !important;
+}
+
+html.theme-china[data-region-theme="tc"] .upload-area.dragover,
+html.theme-china[data-region-theme="tc"] .tech-select-option:hover,
+html.theme-china[data-region-theme="tc"] .tech-select-option.is-selected {
+    background: var(--region-accent-soft) !important;
+    border-color: var(--region-border-strong) !important;
+}
+
+html.theme-china[data-region-theme="tc"] .btn:not(.btn-primary),
+html.theme-china[data-region-theme="tc"] #btnDetectSimilar,
+html.theme-china[data-region-theme="tc"] [data-back-to-project] {
+    background: rgba(56, 189, 248, 0.1) !important;
+    border-color: var(--region-border) !important;
+}
+
+html.theme-china[data-region-theme="tc"] .btn:not(.btn-primary):hover,
+html.theme-china[data-region-theme="tc"] #btnDetectSimilar:hover,
+html.theme-china[data-region-theme="tc"] [data-back-to-project]:hover {
+    background: var(--region-accent-soft) !important;
+    border-color: var(--region-border-strong) !important;
+}
+
+html.theme-china[data-region-theme="tc"] .progress-bar,
+html.theme-china[data-region-theme="tc"] .progress-track {
+    background: rgba(56, 189, 248, 0.15) !important;
+}
+
+html.theme-china[data-region-theme="tc"] .progress-fill,
+html.theme-china[data-region-theme="tc"] .progress-bar-fill {
+    background: linear-gradient(90deg, var(--region-accent-2), var(--region-accent)) !important;
+}
+
+html.theme-china[data-region-theme="tc"] ::selection {
+    background: var(--region-accent) !important;
+}
+
+html.theme-china[data-region-theme="tc"] ::-webkit-scrollbar-thumb {
+    background: rgba(56, 189, 248, 0.35) !important;
+}
+
+html.theme-china[data-region-theme="tc"] ::-webkit-scrollbar-thumb:hover {
+    background: rgba(232, 168, 56, 0.52) !important;
 }
 
 @media (max-width: 768px) {

@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 'use strict';
 /**
  * 通知组件 - 可复用的通知下拉菜单
@@ -25,6 +25,7 @@ class NotificationComponent {
         // 演示数据：实际使用时通过 loadFromServer() 从后端加载
         this.notifications = this.getDemoNotifications();
         this.init();
+        this.loadFromServer();
     }
 
     /** 获取演示通知数据 */
@@ -48,13 +49,28 @@ class NotificationComponent {
             if (res.ok) {
                 const data = await res.json();
                 if (data.ok && Array.isArray(data.notifications)) {
-                    this.notifications = data.notifications;
+                    this.notifications = data.notifications.map((item) => ({
+                        id: item.id,
+                        title: item.title,
+                        message: item.body || '',
+                        time: new Date(item.created_at).toLocaleString(),
+                        icon: 'fas fa-bell',
+                        unread: !item.is_read,
+                        link: item.link || '',
+                    }));
+                    this.refreshDropdownContent();
                     this.updateNotificationBadge();
                 }
             }
         } catch (_) {
             // 服务端 API 未实现时静默回退到演示数据
         }
+    }
+
+    refreshDropdownContent() {
+        document.querySelectorAll('.notification-dropdown .notification-list').forEach((list) => {
+            list.innerHTML = this.renderNotificationItems();
+        });
     }
 
     /**
@@ -258,6 +274,9 @@ class NotificationComponent {
             notification.unread = false;
             item.classList.remove('unread');
             this.updateNotificationBadge();
+            if (typeof fetchWithCsrf === 'function') {
+                fetchWithCsrf(`/api/notifications/${id}/read`, { method: 'PUT', body: '{}' }).catch(() => {});
+            }
 
             // 如果有通知管理器，同步到管理器
             if (window.notificationManager) {
@@ -273,6 +292,10 @@ class NotificationComponent {
      * 处理通知动作
      */
     handleNotificationAction(notification) {
+        if (notification.link) {
+            window.location.href = notification.link;
+            return;
+        }
         switch (notification.title) {
             case '新用户注册':
                 window.TechUI && window.TechUI.toast('跳转到用户管理界面', 'info');
@@ -303,6 +326,9 @@ class NotificationComponent {
         });
 
         this.updateNotificationBadge();
+        if (typeof fetchWithCsrf === 'function') {
+            fetchWithCsrf('/api/notifications/read-all', { method: 'PUT', body: '{}' }).catch(() => {});
+        }
 
         // 如果有通知管理器，同步到管理器
         if (window.notificationManager) {
@@ -331,18 +357,17 @@ class NotificationComponent {
      * 跳转到消息中心
      */
     navigateToMessageCenter() {
-        // 消息中心已集成在用户中心页面，跳转到用户中心
         let userCenterPath;
 
         // 简化的路径计算
         const currentPath = window.location.pathname;
 
         if (currentPath.includes('dashboard.html')) {
-            userCenterPath = 'modules/user-center/userCenter.html';
+            userCenterPath = 'modules/workflow-hub/index.html';
         } else if (currentPath.includes('modules/')) {
-            userCenterPath = 'user-center/userCenter.html';
+            userCenterPath = '../workflow-hub/index.html';
         } else {
-            userCenterPath = 'modules/user-center/userCenter.html';
+            userCenterPath = 'modules/workflow-hub/index.html';
         }
 
         // 显示跳转过渡效果

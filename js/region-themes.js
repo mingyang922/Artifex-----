@@ -271,12 +271,10 @@
 
         // 应用新主题
         currentTheme = theme;
+        html.dataset.regionTheme = theme.id;
 
         if (theme.class) {
-            if (
-                window.ArtifexThemeBootstrap &&
-                typeof window.ArtifexThemeBootstrap.ensureThemeStyles === 'function'
-            ) {
+            if (window.ArtifexThemeBootstrap && typeof window.ArtifexThemeBootstrap.ensureThemeStyles === 'function') {
                 window.ArtifexThemeBootstrap.ensureThemeStyles(theme.id).catch(function () {});
             }
             html.classList.add(theme.class);

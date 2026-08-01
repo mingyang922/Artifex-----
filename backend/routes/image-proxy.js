@@ -108,7 +108,8 @@ const sdWebUiProvider = require('../providers/sd-webui');
 function createImageRouter(deps) {
     const { Router } = require('express');
     const router = Router();
-    const { requireAuth, csrfProtection, isAdminUser, getUserProviderConfig, logApiCall, checkQuota } = deps;
+    const { requireAuth, csrfProtection, isAdminUser, getUserProviderConfig, logApiCall, checkQuota, workspaceDb } =
+        deps;
 
     // ── 文生图 / 图生图 ──────────────────────────────────────────
     router.post(
@@ -117,6 +118,7 @@ function createImageRouter(deps) {
         csrfProtection,
         imageGenerationLimiter.middleware(),
         wrapAsync(async (req, res) => {
+            let historyJobId = null;
             try {
                 const {
                     prompt,
@@ -133,6 +135,14 @@ function createImageRouter(deps) {
                     .trim()
                     .toLowerCase();
                 const currentIsAdmin = isAdminUser(req.currentUser);
+
+                if (
+                    ['free', 'mock'].includes(normalizedProvider) &&
+                    !currentIsAdmin &&
+                    process.env.NODE_ENV !== 'test'
+                ) {
+                    return sendError(res, 403, ERR.FORBIDDEN, '该服务商仅供管理员使用');
+                }
 
                 // 即梦尺寸校验
                 if (normalizedProvider === 'jimeng') {
@@ -214,7 +224,20 @@ function createImageRouter(deps) {
 
                 // 调用对应 provider
                 const startTime = Date.now();
-                let _callStatus = 'success';
+                if (workspaceDb) {
+                    const job = workspaceDb.createGenerationJob(req.currentUser.id, {
+                        provider: normalizedProvider,
+                        mode: isImg2Img ? 'img2img' : 'text2img',
+                        prompt: effectivePrompt,
+                        params: {
+                            size,
+                            strength: effectiveStrength,
+                            imageModel,
+                        },
+                        status: 'running',
+                    });
+                    historyJobId = job.id;
+                }
                 try {
                     const imageUrl = await dispatchImageGeneration({
                         provider: normalizedProvider,
@@ -249,6 +272,13 @@ function createImageRouter(deps) {
                         );
                     }
 
+                    if (historyJobId) {
+                        workspaceDb.updateGenerationJob(req.currentUser.id, historyJobId, {
+                            status: 'completed',
+                            outputs: [{ url: imageUrl }],
+                        });
+                    }
+
                     // 记录活动日志
                     try {
                         usersDbForActivity.addActivity(
@@ -270,7 +300,6 @@ function createImageRouter(deps) {
                         mode: isImg2Img ? 'img2img' : 'text2img',
                     });
                 } catch (err) {
-                    _callStatus = 'error';
                     // 记录失败
                     if (typeof logApiCall === 'function') {
                         logApiCall(
@@ -280,6 +309,12 @@ function createImageRouter(deps) {
                             'error',
                             Date.now() - startTime
                         );
+                    }
+                    if (historyJobId) {
+                        workspaceDb.updateGenerationJob(req.currentUser.id, historyJobId, {
+                            status: 'failed',
+                            error: String(err?.message || err).slice(0, 2000),
+                        });
                     }
                     throw err;
                 }

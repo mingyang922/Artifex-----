@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 /**
  * Artifex：浏览器端项目 / 素材 / 风格预设等 localStorage 导出、导入与用量提示。
  * 依赖 GameUiUserScope（与 user-storage-scope.js 一致键名规则）。

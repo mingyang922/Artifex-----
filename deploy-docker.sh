@@ -28,6 +28,7 @@ if [ ! -f .env ]; then
     echo ""
     echo "必填配置项："
     echo "  - SESSION_SECRET: 会话密钥（使用 openssl rand -hex 32 生成）"
+    echo "  - ENCRYPTION_KEY: API 凭证加密密钥（另行使用 openssl rand -hex 32 生成）"
     echo "  - ALLOWED_ORIGINS: 你的域名（例如 https://artifex.example.com）"
     echo ""
     exit 1

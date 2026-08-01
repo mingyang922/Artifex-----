@@ -1,36 +1,45 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 'use strict';
 // escapeHtml 由 js/html-utils.js 提供（全局函数）
+
+function tr(key) {
+    return window.i18n?.t ? window.i18n.t(key) : key;
+}
+
+function getDashboardLocale() {
+    const language = window.i18n?.getLanguage?.() || 'zh';
+    return (
+        {
+            zh: 'zh-CN',
+            zht: 'zh-TW',
+            en: 'en-US',
+            ja: 'ja-JP',
+            ko: 'ko-KR',
+        }[language] || 'zh-CN'
+    );
+}
 
 function formatDate(dateString) {
     if (!dateString) return '';
     const d = new Date(dateString);
     if (isNaN(d.getTime())) return '';
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return y + '-' + m + '-' + day;
-}
-
-function _getProjectTypeName(type) {
-    const map = {
-        ui: 'UI设计',
-        game: '游戏界面',
-        other: '其他',
-    };
-    return map[type] || type || '';
+    return new Intl.DateTimeFormat(getDashboardLocale(), {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(d);
 }
 
 function renderRecentProjects() {
     const grid = document.getElementById('recent-projects-grid');
     if (!grid) return;
 
-    grid.innerHTML = '<p style="color:#666;text-align:center;">加载中...</p>';
+    grid.innerHTML = '<p style="color:#666;text-align:center;">' + escapeHtml(tr('dashboard.loading')) + '</p>';
 
-    fetch('/api/projects?page=1&limit=3', { credentials: 'include' })
+    fetch('/api/projects?page=1&limit=3&summary=1', { credentials: 'include' })
         .then(function (res) {
             if (res.status === 401) {
                 window.location.href = loginHtmlPath();
@@ -85,16 +94,16 @@ function renderProjectCards(grid, projects) {
     grid.innerHTML = '';
 
     if (!projects.length) {
-        grid.innerHTML = '<p style="color:#666;text-align:center;">暂无项目数据，请在"项目管理"中创建项目。</p>';
+        grid.innerHTML = '<p style="color:#666;text-align:center;">' + escapeHtml(tr('dashboard.noProjects')) + '</p>';
         return;
     }
 
     const recent = projects.slice(0, 3);
 
     recent.forEach(function (project) {
-        let statusText = '进行中';
-        if (project.status === 'done') statusText = '已完成';
-        if (project.status === 'paused') statusText = '已暂停';
+        let statusText = tr('dashboard.statusActive');
+        if (project.status === 'done') statusText = tr('dashboard.statusDone');
+        if (project.status === 'paused') statusText = tr('dashboard.statusPaused');
 
         const card = document.createElement('div');
         card.className = 'project-card';
@@ -107,10 +116,10 @@ function renderProjectCards(grid, projects) {
             '</div>' +
             '<div class="project-info">' +
             '<h3 class="project-title">' +
-            (project.name ? escapeHtml(project.name) : '未命名项目') +
+            (project.name ? escapeHtml(project.name) : escapeHtml(tr('dashboard.untitledProject'))) +
             '</h3>' +
             '<p class="project-desc">' +
-            (project.desc ? escapeHtml(project.desc) : '无描述') +
+            (project.desc ? escapeHtml(project.desc) : escapeHtml(tr('dashboard.noDescription'))) +
             '</p>' +
             '<div class="project-meta">' +
             '<div class="project-date">' +
@@ -120,7 +129,9 @@ function renderProjectCards(grid, projects) {
             '</span>' +
             '</div>' +
             '<div class="project-actions">' +
-            '<button class="project-action" title="打开项目"><i class="fas fa-arrow-right"></i></button>' +
+            '<button class="project-action" title="' +
+            escapeHtml(tr('dashboard.openProject')) +
+            '"><i class="fas fa-arrow-right"></i></button>' +
             '</div>' +
             '</div>' +
             '</div>';
@@ -169,7 +180,10 @@ function renderRecentGenerations(generations) {
     if (!container) return;
     const recent = generations.slice(0, 4);
     if (!recent.length) {
-        container.innerHTML = '<div class="workspace-empty"><i class="fas fa-wand-magic-sparkles"></i><br>还没有生成记录，试着创建第一张素材吧。</div>';
+        container.innerHTML =
+            '<div class="workspace-empty"><i class="fas fa-wand-magic-sparkles"></i><br>' +
+            escapeHtml(tr('dashboard.emptyGenerations')) +
+            '</div>';
         return;
     }
     container.innerHTML = '';
@@ -180,9 +194,9 @@ function renderRecentGenerations(generations) {
         const created = item.createdAt || item.timestamp || item.date;
         link.innerHTML =
             '<i class="fas fa-image"></i><span><strong>' +
-            escapeHtml(item.name || item.prompt || 'AI 生成素材') +
+            escapeHtml(item.name || item.prompt || tr('dashboard.generatedAsset')) +
             '</strong><small>' +
-            escapeHtml(item.style || item.provider || '生成记录') +
+            escapeHtml(item.style || item.provider || tr('dashboard.generationRecord')) +
             '</small></span><span>' +
             escapeHtml(formatDate(created)) +
             '</span>';
@@ -190,26 +204,38 @@ function renderRecentGenerations(generations) {
     });
 }
 
-async function loadWorkspaceOverview() {
-    const hour = new Date().getHours();
-    const greeting = hour < 6 ? '夜深了' : hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好';
+function updateDashboardDateTime() {
+    const now = new Date();
+    const hour = now.getHours();
+    const greetingKey =
+        hour < 6
+            ? 'dashboard.greetingNight'
+            : hour < 12
+              ? 'dashboard.greetingMorning'
+              : hour < 18
+                ? 'dashboard.greetingAfternoon'
+                : 'dashboard.greetingEvening';
     const greetingEl = document.getElementById('dashboard-greeting');
     const dateEl = document.getElementById('dashboard-date');
-    if (greetingEl) greetingEl.textContent = greeting;
+    if (greetingEl) greetingEl.textContent = tr(greetingKey);
     if (dateEl) {
-        dateEl.textContent = new Intl.DateTimeFormat('zh-CN', {
+        dateEl.textContent = new Intl.DateTimeFormat(getDashboardLocale(), {
             month: 'long',
             day: 'numeric',
             weekday: 'long',
-        }).format(new Date());
+        }).format(now);
     }
+}
+
+async function loadWorkspaceOverview() {
+    updateDashboardDateTime();
 
     let projectCount = readStoredCollection(['gameui-projects']).length;
     let assetCount = readStoredCollection(['assetLibrary_v1', 'asset-library']).length;
     const generations = readStoredCollection(['generatedImages']);
 
     const responses = await Promise.allSettled([
-        fetch('/api/projects?page=1&limit=100', { credentials: 'include' }).then((response) =>
+        fetch('/api/projects?page=1&limit=100&summary=1', { credentials: 'include' }).then((response) =>
             response.ok ? response.json() : null
         ),
         fetch('/api/asset-library', { credentials: 'include' }).then((response) =>
@@ -239,14 +265,15 @@ async function loadWorkspaceOverview() {
     const nextText = document.getElementById('dashboard-next-step');
     const nextButton = document.getElementById('dashboard-next-action');
     if (nextText && nextButton) {
-        const target = projectCount === 0 ? 'project-management' : generations.length === 0 ? 'ai-generate' : 'asset-library';
+        const target =
+            projectCount === 0 ? 'project-management' : generations.length === 0 ? 'ai-generate' : 'asset-library';
         nextText.textContent =
             target === 'project-management'
-                ? '先创建一个项目，为后续生成内容和素材建立清晰的归属。'
+                ? tr('dashboard.nextCreateProject')
                 : target === 'ai-generate'
-                  ? '项目已经就绪，接下来可以生成第一批视觉素材。'
-                  : '已有生成结果，建议整理进素材库并补充分类与标签。';
-        nextButton.addEventListener('click', () => window.navManager?.navigateTo(target));
+                  ? tr('dashboard.nextGenerate')
+                  : tr('dashboard.nextOrganize');
+        nextButton.onclick = () => window.navManager?.navigateTo(target);
     }
 }
 
@@ -285,4 +312,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     renderRecentProjects();
     loadWorkspaceOverview().catch((error) => console.warn('[Dashboard] overview failed:', error));
     improveDashboardAccessibility();
+
+    window.setInterval(updateDashboardDateTime, 60 * 1000);
+    window.addEventListener('languageChanged', function () {
+        renderRecentProjects();
+        loadWorkspaceOverview().catch((error) => console.warn('[Dashboard] language refresh failed:', error));
+    });
 });

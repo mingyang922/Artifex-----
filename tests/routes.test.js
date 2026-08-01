@@ -72,6 +72,42 @@ describe('image-proxy route module', () => {
         await fetchPublicImage('https://example.com/image.png', request, lookup);
         assert.equal(requestOptions.maxRedirects, 0);
     });
+
+    it('should record image generation lifecycle on the server', async () => {
+        const express = require('express');
+        const request = require('supertest');
+        const { createImageRouter } = require('../backend/routes/image-proxy');
+        const { createWorkspaceDb } = require('../backend/db/workspace-db');
+        const workspaceDb = createWorkspaceDb(usersDb.getDb());
+        const user = usersDb.createUser('routeimage', 'routeimage@example.test', 'hash');
+        const app = express();
+        app.use(express.json());
+        app.use((req, _res, next) => {
+            req.currentUser = user;
+            next();
+        });
+        app.use(
+            '/api',
+            createImageRouter({
+                requireAuth: (req, res, next) => next(),
+                csrfProtection: (req, res, next) => next(),
+                isAdminUser: () => true,
+                getUserProviderConfig: () => ({}),
+                workspaceDb,
+                checkQuota: () => ({ ok: true }),
+            })
+        );
+
+        const response = await request(app)
+            .post('/api/image-proxy')
+            .send({ provider: 'mock', prompt: 'server-owned history', size: '512x512' });
+        assert.equal(response.status, 200);
+        const jobs = workspaceDb.listGenerationJobs(user.id);
+        assert.equal(jobs.length, 1);
+        assert.equal(jobs[0].status, 'completed');
+        assert.equal(jobs[0].prompt, 'server-owned history');
+        assert.equal(jobs[0].outputs.length, 1);
+    });
 });
 
 describe('auth route module', () => {
@@ -148,6 +184,52 @@ describe('ai-providers route module', () => {
     it('should export createAiProviderRouter function', () => {
         const { createAiProviderRouter } = require('../backend/routes/ai-providers');
         assert.equal(typeof createAiProviderRouter, 'function');
+    });
+});
+
+describe('workspace route module', () => {
+    it('should export createWorkspaceRouter function', () => {
+        const { createWorkspaceRouter } = require('../backend/routes/workspace');
+        assert.equal(typeof createWorkspaceRouter, 'function');
+    });
+
+    it('should enforce reviewer permissions at the HTTP boundary', async () => {
+        const express = require('express');
+        const request = require('supertest');
+        const { createWorkspaceRouter } = require('../backend/routes/workspace');
+        const { createWorkspaceDb } = require('../backend/db/workspace-db');
+        const workspaceDb = createWorkspaceDb(usersDb.getDb());
+        const owner = usersDb.createUser('routeowner', 'routeowner@example.test', 'hash');
+        const reviewer = usersDb.createUser('routereviewer', 'routereviewer@example.test', 'hash');
+        const project = usersDb.createProject(owner.id, '路由权限项目', '', 'game');
+        workspaceDb.captureProjectVersion(project.id);
+        usersDb
+            .getDb()
+            .prepare('INSERT INTO project_members (project_id,user_id,role,created_at) VALUES (?,?,?,?)')
+            .run(project.id, reviewer.id, 'reviewer', new Date().toISOString());
+
+        const app = express();
+        app.use(express.json());
+        app.use((req, _res, next) => {
+            req.currentUser = reviewer;
+            next();
+        });
+        app.use(
+            '/api',
+            createWorkspaceRouter({
+                workspaceDb,
+                usersDb,
+                requireAuth: (req, res, next) => next(),
+                csrfProtection: (req, res, next) => next(),
+            })
+        );
+
+        const approved = await request(app).put(`/api/projects/${project.id}/review`).send({ status: 'approved' });
+        assert.equal(approved.status, 200);
+        const delivered = await request(app).put(`/api/projects/${project.id}/review`).send({ status: 'delivered' });
+        assert.equal(delivered.status, 403);
+        const restored = await request(app).post(`/api/projects/${project.id}/versions/1/restore`).send({});
+        assert.equal(restored.status, 403);
     });
 });
 

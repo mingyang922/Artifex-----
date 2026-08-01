@@ -1,7 +1,7 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 'use strict';
 if (window.PageEffects) {
     window.PageEffects.initPointerGlow();
@@ -415,19 +415,26 @@ function dbItemToFrontend(item) {
 // Load assets from server API
 async function loadAssetsFromServer() {
     try {
-        const resp = await fetch('/api/asset-library', { credentials: 'include' });
-        if (resp.status === 401) {
-            window.location.href = loginHtmlPath();
-            return;
-        }
-        if (!resp.ok) throw new Error('加载失败');
-        const data = await resp.json();
-        if (data.ok && Array.isArray(data.items)) {
-            assets.length = 0;
-            data.items.forEach(function (item) {
-                assets.push(dbItemToFrontend(item));
-            });
-        }
+        const loaded = [];
+        let page = 1;
+        let total = 0;
+        do {
+            const resp = await fetch(`/api/asset-library?page=${page}&limit=100`, { credentials: 'include' });
+            if (resp.status === 401) {
+                window.location.href = loginHtmlPath();
+                return;
+            }
+            if (!resp.ok) throw new Error('加载失败');
+            const data = await resp.json();
+            if (!data.ok || !Array.isArray(data.items)) break;
+            loaded.push(...data.items);
+            total = Number(data.total) || loaded.length;
+            page += 1;
+        } while (loaded.length < total);
+        assets.length = 0;
+        loaded.forEach(function (item) {
+            assets.push(dbItemToFrontend(item));
+        });
     } catch (e) {
         console.error('从服务器加载素材失败', e);
         uiToast('加载素材库失败，将使用本地备份', 'warn');
@@ -892,6 +899,13 @@ function showSimilarResults(groups) {
 
 searchEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
+        renderAssets();
+    }
+});
+
+window.addEventListener('languageChanged', () => {
+    if (window.AssetLibraryRender) {
+        window.AssetLibraryRender.populateCategorySelectors();
         renderAssets();
     }
 });

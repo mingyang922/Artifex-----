@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 'use strict';
 class NavigationManager {
     constructor() {
@@ -14,6 +14,7 @@ class NavigationManager {
             'visual-workbench': 'modules/ai-generate/visual-workbench.html',
             'asset-library': 'modules/asset-library/asset-library.html',
             'style-presets': 'modules/style-presets/style-presets.html',
+            'workflow-hub': 'modules/workflow-hub/index.html',
             'user-center': 'modules/user-center/userCenter.html',
             admin: 'modules/admin/admin.html',
         };
@@ -56,6 +57,7 @@ class NavigationManager {
         if (pathname.includes('asset-library.html')) return 'asset-library';
         if (pathname.includes('style-presets.html')) return 'style-presets';
         if (pathname.includes('project-management/index.html')) return 'project-management';
+        if (pathname.includes('workflow-hub/index.html')) return 'workflow-hub';
         if (pathname.includes('userCenter.html')) return 'user-center';
         return 'dashboard';
     }
@@ -174,6 +176,9 @@ class NavigationManager {
                 break;
             case 'project-management':
                 activeModule = 'project-management';
+                break;
+            case 'workflow-hub':
+                activeModule = 'workflow-hub';
                 break;
             case 'user-center':
                 return;

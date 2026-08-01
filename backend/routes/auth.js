@@ -26,7 +26,7 @@ function wrapAsync(fn) {
 function createAuthRouter(deps) {
     const { Router } = require('express');
     const router = Router();
-    const { usersDb, requireAuth, isAdminUser, csrfProtection, sanitizeApiSettingsPayload } = deps;
+    const { usersDb, requireAuth, isAdminUser, csrfProtection, sanitizeApiSettingsPayload, workspaceDb } = deps;
 
     // ── 工具函数 ──
     function publicUser(row) {
@@ -69,10 +69,15 @@ function createAuthRouter(deps) {
         authLimiter,
         wrapAsync(async (req, res) => {
             try {
+                if (String(process.env.REGISTRATION_ENABLED || 'true').toLowerCase() === 'false') {
+                    return sendError(res, 403, ERR.FORBIDDEN, '当前站点已关闭公开注册');
+                }
                 const { username, email, password } = req.body || {};
                 if (!username || !email || !password)
                     return sendError(res, 400, ERR.VALIDATION, '请填写用户名、邮箱和密码');
-                if (String(password).length < 6) return sendError(res, 400, ERR.VALIDATION, '密码至少 6 位');
+                if (String(password).length < 8 || String(password).length > 128) {
+                    return sendError(res, 400, ERR.VALIDATION, '密码长度应为 8-128 位');
+                }
                 // 用户名校验：只允许字母、数字、下划线、中文，2-32 字符
                 const u = String(username).trim();
                 if (u.length < 2 || u.length > 32)
@@ -81,6 +86,9 @@ function createAuthRouter(deps) {
                     return sendError(res, 400, ERR.VALIDATION, '用户名只允许字母、数字、下划线和中文');
 
                 const em = String(email).trim().toLowerCase();
+                if (em.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+                    return sendError(res, 400, ERR.VALIDATION, '请输入有效的邮箱地址');
+                }
                 if (usersDb.getUserByEmail(em)) return sendError(res, 409, ERR.CONFLICT, '该邮箱已注册');
                 if (usersDb.getUserByUsername(u)) return sendError(res, 409, ERR.CONFLICT, '该用户名已被使用');
 
@@ -151,6 +159,60 @@ function createAuthRouter(deps) {
             res.json({ ok: true });
         });
     });
+
+    // ── 密码重置 ──
+    router.post(
+        '/auth/forgot-password',
+        csrfProtection,
+        authLimiter,
+        wrapAsync(async (req, res) => {
+            const email = String(req.body?.email || '')
+                .trim()
+                .toLowerCase();
+            const reset = workspaceDb?.requestPasswordReset(email);
+            if (reset) {
+                const resetUrl = `${req.protocol}://${req.get('host')}/login.html?resetToken=${encodeURIComponent(reset.token)}`;
+                const webhook = String(process.env.PASSWORD_RESET_WEBHOOK_URL || '').trim();
+                if (webhook) {
+                    try {
+                        await fetch(webhook, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                event: 'password_reset',
+                                email: reset.email,
+                                resetUrl,
+                                expiresAt: reset.expiresAt,
+                            }),
+                        });
+                    } catch (error) {
+                        logger.error('[password-reset] webhook delivery failed:', error.message);
+                    }
+                }
+                // 本地/测试环境直接返回令牌，方便离线部署验证；生产环境不会泄露令牌。
+                if (process.env.NODE_ENV !== 'production') {
+                    return res.json({ ok: true, message: '重置请求已创建', resetToken: reset.token, resetUrl });
+                }
+            }
+            res.json({ ok: true, message: '如果该邮箱已注册，重置说明将会发送' });
+        })
+    );
+
+    router.post(
+        '/auth/reset-password',
+        csrfProtection,
+        authLimiter,
+        wrapAsync(async (req, res) => {
+            const value = String(req.body?.token || '');
+            const password = String(req.body?.newPassword || '');
+            if (password.length < 8) return sendError(res, 400, ERR.VALIDATION, '新密码至少 8 位');
+            const userId = workspaceDb?.consumePasswordReset(value);
+            if (!userId) return sendError(res, 400, ERR.VALIDATION, '重置链接无效或已过期');
+            usersDb.updatePassword(userId, await bcrypt.hash(password, 10));
+            usersDb.addActivity(userId, '通过重置链接修改密码', 'security', null, null);
+            res.json({ ok: true, message: '密码已重置，请重新登录' });
+        })
+    );
 
     // ── 修改密码 ──
     router.post(

@@ -1,33 +1,40 @@
-version: '3.8'
-
 services:
   artifex:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmmirror.com}
+        ALPINE_MIRROR: ${ALPINE_MIRROR:-https://mirrors.tencent.com/alpine}
+        NODE_DIST_URL: ${NODE_DIST_URL:-https://npmmirror.com/mirrors/node}
+    image: artifex-platform:latest
     container_name: artifex-platform
     restart: unless-stopped
     ports:
-      - "${PORT:-3000}:3000"
+      - "127.0.0.1:${PORT:-3000}:3000"
     environment:
-      - NODE_ENV=production
-      - PORT=3000
-      # 必填：会话密钥（请修改为随机字符串）
-      - SESSION_SECRET=${SESSION_SECRET:-change-me-to-random-string}
-      # 必填：允许的前端域名（逗号分隔）
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
+      NODE_ENV: production
+      PORT: 3000
+      # 生产密钥和来源必须由部署环境显式提供，缺失时 Compose 会拒绝启动。
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET is required}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY is required}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:?ALLOWED_ORIGINS is required}
+      ADMIN_USER_ID: ${ADMIN_USER_ID:-}
+      REGISTRATION_ENABLED: ${REGISTRATION_ENABLED:-true}
       # AI 服务配置（按需填写）
-      - HUNYUAN_SECRET_ID=${HUNYUAN_SECRET_ID:-}
-      - HUNYUAN_SECRET_KEY=${HUNYUAN_SECRET_KEY:-}
-      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY:-}
-      - TENCENT_SECRET_ID=${TENCENT_SECRET_ID:-}
-      - TENCENT_SECRET_KEY=${TENCENT_SECRET_KEY:-}
-      - JIMENG_API_KEY=${JIMENG_API_KEY:-}
+      HUNYUAN_SECRET_ID: ${HUNYUAN_SECRET_ID:-}
+      HUNYUAN_SECRET_KEY: ${HUNYUAN_SECRET_KEY:-}
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      TENCENT_SECRET_ID: ${TENCENT_SECRET_ID:-}
+      TENCENT_SECRET_KEY: ${TENCENT_SECRET_KEY:-}
+      JIMENG_API_KEY: ${JIMENG_API_KEY:-}
+      JIMENG_BEARER_WITHOUT_SK_PREFIX: ${JIMENG_BEARER_WITHOUT_SK_PREFIX:-0}
+      PASSWORD_RESET_WEBHOOK_URL: ${PASSWORD_RESET_WEBHOOK_URL:-}
+      LORA_TRAINING_WEBHOOK_URL: ${LORA_TRAINING_WEBHOOK_URL:-}
+      LORA_WORKER_TOKEN: ${LORA_WORKER_TOKEN:-}
     volumes:
-      # 持久化 SQLite 数据库
+      # 用户库与会话库都位于 backend/data，使用同一数据卷统一持久化。
       - artifex-data:/app/backend/data
-      # 持久化会话
-      - artifex-sessions:/app/backend/data
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 30s
@@ -37,4 +44,5 @@ services:
 
 volumes:
   artifex-data:
-  artifex-sessions:
+    # 生产升级时可通过 ARTIFEX_DATA_VOLUME 继续使用已有数据卷。
+    name: ${ARTIFEX_DATA_VOLUME:-artifex-data}

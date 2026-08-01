@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 (function () {
     'use strict';
 
@@ -17,9 +17,10 @@
 
         bindEvents() {
             const closeBtn = document.getElementById('closeMessageCenter');
-            if (closeBtn) closeBtn.addEventListener('click', () => {
-                this.close();
-            });
+            if (closeBtn)
+                closeBtn.addEventListener('click', () => {
+                    this.close();
+                });
 
             document.querySelectorAll('.message-tab').forEach((tab) => {
                 tab.addEventListener('click', () => {

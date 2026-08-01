@@ -7,6 +7,7 @@
 const { Router } = require('express');
 const logger = require('../lib/logger');
 const { sendError, ERR } = require('../lib/error-response');
+const { validateAssetPayload } = require('../lib/asset-validation');
 
 /**
  * @param {object} deps
@@ -24,22 +25,40 @@ function createAssetLibraryRouter(deps) {
         const page = Math.max(1, parseInt(req.query.page, 10) || 1);
         const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
         const offset = (page - 1) * limit;
-        const total = usersDb.getAssetLibraryCount(req.currentUser.id);
-        const assets = usersDb.getAssetLibrary(req.currentUser.id, limit, offset);
-        res.json({ ok: true, assets, total, page, limit });
+        const filters = {
+            q: req.query.q,
+            type: req.query.type,
+            source: req.query.source,
+            tag: req.query.tag,
+            status: req.query.status,
+            favorite: req.query.favorite,
+            deleted: req.query.deleted === '1',
+            sort: req.query.sort,
+            limit,
+            offset,
+        };
+        const total = usersDb.getAssetLibraryCount(req.currentUser.id, filters);
+        const assets = usersDb.getAssetLibrary(req.currentUser.id, filters);
+        // 同时保留 assets 与旧前端使用的 items，避免升级过程中的契约断裂。
+        res.json({ ok: true, assets, items: assets, total, page, limit });
     });
 
     // 添加素材
     router.post('/asset-library', requireAuth, csrfProtection, (req, res) => {
-        const { name, type, content, desc, source, tags } = req.body || {};
-        if (!name || !content) {
-            return sendError(res, 400, ERR.VALIDATION, '素材名称和内容不能为空');
-        }
-        const MAX_ASSET_SIZE = 10 * 1024 * 1024;
-        if (typeof content === 'string' && content.length > MAX_ASSET_SIZE) {
-            return sendError(res, 413, ERR.VALIDATION, '素材内容过大，最大允许 10MB');
-        }
-        const item = usersDb.addAssetLibraryItem(req.currentUser.id, { name, type, content, desc, source, tags });
+        const { name, type, content, desc, source, tags, status, favorite, metadata } = req.body || {};
+        const validationError = validateAssetPayload(req.body, { requireContent: true });
+        if (validationError) return sendError(res, 400, ERR.VALIDATION, validationError);
+        const item = usersDb.addAssetLibraryItem(req.currentUser.id, {
+            name,
+            type,
+            content,
+            desc,
+            source,
+            tags,
+            status,
+            favorite,
+            metadata,
+        });
         try {
             usersDb.addActivity(req.currentUser.id, '保存素材', 'asset', item.id, name);
         } catch (_) {
@@ -49,10 +68,12 @@ function createAssetLibraryRouter(deps) {
     });
 
     // 更新素材
-    router.put('/asset-library/:id', requireAuth, csrfProtection, (req, res) => {
+    router.put('/asset-library/:id(\\d+)', requireAuth, csrfProtection, (req, res) => {
         const assetId = Number(req.params.id);
         if (!assetId || isNaN(assetId)) return sendError(res, 400, ERR.VALIDATION, '无效的素材 ID');
         const updates = req.body || {};
+        const validationError = validateAssetPayload(updates);
+        if (validationError) return sendError(res, 400, ERR.VALIDATION, validationError);
         const item = usersDb.updateAssetLibraryItem(req.currentUser.id, assetId, updates);
         if (!item) {
             return sendError(res, 404, ERR.NOT_FOUND, '素材不存在');
@@ -66,6 +87,42 @@ function createAssetLibraryRouter(deps) {
         if (!assetId || isNaN(assetId)) return sendError(res, 400, ERR.VALIDATION, '无效的素材 ID');
         usersDb.deleteAssetLibraryItem(req.currentUser.id, assetId);
         res.json({ ok: true });
+    });
+
+    // 回收站恢复
+    router.post('/asset-library/:id/restore', requireAuth, csrfProtection, (req, res) => {
+        const result = usersDb
+            .getDb()
+            .prepare('UPDATE asset_library SET deleted_at=NULL,updated_at=? WHERE id=? AND user_id=?')
+            .run(new Date().toISOString(), Number(req.params.id), req.currentUser.id);
+        if (!result.changes) return sendError(res, 404, ERR.NOT_FOUND, '回收站中未找到该素材');
+        res.json({ ok: true });
+    });
+
+    // 批量更新分类、状态、收藏或标签
+    router.put('/asset-library/batch/update', requireAuth, csrfProtection, (req, res) => {
+        const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(Number).filter(Boolean).slice(0, 200) : [];
+        if (!ids.length) return sendError(res, 400, ERR.VALIDATION, '请选择素材');
+        const updates = req.body?.updates || {};
+        const updateMany = usersDb.getDb().transaction(() => {
+            for (const id of ids) usersDb.updateAssetLibraryItem(req.currentUser.id, id, updates);
+        });
+        updateMany();
+        res.json({ ok: true, updated: ids.length });
+    });
+
+    // 精确重复检测（相同内容哈希）；前端感知哈希仍可用于视觉近似检测。
+    router.get('/asset-library/duplicates', requireAuth, (req, res) => {
+        const groups = usersDb
+            .getDb()
+            .prepare(
+                `SELECT content_hash,COUNT(*) AS count,GROUP_CONCAT(id) AS ids
+                 FROM asset_library WHERE user_id=? AND deleted_at IS NULL AND content_hash!=''
+                 GROUP BY content_hash HAVING COUNT(*)>1 ORDER BY count DESC`
+            )
+            .all(req.currentUser.id)
+            .map((row) => ({ hash: row.content_hash, count: row.count, ids: row.ids.split(',').map(Number) }));
+        res.json({ ok: true, groups });
     });
 
     // ── 全局错误处理 ──

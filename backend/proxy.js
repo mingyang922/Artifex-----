@@ -1,7 +1,7 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 'use strict';
 
 const express = require('express');
@@ -29,6 +29,8 @@ const { createProjectRouter } = require('./routes/projects');
 const { createAssetLibraryRouter } = require('./routes/asset-library');
 const { createAdminRouter } = require('./routes/admin');
 const { createAiProviderRouter } = require('./routes/ai-providers');
+const { createWorkspaceRouter } = require('./routes/workspace');
+const { createWorkspaceDb } = require('./db/workspace-db');
 
 // ── 环境变量 ──────────────────────────────────────────────────────
 const envFiles = [path.join(__dirname, '.env'), path.join(__dirname, '../config/.env')];
@@ -55,6 +57,15 @@ function resolveSessionSecret() {
 const resolvedSessionSecret = resolveSessionSecret();
 if (!resolvedSessionSecret) {
     logger.error('FATAL: NODE_ENV=production requires SESSION_SECRET to be set to a non-empty value.');
+    process.exit(1);
+}
+if (isProd && resolvedSessionSecret.length < 32) {
+    logger.error('FATAL: SESSION_SECRET must contain at least 32 characters in production.');
+    process.exit(1);
+}
+const resolvedEncryptionSecret = process.env.ENCRYPTION_KEY || resolvedSessionSecret;
+if (isProd && resolvedEncryptionSecret.length < 32) {
+    logger.error('FATAL: ENCRYPTION_KEY must contain at least 32 characters in production.');
     process.exit(1);
 }
 
@@ -198,6 +209,7 @@ const usersDb = require('./db/users-db');
 const { createAuthPolicy } = require('./lib/auth-policy');
 const { createUserApiSettingsHelpers } = require('./lib/user-api-settings');
 usersDb.init();
+const workspaceDb = createWorkspaceDb(usersDb.getDb());
 const { requireAuth, isAdminUser } = createAuthPolicy(usersDb);
 const { sanitizeApiSettingsPayload, getUserProviderConfig } = createUserApiSettingsHelpers(usersDb);
 
@@ -263,6 +275,7 @@ app.use(
         isAdminUser,
         csrfProtection,
         sanitizeApiSettingsPayload,
+        workspaceDb,
     })
 );
 
@@ -377,17 +390,30 @@ app.use(
         getUserProviderConfig,
         logApiCall: usersDb.logApiCall,
         checkQuota: usersDb.checkQuota,
+        workspaceDb,
     })
 );
 
 // 项目管理路由
-app.use('/api', createProjectRouter({ usersDb, requireAuth, csrfProtection }));
+app.use('/api', createProjectRouter({ usersDb, workspaceDb, requireAuth, csrfProtection }));
 
 // 素材库路由
 app.use('/api', createAssetLibraryRouter({ usersDb, requireAuth, csrfProtection }));
 
 // 管理员路由（用量统计/用户管理）
 app.use('/api', createAdminRouter({ usersDb, requireAuth, isAdminUser }));
+
+// 生成历史、协作、审核、通知、角色档案与 LoRA 任务
+app.use(
+    '/api',
+    createWorkspaceRouter({
+        workspaceDb,
+        usersDb,
+        requireAuth,
+        csrfProtection,
+        notifyUser: (userId, data) => app.get('wsServer')?.notify(userId, data),
+    })
+);
 
 // ── 活动日志 API ───────────────────────────────────────────────
 
@@ -451,7 +477,7 @@ app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
         service: 'Artifex AI Platform',
-        version: API_CONFIG.version || '1.3.3',
+        version: API_CONFIG.version || '1.4.0',
         timestamp: new Date().toISOString(),
     });
 });

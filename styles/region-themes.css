@@ -23,6 +23,16 @@ html[class*="theme-"] .pointer-glow--lag {
 }
 
 /* 主题粒子 & 装饰容器 */
+/*
+ * Keep app-shell navigation out of the flex layout. Region themes only
+ * restyle the sidebar; a relative sidebar makes its width and the main
+ * content offset count twice, leaving a large empty strip between them.
+ */
+html[class*="theme-"] body.app-shell .sidebar {
+    position: fixed;
+    box-sizing: border-box;
+}
+
 #theme-particle-canvas {
     position: fixed; inset: 0; pointer-events: none; z-index: 1;
 }
@@ -31,6 +41,407 @@ html[class*="theme-"] .pointer-glow--lag {
     opacity: 0; transition: opacity 1s ease;
 }
 .theme-decor-layer.active { opacity: 1; }
+
+/* ═══════════════════════════════════════════════
+   Shared semantic theme layer
+   Every authenticated page maps its feature-specific components onto the
+   same surface, border, text and accent roles. Theme files only provide the
+   role values, which keeps new pages from falling back to cyberpunk colors.
+   ═══════════════════════════════════════════════ */
+
+/* Traditional-Chinese mode shares the Chinese artwork but owns a distinct
+   gold/sky-blue palette. `data-region-theme` is maintained by both the early
+   bootstrap and the runtime switcher. */
+html.theme-china[data-region-theme="tc"] {
+    --shell-accent: #e8a838;
+    --shell-accent-2: #38bdf8;
+    --tech-cyan: #38bdf8;
+    --tech-violet: #e8a838;
+    --ui-accent: #e8a838;
+    --region-accent: #e8a838;
+    --region-accent-2: #38bdf8;
+    --region-accent-soft: rgba(232, 168, 56, 0.15);
+    --region-border: rgba(56, 189, 248, 0.25);
+    --region-border-strong: rgba(232, 168, 56, 0.42);
+}
+
+/* Page-level glass surfaces */
+html[class*="theme-"] :is(
+    .workspace-hero,
+    .ai-generator-container,
+    .workflow-hero,
+    .admin-container,
+    .message-center-container
+) {
+    color: var(--region-text) !important;
+    background: var(--region-surface) !important;
+    border-color: var(--region-border) !important;
+    box-shadow: var(--region-shadow) !important;
+    backdrop-filter: var(--region-blur) !important;
+    -webkit-backdrop-filter: var(--region-blur) !important;
+}
+
+html[class*="theme-"] :is(
+    .workspace-hero,
+    .ai-generator-container,
+    .workflow-hero,
+    .message-center-container
+) {
+    border-radius: var(--region-radius) !important;
+}
+
+/* Reusable content cards across every authenticated module. */
+html[class*="theme-"] :is(
+    .workspace-stat-card,
+    .tool-card,
+    .project-card,
+    .workspace-panel,
+    .recent-generation-item,
+    .project-list-section,
+    .project-detail-container,
+    .project-header,
+    .asset-card,
+    .style-preset-lib-row,
+    .workflow-panel,
+    .workflow-form.compact,
+    .workflow-card,
+    .metric-grid article,
+    .admin-tabs,
+    .message-center-header,
+    .message-center-tabs,
+    .message-item,
+    .ae-toolbar,
+    .ae-panel,
+    .generator-style-preset-strip,
+    .form-section,
+    .image-preview-panel,
+    .template-section,
+    .action-config-section,
+    .action-result-section,
+    .notification-dropdown,
+    .forgot-password-content,
+    .security-notice
+) {
+    color: var(--region-text) !important;
+    background: var(--region-surface-strong) !important;
+    border-color: var(--region-border) !important;
+    box-shadow: none !important;
+}
+
+html[class*="theme-"] :is(
+    .workspace-stat-card,
+    .tool-card,
+    .project-card,
+    .workspace-panel,
+    .project-list-section,
+    .project-detail-container,
+    .project-header,
+    .asset-card,
+    .style-preset-lib-row,
+    .workflow-panel,
+    .workflow-card,
+    .metric-grid article,
+    .form-section,
+    .image-preview-panel,
+    .template-section
+) {
+    border-radius: 17px !important;
+}
+
+/* Secondary groups, empty states and tool rows. */
+html[class*="theme-"] :is(
+    .workspace-empty,
+    .upload-area,
+    .batch-bar,
+    .tag-filter-bar,
+    .asset-toolbar-summary,
+    .no-assets,
+    .empty-state,
+    .style-preset-empty,
+    .ae-canvas-wrap,
+    .ae-panel-section,
+    .img2img-zone,
+    .sketch-upload-wrap,
+    .loading-container,
+    .card-list,
+    .compact-list,
+    .message-center-list
+) {
+    color: var(--region-muted) !important;
+    border-color: var(--region-border) !important;
+}
+
+html[class*="theme-"] :is(
+    .workspace-empty,
+    .upload-area,
+    .batch-bar,
+    .tag-filter-bar,
+    .asset-toolbar-summary,
+    .no-assets,
+    .empty-state,
+    .style-preset-empty,
+    .ae-panel-section,
+    .img2img-zone,
+    .sketch-upload-wrap,
+    .loading-container
+) {
+    background: var(--region-surface-soft) !important;
+}
+
+html[class*="theme-"] .workspace-next-step {
+    background: var(--region-surface-strong) !important;
+}
+
+/* Feature controls which previously carried hard-coded cyan/navy skins. */
+html[class*="theme-"] :is(
+    .workspace-secondary-action,
+    .secondary-action,
+    .workflow-tabs button,
+    .admin-tab,
+    .message-tab,
+    .message-action-btn,
+    .close-message-center,
+    .tab-button,
+    .ae-tool-btn,
+    .ae-action-btn,
+    .ae-small-btn,
+    .btn-secondary,
+    .image-preview-tool-btn,
+    .batch-count-btn
+) {
+    color: var(--region-muted) !important;
+    background: var(--region-control) !important;
+    border-color: var(--region-border) !important;
+    box-shadow: none !important;
+}
+
+html[class*="theme-"] :is(
+    .workspace-primary-action,
+    .primary-action,
+    .workflow-tabs button.is-active,
+    .admin-tab.active,
+    .message-tab.active,
+    .tab-button.active,
+    .generate-btn
+) {
+    color: var(--region-text) !important;
+    background: linear-gradient(135deg, var(--region-accent), var(--region-accent-2)) !important;
+    border-color: var(--region-border-strong) !important;
+    box-shadow: 0 8px 22px color-mix(in srgb, var(--region-accent) 20%, transparent) !important;
+}
+
+html[class*="theme-"] :is(
+    .workspace-secondary-action,
+    .secondary-action,
+    .workflow-tabs button,
+    .admin-tab,
+    .message-tab,
+    .message-action-btn,
+    .tab-button,
+    .ae-tool-btn,
+    .ae-action-btn,
+    .ae-small-btn,
+    .btn-secondary
+):hover {
+    color: var(--region-text) !important;
+    background: var(--region-accent-soft) !important;
+    border-color: var(--region-border-strong) !important;
+}
+
+/* Forms and custom selects across AI, workflow, admin and dialogs. */
+html[class*="theme-"] body.app-shell :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+    textarea,
+    select,
+    .form-control,
+    .form-input,
+    .form-select,
+    .tech-select-trigger,
+    .tech-select-menu,
+    #shareResult
+) {
+    color: var(--region-text) !important;
+    background: var(--region-control) !important;
+    border-color: var(--region-border) !important;
+    box-shadow: none !important;
+}
+
+html[class*="theme-"] body.app-shell :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+    textarea,
+    select,
+    .form-control,
+    .form-input,
+    .form-select
+):focus {
+    border-color: var(--region-border-strong) !important;
+    box-shadow: 0 0 0 2px var(--region-accent-soft) !important;
+}
+
+/* Text roles: feature CSS often hard-coded pale blue values. */
+html[class*="theme-"] :is(
+    .workspace-hero h2,
+    .workspace-stat-card strong,
+    .tool-card h3,
+    .project-card h3,
+    .workspace-panel h2,
+    .workspace-next-step h2,
+    .recent-generation-item strong,
+    .workflow-hero h1,
+    .workflow-panel h2,
+    .workflow-card h3,
+    .admin-header h1,
+    .message-center-header h2,
+    .message-title,
+    .ae-panel-header,
+    .ae-panel-sub-title,
+    .form-section-title,
+    .section-title
+) {
+    color: var(--region-text) !important;
+}
+
+html[class*="theme-"] :is(
+    .workspace-hero p,
+    .workspace-stat-card small,
+    .tool-card p,
+    .project-card p,
+    .workspace-next-step p,
+    .recent-generation-item small,
+    .recent-generation-item > span:last-child,
+    .workflow-hero p,
+    .panel-heading p,
+    .workflow-card p,
+    .field-label,
+    .message-text,
+    .message-time,
+    .ae-hint,
+    .hint-text,
+    .section-subtitle,
+    .label-hint
+) {
+    color: var(--region-muted) !important;
+}
+
+html[class*="theme-"] :is(
+    .workspace-eyebrow,
+    .eyebrow,
+    .metric-grid strong,
+    .message-icon i,
+    .workspace-panel-link,
+    .section-title i,
+    .ae-panel-header i
+) {
+    color: var(--region-accent) !important;
+}
+
+html[class*="theme-"] :is(
+    .tool-card,
+    .project-card,
+    .workspace-stat-card,
+    .workspace-panel,
+    .workflow-card,
+    .asset-card,
+    .style-preset-lib-row,
+    .message-item
+):hover {
+    border-color: var(--region-border-strong) !important;
+    box-shadow: 0 14px 34px color-mix(in srgb, var(--region-accent) 10%, transparent) !important;
+}
+
+html[class*="theme-"] .message-item.unread {
+    background: var(--region-accent-soft) !important;
+    border-left-color: var(--region-accent) !important;
+}
+
+html[class*="theme-"] .message-item.unread::before {
+    background: var(--region-accent) !important;
+}
+
+html[class*="theme-"] .workspace-stat-icon {
+    color: var(--region-accent) !important;
+    background: var(--region-accent-soft) !important;
+}
+
+html[class*="theme-"] .workspace-stat-card:nth-child(even) .workspace-stat-icon {
+    color: var(--region-accent-2) !important;
+}
+
+html[class*="theme-"] :is(.ae-slider, input[type="range"]) {
+    accent-color: var(--region-accent);
+}
+
+/* Authentication is part of the product shell as well.  The login page keeps
+   its compact layout, while the selected region owns the material, border and
+   accent language instead of falling back to the legacy cyan cyber panel. */
+html[class*="theme-"] .form-container {
+    color: var(--region-text) !important;
+    background: var(--region-surface-strong) !important;
+    border-color: var(--region-border) !important;
+    border-radius: var(--region-radius) !important;
+    box-shadow: var(--region-shadow) !important;
+    backdrop-filter: var(--region-blur) !important;
+    -webkit-backdrop-filter: var(--region-blur) !important;
+}
+
+html[class*="theme-"] .form-container::before {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--region-accent-2),
+        var(--region-accent),
+        transparent
+    ) !important;
+}
+
+html[class*="theme-"] .form-container :is(.form-header h2, .platform-logo h1) {
+    color: var(--region-text) !important;
+}
+
+html[class*="theme-"] .form-container :is(
+    .form-header p,
+    .form-footer,
+    .strength-text,
+    .remember-me,
+    .terms-agreement
+) {
+    color: var(--region-muted) !important;
+}
+
+html[class*="theme-"] .form-container :is(.link-button, .terms-link, .password-toggle) {
+    color: var(--region-accent) !important;
+}
+
+/* Remove feature-local cyber grids and scanning decorations when a cultural
+   theme is active; the selected theme owns the texture and ornamentation. */
+html[class*="theme-"] :is(
+    .admin-container,
+    .ai-generator-container,
+    .workspace-hero,
+    .workflow-hero
+)::before,
+html[class*="theme-"] :is(
+    .admin-container,
+    .ai-generator-container,
+    .workspace-hero,
+    .workflow-hero
+)::after {
+    display: none !important;
+}
+
+@supports not (color: color-mix(in srgb, white, black)) {
+    html[class*="theme-"] :is(
+        .workspace-primary-action,
+        .primary-action,
+        .workflow-tabs button.is-active,
+        .admin-tab.active,
+        .message-tab.active,
+        .tab-button.active,
+        .generate-btn
+    ) {
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2) !important;
+    }
+}
 
 @media (prefers-reduced-motion: reduce) {
     #theme-particle-canvas, .theme-decor-layer { display: none !important; }

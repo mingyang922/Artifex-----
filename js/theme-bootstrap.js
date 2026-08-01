@@ -83,6 +83,7 @@
         ensureThemeStyles(themeId).catch(() => {});
         document.documentElement.classList.add(themeClass);
         document.documentElement.dataset.regionThemeBootstrap = themeId;
+        document.documentElement.dataset.regionTheme = themeId;
         const meta = document.querySelector('meta[name="theme-color"]');
         if (meta && THEME_COLORS[themeId]) meta.setAttribute('content', THEME_COLORS[themeId]);
     }

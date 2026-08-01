@@ -3,7 +3,7 @@
     "info": {
         "title": "Artifex API",
         "description": "二维游戏美术协作与 AI 资产生成平台 API",
-        "version": "1.3.3",
+        "version": "1.4.0",
         "contact": { "name": "Artifex Team" }
     },
     "servers": [
@@ -19,6 +19,8 @@
         { "name": "asset-library", "description": "素材库" },
         { "name": "admin", "description": "管理员功能" },
         { "name": "usage", "description": "用量统计" }
+        ,{ "name": "workflow", "description": "生成历史、角色档案、LoRA 与通知" }
+        ,{ "name": "collaboration", "description": "项目成员、审核、版本和分享" }
     ],
     "paths": {
         "/api/health": {
@@ -456,6 +458,84 @@
                     "403": { "description": "权限不足" }
                 }
             }
+        },
+        "/api/generation-jobs": {
+            "get": {
+                "tags": ["workflow"],
+                "summary": "获取当前用户的生成任务",
+                "parameters": [
+                    { "name": "status", "in": "query", "schema": { "type": "string" } },
+                    { "name": "projectId", "in": "query", "schema": { "type": "integer" } },
+                    { "name": "limit", "in": "query", "schema": { "type": "integer", "maximum": 100 } }
+                ],
+                "responses": { "200": { "description": "生成任务列表" } }
+            },
+            "post": {
+                "tags": ["workflow"],
+                "summary": "创建排队任务（状态和成本由服务端维护）",
+                "responses": { "201": { "description": "已创建" }, "400": { "description": "参数无效" } }
+            }
+        },
+        "/api/generation-jobs/{jobId}/retry": {
+            "post": {
+                "tags": ["workflow"],
+                "summary": "将失败任务重新排队",
+                "parameters": [{ "name": "jobId", "in": "path", "required": true, "schema": { "type": "integer" } }],
+                "responses": { "200": { "description": "已重新排队" }, "404": { "description": "任务不存在" } }
+            }
+        },
+        "/api/characters": {
+            "get": { "tags": ["workflow"], "summary": "获取角色一致性档案", "responses": { "200": { "description": "角色列表" } } },
+            "post": { "tags": ["workflow"], "summary": "创建角色档案", "responses": { "201": { "description": "已创建" } } }
+        },
+        "/api/lora-jobs": {
+            "get": { "tags": ["workflow"], "summary": "获取 LoRA 训练任务", "responses": { "200": { "description": "LoRA 任务列表" } } },
+            "post": { "tags": ["workflow"], "summary": "创建 LoRA 训练任务", "responses": { "201": { "description": "已排队" } } }
+        },
+        "/api/collaboration/projects": {
+            "get": { "tags": ["collaboration"], "summary": "获取拥有或参与的项目", "responses": { "200": { "description": "协作项目列表" } } }
+        },
+        "/api/projects/{id}/members": {
+            "get": { "tags": ["collaboration"], "summary": "获取项目成员", "responses": { "200": { "description": "成员列表" } } },
+            "post": { "tags": ["collaboration"], "summary": "项目所有者添加成员", "responses": { "200": { "description": "已添加" }, "403": { "description": "权限不足" } } }
+        },
+        "/api/projects/{id}/comments": {
+            "get": { "tags": ["collaboration"], "summary": "获取项目批注", "responses": { "200": { "description": "批注列表" } } },
+            "post": { "tags": ["collaboration"], "summary": "发布项目批注", "responses": { "201": { "description": "已发布" } } }
+        },
+        "/api/projects/{id}/review": {
+            "put": { "tags": ["collaboration"], "summary": "按角色权限更新审核状态", "responses": { "200": { "description": "已更新" }, "403": { "description": "角色无权设置该状态" } } }
+        },
+        "/api/projects/{id}/versions": {
+            "get": { "tags": ["collaboration"], "summary": "获取项目版本快照", "responses": { "200": { "description": "版本列表" } } }
+        },
+        "/api/projects/{id}/versions/{version}/restore": {
+            "post": { "tags": ["collaboration"], "summary": "事务性恢复项目与素材快照", "responses": { "200": { "description": "恢复成功" }, "403": { "description": "权限不足" } } }
+        },
+        "/api/projects/{id}/invites": {
+            "get": { "tags": ["collaboration"], "summary": "项目所有者获取邀请", "responses": { "200": { "description": "邀请列表" } } },
+            "post": { "tags": ["collaboration"], "summary": "创建成员邀请或只读分享", "responses": { "201": { "description": "已创建" } } }
+        },
+        "/api/shared-projects/{token}": {
+            "get": {
+                "security": [],
+                "tags": ["collaboration"],
+                "summary": "使用可撤销令牌获取只读项目",
+                "responses": { "200": { "description": "只读项目" }, "404": { "description": "分享无效或过期" } }
+            }
+        },
+        "/api/notifications": {
+            "get": { "tags": ["workflow"], "summary": "获取当前用户通知", "responses": { "200": { "description": "通知列表" } } }
+        },
+        "/api/notifications/read-all": {
+            "put": { "tags": ["workflow"], "summary": "全部标记已读", "responses": { "200": { "description": "已更新" } } }
+        },
+        "/api/asset-collections": {
+            "get": { "tags": ["asset-library"], "summary": "获取素材集合", "responses": { "200": { "description": "集合列表" } } },
+            "post": { "tags": ["asset-library"], "summary": "创建素材集合", "responses": { "201": { "description": "已创建" } } }
+        },
+        "/api/me/cost-summary": {
+            "get": { "tags": ["usage"], "summary": "获取服务商任务与估算成本汇总", "responses": { "200": { "description": "成本与配额预警" } } }
         },
         "/api/health/detail": {
             "get": {

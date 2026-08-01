@@ -3,7 +3,7 @@
  * 提供静态资源缓存和离线支持
  */
 
-const CACHE_NAME = 'artifex-v1.3.3-r2';
+const CACHE_NAME = 'artifex-v1.4.0-r2';
 const MAX_CACHE_SIZE = 200; // 最大缓存条目数
 let fetchCount = 0; // 用于限制 trimCache 调用频率
 const STATIC_ASSETS = [
@@ -107,6 +107,34 @@ self.addEventListener('fetch', (event) => {
 
     // 跳过非 http(s) 请求（如 chrome-extension、data 等）
     if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        return;
+    }
+
+    // Navigations must prefer the network. Serving an old cached HTML shell
+    // during a deployment can make a hard refresh appear stuck and can mix an
+    // old page with newly hashed assets. Cached pages remain an offline fallback.
+    if (request.mode === 'navigate' || request.destination === 'document') {
+        event.respondWith(
+            fetch(request, { cache: 'no-store' })
+                .then((networkResponse) => {
+                    if (networkResponse.ok) {
+                        const responseClone = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
+                    }
+                    return networkResponse;
+                })
+                .catch(() =>
+                    caches
+                        .match(request)
+                        .then(
+                            (resp) =>
+                                resp ||
+                                caches
+                                    .match('/dashboard.html')
+                                    .then((dashboard) => dashboard || caches.match('/login.html'))
+                        )
+                )
+        );
         return;
     }
 

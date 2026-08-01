@@ -1,7 +1,10 @@
 const globals = require('globals');
 const js = require('@eslint/js');
 
-const noUnusedVarsRule = ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }];
+const noUnusedVarsRule = [
+    'warn',
+    { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+];
 const appBrowserGlobals = {
     API_BASE: 'readonly',
     AssetEditor: 'readonly',
@@ -83,7 +86,14 @@ module.exports = [
         },
     },
     {
-        files: ['js/constants.js', 'js/html-utils.js', 'vite.config.js', 'playwright.config.js', 'scripts/**/*.js', 'e2e/**/*.js'],
+        files: [
+            'js/constants.js',
+            'js/html-utils.js',
+            'vite.config.js',
+            'playwright*.config.js',
+            'scripts/**/*.js',
+            'e2e/**/*.js',
+        ],
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: 'module',

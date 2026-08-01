@@ -92,6 +92,40 @@ test.describe('AI 生成器', () => {
         await expect(page.locator('#view-image')).not.toBeVisible();
     });
 
+    test('日语模式完整翻译图片生成与动作组界面', async ({ page }) => {
+        await page.evaluate(() => window.i18n.setLanguage('ja'));
+
+        await page.click('.tab-button[data-tab="image"]');
+        await expect(page.locator('#view-image')).toBeVisible();
+        await expect(page.getByText('内容とスタイル', { exact: true })).toBeVisible();
+        await expect(page.getByText('生成方法', { exact: true })).toBeVisible();
+        await expect(page.getByText('説明と生成', { exact: true })).toBeVisible();
+        await expect(page.getByText('画像タイプ', { exact: true })).toBeVisible();
+        await expect(
+            page.locator('#imageGeneratorForm').getByText('APIプロバイダー', { exact: true })
+        ).toBeVisible();
+
+        await page.click('.tab-button[data-tab="action-group"]');
+        await expect(page.locator('#view-action-group')).toBeVisible();
+        await expect(page.getByText('ラフと三面図（画像変換・Seedream）', { exact: true })).toBeVisible();
+        await expect(page.getByText('キャラクターとアクション設定', { exact: true })).toBeVisible();
+        await expect(page.getByText('プレビューと書き出し', { exact: true })).toBeAttached();
+
+        const legacyChinese = [
+            '内容与风格',
+            '图片类型',
+            '配色方案',
+            '生成方式',
+            '描述与生成',
+            '角色与动作配置',
+            '动作类型（可多选）',
+            '预览与导出',
+        ];
+        for (const label of legacyChinese) {
+            await expect(page.getByText(label, { exact: true })).toHaveCount(0);
+        }
+    });
+
     test('图片生成完整流程', async ({ page }) => {
         // Switch to the image generation tab
         await page.click('.tab-button[data-tab="image"]');

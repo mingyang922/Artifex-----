@@ -15,6 +15,18 @@ process.env.USERS_DB_PATH = testDbPath;
 const usersDb = require('../backend/db/users-db');
 const { createAuthPolicy } = require('../backend/lib/auth-policy');
 const { createUserApiSettingsHelpers } = require('../backend/lib/user-api-settings');
+const { validateAssetPayload } = require('../backend/lib/asset-validation');
+
+describe('asset-validation', () => {
+    it('should reject oversized updates and forged image data URLs', () => {
+        assert.match(validateAssetPayload({ content: 'x'.repeat(10 * 1024 * 1024 + 1) }), /10MB/);
+        assert.match(validateAssetPayload({ type: 'image', content: 'data:image/png;base64,dGV4dA==' }), /文件头/);
+    });
+
+    it('should preserve valid image updates', () => {
+        assert.equal(validateAssetPayload({ type: 'image', content: 'data:image/png;base64,iVBORw0KGgo=' }), null);
+    });
+});
 
 describe('users-db', () => {
     before(() => {
@@ -34,6 +46,32 @@ describe('users-db', () => {
         assert.ok(row.id > 0);
         assert.equal(row.username, 'testuser');
         assert.equal(row.email, 'test@example.com');
+        assert.equal(row.role, 'user', '未显式配置管理员时，首位注册用户不应自动提权');
+    });
+
+    it('should enforce foreign keys and cascade project deletion', () => {
+        assert.equal(usersDb.getDb().pragma('foreign_keys', { simple: true }), 1);
+        const user = usersDb.getUserByEmail('test@example.com');
+        const project = usersDb.createProject(user.id, '级联删除测试', '', 'game');
+        usersDb.addProjectAsset(project.id, user.id, '临时素材', 'image', 'data:image/png;base64,AA==');
+        usersDb.deleteProject(project.id, user.id);
+        const orphanCount = usersDb
+            .getDb()
+            .prepare('SELECT COUNT(*) AS count FROM project_assets WHERE project_id = ?')
+            .get(project.id).count;
+        assert.equal(orphanCount, 0);
+    });
+
+    it('should grant admin only to an explicitly configured user id', () => {
+        const nextId = usersDb.getDb().prepare('SELECT COALESCE(MAX(id), 0) + 1 AS id FROM users').get().id;
+        process.env.ADMIN_USER_ID = String(nextId);
+        try {
+            const admin = usersDb.createUser('configuredAdmin', 'configured-admin@example.com', 'hash');
+            assert.equal(admin.id, nextId);
+            assert.equal(admin.role, 'admin');
+        } finally {
+            delete process.env.ADMIN_USER_ID;
+        }
     });
 
     it('should find user by email', () => {
@@ -103,8 +141,13 @@ describe('auth-policy', () => {
         let body = null;
         const req = { session: {} };
         const res = {
-            status(code) { statusCode = code; return this; },
-            json(obj) { body = obj; },
+            status(code) {
+                statusCode = code;
+                return this;
+            },
+            json(obj) {
+                body = obj;
+            },
         };
         requireAuth(req, res, () => {});
         assert.equal(statusCode, 401);
@@ -117,18 +160,21 @@ describe('auth-policy', () => {
         let called = false;
         const req = { session: { userId: row.id } };
         const res = {
-            status() { return this; },
+            status() {
+                return this;
+            },
             json() {},
         };
-        requireAuth(req, res, () => { called = true; });
+        requireAuth(req, res, () => {
+            called = true;
+        });
         assert.ok(called);
     });
 
     it('should detect admin users', () => {
         const { isAdminUser } = createAuthPolicy(usersDb);
         const row = usersDb.getUserByEmail('test@example.com');
-        // 该用户是 ID=1，init() 中已自动提升为 admin
-        // 如果 role 不是 admin（测试顺序问题），手动设置
+        // 管理员必须由受信任的配置或管理流程显式授予。
         if (row.role !== 'admin') {
             const db = require('better-sqlite3')(testDbPath);
             db.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(row.id);
@@ -232,7 +278,13 @@ describe('projects', () => {
 
     it('should add project asset', () => {
         const projects = usersDb.getUserProjects(userId, 10, 0);
-        const asset = usersDb.addProjectAsset(projects[0].id, userId, 'Test Asset', 'image', 'data:image/png;base64,abc');
+        const asset = usersDb.addProjectAsset(
+            projects[0].id,
+            userId,
+            'Test Asset',
+            'image',
+            'data:image/png;base64,abc'
+        );
         assert.ok(asset.id > 0);
         assert.equal(asset.name, 'Test Asset');
     });
@@ -516,12 +568,13 @@ describe('provider-routing', () => {
 
     it('dispatchImageGeneration with unknown img2img provider throws error', async () => {
         await assert.rejects(
-            () => dispatchImageGeneration({
-                ...baseCtx,
-                provider: 'unknown-provider',
-                mode: 'img2img',
-                imageDataUrl: 'data:image/png;base64,abc',
-            }),
+            () =>
+                dispatchImageGeneration({
+                    ...baseCtx,
+                    provider: 'unknown-provider',
+                    mode: 'img2img',
+                    imageDataUrl: 'data:image/png;base64,abc',
+                }),
             (err) => {
                 assert.ok(err.message.includes('不支持的图生图服务'));
                 return true;

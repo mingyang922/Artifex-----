@@ -32,6 +32,12 @@ Windows 可直接双击 `一键启动.cmd`。
 - `free/mock` 仅管理员账号可用。
 - 后端接口采用会话 Cookie（`express-session`），前端请求需携带 `credentials: 'include'`。
 
+## 生产工作流
+
+登录后可从侧边栏进入“生产工作台”，统一管理生成历史与失败重试、角色一致性档案、项目成员与邀请、只读交付分享、批注审核、版本恢复、LoRA 训练队列、实时通知和成本预警。线稿转成品图入口会直接打开 AI 生成器的图生图工作流。
+
+完整接口、Worker 对接和环境变量说明见 `docs/PRODUCTION_WORKFLOWS.md`。
+
 ## 主要目录
 
 ```text
@@ -51,6 +57,7 @@ modules/
   ai-generate/               AI 生成页面
   project-management/        项目管理页面
   asset-library/             素材库页面
+  workflow-hub/              生产工作台与只读交付页
   style-presets/              风格预设
   user-center/               用户中心
 js/                          前端共享脚本
@@ -70,6 +77,7 @@ docs/                        部署与接入文档
 - `npm run lint`：ESLint 检查
 - `npm run format:check`：Prettier 检查
 - `npm test`：运行测试
+- `npm run test:e2e:production`：对生产 `dist` 产物执行冒烟回归
 
 ## CI/CD
 
@@ -99,10 +107,21 @@ docs/                        部署与接入文档
 - 运行环境锁定：**Node `>=22.14.0 <23`**（见 `package.json` 的 `engines`、`.nvmrc`、`.npmrc`）。
 - `npm run check:node`：单独校验当前 Node 版本。
 - 环境变量示例见 `backend/.env.example`。
-- 生产环境必须设置 `SESSION_SECRET`，并按需限制 `ALLOWED_ORIGINS`。
+- 生产环境必须设置 `SESSION_SECRET`，并限制 `ALLOWED_ORIGINS`。
 - `backend/data/*.sqlite`、`.env`、日志等本地数据不应提交到仓库。
-- 可选设置 `ADMIN_USER_ID` 指定管理员用户 ID（默认首个注册用户）。
-- 可选设置 `ENCRYPTION_KEY` 指定 API 密钥加密密钥（默认使用 `SESSION_SECRET`）。
+- 管理员必须通过 `ADMIN_USER_ID` 显式指定；首位注册用户不再自动提权。首次部署时先注册普通账号，查明其 ID 后设置 `ADMIN_USER_ID` 并重启服务。
+- 私有部署可设置 `REGISTRATION_ENABLED=false` 关闭公开注册。
+- 生产环境建议独立设置并长期保存 `ENCRYPTION_KEY`；Docker 部署将其设为必填，避免会话密钥轮换导致已有 API 凭证无法解密。
+
+## 生产发布
+
+腾讯云生产环境使用 Docker Compose，服务器为 `ubuntu@82.156.244.66`，应用目录为 `/opt/Artifex-----`。首次配置 SSH 公钥后，在 Windows PowerShell 中运行：
+
+```powershell
+npm run deploy:production
+```
+
+脚本会依次执行 lint、单元测试、生产构建、制品打包与 SHA-256 校验，并在服务器端完成源码/SQLite 数据卷备份、镜像构建、健康检查和失败自动回滚。生产密钥及 `config/ark-rest-api.local.json` 不会进入部署包。
 
 ## 安全特性
 

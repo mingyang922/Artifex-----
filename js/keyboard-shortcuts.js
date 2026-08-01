@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Artifex - 全局快捷键系统
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 'use strict';
 
 document.addEventListener('keydown', function (e) {

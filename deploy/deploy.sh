@@ -89,6 +89,7 @@ if [ ! -f "config/.env" ]; then
 NODE_ENV=production
 PORT=3000
 SESSION_SECRET=$(openssl rand -hex 32)
+ENCRYPTION_KEY=$(openssl rand -hex 32)
 
 # 请填写你的 API Key
 # HUNYUAN_SECRET_ID=

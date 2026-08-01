@@ -10,8 +10,8 @@
         <link href="vendor/css/google-fonts.css" rel="stylesheet" />
         <!-- 预连接CDN，提高外部资源加载速度 -->
         <link rel="stylesheet" href="styles/ui-kit.css" />
-        <!-- 异步加载非关键CSS -->
-        <link rel="stylesheet" href="vendor/css/font-awesome.min.css" media="print" onload="this.media = 'all'" />
+        <!-- 图标字体属于首屏关键资源，交给 Vite 正常解析并重写字体路径。 -->
+        <link rel="stylesheet" href="vendor/css/font-awesome.min.css" />
         <!-- dashboard 样式 -->
         <link rel="stylesheet" href="styles/dashboard.css" />
         <link rel="stylesheet" href="styles/app-shell.css" />
@@ -58,6 +58,10 @@
                             <i class="fas fa-swatchbook"></i>
                             <span data-i18n="nav.presets">风格预设</span>
                         </a>
+                        <a href="#" class="nav-link" data-module="workflow-hub">
+                            <i class="fas fa-layer-group"></i>
+                            <span data-i18n="nav.workflow">生产工作台</span>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-module="user-center">
@@ -97,20 +101,57 @@
                 <section class="workspace-hero scroll-section" aria-labelledby="workspace-title">
                     <div>
                         <span class="workspace-eyebrow"><i class="fas fa-sparkles"></i> ARTIFEX WORKSPACE</span>
-                        <h2 id="workspace-title"><span id="dashboard-greeting">欢迎回来</span>，开始创造吧</h2>
-                        <p id="dashboard-date">正在同步你的工作空间…</p>
+                        <h2 id="workspace-title">
+                            <span id="dashboard-greeting">欢迎回来</span
+                            ><span data-i18n="dashboard.heroSuffix">，开始创造吧</span>
+                        </h2>
+                        <p id="dashboard-date" data-i18n="dashboard.syncing">正在同步你的工作空间…</p>
                     </div>
                     <div class="workspace-hero-actions">
-                        <button type="button" class="workspace-primary-action" data-target="ai-generate"><i class="fas fa-wand-magic-sparkles"></i> 开始生成</button>
-                        <button type="button" class="workspace-secondary-action" data-target="project-management"><i class="fas fa-plus"></i> 新建项目</button>
+                        <button type="button" class="workspace-primary-action" data-target="ai-generate">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                            <span data-i18n="dashboard.startGenerate">开始生成</span>
+                        </button>
+                        <button type="button" class="workspace-secondary-action" data-target="project-management">
+                            <i class="fas fa-plus"></i>
+                            <span data-i18n="dashboard.newProject">新建项目</span>
+                        </button>
                     </div>
                 </section>
 
-                <section class="workspace-stats scroll-section" aria-label="工作空间概览">
-                    <article class="workspace-stat-card"><span class="workspace-stat-icon cyan"><i class="fas fa-diagram-project"></i></span><span><strong id="statProjects">—</strong><small>项目总数</small></span></article>
-                    <article class="workspace-stat-card"><span class="workspace-stat-icon violet"><i class="fas fa-images"></i></span><span><strong id="statAssets">—</strong><small>素材数量</small></span></article>
-                    <article class="workspace-stat-card"><span class="workspace-stat-icon green"><i class="fas fa-wand-magic-sparkles"></i></span><span><strong id="statGenerations">—</strong><small>生成记录</small></span></article>
-                    <article class="workspace-stat-card"><span class="workspace-stat-icon amber"><i class="fas fa-hard-drive"></i></span><span><strong id="statStorage">—</strong><small>本地空间</small></span></article>
+                <section
+                    class="workspace-stats scroll-section"
+                    aria-label="工作空间概览"
+                    data-i18n-aria="dashboard.workspaceOverview"
+                >
+                    <article class="workspace-stat-card">
+                        <span class="workspace-stat-icon cyan"><i class="fas fa-diagram-project"></i></span
+                        ><span
+                            ><strong id="statProjects">—</strong
+                            ><small data-i18n="dashboard.projectTotal">项目总数</small></span
+                        >
+                    </article>
+                    <article class="workspace-stat-card">
+                        <span class="workspace-stat-icon violet"><i class="fas fa-images"></i></span
+                        ><span
+                            ><strong id="statAssets">—</strong
+                            ><small data-i18n="dashboard.assetCount">素材数量</small></span
+                        >
+                    </article>
+                    <article class="workspace-stat-card">
+                        <span class="workspace-stat-icon green"><i class="fas fa-wand-magic-sparkles"></i></span
+                        ><span
+                            ><strong id="statGenerations">—</strong
+                            ><small data-i18n="dashboard.generationCount">生成记录</small></span
+                        >
+                    </article>
+                    <article class="workspace-stat-card">
+                        <span class="workspace-stat-icon amber"><i class="fas fa-hard-drive"></i></span
+                        ><span
+                            ><strong id="statStorage">—</strong
+                            ><small data-i18n="dashboard.localStorage">本地空间</small></span
+                        >
+                    </article>
                 </section>
 
                 <section class="quick-tools-section scroll-section">
@@ -149,16 +190,34 @@
                 <section class="workspace-insights scroll-section">
                     <article class="workspace-panel">
                         <div class="section-header">
-                            <h2 class="section-title"><i class="fas fa-clock-rotate-left"></i> 最近生成</h2>
-                            <a href="#" class="view-all" data-target="ai-generate">继续创作</a>
+                            <h2 class="section-title">
+                                <i class="fas fa-clock-rotate-left"></i>
+                                <span data-i18n="dashboard.recentGenerations">最近生成</span>
+                            </h2>
+                            <a
+                                href="#"
+                                class="view-all"
+                                data-target="ai-generate"
+                                data-i18n="dashboard.continueCreating"
+                                >继续创作</a
+                            >
                         </div>
                         <div id="recent-generations" class="recent-generation-list"></div>
                     </article>
                     <article class="workspace-panel workspace-next-step">
-                        <span class="workspace-eyebrow">SMART NEXT STEP</span>
-                        <h2>推荐下一步</h2>
-                        <p id="dashboard-next-step">正在根据你的工作状态生成建议…</p>
-                        <button type="button" class="workspace-secondary-action" id="dashboard-next-action">立即前往</button>
+                        <span class="workspace-eyebrow" data-i18n="dashboard.smartNextStep">智能下一步</span>
+                        <h2 data-i18n="dashboard.recommendedNext">推荐下一步</h2>
+                        <p id="dashboard-next-step" data-i18n="dashboard.nextCalculating">
+                            正在根据你的工作状态生成建议…
+                        </p>
+                        <button
+                            type="button"
+                            class="workspace-secondary-action"
+                            id="dashboard-next-action"
+                            data-i18n="dashboard.goNow"
+                        >
+                            立即前往
+                        </button>
                     </article>
                 </section>
 
@@ -175,11 +234,15 @@
                     "
                 >
                     <div class="section-header" style="margin-bottom: 10px">
-                        <h2 class="section-title"><i class="fas fa-database"></i> 本地数据备份</h2>
+                        <h2 class="section-title">
+                            <i class="fas fa-database"></i>
+                            <span data-i18n="dashboard.localBackup">本地数据备份</span>
+                        </h2>
                     </div>
                     <p
                         id="artifex-storage-usage"
                         style="color: #b0b8d0; font-size: 14px; margin: 0 0 14px; line-height: 1.5"
+                        data-i18n="dashboard.storageCalculating"
                     >
                         正在计算本地存储用量…
                     </p>
@@ -189,16 +252,18 @@
                             id="artifex-export-local-btn"
                             class="project-action"
                             title="导出为 JSON 文件"
+                            data-i18n-title="dashboard.exportBackupTitle"
                         >
-                            导出 JSON 备份
+                            <span data-i18n="dashboard.exportBackup">导出 JSON 备份</span>
                         </button>
                         <button
                             type="button"
                             id="artifex-import-local-btn"
                             class="project-action"
                             title="从之前导出的 JSON 恢复"
+                            data-i18n-title="dashboard.importBackupTitle"
                         >
-                            从文件导入
+                            <span data-i18n="dashboard.importBackup">从文件导入</span>
                         </button>
                         <input
                             type="file"
@@ -208,7 +273,7 @@
                             aria-hidden="true"
                         />
                     </div>
-                    <p style="color: #8090a8; font-size: 12px; margin: 12px 0 0">
+                    <p style="color: #8090a8; font-size: 12px; margin: 12px 0 0" data-i18n="dashboard.backupNotice">
                         覆盖项目列表、素材库、风格预设与 AI 生成缩略索引等当前登录用户下的键。导入后请刷新页面。
                     </p>
                 </section>
@@ -219,7 +284,7 @@
         </div>
 
         <!-- 移动端菜单按钮 -->
-        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="菜单">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="菜单" data-i18n-aria="misc.menu">
             <i class="fas fa-bars"></i>
         </button>
 

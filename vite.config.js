@@ -19,6 +19,8 @@ export default defineConfig({
                 admin: resolve(import.meta.dirname, 'modules/admin/admin.html'),
                 'style-presets': resolve(import.meta.dirname, 'modules/style-presets/style-presets.html'),
                 'message-center': resolve(import.meta.dirname, 'modules/messageCenter.html'),
+                'workflow-hub': resolve(import.meta.dirname, 'modules/workflow-hub/index.html'),
+                'shared-project': resolve(import.meta.dirname, 'modules/workflow-hub/shared.html'),
             },
             output: {
                 // 文件哈希用于长期缓存
@@ -48,8 +50,8 @@ export default defineConfig({
             },
         },
     },
-    // 静态资源处理
-    publicDir: 'public',
+    // 本项目的经典脚本与 vendor 资源由 prepare-dist.js 复制，不使用 Vite public 目录。
+    publicDir: false,
     // CSS 配置
     css: {
         devSourcemap: true,

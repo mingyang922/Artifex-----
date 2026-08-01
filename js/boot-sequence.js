@@ -1,10 +1,10 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 'use strict';
 
-const APP_VERSION = (typeof window !== 'undefined' && window.API_CONFIG && window.API_CONFIG.version) || '1.3.3';
+const APP_VERSION = (typeof window !== 'undefined' && window.API_CONFIG && window.API_CONFIG.version) || '1.4.0';
 
 const BOOT_LINES = [
     { text: '> ARTIFEX ENGINE v' + APP_VERSION, color: '#00f0ff' },

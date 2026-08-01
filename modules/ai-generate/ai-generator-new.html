@@ -97,15 +97,24 @@
                     <!-- 当前项目提示（从项目详情跳转时显示） -->
                     <div id="currentProjectBanner" class="current-project-banner">
                         <span
-                            ><i class="fas fa-project-diagram"></i> 当前关联项目：<strong data-project-name></strong>
+                            ><i class="fas fa-project-diagram"></i>
+                            <span data-i18n="module.currentProject">当前关联项目：</span
+                            ><strong data-project-name></strong>
                             <span data-project-extra style="margin-left: 8px; opacity: 0.8"></span>
                         </span>
-                        <button type="button" data-back-to-project>返回项目详情</button>
+                        <button type="button" data-back-to-project>
+                            <span data-i18n="module.backToProject">返回项目详情</span>
+                        </button>
                     </div>
                     <div class="section-header">
-                        <h2 class="section-title"><i class="fas fa-wand-magic-sparkles"></i> AI UI资产生成器</h2>
+                        <h2 class="section-title">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                            <span data-i18n="ai.pageTitle">AI UI资产生成器</span>
+                        </h2>
                     </div>
-                    <p class="section-subtitle">使用 AI 技术快速生成高质量的 UI 设计资产（代码与图片）</p>
+                    <p class="section-subtitle" data-i18n="ai.pageSubtitle">
+                        使用 AI 技术快速生成高质量的 UI 设计资产（代码与图片）
+                    </p>
 
                     <!-- 功能选项卡 -->
                     <div class="tab-container">
@@ -299,19 +308,24 @@
                                 <div class="ae-body">
                                     <!-- 左侧：素材库选择面板 -->
                                     <div class="ae-panel ae-panel-left">
-                                        <div class="ae-panel-header"><i class="fas fa-images"></i> 我的素材</div>
+                                        <div class="ae-panel-header">
+                                            <i class="fas fa-images"></i> <span data-i18n="ai.myAssets">我的素材</span>
+                                        </div>
                                         <div class="ae-panel-section">
-                                            <div class="ae-panel-sub-title">从素材库加载</div>
+                                            <div class="ae-panel-sub-title" data-i18n="ai.loadFromAssets">
+                                                从素材库加载
+                                            </div>
                                             <div id="aeAssetList" class="ae-asset-list">
-                                                <div class="ae-empty-hint">
+                                                <div class="ae-empty-hint" data-i18n="ai.noEditorAssets">
                                                     暂无素材，请先在「图片生成」或「角色动作组」中生成并保存到素材库。
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="ae-panel-section">
-                                            <div class="ae-panel-sub-title">本地上传</div>
+                                            <div class="ae-panel-sub-title" data-i18n="ai.localUpload">本地上传</div>
                                             <label class="ae-upload-btn">
-                                                <i class="fas fa-upload"></i> 上传图片
+                                                <i class="fas fa-upload"></i>
+                                                <span data-i18n="ai.uploadImage">上传图片</span>
                                                 <input
                                                     type="file"
                                                     id="aeLocalUpload"
@@ -321,9 +335,11 @@
                                             </label>
                                         </div>
                                         <div class="ae-panel-section">
-                                            <div class="ae-panel-sub-title">色彩调整</div>
+                                            <div class="ae-panel-sub-title" data-i18n="ai.colorAdjustments">
+                                                色彩调整
+                                            </div>
                                             <label
-                                                >亮度
+                                                ><span data-i18n="ai.brightness">亮度</span>
                                                 <input
                                                     type="range"
                                                     id="aeAdjBrightness"
@@ -334,7 +350,7 @@
                                                 /><span id="aeAdjBrVal">0</span></label
                                             >
                                             <label
-                                                >对比度
+                                                ><span data-i18n="ai.contrast">对比度</span>
                                                 <input
                                                     type="range"
                                                     id="aeAdjContrast"
@@ -345,7 +361,7 @@
                                                 /><span id="aeAdjCVal">0</span></label
                                             >
                                             <label
-                                                >饱和度
+                                                ><span data-i18n="ai.saturation">饱和度</span>
                                                 <input
                                                     type="range"
                                                     id="aeAdjSaturation"
@@ -356,10 +372,11 @@
                                                 /><span id="aeAdjSVal">0</span></label
                                             >
                                             <button class="ae-small-btn" id="aeAdjApply">
-                                                <i class="fas fa-check"></i> 应用调整
+                                                <i class="fas fa-check"></i>
+                                                <span data-i18n="ai.applyAdjustments">应用调整</span>
                                             </button>
                                             <button class="ae-small-btn ae-small-btn-ghost" id="aeAdjReset">
-                                                <i class="fas fa-undo-alt"></i> 重置
+                                                <i class="fas fa-undo-alt"></i> <span data-i18n="ai.reset">重置</span>
                                             </button>
                                         </div>
                                     </div>
@@ -397,9 +414,9 @@
                                                     display: block;
                                                 "
                                             ></i>
-                                            <p>从左侧选择素材，或直接上传图片开始编辑</p>
+                                            <p data-i18n="ai.editorEmpty">从左侧选择素材，或直接上传图片开始编辑</p>
                                             <p style="font-size: 12px; opacity: 0.5; margin-top: 8px">
-                                                支持拖拽图片到此区域
+                                                <span data-i18n="ai.editorDropHint">支持拖拽图片到此区域</span>
                                             </p>
                                         </div>
                                         <div class="ae-statusbar" id="aeStatusBar">
@@ -413,20 +430,26 @@
 
                                     <!-- 右侧：AI 辅助面板 -->
                                     <div class="ae-panel ae-panel-right">
-                                        <div class="ae-panel-header"><i class="fas fa-magic"></i> AI 辅助</div>
+                                        <div class="ae-panel-header">
+                                            <i class="fas fa-magic"></i> <span data-i18n="ai.assistant">AI 辅助</span>
+                                        </div>
                                         <div class="ae-panel-section">
                                             <div class="ae-panel-sub-title">
-                                                <i class="fas fa-paint-roller"></i> 局部重绘
+                                                <i class="fas fa-paint-roller"></i>
+                                                <span data-i18n="ai.inpaint">局部重绘</span>
                                             </div>
-                                            <p class="ae-hint">用「选区」工具框选要修改的区域，再描述想要的效果。</p>
+                                            <p class="ae-hint" data-i18n="ai.inpaintHint">
+                                                用「选区」工具框选要修改的区域，再描述想要的效果。
+                                            </p>
                                             <textarea
                                                 id="aeInpaintPrompt"
                                                 class="ae-textarea"
                                                 rows="3"
                                                 placeholder="例：把背景换成星空，保留角色不变"
+                                                data-i18n="ai.inpaintPlaceholder"
                                             ></textarea>
                                             <label
-                                                >重绘强度
+                                                ><span data-i18n="ai.inpaintStrength">重绘强度</span>
                                                 <input
                                                     type="range"
                                                     id="aeInpaintStrength"
@@ -437,21 +460,27 @@
                                                 /><span id="aeInpaintStrVal">65</span>%</label
                                             >
                                             <button type="button" class="generate-btn ae-ai-btn" id="aeInpaintBtn">
-                                                <i class="fas fa-wand-magic-sparkles"></i> AI 局部重绘
+                                                <i class="fas fa-wand-magic-sparkles"></i>
+                                                <span data-i18n="ai.runInpaint">AI 局部重绘</span>
                                             </button>
                                         </div>
                                         <div class="ae-panel-section">
-                                            <div class="ae-panel-sub-title"><i class="fas fa-expand"></i> AI 扩图</div>
-                                            <p class="ae-hint">将画布扩展到更大尺寸，AI 自动补全边缘。</p>
+                                            <div class="ae-panel-sub-title">
+                                                <i class="fas fa-expand"></i>
+                                                <span data-i18n="ai.outpaint">AI 扩图</span>
+                                            </div>
+                                            <p class="ae-hint" data-i18n="ai.outpaintHint">
+                                                将画布扩展到更大尺寸，AI 自动补全边缘。
+                                            </p>
                                             <select id="aeOutpaintDir" class="form-control ae-sm-select">
-                                                <option value="all">四周扩展</option>
-                                                <option value="right">向右扩展</option>
-                                                <option value="down">向下扩展</option>
-                                                <option value="left">向左扩展</option>
-                                                <option value="up">向上扩展</option>
+                                                <option value="all" data-i18n="ai.expandAll">四周扩展</option>
+                                                <option value="right" data-i18n="ai.expandRight">向右扩展</option>
+                                                <option value="down" data-i18n="ai.expandDown">向下扩展</option>
+                                                <option value="left" data-i18n="ai.expandLeft">向左扩展</option>
+                                                <option value="up" data-i18n="ai.expandUp">向上扩展</option>
                                             </select>
                                             <label
-                                                >扩展像素
+                                                ><span data-i18n="ai.expandPixels">扩展像素</span>
                                                 <input
                                                     type="number"
                                                     id="aeOutpaintPx"
@@ -462,42 +491,57 @@
                                                     class="form-control ae-sm-input"
                                             /></label>
                                             <button type="button" class="generate-btn ae-ai-btn" id="aeOutpaintBtn">
-                                                <i class="fas fa-expand-arrows-alt"></i> AI 扩图
+                                                <i class="fas fa-expand-arrows-alt"></i>
+                                                <span data-i18n="ai.outpaint">AI 扩图</span>
                                             </button>
                                         </div>
                                         <div class="ae-panel-section">
                                             <div class="ae-panel-sub-title">
-                                                <i class="fas fa-palette"></i> 风格迁移
+                                                <i class="fas fa-palette"></i>
+                                                <span data-i18n="ai.styleTransfer">风格迁移</span>
                                             </div>
                                             <select id="aeStyleTransfer" class="form-control ae-sm-select">
-                                                <option value="">选择目标风格</option>
-                                                <option value="pixel_art">像素风格</option>
-                                                <option value="watercolor">水彩风格</option>
-                                                <option value="oil_painting">油画风格</option>
-                                                <option value="anime">日式动漫</option>
-                                                <option value="chibi">Q版卡通</option>
-                                                <option value="realistic">写实风格</option>
-                                                <option value="flat_vector">扁平矢量</option>
+                                                <option value="" data-i18n="ai.chooseTargetStyle">选择目标风格</option>
+                                                <option value="pixel_art" data-i18n="ai.stylePixel">像素风格</option>
+                                                <option value="watercolor" data-i18n="ai.styleWatercolor">
+                                                    水彩风格
+                                                </option>
+                                                <option value="oil_painting" data-i18n="ai.styleOil">油画风格</option>
+                                                <option value="anime" data-i18n="ai.styleAnime">日式动漫</option>
+                                                <option value="chibi" data-i18n="ai.styleChibi">Q版卡通</option>
+                                                <option value="realistic" data-i18n="ai.styleRealistic">
+                                                    写实风格
+                                                </option>
+                                                <option value="flat_vector" data-i18n="ai.styleFlatVector">
+                                                    扁平矢量
+                                                </option>
                                             </select>
                                             <button type="button" class="generate-btn ae-ai-btn" id="aeStyleBtn">
-                                                <i class="fas fa-palette"></i> AI 风格迁移
-                                            </button>
-                                        </div>
-                                        <div class="ae-panel-section">
-                                            <div class="ae-panel-sub-title"><i class="fas fa-download"></i> 导出</div>
-                                            <button class="ae-small-btn" id="aeExportPng">
-                                                <i class="fas fa-file-image"></i> 导出 PNG
-                                            </button>
-                                            <button class="ae-small-btn" id="aeSaveToLib">
-                                                <i class="fas fa-folder-plus"></i> 存回素材库
+                                                <i class="fas fa-palette"></i> AI
+                                                <span data-i18n="ai.styleTransfer">风格迁移</span>
                                             </button>
                                         </div>
                                         <div class="ae-panel-section">
                                             <div class="ae-panel-sub-title">
-                                                <i class="fas fa-swatchbook"></i> 调色板
+                                                <i class="fas fa-download"></i> <span data-i18n="ai.export">导出</span>
+                                            </div>
+                                            <button class="ae-small-btn" id="aeExportPng">
+                                                <i class="fas fa-file-image"></i>
+                                                <span data-i18n="ai.exportPng">导出 PNG</span>
+                                            </button>
+                                            <button class="ae-small-btn" id="aeSaveToLib">
+                                                <i class="fas fa-folder-plus"></i>
+                                                <span data-i18n="ai.saveToLibrary">存回素材库</span>
+                                            </button>
+                                        </div>
+                                        <div class="ae-panel-section">
+                                            <div class="ae-panel-sub-title">
+                                                <i class="fas fa-swatchbook"></i>
+                                                <span data-i18n="ai.palette">调色板</span>
                                             </div>
                                             <button class="ae-small-btn" id="aeExtractPalette">
-                                                <i class="fas fa-eye-dropper"></i> 提取调色板
+                                                <i class="fas fa-eye-dropper"></i>
+                                                <span data-i18n="ai.extractPaletteAction">提取调色板</span>
                                             </button>
                                         </div>
                                     </div>
@@ -1360,6 +1404,7 @@
         <script defer src="../../js/image-state-store.js"></script>
         <script defer src="../../js/keyboard-shortcuts.js"></script>
         <script src="../../js/i18n.js"></script>
+        <script defer src="ai-generator-i18n.js"></script>
         <script src="../../js/region-themes.js"></script>
         <script src="../../js/session-guard.js"></script>
         <script defer src="../../js/ui-kit.js"></script>
@@ -1373,6 +1418,7 @@
         <script defer src="../../js/page-effects.js"></script>
         <script defer src="../../js/user-storage-scope.js"></script>
         <script defer src="../../js/api-utils.js"></script>
+        <script defer src="workflow-presets.js"></script>
         <script defer src="../../js/ai-page-utils.js"></script>
         <script defer src="ai-generator-page.js"></script>
         <script defer src="action-group.js"></script>

@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 'use strict';
 
 /**
@@ -205,17 +205,52 @@ function setupForgotPassword() {
     const forgotLink = document.querySelector('.forgot-password');
     if (!forgotLink) return;
 
-    forgotLink.addEventListener('click', (e) => {
+    forgotLink.addEventListener('click', async (e) => {
         e.preventDefault();
-        showMessage('请联系管理员重置密码', 'error');
+        const email = window.prompt('请输入注册邮箱');
+        if (!email) return;
+        try {
+            const response = await fetchWithCsrf('/api/auth/forgot-password', {
+                method: 'POST',
+                body: JSON.stringify({ email: email.trim() }),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || data.error || '请求失败');
+            showMessage(data.message || '重置请求已提交，请检查邮箱', 'success');
+            // 开发环境会返回令牌，允许直接完成本地闭环验证。
+            if (data.resetToken) await finishPasswordReset(data.resetToken);
+        } catch (error) {
+            showMessage(error.message || '密码重置请求失败', 'error');
+        }
     });
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+async function finishPasswordReset(token) {
+    const newPassword = window.prompt('请输入新密码（至少 8 位）');
+    if (!newPassword) return;
+    const response = await fetchWithCsrf('/api/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ token, newPassword }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || data.error || '密码重置失败');
+    showMessage(data.message || '密码已重置，请重新登录', 'success');
+    history.replaceState({}, '', 'login.html');
+}
+
+document.addEventListener('DOMContentLoaded', async function () {
     setupPasswordToggles();
     setupPasswordStrength();
     setupFormSwitchLinks();
     setupLoginForm();
     setupRegisterForm();
     setupForgotPassword();
+    const resetToken = new URLSearchParams(location.search).get('resetToken');
+    if (resetToken) {
+        try {
+            await finishPasswordReset(resetToken);
+        } catch (error) {
+            showMessage(error.message || '密码重置失败', 'error');
+        }
+    }
 });

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>项目交付预览 - Artifex</title>
+        <link rel="stylesheet" href="../../vendor/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="../../styles/ui-kit.css" />
+        <link rel="stylesheet" href="workflow-hub.css" />
+    </head>
+    <body class="shared-project-page">
+        <main class="shared-project-shell">
+            <header class="workflow-hero">
+                <div>
+                    <p class="eyebrow">ARTIFEX DELIVERY REVIEW</p>
+                    <h1 id="projectName">正在加载项目…</h1>
+                    <p id="projectDescription">这是一个只读交付链接。</p>
+                </div>
+                <span class="status-pill" id="reviewStatus">只读</span>
+            </header>
+            <section class="metric-grid">
+                <article><strong id="assetCount">—</strong><span>交付资产</span></article>
+                <article><strong id="projectVersion">—</strong><span>项目版本</span></article>
+                <article><strong id="projectType">—</strong><span>项目类型</span></article>
+                <article><strong id="updatedAt">—</strong><span>最近更新</span></article>
+            </section>
+            <section class="workflow-panel is-active">
+                <div class="panel-heading">
+                    <div>
+                        <h2>资产清单</h2>
+                        <p>此页面不会暴露账户信息、API 密钥或内部协作记录。</p>
+                    </div>
+                </div>
+                <div id="assetList" class="card-grid"></div>
+                <p id="shareError" class="empty-state" hidden></p>
+            </section>
+        </main>
+        <script src="../../js/html-utils.js"></script>
+        <script src="shared.js"></script>
+    </body>
+</html>

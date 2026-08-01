@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3
+ * 版本: 1.4.0
  *
  * templates.js - 游戏 UI 模板库
  * 提供预设的游戏 UI 模式模板，点击即可填入 prompt 并设置参数。
@@ -189,7 +189,10 @@ function initTemplateUI() {
         const cat = TEMPLATES[catKey];
         if (!cat || !cat.prompts[subKey]) return;
 
-        const promptText = cat.prompts[subKey].prompt;
+        const promptText =
+            typeof window.aiGeneratorTranslate === 'function'
+                ? window.aiGeneratorTranslate(cat.prompts[subKey].prompt)
+                : cat.prompts[subKey].prompt;
         const descEl = document.getElementById('imageDescription');
         if (descEl) {
             descEl.value = promptText;

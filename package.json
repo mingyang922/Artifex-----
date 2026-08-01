@@ -1,6 +1,6 @@
 {
     "name": "artifex-platform",
-    "version": "1.3.3",
+    "version": "1.4.0",
     "description": "Artifex 二维游戏美术协作与AI资产生成平台",
     "main": "backend/proxy.js",
     "scripts": {
@@ -19,9 +19,11 @@
         "format:check": "prettier --check \"backend/**/*.{js,json}\" \"js/**/*.{js,json}\" \"modules/**/*.{js,css,html,json}\" \"scripts/**/*.{js,json}\" \"*.{html,css,js,json,md}\"",
         "install-deps": "npm install express axios dotenv",
         "setup": "npm run install-deps && echo \"请在 config/.env 中配置 API 密钥等变量（见 README）\"",
-        "test": "node --test tests/backend.test.js tests/routes.test.js tests/utils.test.js",
+        "test": "node --test tests/backend.test.js tests/routes.test.js tests/utils.test.js tests/workspace.test.js",
         "test:e2e": "npx playwright test",
+        "test:e2e:production": "npx playwright test --config=playwright.production.config.js",
         "ci": "npm run lint && npm test",
+        "deploy:production": "powershell -ExecutionPolicy Bypass -File deploy/production-deploy.ps1",
         "precommit": "npm run lint"
     },
     "dependencies": {

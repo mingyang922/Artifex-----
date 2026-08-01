@@ -21,6 +21,20 @@ html.theme-uk {
     --login-cyan: #d4af37;
     --login-violet: #7a2030;
     --login-bg: #100c0a;
+    --region-text: #f0e2c2;
+    --region-muted: rgba(205, 188, 155, 0.66);
+    --region-accent: #d4af37;
+    --region-accent-2: #a05a2c;
+    --region-accent-soft: rgba(212, 175, 55, 0.13);
+    --region-surface: rgba(43, 31, 23, 0.63);
+    --region-surface-strong: rgba(18, 12, 9, 0.77);
+    --region-surface-soft: rgba(62, 42, 29, 0.42);
+    --region-control: rgba(20, 13, 9, 0.62);
+    --region-border: rgba(212, 175, 55, 0.25);
+    --region-border-strong: rgba(212, 175, 55, 0.46);
+    --region-shadow: 0 16px 42px rgba(4, 3, 2, 0.32), inset 0 1px rgba(255, 243, 207, 0.04);
+    --region-radius: 15px 22px;
+    --region-blur: blur(19px) saturate(0.9);
 }
 
 html.theme-uk body,

@@ -1,8 +1,9 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 'use strict';
+const stylePresetTr = (key) => (window.i18n && typeof window.i18n.t === 'function' ? window.i18n.t(key) : key);
 if (window.PageEffects) {
     window.PageEffects.initPointerGlow();
 }
@@ -42,10 +43,21 @@ function uiToast(message, type) {
     }
 }
 function uiConfirm(message, title) {
-    return window.TechUI.confirm(message, title || '请确认', '确定', '取消');
+    return window.TechUI.confirm(
+        message,
+        title || stylePresetTr('common.confirm'),
+        stylePresetTr('common.confirm'),
+        stylePresetTr('common.cancel')
+    );
 }
 function uiPrompt(title, label, value) {
-    return window.TechUI.prompt(title, label, value || '', '确定', '取消');
+    return window.TechUI.prompt(
+        title,
+        label,
+        value || '',
+        stylePresetTr('common.confirm'),
+        stylePresetTr('common.cancel')
+    );
 }
 
 const STYLE_PRESETS_STORE = 'style_presets_v1';
@@ -86,7 +98,7 @@ function renderStylePresetLibrary() {
     if (!list.length) {
         const p = document.createElement('p');
         p.className = 'style-preset-empty';
-        p.textContent = '暂无风格预设。可在 AI 图片生成或工作台中创建。';
+        p.textContent = stylePresetTr('presets.empty');
         root.appendChild(p);
         return;
     }
@@ -97,7 +109,7 @@ function renderStylePresetLibrary() {
         head.className = 'style-preset-lib-row-header';
         const title = document.createElement('div');
         title.className = 'style-preset-lib-name';
-        title.textContent = preset.name || '未命名';
+        title.textContent = preset.name || stylePresetTr('common.unnamed');
         const meta = document.createElement('div');
         meta.className = 'style-preset-lib-meta';
         meta.textContent = (preset.createdAt || '').slice(0, 10);
@@ -107,7 +119,7 @@ function renderStylePresetLibrary() {
             const im = document.createElement('img');
             im.src = preset.referenceThumb;
             im.className = 'style-preset-lib-thumb';
-            im.alt = '预设参考图';
+            im.alt = stylePresetTr('presets.referenceImage');
             row.appendChild(im);
         }
         const ta = document.createElement('textarea');
@@ -119,7 +131,7 @@ function renderStylePresetLibrary() {
         const btnSave = document.createElement('button');
         btnSave.className = 'btn btn-small btn-primary';
         btnSave.type = 'button';
-        btnSave.textContent = '保存片段';
+        btnSave.textContent = stylePresetTr('presets.saveSnippet');
         btnSave.addEventListener('click', () => {
             const next = readStylePresetsList().map((x) =>
                 String(x.id) === String(preset.id) ? Object.assign({}, x, { styleText: ta.value.trim() }) : x
@@ -131,7 +143,7 @@ function renderStylePresetLibrary() {
         const btnCopy = document.createElement('button');
         btnCopy.className = 'btn btn-small';
         btnCopy.type = 'button';
-        btnCopy.textContent = '复制为新预设';
+        btnCopy.textContent = stylePresetTr('presets.copy');
         btnCopy.addEventListener('click', async () => {
             const nm = await uiPrompt('复制为预设', '新预设名称：', (preset.name || '预设') + ' 副本');
             if (!nm || !String(nm).trim()) return;
@@ -150,7 +162,7 @@ function renderStylePresetLibrary() {
         const btnDel = document.createElement('button');
         btnDel.className = 'btn btn-small';
         btnDel.type = 'button';
-        btnDel.textContent = '删除';
+        btnDel.textContent = stylePresetTr('assets.delete');
         btnDel.addEventListener('click', async () => {
             const ok = await uiConfirm('确定删除该风格预设？此操作不可撤销。', '删除风格预设');
             if (!ok) return;
@@ -190,3 +202,4 @@ if (document.readyState === 'loading') {
 } else {
     boot();
 }
+window.addEventListener('languageChanged', renderStylePresetLibrary);

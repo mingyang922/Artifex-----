@@ -1,7 +1,22 @@
 # artifex.com.cn 部署命令速查
 
-服务器公网 IP（若未变）：`82.156.244.66`  
-代码目录（按你机器实际路径调整）：`/srv/game-management/current`
+当前生产环境（2026-07-30）：
+
+- 服务器：`ubuntu@82.156.244.66`
+- 代码目录：`/opt/Artifex-----`
+- 容器：`artifex-platform`
+- 数据卷：由服务器 `.env` 中的 `ARTIFEX_DATA_VOLUME` 显式指定
+- 外部入口：Nginx `80/443`；Node 后端仅监听 `127.0.0.1:3000`
+
+推荐从项目根目录一键发布：
+
+```powershell
+npm run deploy:production
+```
+
+该命令自动执行本地检查、生成制品、SSH 上传、SHA-256 校验、源码与 SQLite 数据卷备份、Docker 构建、健康检查及失败回滚。回滚点保存在 `/opt/artifex-backups/<UTC时间戳>`，同时保留一个停止状态的旧容器。
+
+> 下方 PM2 与 `/srv/game-management/current` 内容仅供历史部署参考，不适用于当前 Docker 生产环境。
 
 ---
 
@@ -59,6 +74,7 @@ sudo nano backend/.env
 NODE_ENV=production
 PORT=3000
 SESSION_SECRET=请改为至少32位随机字符串
+ENCRYPTION_KEY=请改为另一段至少32位随机字符串
 ALLOWED_ORIGINS=https://artifex.com.cn,https://www.artifex.com.cn,http://artifex.com.cn,http://www.artifex.com.cn
 ```
 

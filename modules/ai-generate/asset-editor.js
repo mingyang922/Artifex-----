@@ -1,8 +1,9 @@
-﻿/**
+/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 'use strict';
+const assetEditorTr = (key) => (window.i18n && typeof window.i18n.t === 'function' ? window.i18n.t(key) : key);
 class AssetEditor {
     constructor() {
         this.canvas = document.getElementById('aeCanvas');
@@ -95,8 +96,10 @@ class AssetEditor {
             }
         });
         if (assets.length === 0) {
-            list.innerHTML =
-                '<div class="ae-empty-hint">暂无素材，请先在「图片生成」或「角色动作组」中生成并保存到素材库。</div>';
+            const empty = document.createElement('div');
+            empty.className = 'ae-empty-hint';
+            empty.textContent = assetEditorTr('ai.noEditorAssets');
+            list.replaceChildren(empty);
             return;
         }
         list.innerHTML = '';
@@ -112,7 +115,10 @@ class AssetEditor {
             list.appendChild(imgEl);
         });
         if (!list.children.length) {
-            list.innerHTML = '<div class="ae-empty-hint">素材库中暂无可用图片。</div>';
+            const empty = document.createElement('div');
+            empty.className = 'ae-empty-hint';
+            empty.textContent = assetEditorTr('ai.noEditorAssets');
+            list.replaceChildren(empty);
         }
     }
 

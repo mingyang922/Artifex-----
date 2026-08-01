@@ -33,6 +33,20 @@ html.theme-japan {
     --login-cyan: #00d4ff;
     --login-violet: #e8607a;
     --login-bg: #1a1020;
+    --region-text: #ffffff;
+    --region-muted: rgba(255, 255, 255, 0.62);
+    --region-accent: #00d4ff;
+    --region-accent-2: #e8607a;
+    --region-accent-soft: rgba(0, 212, 255, 0.12);
+    --region-surface: rgba(86, 59, 70, 0.46);
+    --region-surface-strong: rgba(29, 21, 31, 0.68);
+    --region-surface-soft: rgba(106, 74, 82, 0.34);
+    --region-control: rgba(38, 27, 40, 0.52);
+    --region-border: rgba(255, 255, 255, 0.13);
+    --region-border-strong: rgba(0, 212, 255, 0.34);
+    --region-shadow: 0 14px 38px rgba(44, 27, 36, 0.2), inset 0 1px rgba(255, 255, 255, 0.055);
+    --region-radius: 18px;
+    --region-blur: blur(20px) saturate(1.16);
 }
 
 

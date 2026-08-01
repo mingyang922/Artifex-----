@@ -21,6 +21,20 @@ html.theme-korea {
     --login-cyan: #8be9fd;
     --login-violet: #ff79c6;
     --login-bg: #0e0b16;
+    --region-text: #fff8f1;
+    --region-muted: rgba(235, 222, 239, 0.66);
+    --region-accent: #b088f9;
+    --region-accent-2: #ff79c6;
+    --region-accent-soft: rgba(176, 136, 249, 0.14);
+    --region-surface: rgba(23, 17, 35, 0.55);
+    --region-surface-strong: rgba(12, 9, 21, 0.74);
+    --region-surface-soft: rgba(42, 28, 57, 0.42);
+    --region-control: rgba(20, 14, 34, 0.56);
+    --region-border: rgba(176, 136, 249, 0.24);
+    --region-border-strong: rgba(255, 121, 198, 0.4);
+    --region-shadow: 0 14px 38px rgba(7, 4, 18, 0.25), 0 0 26px rgba(176, 136, 249, 0.05), inset 0 1px rgba(255, 255, 255, 0.055);
+    --region-radius: 20px;
+    --region-blur: blur(24px) saturate(1.28);
 }
 
 html.theme-korea body,

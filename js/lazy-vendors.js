@@ -11,9 +11,13 @@
             const script = document.createElement('script');
             script.src = src;
             script.defer = true;
-            script.addEventListener('load', () => (ready() ? resolve() : reject(new Error(`依赖未正确初始化: ${src}`))), {
-                once: true,
-            });
+            script.addEventListener(
+                'load',
+                () => (ready() ? resolve() : reject(new Error(`依赖未正确初始化: ${src}`))),
+                {
+                    once: true,
+                }
+            );
             script.addEventListener('error', () => reject(new Error(`依赖加载失败: ${src}`)), { once: true });
             document.head.appendChild(script);
         }).catch((error) => {

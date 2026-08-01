@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3 */
+ * 版本: 1.4.0 */
 'use strict';
 (function ensureLocalServerEntry() {
     'use strict';
@@ -206,7 +206,11 @@ function themedToast(kind, message) {
     };
     const tone = palette[kind] || palette.success;
     const node = document.createElement('div');
-    node.textContent = message || '操作成功';
+    const displayMessage =
+        typeof window.aiGeneratorTranslate === 'function'
+            ? window.aiGeneratorTranslate(message || '操作成功')
+            : message || '操作成功';
+    node.textContent = displayMessage;
     node.style.cssText = `max-width:min(560px,86vw);padding:12px 18px;border-radius:10px;border:1px solid ${tone.border};background:linear-gradient(165deg,rgba(12,22,40,0.95) 0%,rgba(6,12,24,0.94) 100%);box-shadow:0 16px 44px rgba(0,0,0,0.45),0 0 28px ${tone.glow};color:${tone.color};font-family:"Rajdhani","Segoe UI",sans-serif;font-size:17px;font-weight:600;letter-spacing:0.02em;line-height:1.5;text-align:center;white-space:pre-wrap;opacity:0;transform:translateY(8px) scale(0.98);transition:opacity .18s ease,transform .18s ease;`;
     wrap.appendChild(node);
 

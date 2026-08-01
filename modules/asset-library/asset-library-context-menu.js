@@ -1,7 +1,7 @@
 /**
  * Artifex - 二维游戏美术协作与 AI 资产生成平台
  * Copyright (c) 2026 窦英杰, 黄建文, 吴名扬
- * 版本: 1.3.3
+ * 版本: 1.4.0
  *
  * 素材库 - 右键菜单、项目复制、标签编辑器
  * 从 asset-library.js 拆分，通过 AssetLibraryContextMenu 暴露
@@ -91,7 +91,7 @@
         });
         document.body.appendChild(dialog);
 
-        fetch('/api/projects', { credentials: 'include' })
+        fetch('/api/projects?summary=1', { credentials: 'include' })
             .then(function (r) {
                 return r.json();
             })

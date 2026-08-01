@@ -1,32 +1,50 @@
 # ============================================================
 # Stage 1: deps - Install production dependencies only
 # ============================================================
-FROM node:22-alpine AS deps
+FROM node:22.23.2-alpine AS deps
 
 WORKDIR /app
 
+ARG NPM_REGISTRY=https://registry.npmmirror.com
+ARG ALPINE_MIRROR=https://mirrors.tencent.com/alpine
+ARG NODE_DIST_URL=https://npmmirror.com/mirrors/node
+
 # better-sqlite3 needs python3, make, g++ to compile native addons
-RUN apk add --no-cache python3 make g++
+RUN sed -i "s#https://dl-cdn.alpinelinux.org/alpine#$ALPINE_MIRROR#g" /etc/apk/repositories \
+    && apk add --no-cache python3 py3-setuptools make g++
 
 COPY package.json package-lock.json ./
+COPY scripts/check-node-version.js scripts/postinstall-native.js ./scripts/
 
-RUN npm ci --omit=dev
+RUN npm config set registry "$NPM_REGISTRY" \
+    && npm config set replace-registry-host always \
+    && npm_config_disturl="$NODE_DIST_URL" npm ci --omit=dev --fetch-retries=5 --fetch-retry-mintimeout=10000 --fetch-retry-maxtimeout=120000
 
 # ============================================================
 # Stage 2: build - Build frontend assets with Vite
 # ============================================================
-FROM node:22-alpine AS build
+FROM node:22.23.2-alpine AS build
 
 WORKDIR /app
 
+ARG NPM_REGISTRY=https://registry.npmmirror.com
+ARG ALPINE_MIRROR=https://mirrors.tencent.com/alpine
+ARG NODE_DIST_URL=https://npmmirror.com/mirrors/node
+
+RUN sed -i "s#https://dl-cdn.alpinelinux.org/alpine#$ALPINE_MIRROR#g" /etc/apk/repositories \
+    && apk add --no-cache python3 py3-setuptools make g++
+
 COPY package.json package-lock.json ./
+COPY scripts/check-node-version.js scripts/postinstall-native.js ./scripts/
 
 # Install all dependencies (including devDependencies for Vite)
-RUN npm ci
+RUN npm config set registry "$NPM_REGISTRY" \
+    && npm config set replace-registry-host always \
+    && npm_config_disturl="$NODE_DIST_URL" npm ci --fetch-retries=5 --fetch-retry-mintimeout=10000 --fetch-retry-maxtimeout=120000
 
 # Copy source files needed for the Vite build
 COPY vite.config.js ./
-COPY scripts/prepare-dist.js ./scripts/prepare-dist.js
+COPY scripts/ ./scripts/
 COPY js/ ./js/
 COPY styles/ ./styles/
 COPY modules/ ./modules/
@@ -41,12 +59,14 @@ RUN npm run build
 # ============================================================
 # Stage 3: production - Minimal runtime image
 # ============================================================
-FROM node:22-alpine AS production
+FROM node:22.23.2-alpine AS production
 
 WORKDIR /app
 
 # better-sqlite3 runtime needs libstdc++
-RUN apk add --no-cache libstdc++
+ARG ALPINE_MIRROR=https://mirrors.tencent.com/alpine
+RUN sed -i "s#https://dl-cdn.alpinelinux.org/alpine#$ALPINE_MIRROR#g" /etc/apk/repositories \
+    && apk add --no-cache libstdc++
 
 # Copy production node_modules from deps stage
 COPY --from=deps /app/node_modules ./node_modules

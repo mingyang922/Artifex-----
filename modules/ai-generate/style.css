@@ -199,6 +199,13 @@ body::before {
     border-left: 3px solid transparent;
 }
 
+.nav-link span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .nav-link:hover,
 .nav-link.active {
     background: rgba(0, 240, 255, 0.1);

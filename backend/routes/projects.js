@@ -7,6 +7,7 @@
 const { Router } = require('express');
 const logger = require('../lib/logger');
 const { sendError, ERR } = require('../lib/error-response');
+const { validateAssetPayload } = require('../lib/asset-validation');
 
 /**
  * @param {object} deps
@@ -17,7 +18,7 @@ const { sendError, ERR } = require('../lib/error-response');
  */
 function createProjectRouter(deps) {
     const router = Router();
-    const { usersDb, requireAuth, csrfProtection } = deps;
+    const { usersDb, workspaceDb, requireAuth, csrfProtection } = deps;
 
     // 获取用户所有项目（支持分页）
     router.get('/projects', requireAuth, (req, res) => {
@@ -25,17 +26,24 @@ function createProjectRouter(deps) {
         const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
         const offset = (page - 1) * limit;
         const total = usersDb.getProjectCount(req.currentUser.id);
-        const projects = usersDb.getUserProjects(req.currentUser.id, limit, offset);
+        const projects =
+            req.query.summary === '1'
+                ? usersDb.getUserProjectSummaries(req.currentUser.id, limit, offset)
+                : usersDb.getUserProjects(req.currentUser.id, limit, offset);
         res.json({ ok: true, projects, total, page, limit });
     });
 
     // 创建项目
     router.post('/projects', requireAuth, csrfProtection, (req, res) => {
         const { name, description, type } = req.body || {};
-        if (!name || !name.trim()) {
+        if (!name || !String(name).trim()) {
             return sendError(res, 400, ERR.VALIDATION, '项目名称不能为空');
         }
+        if (String(name).trim().length > 120 || String(description || '').length > 5000) {
+            return sendError(res, 400, ERR.VALIDATION, '项目名称或描述过长');
+        }
         const project = usersDb.createProject(req.currentUser.id, name.trim(), description, type);
+        workspaceDb?.captureProjectVersion(project.id);
         try {
             usersDb.addActivity(req.currentUser.id, '创建项目', 'project', project.id, name.trim());
         } catch (_) {
@@ -49,10 +57,17 @@ function createProjectRouter(deps) {
         const projectId = Number(req.params.id);
         if (!projectId || isNaN(projectId)) return sendError(res, 400, ERR.VALIDATION, '无效的项目 ID');
         const { name, description, type, versionDesc } = req.body || {};
+        if (
+            (name !== undefined && (!String(name).trim() || String(name).trim().length > 120)) ||
+            String(description || '').length > 5000
+        ) {
+            return sendError(res, 400, ERR.VALIDATION, '项目名称或描述无效');
+        }
         const project = usersDb.updateProject(projectId, req.currentUser.id, { name, description, type, versionDesc });
         if (!project) {
             return sendError(res, 404, ERR.NOT_FOUND, '项目不存在');
         }
+        workspaceDb?.captureProjectVersion(project.id);
         res.json({ ok: true, project });
     });
 
@@ -82,14 +97,8 @@ function createProjectRouter(deps) {
             return sendError(res, 404, ERR.NOT_FOUND, '项目不存在');
         }
         const { name, type, content } = req.body || {};
-        if (!name || !content) {
-            return sendError(res, 400, ERR.VALIDATION, '素材名称和内容不能为空');
-        }
-        // 限制单个素材内容大小不超过 10MB
-        const MAX_ASSET_SIZE = 10 * 1024 * 1024;
-        if (typeof content === 'string' && content.length > MAX_ASSET_SIZE) {
-            return sendError(res, 413, ERR.VALIDATION, '素材内容过大，最大允许 10MB');
-        }
+        const validationError = validateAssetPayload({ name, type, content }, { requireContent: true });
+        if (validationError) return sendError(res, 400, ERR.VALIDATION, validationError);
 
         // 图片格式验证
         if (typeof content === 'string' && content.startsWith('data:')) {
@@ -100,7 +109,12 @@ function createProjectRouter(deps) {
             }
             const claimedMime = mimeMatch[1].toLowerCase();
             if (!ALLOWED_MIME.includes(claimedMime)) {
-                return sendError(res, 400, ERR.VALIDATION, `不支持的图片格式: ${claimedMime}，允许: ${ALLOWED_MIME.join(', ')}`);
+                return sendError(
+                    res,
+                    400,
+                    ERR.VALIDATION,
+                    `不支持的图片格式: ${claimedMime}，允许: ${ALLOWED_MIME.join(', ')}`
+                );
             }
             // SVG 无需 magic bytes 验证
             if (claimedMime !== 'image/svg+xml') {
@@ -134,6 +148,8 @@ function createProjectRouter(deps) {
         }
 
         const asset = usersDb.addProjectAsset(projectId, req.currentUser.id, name, type, content);
+        usersDb.updateProject(projectId, req.currentUser.id, { versionDesc: `添加素材：${String(name).slice(0, 80)}` });
+        workspaceDb?.captureProjectVersion(projectId);
         res.json({ ok: true, asset });
     });
 
@@ -141,7 +157,16 @@ function createProjectRouter(deps) {
     router.delete('/assets/:id', requireAuth, csrfProtection, (req, res) => {
         const assetId = Number(req.params.id);
         if (!assetId || isNaN(assetId)) return sendError(res, 400, ERR.VALIDATION, '无效的素材 ID');
+        const asset = usersDb
+            .getDb()
+            .prepare('SELECT id,project_id,name FROM project_assets WHERE id=? AND user_id=?')
+            .get(assetId, req.currentUser.id);
+        if (!asset) return sendError(res, 404, ERR.NOT_FOUND, '素材不存在');
         usersDb.deleteProjectAsset(assetId, req.currentUser.id);
+        usersDb.updateProject(asset.project_id, req.currentUser.id, {
+            versionDesc: `删除素材：${String(asset.name).slice(0, 80)}`,
+        });
+        workspaceDb?.captureProjectVersion(asset.project_id);
         res.json({ ok: true });
     });
 

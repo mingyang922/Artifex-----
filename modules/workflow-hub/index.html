@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>生产工作台 - Artifex</title>
+        <link rel="manifest" href="../../manifest.json" />
+        <link rel="stylesheet" href="../../vendor/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="../../vendor/css/google-fonts.css" />
+        <link rel="stylesheet" href="../../styles/app-shell.css" />
+        <link rel="stylesheet" href="../../styles/ui-kit.css" />
+        <link rel="stylesheet" href="workflow-hub.css" />
+        <link rel="stylesheet" href="../../styles/region-themes.css" />
+        <script src="../../js/theme-bootstrap.js"></script>
+    </head>
+    <body class="app-shell" data-app-page="workflow-hub">
+        <div class="dashboard-container">
+            <aside class="sidebar">
+                <div class="logo"><img src="../../js/logo-small.png" alt="Artifex" /></div>
+                <nav class="main-nav">
+                    <a href="../../dashboard.html" class="nav-link"><i class="fas fa-home"></i><span>控制台</span></a>
+                    <a href="../project-management/index.html" class="nav-link"
+                        ><i class="fas fa-diagram-project"></i><span>项目</span></a
+                    >
+                    <a href="../ai-generate/ai-generator-new.html" class="nav-link"
+                        ><i class="fas fa-wand-magic-sparkles"></i><span>AI 生成</span></a
+                    >
+                    <a href="../asset-library/asset-library.html" class="nav-link"
+                        ><i class="fas fa-images"></i><span>素材库</span></a
+                    >
+                    <a href="index.html" class="nav-link active"
+                        ><i class="fas fa-layer-group"></i><span>生产工作台</span></a
+                    >
+                    <a href="../user-center/userCenter.html" class="nav-link"
+                        ><i class="fas fa-user-gear"></i><span>账户</span></a
+                    >
+                </nav>
+            </aside>
+            <main class="main-content workflow-main">
+                <header class="workflow-hero">
+                    <div>
+                        <p class="eyebrow">ART PRODUCTION PIPELINE</p>
+                        <h1>生产工作台</h1>
+                        <p>把生成、角色一致性、协作审核、版本交付与成本控制放进同一条工作流。</p>
+                    </div>
+                    <a class="primary-action" href="../ai-generate/ai-generator-new.html?workflow=sketch">
+                        <i class="fas fa-pen-ruler"></i> 线稿转成品图
+                    </a>
+                </header>
+
+                <section class="metric-grid" id="workflowMetrics">
+                    <article><strong id="metricJobs">—</strong><span>生成任务</span></article>
+                    <article><strong id="metricCharacters">—</strong><span>角色档案</span></article>
+                    <article><strong id="metricProjects">—</strong><span>协作项目</span></article>
+                    <article><strong id="metricUnread">—</strong><span>未读通知</span></article>
+                </section>
+
+                <nav class="workflow-tabs" aria-label="工作流模块">
+                    <button class="is-active" data-panel="jobs">生成历史</button>
+                    <button data-panel="characters">角色一致性</button>
+                    <button data-panel="collaboration">协作与审核</button>
+                    <button data-panel="lora">LoRA 训练</button>
+                    <button data-panel="notifications">通知与成本</button>
+                </nav>
+
+                <section class="workflow-panel is-active" data-workflow-panel="jobs">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>生成历史</h2>
+                            <p>跨设备保存生成参数、输出、状态和失败重试。</p>
+                        </div>
+                        <button class="secondary-action" id="refreshJobs"><i class="fas fa-rotate"></i> 刷新</button>
+                    </div>
+                    <div id="jobList" class="card-list"></div>
+                </section>
+
+                <section class="workflow-panel" data-workflow-panel="characters">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>角色一致性档案</h2>
+                            <p>锁定角色设定、配色、Seed、参考图和禁止变化项。</p>
+                        </div>
+                    </div>
+                    <form id="characterForm" class="workflow-form">
+                        <input name="name" placeholder="角色名称" required />
+                        <input name="palette" placeholder="固定配色，如：墨黑、朱红、金色" />
+                        <input name="seed" placeholder="固定 Seed（可选）" />
+                        <textarea name="description" placeholder="角色外观、服装、身份设定"></textarea>
+                        <textarea name="stylePrompt" placeholder="固定画风提示词"></textarea>
+                        <input name="lockedTraits" placeholder="禁止变化项，用逗号分隔" />
+                        <input name="references" placeholder="参考图 URL，用逗号分隔" />
+                        <button class="primary-action" type="submit">创建角色档案</button>
+                    </form>
+                    <div id="characterList" class="card-grid"></div>
+                </section>
+
+                <section class="workflow-panel" data-workflow-panel="collaboration">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>项目协作与审核</h2>
+                            <p>成员权限、邀请分享、批注、审核状态与版本恢复。</p>
+                        </div>
+                    </div>
+                    <label class="field-label"
+                        >当前项目
+                        <select id="projectSelect"></select>
+                    </label>
+                    <div class="two-column">
+                        <form id="memberForm" class="workflow-form compact">
+                            <h3>添加成员</h3>
+                            <input name="email" type="email" placeholder="成员邮箱" required />
+                            <select name="role">
+                                <option value="viewer">只读</option>
+                                <option value="editor">编辑</option>
+                                <option value="reviewer">审核</option>
+                            </select>
+                            <button class="secondary-action" type="submit">添加</button>
+                        </form>
+                        <div class="workflow-form compact" id="inviteControls">
+                            <h3>邀请与分享</h3>
+                            <div class="inline-actions">
+                                <button id="createInvite" class="secondary-action">创建成员邀请</button>
+                                <button id="createShare" class="secondary-action">创建只读分享</button>
+                            </div>
+                            <input id="shareResult" readonly placeholder="生成的链接会显示在这里" />
+                            <div id="inviteList" class="card-list compact-list"></div>
+                        </div>
+                    </div>
+                    <div class="two-column">
+                        <div>
+                            <h3>成员</h3>
+                            <div id="memberList" class="card-list compact-list"></div>
+                        </div>
+                        <form id="commentForm" class="workflow-form compact">
+                            <h3>新增批注</h3>
+                            <textarea name="body" placeholder="指出需要修改的内容" required></textarea>
+                            <button class="secondary-action" type="submit">提交批注</button>
+                        </form>
+                    </div>
+                    <label class="field-label" id="reviewStatusField"
+                        >项目状态
+                        <select id="reviewStatus">
+                            <option value="draft">草稿</option>
+                            <option value="pending">待审核</option>
+                            <option value="changes_requested">需修改</option>
+                            <option value="approved">已通过</option>
+                            <option value="delivered">已交付</option>
+                        </select>
+                    </label>
+                    <div id="commentList" class="card-list"></div>
+                    <h3>版本历史</h3>
+                    <div id="versionList" class="card-list"></div>
+                </section>
+
+                <section class="workflow-panel" data-workflow-panel="lora">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>风格 LoRA 训练队列</h2>
+                            <p>登记训练集与参数，交由本地 SD WebUI/训练 Worker 执行。</p>
+                        </div>
+                    </div>
+                    <form id="loraForm" class="workflow-form">
+                        <input name="name" placeholder="LoRA 名称" required />
+                        <select name="provider">
+                            <option value="sdwebui">SD WebUI / 本地 Worker</option>
+                            <option value="custom">自定义训练服务</option>
+                        </select>
+                        <textarea name="images" placeholder="每行一个训练图 URL，至少需要 5 张" required></textarea>
+                        <input name="triggerWord" placeholder="触发词，例如 artifex_style" />
+                        <button class="primary-action" type="submit">创建训练任务</button>
+                    </form>
+                    <div id="loraList" class="card-list"></div>
+                </section>
+
+                <section class="workflow-panel" data-workflow-panel="notifications">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>通知与成本</h2>
+                            <p>生成完成、协作变更、审核消息和额度风险集中展示。</p>
+                        </div>
+                        <button id="readAll" class="secondary-action">全部已读</button>
+                    </div>
+                    <div id="costSummary" class="cost-grid"></div>
+                    <div id="notificationList" class="card-list"></div>
+                </section>
+            </main>
+        </div>
+        <div id="workflowToast" role="status" aria-live="polite"></div>
+        <script src="../../js/session-guard.js"></script>
+        <script src="../../js/api-utils.js"></script>
+        <script src="../../js/html-utils.js"></script>
+        <script src="../../js/region-themes.js"></script>
+        <script src="../../js/ws-client.js"></script>
+        <script src="workflow-hub.js"></script>
+        <script src="../../js/sw-register.js"></script>
+    </body>
+</html>
